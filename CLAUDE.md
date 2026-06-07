@@ -45,7 +45,7 @@ the hub's "Mon magasin" modal (`index.html`) and **read** by every tool. Shape (
 Because all pages share the same GitHub Pages origin, they share this key. Conventions:
 - `nom` is the **full** shop name as the user typed it (e.g. `"Optique du Centre"`). Never
   hardcode any brand name; display `nom` as-is, falling back to a neutral label
-  ("Mon magasin" in tools, "Outils internes" on the hub) when unset.
+  (`"Mon magasin"` in tools, `"Outils internes"` on the hub) when unset.
 - Tools must **read** the profile and degrade gracefully when unset (never hardcode a shop's name,
   phone, e-mail, or cash float). Reader pattern: a small `profil()`/`loadProfil()` helper that
   `JSON.parse`s the key inside a try/catch. See `storeName()`/`storeMeta()` in `demande-ordonnance`
