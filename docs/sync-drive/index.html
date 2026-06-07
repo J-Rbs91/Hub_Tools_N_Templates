@@ -106,6 +106,22 @@
     .gwarn__cap .no { color: #C5221F; font-weight: 700; }
     .gw-steps { list-style: decimal; margin: 12px 0 0; padding-left: 20px; font-size: .92rem; line-height: 1.6; }
     .gw-steps li { margin-bottom: 6px; }
+    /* ── Repro écran de consentement / fenêtre de déploiement ── */
+    .gscreen { border: 1px solid var(--border); border-radius: 10px; background: #fff; max-width: 480px; margin: 12px 0 0; padding: 20px 22px; box-shadow: 0 2px 12px rgba(26,42,58,.10); }
+    .gscreen__title { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 12px; line-height: 1.4; }
+    .gscreen__user { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+    .gscreen__avatar { width: 26px; height: 26px; border-radius: 50%; background: #D6E4F0; flex: none; }
+    .gscreen__mail { font-size: .85rem; color: var(--grey); }
+    .gnote { background: #FFF7E6; border: 1px solid #F0C36D; border-radius: 8px; padding: 10px 12px; font-size: .8rem; color: #7A5500; line-height: 1.5; margin-bottom: 14px; }
+    .gscope { display: flex; align-items: flex-start; gap: 9px; font-size: .85rem; color: var(--ink); margin-bottom: 16px; }
+    .gscope__ic { width: 16px; height: 16px; border-radius: 3px; background: #1FA463; flex: none; margin-top: 2px; }
+    .gbtns { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+    .gbtn { font-size: .82rem; font-weight: 700; border: 1px solid var(--border); border-radius: 20px; padding: 8px 18px; color: var(--blue); background: #fff; }
+    .gbtn--primary { background: #1A73E8; color: #fff; border-color: #1A73E8; }
+    .glabel { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--grey); margin-bottom: 4px; }
+    .gurl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .gurl code { word-break: break-all; }
+    .gurl__copy { font-size: .8rem; font-weight: 700; color: var(--blue); white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -257,22 +273,42 @@ function ecrire_(contenu) {
             <span class="no">&#10008; À éviter :</span> n'appuyez <b>pas</b> sur le gros bouton bleu <b>« Revenir à la sécurité »</b>.
           </p>
 
-          <ol class="gw-steps">
-            <li>Un nouveau lien apparaît : cliquez sur <b>« Accéder à (nom du projet) (non sécurisé) »</b>.</li>
-            <li>Sur l'écran de permissions, cliquez sur <b>« Autoriser »</b>.</li>
-          </ol>
+          <p class="gwarn__cap"><span class="ok">&#10004;</span> Puis cliquez sur le lien <b>« Accéder à (nom du projet) (non sécurisé) »</b> qui apparaît juste en dessous.</p>
 
-          <p class="why">Si votre compte Google est en anglais, les libellés sont&nbsp;: <em>Advanced</em>, puis
-          <em>Go to (projet) (unsafe)</em>, puis <em>Allow</em>. La mention « non sécurisé / unsafe » veut juste
-          dire que Google n'a pas audité ce mini-script personnel — c'est attendu, et il ne touche qu'à votre Drive.</p>
+          <p style="font-weight:700;color:var(--ink);margin:16px 0 6px;">Vous arrivez alors sur l'écran d'autorisation :</p>
+          <div class="gscreen" aria-label="Reproduction de l'écran de consentement Google">
+            <div class="gscreen__title">« Projet sans titre » souhaite accéder à votre compte Google</div>
+            <div class="gscreen__user"><span class="gscreen__avatar"></span><span class="gscreen__mail">contact@votremagasin.fr</span></div>
+            <div class="gnote">Cette application n'a pas été validée par Google. Continuez seulement si vous connaissez et faites confiance au développeur (ici, c'est vous).</div>
+            <div class="gscope"><span class="gscope__ic"></span><span>Voir, modifier, créer et supprimer tous vos fichiers Google&nbsp;Drive.</span></div>
+            <div class="gbtns"><span class="gbtn">Annuler</span><span class="gbtn gbtn--primary">Continuer</span></div>
+          </div>
+          <p class="gwarn__cap"><span class="ok">&#10004;</span> Cliquez sur <b>« Continuer »</b> (« Continue » en anglais) pour terminer l'autorisation.</p>
+
+          <p class="why"><b>Pourquoi Google annonce un accès « à tous vos fichiers Drive »&nbsp;?</b> C'est une
+          limite technique d'Apps Script&nbsp;: il réclame l'autorisation Drive complète. En pratique, le script
+          que vous avez collé ne lit et n'écrit <b>qu'un seul fichier</b> (<code>profil-magasin.json</code>, dans
+          le dossier <code>Hub_Facilities</code>) — vous pouvez le vérifier dans le code de l'étape 2.</p>
+
+          <p class="why">Si votre compte Google est en anglais, les libellés sont&nbsp;: <em>Advanced</em> →
+          <em>Go to (projet) (unsafe)</em> → <em>Continue</em>.</p>
         </div>
       </li>
 
       <li>
         <div class="step-title">Copier l'adresse obtenue</div>
         <div class="step-body">
-          À la fin, Google affiche une <strong>URL d'application web</strong> (elle se termine par
-          <code>/exec</code>). Copiez-la. C'est elle que l'outil utilisera.
+          À la fin, Google affiche la fenêtre <strong>« Nouveau déploiement »</strong> avec une
+          <strong>URL d'application web</strong> qui se termine par <code>/exec</code> : c'est elle que l'outil utilisera.
+          <div class="gscreen" aria-label="Reproduction de la fenêtre Nouveau déploiement">
+            <div class="gscreen__title">Nouveau déploiement</div>
+            <div class="glabel">Application Web — URL</div>
+            <div class="gurl">
+              <code>https://script.google.com/macros/s/AKfyc…/exec</code>
+              <span class="gurl__copy">Copier</span>
+            </div>
+          </div>
+          <p class="gwarn__cap"><span class="ok">&#10004;</span> Cliquez sur <b>« Copier »</b> sous l'URL (celle qui finit par <code>/exec</code>), puis collez-la à l'étape suivante.</p>
         </div>
       </li>
 
