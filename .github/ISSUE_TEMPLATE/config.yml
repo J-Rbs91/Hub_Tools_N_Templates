@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 Guide de contribution
+    url: https://github.com/J-Rbs91/Hub_Tools_N_Templates/blob/main/CONTRIBUTING.md
+    about: Comment contribuer, lancer le site en local et exécuter les contrôles.
+  - name: 🔒 Signaler une faille de sécurité
+    url: https://github.com/J-Rbs91/Hub_Tools_N_Templates/blob/main/SECURITY.md
+    about: Merci de ne PAS ouvrir d'issue publique pour une vulnérabilité.
