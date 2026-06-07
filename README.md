@@ -100,14 +100,14 @@ Dependabot met à jour les versions d'actions chaque semaine pour éviter les av
 2. Dans `index.html` (hub, à la racine), ajouter une carte `<article class="tool-card">` dans `<div id="tools-grid">`, en s'inspirant de la carte existante.
 3. Respecter les variables CSS définies dans `assets/css/hub.css` (`--blue`, `--blue-d`, `--ink`, `--bg`…).
 4. Ajouter un lien « ← Retour aux outils » en haut de l'outil pointant vers `../../` (chemin relatif).
-5. Committer avec le préfixe `KF-XXX — description`.
+5. Committer avec le préfixe `HF-XXX — description`.
 
 ---
 
 ## Convention de commits
 
-Préfixe `KF-XXX` + description courte en français. Exemple :
-`KF-003 — outil Demande/Ordonnance : structure et styles`
+Préfixe `HF-XXX` + description courte en français. Exemple :
+`HF-003 — outil Demande/Ordonnance : structure et styles`
 
 ---
 
