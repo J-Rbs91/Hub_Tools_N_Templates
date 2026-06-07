@@ -14,7 +14,7 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 | Outil | Description | Statut |
 |---|---|---|
 | [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
-| [Clôture de Caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs KWEB, reprise du comptage de la veille, historique local | Disponible |
+| [Clôture de Caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
 
 > **Profil magasin** — un profil partagé (clé `localStorage` `profil-magasin-v1`) renseigné une
 > fois sur le hub pré-remplit l'en-tête de la Demande/Ordonnance et le fond de caisse par défaut de
@@ -100,14 +100,14 @@ Dependabot met à jour les versions d'actions chaque semaine pour éviter les av
 2. Dans `index.html` (hub, à la racine), ajouter une carte `<article class="tool-card">` dans `<div id="tools-grid">`, en s'inspirant de la carte existante.
 3. Respecter les variables CSS définies dans `assets/css/hub.css` (`--blue`, `--blue-d`, `--ink`, `--bg`…).
 4. Ajouter un lien « ← Retour aux outils » en haut de l'outil pointant vers `../../` (chemin relatif).
-5. Committer avec le préfixe `HF-XXX — description`.
+5. Committer avec le préfixe `KF-XXX — description`.
 
 ---
 
 ## Convention de commits
 
-Préfixe `HF-XXX` + description courte en français. Exemple :
-`HF-003 — outil Demande/Ordonnance : structure et styles`
+Préfixe `KF-XXX` + description courte en français. Exemple :
+`KF-003 — outil Demande/Ordonnance : structure et styles`
 
 ---
 

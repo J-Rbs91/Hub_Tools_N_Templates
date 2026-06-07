@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#1F6FB2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -34,7 +32,6 @@
     <div id="tools-grid">
 
       <article class="tool-card">
-        <span class="tool-card__glare" aria-hidden="true"></span>
         <div class="tool-card__header">
           <h2 class="tool-card__title">Demande / Ordonnance</h2>
           <span class="badge badge--available">Disponible</span>
@@ -48,14 +45,13 @@
       </article>
 
       <article class="tool-card">
-        <span class="tool-card__glare" aria-hidden="true"></span>
         <div class="tool-card__header">
           <h2 class="tool-card__title">Clôture de Caisse</h2>
           <span class="badge badge--available">Disponible</span>
         </div>
         <p class="tool-card__desc">
           Comptage de fin de journée : pièces, billets, paiements électroniques.
-          Calcul automatique du total espèces, de l'écart par rapport au KWEB,
+          Calcul automatique du total espèces, de l'écart par rapport au logiciel métier,
           et alerte remise. Le comptage de la veille est repris automatiquement.
           Historique conservé dans le navigateur.
         </p>
@@ -271,137 +267,6 @@
 
     renderHeader();
     if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
-  </script>
-
-  <!-- ── Touche 3D premium : apparition en cascade + interactions des cartes ──
-       100 % maison, sans dépendance ni CDN, transform/opacity uniquement.
-       Desktop : tilt + reflet au survol. Tactile : pression au toucher +
-       inclinaison gyroscope. Tout est neutralisé si prefers-reduced-motion. -->
-  <script>
-    (function premium3D() {
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-      var fine   = window.matchMedia('(hover: hover) and (pointer: fine)');
-      var grid   = document.getElementById('tools-grid');
-      if (!grid) { return; }
-      var cards = Array.prototype.slice.call(grid.querySelectorAll('.tool-card'));
-
-      // Apparition en cascade lorsque les cartes entrent dans le viewport.
-      if (!reduce.matches && 'IntersectionObserver' in window) {
-        grid.classList.add('reveal-ready');
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            if (!e.isIntersecting) { return; }
-            var i = cards.indexOf(e.target);
-            setTimeout(function () { e.target.classList.add('is-visible'); }, Math.max(0, i) * 90);
-            io.unobserve(e.target);
-          });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-        cards.forEach(function (c) { io.observe(c); });
-      }
-
-      // Au-delà : aucune interaction si l'utilisateur préfère réduire le mouvement.
-      if (reduce.matches) { return; }
-
-      // ── Desktop (souris/trackpad) : tilt 3D au survol ───────────────────
-      if (fine.matches) {
-        var MAX = 7; // amplitude en degrés — volontairement discrète
-        cards.forEach(function (card) {
-          var raf = null, rect = null;
-          function onMove(ev) {
-            if (!rect) { rect = card.getBoundingClientRect(); }
-            var px = (ev.clientX - rect.left) / rect.width;
-            var py = (ev.clientY - rect.top) / rect.height;
-            if (raf) { return; }
-            raf = requestAnimationFrame(function () {
-              raf = null;
-              var rx = (0.5 - py) * 2 * MAX;
-              var ry = (px - 0.5) * 2 * MAX;
-              card.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) +
-                'deg) rotateY(' + ry.toFixed(2) + 'deg) translateZ(6px)';
-              card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
-              card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
-            });
-          }
-          function onEnter() { rect = card.getBoundingClientRect(); card.classList.add('is-tilting'); }
-          function onLeave() {
-            card.classList.remove('is-tilting');
-            rect = null;
-            if (raf) { cancelAnimationFrame(raf); raf = null; }
-            card.style.transform = '';
-            card.style.removeProperty('--mx');
-            card.style.removeProperty('--my');
-          }
-          card.addEventListener('pointerenter', onEnter);
-          card.addEventListener('pointermove', onMove);
-          card.addEventListener('pointerleave', onLeave);
-        });
-        return;
-      }
-
-      // ── Mobile / tablette (tactile) : pression au toucher + inclinaison gyroscope ──
-      // Transforms posés en inline (priment sur le CSS) et activés APRÈS l'apparition
-      // en cascade pour ne pas casser l'entrée. On compose press + gyro en un transform.
-      var tilt = { rx: 0, ry: 0 };
-      var base = { beta: null, gamma: null };
-      var gyroActive = false, orRaf = null, lastE = null;
-      var MAXM = 8; // amplitude max de l'inclinaison gyroscope (deg)
-
-      function clamp(v, m) { return v < -m ? -m : (v > m ? m : v); }
-
-      function applyCard(card) {
-        var p = card.pressed3d;
-        if (!gyroActive && !p) { card.style.transform = ''; return; }
-        card.style.transform = 'perspective(900px) rotateX(' + tilt.rx.toFixed(2) +
-          'deg) rotateY(' + tilt.ry.toFixed(2) + 'deg) scale(' + (p ? 0.97 : 1) +
-          ') translateZ(' + (p ? -2 : 0) + 'px)';
-      }
-      function applyAll() { cards.forEach(applyCard); }
-
-      function onOrient(e) {
-        if (e.beta === null || e.gamma === null) { return; }
-        lastE = e;
-        if (orRaf) { return; }
-        orRaf = requestAnimationFrame(function () {
-          orRaf = null;
-          if (base.beta === null) { base.beta = lastE.beta; base.gamma = lastE.gamma; }
-          tilt.rx = clamp((lastE.beta  - base.beta)  * 0.5, MAXM); // avant / arrière
-          tilt.ry = clamp((lastE.gamma - base.gamma) * 0.5, MAXM); // gauche / droite
-          gyroActive = true;
-          applyAll();
-        });
-      }
-      function startGyro() {
-        if (gyroActive || !('DeviceOrientationEvent' in window)) { return; }
-        window.addEventListener('deviceorientation', onOrient, { passive: true });
-      }
-
-      function enableTouch() {
-        grid.classList.add('touch-live');
-        // Retour tactile : la carte « s'enfonce » sous le doigt.
-        cards.forEach(function (card) {
-          function down() { card.pressed3d = true; applyCard(card); }
-          function up()   { card.pressed3d = false; applyCard(card); }
-          card.addEventListener('pointerdown', down, { passive: true });
-          card.addEventListener('pointerup', up, { passive: true });
-          card.addEventListener('pointercancel', up, { passive: true });
-          card.addEventListener('pointerleave', up, { passive: true });
-        });
-        // Gyroscope : iOS exige une permission déclenchée par un geste utilisateur.
-        var DOE = window.DeviceOrientationEvent;
-        if (DOE && typeof DOE.requestPermission === 'function') {
-          document.addEventListener('pointerup', function ask() {
-            DOE.requestPermission().then(function (s) {
-              if (s === 'granted') { startGyro(); }
-            }).catch(function () {});
-          }, { once: true });
-        } else if (DOE) {
-          startGyro();
-        }
-      }
-
-      // On laisse l'apparition en cascade se terminer avant d'activer le tactile « vivant ».
-      setTimeout(enableTouch, cards.length * 90 + 800);
-    })();
   </script>
 
 </body>
