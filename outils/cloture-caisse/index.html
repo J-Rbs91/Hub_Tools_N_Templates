@@ -715,6 +715,7 @@
     var ELEC = ['CB', 'Sans Contact', 'Amex', 'Autre'];
 
     var LS_CAISSE = 'cloture-caisse-v1';
+    var LS_FOND = 'cloture-fond-v1';
 
     /* ── PROFIL MAGASIN (partagé via localStorage) ── */
     function profilMagasin() {
@@ -722,8 +723,8 @@
       catch (e) { return {}; }
     }
     function fondDefaut() {
-      var f = profilMagasin().fond;
-      return (typeof f === 'number') ? f : 53.80;
+      var f = parseFloat(localStorage.getItem(LS_FOND));
+      return isNaN(f) ? 53.80 : f;
     }
     function storeSubtitle() {
       return (profilMagasin().nom || '').trim() || 'Mon magasin';
@@ -1080,7 +1081,11 @@
     document.getElementById('coins-tbody').addEventListener('input', calculate);
     document.getElementById('bills-tbody').addEventListener('input', calculate);
     document.getElementById('elec-tbody').addEventListener('input', calculate);
-    document.getElementById('fond-caisse').addEventListener('input', calculate);
+    document.getElementById('fond-caisse').addEventListener('input', function () {
+      var v = parseFloat(document.getElementById('fond-caisse').value);
+      if (!isNaN(v)) { localStorage.setItem(LS_FOND, v); }
+      calculate();
+    });
     document.getElementById('kweb').addEventListener('input', calculate);
     document.getElementById('btn-save').addEventListener('click', saveEntry);
     document.getElementById('btn-reset').addEventListener('click', resetForm);
