@@ -1,0 +1,94 @@
+name: Contrôle & hygiène
+
+# Qualité / hygiène du site statique : lint des workflows, hygiène des fichiers,
+# validation HTML et vérification des liens. Aucun build (site HTML/CSS/JS pur).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: Lint des workflows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: actionlint
+        run: |
+          set -euo pipefail
+          # Télécharge le binaire depuis les releases GitHub (évite le rate-limit Docker Hub)
+          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
+          ./actionlint -color
+
+  hygiene:
+    name: Hygiène des fichiers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Vérifications hygiène (whitespace, CRLF, newline finale)
+        run: |
+          set -euo pipefail
+          fail=0
+
+          echo "== Espaces en fin de ligne (hors Markdown) =="
+          if git grep -nIP ' +$' -- ':!*.md'; then
+            echo "::error::Des lignes contiennent des espaces en fin de ligne."
+            fail=1
+          else
+            echo "OK"
+          fi
+
+          echo "== Fins de ligne CRLF =="
+          if git grep -lIP '\r$' -- .; then
+            echo "::error::Des fichiers utilisent des fins de ligne CRLF (attendu : LF)."
+            fail=1
+          else
+            echo "OK"
+          fi
+
+          echo "== Newline finale manquante =="
+          while IFS= read -r f; do
+            case "$f" in
+              *.png|*.jpg|*.jpeg|*.gif|*.ico|*.webp|*.woff|*.woff2|*.pdf) continue ;;
+            esac
+            if [ -s "$f" ] && [ -n "$(tail -c1 "$f")" ]; then
+              echo "::error file=$f::Newline finale manquante."
+              fail=1
+            fi
+          done < <(git ls-files)
+          [ "$fail" -eq 0 ] && echo "OK"
+
+          exit "$fail"
+
+  html-validate:
+    name: Validation HTML
+    runs-on: ubuntu-latest
+    container: node:22
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: html-validate
+        run: npx --yes html-validate "**/*.html"
+
+  links:
+    name: Vérification des liens
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --accept 200,206,403,429
+            "./**/*.html"
+            "./**/*.md"
+          fail: true

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://html-validate.org/schemas/config.json",
+  "extends": [],
+  "rules": {
+    "no-dup-id": "error",
+    "no-dup-attr": "error",
+    "close-order": "error",
+    "valid-id": "error",
+    "element-required-attributes": "error",
+    "deprecated": "error"
+  }
+}

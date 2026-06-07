@@ -1,0 +1,14 @@
+# Maintient les versions des GitHub Actions à jour automatiquement.
+# But : éviter les avertissements de dépréciation (ex. runtime Node.js obsolète)
+# en recevant des PR de mise à jour dès qu'une nouvelle version d'action sort.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
+    labels:
+      - dependencies
+      - github-actions
