@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clôture de Caisse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1A2A3A;
+      --bg: #F4F7FA;
+      --white: #fff;
+      --line: #C9D6E2;
+      --grey: #5A6B7B;
+      /* La Ferraille — orange / brun */
+      --fe:     #9C4221;
+      --fe-bg:  #FFF5EB;
+      --fe-alt: #FEEBCB;
+      /* Le Papier — vert */
+      --pa:     #276749;
+      --pa-bg:  #F0FFF4;
+      --pa-alt: #C6F6D5;
+      /* L'Électronique — violet / lavande */
+      --el:     #553C9A;
+      --el-bg:  #FAF5FF;
+      --el-alt: #E9D8FD;
+      /* Comptage Espèces — bleu */
+      --co:     #1F6FB2;
+      --co-bg:  #EBF8FF;
+      /* Calcul Écart — vert foncé */
+      --ec:     #276749;
+      --ec-d:   #1C4532;
+      --ec-bg:  #F0FFF4;
+      /* Tableau historique — gris ardoise */
+      --tb:     #475569;
+      --tb-alt: #EEF2F7;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Manrope", "Segoe UI", -apple-system, Roboto, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      background: #1F6FB2;
+      color: #fff;
+      padding: 13px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .back-link {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,.35);
+      padding: 5px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .back-link:hover { background: rgba(255,255,255,.15); }
+
+    /* ── BOUTON RETOUR FLOTTANT (iOS : pas de bouton retour navigateur) ── */
+    .ios-back {
+      display: none;
+      position: fixed;
+      left: calc(env(safe-area-inset-left, 0px) + 16px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      z-index: 1000;
+      align-items: center;
+      gap: 6px;
+      background: #1F6FB2;
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 11px 17px;
+      border-radius: 999px;
+      box-shadow: 0 4px 16px rgba(26,42,58,.32);
+    }
+    body.is-ios .ios-back { display: inline-flex; }
+    body.is-ios .back-link { display: none; }
+    .hdr-info { flex: 1; min-width: 0; }
+    .hdr-title { font-size: 16px; font-weight: 800; }
+    .hdr-sub { font-size: 12px; opacity: .9; margin-top: 2px; }
+    .hdr-date { font-size: 13px; font-weight: 600; opacity: .9; white-space: nowrap; }
+
+    /* ── LAYOUT ── */
+    main { padding: 16px 16px 52px; max-width: 1340px; margin: 0 auto; }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .grid-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    /* ── BLOCKS ── */
+    .block {
+      background: var(--white);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 14px rgba(26,42,58,.08);
+    }
+
+    .block-hdr {
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .block-hdr h2 {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .25px;
+      color: #fff;
+    }
+    .block-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.22);
+      color: #fff;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    .block--ferraille .block-hdr { background: var(--fe); }
+    .block--papier    .block-hdr { background: var(--pa); }
+    .block--elec      .block-hdr { background: var(--el); }
+    .block--comptage  .block-hdr { background: var(--co); }
+    .block--ecart     .block-hdr { background: var(--ec); }
+    .block--history   .block-hdr { background: var(--tb); }
+
+    /* ── TABLES (pièces / billets / élec) ── */
+    .cnt-table { width: 100%; border-collapse: collapse; }
+
+    .cnt-table thead th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .45px;
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--line);
+      color: var(--grey);
+      text-align: left;
+    }
+    .cnt-table thead th.th-r { text-align: right; }
+    .cnt-table thead th.th-c { text-align: center; }
+
+    .cnt-table tbody td {
+      padding: 6px 10px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    .cnt-table tbody td.td-c { text-align: center; }
+    .cnt-table tbody td.td-r { text-align: right; font-weight: 700; }
+    .cnt-table tbody td.td-lbl { font-weight: 600; }
+
+    .block--ferraille .cnt-table tbody tr:nth-child(even) td { background: var(--fe-alt); }
+    .block--papier    .cnt-table tbody tr:nth-child(even) td { background: var(--pa-alt); }
+    .block--elec      .cnt-table tbody tr:nth-child(even) td { background: var(--el-alt); }
+
+    .cnt-table tfoot td {
+      padding: 9px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(0,0,0,.03);
+      border-top: 2px solid var(--line);
+    }
+    .cnt-table tfoot td.td-r { text-align: right; }
+
+    /* ── QUANTITY INPUT ── */
+    .qty-input {
+      width: 64px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+      border-radius: 6px;
+      padding: 4px 6px;
+      background: #fff;
+      transition: border-color .15s;
+      -moz-appearance: textfield;
+    }
+    .qty-input:focus { outline: none; border-color: #1F6FB2; }
+    .qty-input::-webkit-inner-spin-button,
+    .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* ── AMOUNT INPUT (élec) ── */
+    .amt-input {
+      width: 120px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: right;
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+      border-radius: 6px;
+      padding: 4px 9px;
+      background: #fff;
+      transition: border-color .15s;
+      -moz-appearance: textfield;
+    }
+    .amt-input:focus { outline: none; border-color: var(--el); }
+    .amt-input::-webkit-inner-spin-button,
+    .amt-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* ── FOND DE CAISSE row (jaune) ── */
+    .fond-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: #FEFCE8;
+      border-top: 2px solid #D97706;
+    }
+    .fond-row label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 700;
+      color: #92400E;
+    }
+    .fond-input {
+      width: 90px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: right;
+      color: #92400E;
+      border: 1.5px solid #F59E0B;
+      border-radius: 6px;
+      padding: 5px 8px;
+      background: #FFFBEB;
+      transition: border-color .15s;
+      -moz-appearance: textfield;
+    }
+    .fond-input:focus { outline: none; border-color: #D97706; }
+    .fond-input::-webkit-inner-spin-button,
+    .fond-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .fond-eur { font-size: 13px; font-weight: 700; color: #92400E; }
+
+    /* ── COMPTAGE ESPÈCES ── */
+    .comptage-body {
+      padding: 28px 20px 24px;
+      text-align: center;
+    }
+    .comptage-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--grey);
+      margin-bottom: 6px;
+    }
+    .comptage-total {
+      font-size: 44px;
+      font-weight: 800;
+      color: var(--co);
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
+    .comptage-sub { font-size: 12px; color: var(--grey); margin-top: 5px; }
+    .comptage-breakdown {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px 18px;
+      margin-top: 22px;
+    }
+    .cb-item { text-align: center; }
+    .cb-item .cb-val { font-size: 18px; font-weight: 800; color: var(--ink); }
+    .cb-item .cb-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--grey); margin-top: 2px; }
+    .cb-sep { font-size: 22px; color: var(--line); font-weight: 300; line-height: 1; }
+
+    /* ── CALCUL ÉCART ── */
+    .ecart-body { padding: 18px 16px 20px; }
+
+    .ecart-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .ecart-field label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--grey);
+    }
+    .kweb-input {
+      width: 130px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: right;
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 10px;
+      background: #fff;
+      transition: border-color .15s;
+      -moz-appearance: textfield;
+    }
+    .kweb-input:focus { outline: none; border-color: var(--ec); }
+    .kweb-input::-webkit-inner-spin-button,
+    .kweb-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .kweb-eur { font-size: 13px; font-weight: 600; color: var(--grey); }
+
+    .ecart-result {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      background: #F8FAFC;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .er-lbl { font-size: 13px; font-weight: 600; color: var(--grey); }
+    .er-val {
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .er-val.pos { color: var(--ec); }
+    .er-val.neg { color: #C53030; }
+    .er-val.zero { color: var(--grey); }
+
+    .remise-alert {
+      padding: 10px 13px;
+      background: #FFFBEB;
+      border: 1px solid #F59E0B;
+      border-left: 4px solid #D97706;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #92400E;
+      margin-bottom: 14px;
+    }
+
+    /* ── BANDEAU REPORT DE LA VEILLE ── */
+    .prefill-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--co-bg);
+      border: 1px solid var(--co);
+      border-left: 4px solid var(--co);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1A4971;
+      margin-bottom: 14px;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 11px;
+      background: var(--ec);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-save:hover { background: var(--ec-d); }
+
+    /* ── HISTORY TABLE ── */
+    .history-body { overflow-x: auto; }
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table thead th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 9px 14px;
+      text-align: left;
+      color: var(--grey);
+      border-bottom: 2px solid var(--line);
+      white-space: nowrap;
+    }
+    .history-table tbody tr:nth-child(even) td { background: var(--tb-alt); }
+    .history-table tbody td {
+      padding: 9px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    .h-r { text-align: right; }
+    .history-table .ht-pos { color: var(--ec); font-weight: 700; }
+    .history-table .ht-neg { color: #C53030; font-weight: 700; }
+    .history-table .ht-zero { color: var(--grey); font-weight: 700; }
+    .history-table .ht-bold { font-weight: 700; }
+    .history-empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--grey);
+      font-size: 13px;
+      font-style: italic;
+    }
+    .btn-del {
+      background: none;
+      border: 1px solid #FC8181;
+      color: #E53E3E;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-del:hover { background: #FFF5F5; }
+
+    /* ── ACTIONS ── */
+    .actions-bar { display: flex; justify-content: flex-end; margin-top: 8px; }
+    .btn-reset {
+      background: none;
+      border: 1.5px solid var(--line);
+      color: var(--grey);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 18px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-reset:hover { border-color: #FC8181; color: #E53E3E; background: #FFF5F5; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--ink);
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,.22);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .22s;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--grey);
+      padding: 14px 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .grid-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .grid-top { grid-template-columns: 1fr; }
+      .grid-bottom { grid-template-columns: 1fr; }
+      .comptage-total { font-size: 34px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
+
+  <header class="site-header">
+    <a class="back-link" href="../../">&#8592; Retour</a>
+    <div class="hdr-info">
+      <div class="hdr-title">Cl&#244;ture de Caisse</div>
+      <div class="hdr-sub" id="hdr-sub">Mon magasin</div>
+    </div>
+    <div class="hdr-date" id="js-date"></div>
+  </header>
+
+  <main>
+
+    <!-- ── BANDEAU REPORT DE LA VEILLE ── -->
+    <div class="prefill-banner" id="prefill-banner" style="display:none"></div>
+
+    <!-- ── TOP ROW : 3 blocs ── -->
+    <div class="grid-top">
+
+      <!-- LA FERRAILLE (pièces) -->
+      <section class="block block--ferraille">
+        <div class="block-hdr">
+          <h2>La Ferraille</h2>
+          <span class="block-badge">Pi&#232;ces</span>
+        </div>
+        <table class="cnt-table">
+          <thead>
+            <tr>
+              <th class="th-c">Qt&#233;</th>
+              <th>Valeur</th>
+              <th class="th-r">Total</th>
+            </tr>
+          </thead>
+          <tbody id="coins-tbody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2">Total pi&#232;ces</td>
+              <td class="td-r" id="total-coins">0,00&#160;&#8364;</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <!-- LE PAPIER (billets) -->
+      <section class="block block--papier">
+        <div class="block-hdr">
+          <h2>Le Papier</h2>
+          <span class="block-badge">Billets</span>
+        </div>
+        <table class="cnt-table">
+          <thead>
+            <tr>
+              <th class="th-c">Qt&#233;</th>
+              <th>Valeur</th>
+              <th class="th-r">Total</th>
+            </tr>
+          </thead>
+          <tbody id="bills-tbody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2">Total billets</td>
+              <td class="td-r" id="total-bills">0,00&#160;&#8364;</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="fond-row">
+          <label for="fond-caisse">Fond de caisse</label>
+          <input class="fond-input" type="number" id="fond-caisse" value="53.80" min="0" step="0.01">
+          <span class="fond-eur">&#8364;</span>
+        </div>
+      </section>
+
+      <!-- L'ÉLECTRONIQUE -->
+      <section class="block block--elec">
+        <div class="block-hdr">
+          <h2>L'&#201;lectronique</h2>
+          <span class="block-badge">Paiements</span>
+        </div>
+        <table class="cnt-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th class="th-r">Montant</th>
+            </tr>
+          </thead>
+          <tbody id="elec-tbody"></tbody>
+          <tfoot>
+            <tr>
+              <td>Total &#233;lectronique</td>
+              <td class="td-r" id="total-elec">0,00&#160;&#8364;</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+
+    </div>
+
+    <!-- ── BOTTOM ROW : 2 blocs ── -->
+    <div class="grid-bottom">
+
+      <!-- COMPTAGE ESPÈCES -->
+      <section class="block block--comptage">
+        <div class="block-hdr">
+          <h2>Comptage Esp&#232;ces</h2>
+          <span class="block-badge">Total tiroir</span>
+        </div>
+        <div class="comptage-body">
+          <div class="comptage-lbl">Total tiroir-caisse</div>
+          <div class="comptage-total" id="total-especes">0,00&#160;&#8364;</div>
+          <div class="comptage-sub">Pi&#232;ces + Billets + Fond</div>
+          <div class="comptage-breakdown">
+            <div class="cb-item">
+              <div class="cb-val" id="sub-coins">0,00&#160;&#8364;</div>
+              <div class="cb-lbl">Pi&#232;ces</div>
+            </div>
+            <div class="cb-sep">+</div>
+            <div class="cb-item">
+              <div class="cb-val" id="sub-bills">0,00&#160;&#8364;</div>
+              <div class="cb-lbl">Billets</div>
+            </div>
+            <div class="cb-sep">+</div>
+            <div class="cb-item">
+              <div class="cb-val" id="sub-fond">0,00&#160;&#8364;</div>
+              <div class="cb-lbl">Fond</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CALCUL DE L'ÉCART -->
+      <section class="block block--ecart">
+        <div class="block-hdr">
+          <h2>Calcul de l'&#233;cart de caisse</h2>
+          <span class="block-badge">Cl&#244;ture</span>
+        </div>
+        <div class="ecart-body">
+
+          <div class="ecart-field">
+            <label for="kweb">Montant KWEB</label>
+            <input class="kweb-input" type="number" id="kweb" placeholder="0,00" min="0" step="0.01">
+            <span class="kweb-eur">&#8364;</span>
+          </div>
+
+          <div class="ecart-result">
+            <span class="er-lbl">&#201;cart de caisse</span>
+            <strong class="er-val zero" id="ecart-value">&#8212;</strong>
+          </div>
+
+          <div class="remise-alert" id="remise-alert" style="display:none"></div>
+
+          <button class="btn-save" id="btn-save" type="button">Enregistrer le comptage</button>
+
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ── TABLEAU HISTORIQUE ── -->
+    <section class="block block--history">
+      <div class="block-hdr">
+        <h2>Tableau &#224; compl&#233;ter</h2>
+        <span class="block-badge" id="history-count">0 entr&#233;e</span>
+      </div>
+      <div class="history-body">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="h-r">Comptage du jour</th>
+              <th class="h-r">Fond de caisse</th>
+              <th class="h-r">KWEB</th>
+              <th class="h-r">&#201;cart</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td class="history-empty" colspan="6">Aucun comptage enregistr&#233; pour le moment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="actions-bar">
+      <button class="btn-reset" id="btn-reset" type="button">R&#233;initialiser le formulaire</button>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    Usage interne &#160;&#183;&#160; Donn&#233;es stock&#233;es localement dans le navigateur
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ── CONSTANTES ── */
+    var COINS = [
+      { label: '2,00 €', value: 2.00 },
+      { label: '1,00 €', value: 1.00 },
+      { label: '0,50 €', value: 0.50 },
+      { label: '0,20 €', value: 0.20 },
+      { label: '0,10 €', value: 0.10 },
+      { label: '0,05 €', value: 0.05 },
+      { label: '0,02 €', value: 0.02 },
+      { label: '0,01 €', value: 0.01 }
+    ];
+
+    var BILLS = [
+      { label: '200 €', value: 200 },
+      { label: '100 €', value: 100 },
+      { label: '50 €',  value: 50  },
+      { label: '20 €',  value: 20  },
+      { label: '10 €',  value: 10  },
+      { label: '5 €',   value: 5   }
+    ];
+
+    var ELEC = ['CB', 'Sans Contact', 'Amex', 'Autre'];
+
+    var LS_CAISSE = 'cloture-caisse-v1';
+
+    /* ── PROFIL MAGASIN (partagé via localStorage) ── */
+    function profilMagasin() {
+      try { return JSON.parse(localStorage.getItem('profil-magasin-v1') || '{}') || {}; }
+      catch (e) { return {}; }
+    }
+    function fondDefaut() {
+      var f = profilMagasin().fond;
+      return (typeof f === 'number') ? f : 53.80;
+    }
+    function storeSubtitle() {
+      return (profilMagasin().nom || '').trim() || 'Mon magasin';
+    }
+
+    /* ── FORMATAGE ── */
+    function fmt(n) {
+      return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+
+    function r2(n) {
+      return Math.round(n * 100) / 100;
+    }
+
+    /* ── CONSTRUCTION DES LIGNES ── */
+    function buildCoins() {
+      var tbody = document.getElementById('coins-tbody');
+      COINS.forEach(function(coin, i) {
+        var tr = document.createElement('tr');
+        var tdQty = document.createElement('td');
+        tdQty.className = 'td-c';
+        var inp = document.createElement('input');
+        inp.className = 'qty-input';
+        inp.type = 'number';
+        inp.id = 'coin-qty-' + i;
+        inp.placeholder = '0';
+        inp.min = '0';
+        inp.step = '1';
+        tdQty.appendChild(inp);
+        var tdLbl = document.createElement('td');
+        tdLbl.className = 'td-lbl';
+        tdLbl.textContent = coin.label;
+        var tdTot = document.createElement('td');
+        tdTot.className = 'td-r';
+        tdTot.id = 'coin-tot-' + i;
+        tdTot.textContent = '0,00 €';
+        tr.appendChild(tdQty);
+        tr.appendChild(tdLbl);
+        tr.appendChild(tdTot);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function buildBills() {
+      var tbody = document.getElementById('bills-tbody');
+      BILLS.forEach(function(bill, i) {
+        var tr = document.createElement('tr');
+        var tdQty = document.createElement('td');
+        tdQty.className = 'td-c';
+        var inp = document.createElement('input');
+        inp.className = 'qty-input';
+        inp.type = 'number';
+        inp.id = 'bill-qty-' + i;
+        inp.placeholder = '0';
+        inp.min = '0';
+        inp.step = '1';
+        tdQty.appendChild(inp);
+        var tdLbl = document.createElement('td');
+        tdLbl.className = 'td-lbl';
+        tdLbl.textContent = bill.label;
+        var tdTot = document.createElement('td');
+        tdTot.className = 'td-r';
+        tdTot.id = 'bill-tot-' + i;
+        tdTot.textContent = '0,00 €';
+        tr.appendChild(tdQty);
+        tr.appendChild(tdLbl);
+        tr.appendChild(tdTot);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function buildElec() {
+      var tbody = document.getElementById('elec-tbody');
+      ELEC.forEach(function(type, i) {
+        var tr = document.createElement('tr');
+        var tdLbl = document.createElement('td');
+        tdLbl.className = 'td-lbl';
+        tdLbl.textContent = type;
+        var tdAmt = document.createElement('td');
+        tdAmt.className = 'td-r';
+        var inp = document.createElement('input');
+        inp.className = 'amt-input';
+        inp.type = 'number';
+        inp.id = 'elec-' + i;
+        inp.placeholder = '0,00';
+        inp.min = '0';
+        inp.step = '0.01';
+        tdAmt.appendChild(inp);
+        tr.appendChild(tdLbl);
+        tr.appendChild(tdAmt);
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ── CALCULS ── */
+    function calculate() {
+      var totalCoins = 0;
+      COINS.forEach(function(coin, i) {
+        var qty = parseInt(document.getElementById('coin-qty-' + i).value, 10) || 0;
+        if (qty < 0) { qty = 0; }
+        var line = r2(qty * coin.value);
+        document.getElementById('coin-tot-' + i).textContent = fmt(line);
+        totalCoins = r2(totalCoins + line);
+      });
+      document.getElementById('total-coins').textContent = fmt(totalCoins);
+      document.getElementById('sub-coins').textContent = fmt(totalCoins);
+
+      var totalBills = 0;
+      BILLS.forEach(function(bill, i) {
+        var qty = parseInt(document.getElementById('bill-qty-' + i).value, 10) || 0;
+        if (qty < 0) { qty = 0; }
+        var line = r2(qty * bill.value);
+        document.getElementById('bill-tot-' + i).textContent = fmt(line);
+        totalBills = r2(totalBills + line);
+      });
+      document.getElementById('total-bills').textContent = fmt(totalBills);
+      document.getElementById('sub-bills').textContent = fmt(totalBills);
+
+      var fond = r2(parseFloat(document.getElementById('fond-caisse').value) || 0);
+      document.getElementById('sub-fond').textContent = fmt(fond);
+
+      var totalEspeces = r2(totalCoins + totalBills);
+      var totalTiroir = r2(totalEspeces + fond);
+      document.getElementById('total-especes').textContent = fmt(totalTiroir);
+
+      var totalElec = 0;
+      ELEC.forEach(function(_, i) {
+        var v = parseFloat(document.getElementById('elec-' + i).value) || 0;
+        totalElec = r2(totalElec + v);
+      });
+      document.getElementById('total-elec').textContent = fmt(totalElec);
+
+      var kweb = parseFloat(document.getElementById('kweb').value) || 0;
+
+      var ecartEl = document.getElementById('ecart-value');
+      if (kweb > 0 || document.getElementById('kweb').value !== '') {
+        var ecart = r2(totalEspeces + fond - kweb);
+        ecartEl.textContent = (ecart >= 0 ? '+' : '') + fmt(ecart);
+        ecartEl.className = 'er-val ' + (ecart > 0.005 ? 'pos' : ecart < -0.005 ? 'neg' : 'zero');
+      } else {
+        ecartEl.textContent = '—';
+        ecartEl.className = 'er-val zero';
+      }
+
+      var remise = r2(totalEspeces - fond);
+      var remiseEl = document.getElementById('remise-alert');
+      if (totalEspeces > 0 && remise > fond) {
+        var remiseRounded = Math.floor(remise / 10) * 10;
+        remiseEl.textContent = 'Une remise d’espèce d’environ ' + remiseRounded + ' € est à effectuer.';
+        remiseEl.style.display = 'block';
+      } else {
+        remiseEl.style.display = 'none';
+      }
+    }
+
+    /* ── HISTORIQUE ── */
+    function loadHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_CAISSE) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveHistoryData(data) {
+      localStorage.setItem(LS_CAISSE, JSON.stringify(data));
+    }
+
+    function renderHistory() {
+      var data = loadHistory();
+      var tbody = document.getElementById('history-tbody');
+      var countEl = document.getElementById('history-count');
+
+      countEl.textContent = data.length + (data.length <= 1 ? ' entrée' : ' entrées');
+
+      while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+      }
+
+      if (data.length === 0) {
+        var emptyTr = document.createElement('tr');
+        var emptyTd = document.createElement('td');
+        emptyTd.className = 'history-empty';
+        emptyTd.colSpan = 6;
+        emptyTd.textContent = 'Aucun comptage enregistré pour le moment.';
+        emptyTr.appendChild(emptyTd);
+        tbody.appendChild(emptyTr);
+        return;
+      }
+
+      data.forEach(function(entry, i) {
+        var tr = document.createElement('tr');
+        var ecartCls = entry.ecart > 0.005 ? 'ht-pos' : entry.ecart < -0.005 ? 'ht-neg' : 'ht-zero';
+        var ecartSign = entry.ecart > 0.005 ? '+' : '';
+
+        var cells = [
+          { cls: '', text: entry.date },
+          { cls: 'h-r ht-bold', text: fmt(entry.comptage) },
+          { cls: 'h-r', text: fmt(entry.fond) },
+          { cls: 'h-r', text: entry.kweb > 0 ? fmt(entry.kweb) : '—' },
+          { cls: 'h-r ' + ecartCls, text: ecartSign + fmt(entry.ecart) }
+        ];
+
+        cells.forEach(function(c) {
+          var td = document.createElement('td');
+          if (c.cls) { td.className = c.cls; }
+          td.textContent = c.text;
+          tr.appendChild(td);
+        });
+
+        var tdDel = document.createElement('td');
+        tdDel.className = 'h-r';
+        var btnDel = document.createElement('button');
+        btnDel.className = 'btn-del';
+        btnDel.type = 'button';
+        btnDel.textContent = 'Supprimer';
+        btnDel.dataset.idx = i;
+        btnDel.addEventListener('click', function() {
+          var idx = parseInt(this.dataset.idx, 10);
+          var d = loadHistory();
+          d.splice(idx, 1);
+          saveHistoryData(d);
+          renderHistory();
+          showToast('Entrée supprimée');
+        });
+        tdDel.appendChild(btnDel);
+        tr.appendChild(tdDel);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveEntry() {
+      var coinQtys = [];
+      var totalCoins = 0;
+      COINS.forEach(function(coin, i) {
+        var qty = parseInt(document.getElementById('coin-qty-' + i).value, 10) || 0;
+        if (qty < 0) { qty = 0; }
+        coinQtys.push(qty);
+        totalCoins = r2(totalCoins + r2(qty * coin.value));
+      });
+
+      var billQtys = [];
+      var totalBills = 0;
+      BILLS.forEach(function(bill, i) {
+        var qty = parseInt(document.getElementById('bill-qty-' + i).value, 10) || 0;
+        if (qty < 0) { qty = 0; }
+        billQtys.push(qty);
+        totalBills = r2(totalBills + r2(qty * bill.value));
+      });
+
+      var totalEspeces = r2(totalCoins + totalBills);
+      var fond = r2(parseFloat(document.getElementById('fond-caisse').value) || 0);
+      var kweb = r2(parseFloat(document.getElementById('kweb').value) || 0);
+      var ecart = r2(totalEspeces + fond - kweb);
+
+      var now = new Date();
+      var dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      var entry = {
+        date: dateStr,
+        ts: now.getTime(),
+        comptage: totalEspeces,
+        fond: fond,
+        kweb: kweb,
+        ecart: ecart,
+        coins: coinQtys,
+        bills: billQtys
+      };
+
+      var data = loadHistory();
+      var todayIdx = -1;
+      data.forEach(function(e, i) { if (e.date === dateStr) { todayIdx = i; } });
+
+      if (todayIdx >= 0) {
+        data[todayIdx] = entry;
+        showToast('Comptage du jour mis à jour');
+      } else {
+        data.unshift(entry);
+        showToast('Comptage enregistré ✔');
+      }
+
+      saveHistoryData(data);
+      renderHistory();
+    }
+
+    /* ── REPORT DU COMPTAGE DE LA VEILLE ── */
+    function prefillFromLast() {
+      var data = loadHistory();
+      if (data.length === 0) { return; }
+      var last = data[0];
+      if (!last.coins && !last.bills) { return; }
+
+      if (last.coins) {
+        last.coins.forEach(function(qty, i) {
+          var el = document.getElementById('coin-qty-' + i);
+          if (el && qty > 0) { el.value = qty; }
+        });
+      }
+      if (last.bills) {
+        last.bills.forEach(function(qty, i) {
+          var el = document.getElementById('bill-qty-' + i);
+          if (el && qty > 0) { el.value = qty; }
+        });
+      }
+      if (typeof last.fond === 'number') {
+        document.getElementById('fond-caisse').value = last.fond.toFixed(2);
+      }
+
+      var banner = document.getElementById('prefill-banner');
+      banner.textContent = 'Comptage pré-rempli depuis la dernière clôture du ' + last.date + '. Vérifiez et ajustez les quantités avant d’enregistrer.';
+      banner.style.display = 'flex';
+    }
+
+    /* ── TOAST ── */
+    var toastTimer;
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2600);
+    }
+
+    /* ── RESET ── */
+    function resetForm() {
+      if (!window.confirm('Réinitialiser tous les champs ? L’historique sera conservé.')) { return; }
+      COINS.forEach(function(_, i) { document.getElementById('coin-qty-' + i).value = ''; });
+      BILLS.forEach(function(_, i) { document.getElementById('bill-qty-' + i).value = ''; });
+      ELEC.forEach(function(_, i) { document.getElementById('elec-' + i).value = ''; });
+      document.getElementById('kweb').value = '';
+      document.getElementById('fond-caisse').value = fondDefaut().toFixed(2);
+      document.getElementById('prefill-banner').style.display = 'none';
+      calculate();
+      showToast('Formulaire réinitialisé');
+    }
+
+    /* ── INIT ── */
+    document.getElementById('hdr-sub').textContent = storeSubtitle();
+    document.getElementById('fond-caisse').value = fondDefaut().toFixed(2);
+
+    buildCoins();
+    buildBills();
+    buildElec();
+    prefillFromLast();
+    renderHistory();
+    calculate();
+
+    var nowDate = new Date();
+    document.getElementById('js-date').textContent = nowDate.toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    document.getElementById('coins-tbody').addEventListener('input', calculate);
+    document.getElementById('bills-tbody').addEventListener('input', calculate);
+    document.getElementById('elec-tbody').addEventListener('input', calculate);
+    document.getElementById('fond-caisse').addEventListener('input', calculate);
+    document.getElementById('kweb').addEventListener('input', calculate);
+    document.getElementById('btn-save').addEventListener('click', saveEntry);
+    document.getElementById('btn-reset').addEventListener('click', resetForm);
+
+    /* ── Détection iOS : affiche le bouton retour flottant (iPhone/iPad
+       n'ont pas de bouton retour navigateur, notamment en mode plein écran) ── */
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+      document.body.classList.add('is-ios');
+    }
+  </script>
+
+</body>
+</html>
