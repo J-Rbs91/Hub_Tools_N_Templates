@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synchronisation Google Drive — Procédure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --ink: #1A2A3A; --bg: #F4F7FA;
+      --white: #fff; --border: #D6E4F0; --grey: #5A7080; --green: #2E8B57; --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink);
+      line-height: 1.6; padding: 0 0 60px;
+    }
+    .site-header {
+      background: var(--blue); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .back-link {
+      color: rgba(255,255,255,.9); text-decoration: none; font-size: .85rem;
+      font-weight: 700; border: 1px solid rgba(255,255,255,.4);
+      padding: 6px 13px; border-radius: var(--radius); white-space: nowrap;
+    }
+    .back-link:hover { background: rgba(255,255,255,.16); }
+    .site-header h1 { font-size: 1.1rem; font-weight: 800; }
+    main { max-width: 760px; margin: 0 auto; padding: 28px 20px; }
+    h2 { font-size: 1.05rem; margin: 28px 0 12px; }
+    p { margin-bottom: 12px; }
+    .lead { font-size: 1rem; }
+    .panel {
+      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 22px;
+      font-size: .92rem;
+    }
+    .panel--info { background: #EAF2FA; border: 1px solid var(--border); }
+    .panel--safe { background: #ECF7F0; border: 1px solid #BfE3CD; }
+    .panel--warn { background: #FFF7E6; border: 1px solid #F0C36D; }
+    .panel h3 { font-size: .95rem; margin-bottom: 8px; }
+    .panel ul { margin: 6px 0 0 18px; }
+    .panel li { margin-bottom: 5px; }
+    .time {
+      display: inline-block; font-size: .8rem; font-weight: 700; color: var(--blue-d);
+      background: #fff; border: 1px solid var(--border); border-radius: 20px;
+      padding: 2px 12px; margin-bottom: 14px;
+    }
+    ol.steps { list-style: none; counter-reset: step; margin-top: 6px; }
+    ol.steps > li {
+      counter-increment: step; position: relative;
+      padding: 0 0 24px 48px; margin: 0;
+    }
+    ol.steps > li::before {
+      content: counter(step); position: absolute; left: 0; top: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue); color: #fff; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem;
+    }
+    ol.steps > li:not(:last-child)::after {
+      content: ''; position: absolute; left: 15px; top: 36px; bottom: 2px;
+      width: 2px; background: var(--border);
+    }
+    .step-title { font-weight: 700; margin-bottom: 4px; }
+    .step-body { font-size: .92rem; }
+    .step-body ul { margin: 6px 0 0 18px; }
+    .why {
+      font-size: .85rem; color: var(--grey); background: #fff;
+      border-left: 3px solid var(--blue); padding: 6px 0 6px 12px; margin: 8px 0 0;
+    }
+    .why b { color: var(--ink); }
+    code {
+      background: #EEF2F7; padding: 1px 6px; border-radius: 4px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em;
+    }
+    .code-wrap { position: relative; margin: 10px 0 4px; }
+    pre {
+      background: #0E2233; color: #E6EEF6; border-radius: var(--radius);
+      padding: 16px; overflow-x: auto; font-size: .78rem; line-height: 1.5;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px;
+      font-family: inherit; font-size: .72rem; font-weight: 700;
+      background: rgba(255,255,255,.14); color: #fff;
+      border: 1px solid rgba(255,255,255,.35); border-radius: 6px;
+      padding: 5px 10px; cursor: pointer;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.26); }
+    details { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+    summary { cursor: pointer; font-weight: 700; padding: 12px 14px; font-size: .9rem; color: var(--blue-d); }
+    details[open] summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 12px 14px; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="back-link" href="../../">&#8592; Retour</a>
+    <h1>Retrouver votre paramétrage sur tous vos postes</h1>
+  </header>
+
+  <main>
+    <p class="lead">
+      Par défaut, le paramétrage de votre magasin (nom, adresse, téléphone, e-mail, fond de caisse)
+      est enregistré dans le navigateur, donc <strong>sur un seul ordinateur</strong>. Cette page
+      vous explique comment le mémoriser dans <strong>votre propre Google Drive</strong>, afin de le
+      retrouver automatiquement sur les autres postes du magasin. C'est <strong>facultatif</strong>.
+    </p>
+    <p><span class="time">Durée : environ 5 minutes, une seule fois</span></p>
+
+    <div class="panel panel--safe">
+      <h3>Avant de commencer : en toute transparence</h3>
+      <p style="margin-bottom:8px;">Ce type de manipulation peut sembler technique, voici donc exactement
+        ce qui se passe — rien de caché :</p>
+      <ul>
+        <li><strong>Vos données restent chez vous.</strong> Elles sont écrites dans un dossier de
+          <em>votre</em> Google Drive (créé automatiquement, nommé <code>Hub_Facilities</code>).
+          Aucun serveur tiers, aucun éditeur extérieur n'y a accès.</li>
+        <li><strong>Vous restez propriétaire et maître.</strong> Le petit programme est créé sous
+          votre compte Google ; vous pouvez le supprimer ou couper l'accès à tout moment.</li>
+        <li><strong>Aucune donnée patient n'est concernée.</strong> Seules les coordonnées du magasin
+          sont synchronisées — jamais les informations des clients.</li>
+        <li><strong>Le code est court et lisible</strong> (vous le collez vous-même à l'étape 2) :
+          il ne fait que lire et écrire un fichier dans ce dossier.</li>
+      </ul>
+    </div>
+
+    <h2>Les étapes</h2>
+    <ol class="steps">
+      <li>
+        <div class="step-title">Ouvrir l'outil de script de Google</div>
+        <div class="step-body">
+          Sur l'ordinateur, connectez-vous au <strong>compte Google du magasin</strong>. Ouvrez un
+          nouvel onglet, allez sur <code>script.google.com</code> puis cliquez sur
+          <strong>Nouveau projet</strong>.
+          <p class="why"><b>Pourquoi&nbsp;?</b> « Apps Script » est l'outil officiel de Google qui
+          permet à votre compte d'automatiser de petites tâches sur votre propre Drive.</p>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Coller le programme fourni</div>
+        <div class="step-body">
+          Sélectionnez tout le texte déjà présent, supprimez-le, puis collez ce code
+          (bouton <strong>Copier</strong>). Enregistrez avec l'icône disquette.
+          <div class="code-wrap">
+            <button class="copy-btn" id="copy-code" type="button">Copier</button>
+            <pre id="code">var DOSSIER = 'Hub_Facilities';
+var FICHIER = 'profil-magasin.json';
+
+function doGet(e) {
+  var p  = e.parameter || {};
+  var cb = p.callback;
+  var res;
+  try {
+    if (p.action === 'save') {
+      JSON.parse(p.data || '{}');   // vérifie que la donnée est valide
+      ecrire_(p.data || '{}');
+      res = { ok: true };
+    } else {
+      res = { ok: true, data: lire_() };
+    }
+  } catch (err) {
+    res = { ok: false, error: String(err) };
+  }
+  var json = JSON.stringify(res);
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function dossier_() {
+  var it = DriveApp.getFoldersByName(DOSSIER);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(DOSSIER);
+}
+function fichier_() {
+  var it = dossier_().getFilesByName(FICHIER);
+  return it.hasNext() ? it.next() : null;
+}
+function lire_() {
+  var f = fichier_();
+  return f ? f.getBlob().getDataAsString() : '';
+}
+function ecrire_(contenu) {
+  var f = fichier_();
+  if (f) { f.setContent(contenu); }
+  else { dossier_().createFile(FICHIER, contenu, 'application/json'); }
+}</pre>
+          </div>
+          <details>
+            <summary>Que fait ce programme, en clair&nbsp;?</summary>
+            <div class="details-body">
+              Il sait faire deux choses, et rien d'autre : <strong>« enregistrer »</strong> (écrire vos
+              coordonnées dans le fichier <code>profil-magasin.json</code>) et <strong>« lire »</strong>
+              (renvoyer ce qui y est enregistré). Le dossier et le fichier sont créés tout seuls la
+              première fois. Il n'accède à aucun autre fichier de votre Drive.
+            </div>
+          </details>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Publier en « application web »</div>
+        <div class="step-body">
+          En haut à droite : <strong>Déployer &#8594; Nouveau déploiement</strong>. Cliquez sur la roue
+          dentée et choisissez <strong>Application web</strong>. Réglez ensuite :
+          <ul>
+            <li><strong>Exécuter en tant que</strong> : <em>Moi</em></li>
+            <li><strong>Qui a accès</strong> : <em>Tout le monde</em></li>
+          </ul>
+          <p class="why"><b>Pourquoi ces réglages&nbsp;?</b> « Exécuter en tant que moi » fait que le
+          programme agit dans <b>votre</b> Drive (et nulle part ailleurs). « Tout le monde » signifie
+          seulement que l'outil peut joindre cette adresse&nbsp;: l'adresse est longue et connue de
+          vous seul, elle joue le rôle de clé — ne la partagez qu'en interne.</p>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Autoriser votre propre programme</div>
+        <div class="step-body">
+          Google vous demande d'autoriser l'accès à votre Drive : acceptez avec le compte du magasin.
+          <p class="why"><b>Un écran « Application non vérifiée » peut apparaître — c'est normal et
+          sans danger ici.</b> Google affiche cet avertissement pour tout script personnel qu'il n'a
+          pas audité&nbsp;; comme c'est <b>vous</b> qui venez de le créer, vous pouvez continuer :
+          cliquez sur <em>Paramètres avancés</em>, puis sur <em>Accéder à (nom du projet)</em>, et
+          <em>Autoriser</em>.</p>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Copier l'adresse obtenue</div>
+        <div class="step-body">
+          À la fin, Google affiche une <strong>URL d'application web</strong> (elle se termine par
+          <code>/exec</code>). Copiez-la. C'est elle que l'outil utilisera.
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Coller l'adresse dans l'outil</div>
+        <div class="step-body">
+          Revenez sur le hub, ouvrez <strong>&#9881; Mon magasin</strong>, collez l'URL dans le champ
+          <em>URL de synchronisation</em>, puis <strong>Enregistrer</strong>. Vos coordonnées partent
+          alors dans votre Drive. Sur chaque autre poste, collez la même URL et cliquez sur
+          <em>Récupérer depuis le Drive</em> : tout réapparaît.
+        </div>
+      </li>
+    </ol>
+
+    <div class="panel panel--warn">
+      <h3>Bon à savoir</h3>
+      <ul>
+        <li>Toute personne qui possède cette URL peut lire et modifier ces coordonnées : gardez-la
+          en interne.</li>
+        <li>Pour tout arrêter : supprimez le projet sur <code>script.google.com</code>, ou videz le
+          champ URL dans « Mon magasin ». Vos outils continuent de fonctionner en local.</li>
+      </ul>
+    </div>
+
+    <div class="panel panel--info">
+      Un doute ou un blocage à une étape&nbsp;? Notez le numéro de l'étape et le message affiché :
+      c'est suffisant pour être dépanné rapidement.
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('copy-code').addEventListener('click', function () {
+      var code = document.getElementById('code').textContent;
+      var btn = this;
+      navigator.clipboard.writeText(code).then(function () {
+        btn.textContent = 'Copié ✓';
+        setTimeout(function () { btn.textContent = 'Copier'; }, 2000);
+      }, function () {
+        btn.textContent = 'Échec';
+        setTimeout(function () { btn.textContent = 'Copier'; }, 2000);
+      });
+    });
+  </script>
+</body>
+</html>

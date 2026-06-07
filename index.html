@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outils internes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hub.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="logo-wrap">
+      <span class="store-name" id="store-name">Outils internes</span>
+      <span class="store-meta" id="store-meta"></span>
+    </div>
+    <button class="store-settings-btn" id="open-settings" type="button">&#9881; Mon magasin</button>
+  </header>
+
+  <main class="main">
+
+    <div class="setup-notice" id="setup-notice" hidden>
+      Votre magasin n'est pas encore configuré. Renseignez vos coordonnées une seule fois :
+      elles seront réutilisées par tous les outils.
+      <button class="btn btn--primary" id="setup-notice-btn" type="button">Configurer mon magasin</button>
+    </div>
+
+    <p class="section-title">Outils disponibles</p>
+
+    <div id="tools-grid">
+
+      <article class="tool-card">
+        <div class="tool-card__header">
+          <h2 class="tool-card__title">Demande / Ordonnance</h2>
+          <span class="badge badge--available">Disponible</span>
+        </div>
+        <p class="tool-card__desc">
+          Formulaire de demande au médecin : modification de prescription, compte rendu
+          d'adaptation lentilles ou de contrôle de vision, renouvellement exceptionnel.
+          Export PDF et copie directe dans Gmail.
+        </p>
+        <a class="btn btn--primary" href="outils/demande-ordonnance/">Accéder à l'outil</a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-card__header">
+          <h2 class="tool-card__title">Clôture de Caisse</h2>
+          <span class="badge badge--available">Disponible</span>
+        </div>
+        <p class="tool-card__desc">
+          Comptage de fin de journée : pièces, billets, paiements électroniques.
+          Calcul automatique du total espèces, de l'écart par rapport au KWEB,
+          et alerte remise. Le comptage de la veille est repris automatiquement.
+          Historique conservé dans le navigateur.
+        </p>
+        <a class="btn btn--primary" href="outils/cloture-caisse/">Accéder à l'outil</a>
+      </article>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Usage interne &nbsp;·&nbsp; Aucune donnée transmise au serveur
+  </footer>
+
+  <!-- ── MODALE : MON MAGASIN ── -->
+  <div class="modal-overlay" id="settings-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 class="modal__title" id="modal-title">Mon magasin</h2>
+      <p class="modal__hint">
+        Ces informations restent sur cet appareil (aucun envoi au serveur) et pré-remplissent
+        les outils. À renseigner une fois par poste.
+      </p>
+
+      <form id="settings-form">
+        <label class="field">
+          <span class="field__lbl">Nom du magasin <span class="field__req">obligatoire</span></span>
+          <input type="text" id="f-nom" placeholder="Ex. : Optique du Centre" autocomplete="off" required>
+        </label>
+
+        <label class="field">
+          <span class="field__lbl">Adresse <span class="field__opt">facultatif</span></span>
+          <input type="text" id="f-adresse" placeholder="Centre Commercial…, 34000 Ville" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span class="field__lbl">Téléphone <span class="field__opt">facultatif</span></span>
+          <input type="text" id="f-tel" placeholder="04.00.00.00.00" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span class="field__lbl">E-mail <span class="field__opt">facultatif</span></span>
+          <input type="email" id="f-mail" placeholder="contact@votremagasin.fr" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span class="field__lbl">Fond de caisse par défaut (&euro;) <span class="field__opt">facultatif</span></span>
+          <input type="number" id="f-fond" placeholder="53.80" min="0" step="0.01" autocomplete="off">
+        </label>
+
+        <div class="sync-section">
+          <p class="sync-title">Synchronisation Google Drive <span class="field__opt">facultatif</span></p>
+          <p class="sync-desc">
+            Pour retrouver ce paramétrage sur tous vos postes, collez l'URL de votre script Drive.
+            <a href="docs/sync-drive/" target="_blank" rel="noopener">Procédure d'installation</a>.
+          </p>
+          <label class="field">
+            <span class="field__lbl">URL de synchronisation</span>
+            <input type="url" id="f-sync" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+          </label>
+          <div class="sync-actions">
+            <button type="button" class="btn btn--ghost" id="pull-sync">Récupérer depuis le Drive</button>
+            <span class="sync-status" id="sync-status" role="status"></span>
+          </div>
+        </div>
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="cancel-settings">Annuler</button>
+          <button type="submit" class="btn btn--primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var LS_PROFIL = 'profil-magasin-v1';
+    var LS_SYNC   = 'sync-url-v1';
+
+    function loadProfil() {
+      try { return JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}; }
+      catch (e) { return {}; }
+    }
+
+    function isConfigured(p) {
+      return !!((p.nom || '').trim());
+    }
+
+    function syncUrl() {
+      return (localStorage.getItem(LS_SYNC) || '').trim();
+    }
+
+    function renderHeader() {
+      var p = loadProfil();
+      var nameEl = document.getElementById('store-name');
+      var metaEl = document.getElementById('store-meta');
+      var notice = document.getElementById('setup-notice');
+
+      var nom = (p.nom || '').trim();
+      nameEl.textContent = nom || 'Outils internes';
+
+      var metaParts = [];
+      if ((p.adresse || '').trim()) { metaParts.push(p.adresse.trim()); }
+      if ((p.tel || '').trim()) { metaParts.push('Tél : ' + p.tel.trim()); }
+      metaEl.innerHTML = metaParts.join('<br>');
+
+      notice.hidden = isConfigured(p);
+    }
+
+    function fillForm(p) {
+      document.getElementById('f-nom').value = p.nom || '';
+      document.getElementById('f-adresse').value = p.adresse || '';
+      document.getElementById('f-tel').value = p.tel || '';
+      document.getElementById('f-mail').value = p.mail || '';
+      document.getElementById('f-fond').value = (p.fond || p.fond === 0) ? p.fond : '';
+    }
+
+    function openModal() {
+      fillForm(loadProfil());
+      document.getElementById('f-sync').value = syncUrl();
+      setStatus('');
+      document.getElementById('settings-modal').hidden = false;
+      document.getElementById('f-nom').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('settings-modal').hidden = true;
+    }
+
+    /* ── Synchronisation Google Drive via Apps Script (JSONP, sans CORS) ── */
+    function setStatus(msg, ok) {
+      var el = document.getElementById('sync-status');
+      el.textContent = msg || '';
+      el.className = 'sync-status' + (ok === true ? ' ok' : ok === false ? ' err' : '');
+    }
+
+    function jsonp(base, params, cb) {
+      var name = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+      var s = document.createElement('script');
+      var done = false;
+      var timer = setTimeout(function () { if (!done) { finish({ ok: false, error: 'délai dépassé' }); } }, 15000);
+      function finish(res) {
+        done = true;
+        clearTimeout(timer);
+        try { delete window[name]; } catch (e) { window[name] = undefined; }
+        if (s.parentNode) { s.parentNode.removeChild(s); }
+        cb(res);
+      }
+      window[name] = function (res) { finish(res); };
+      s.onerror = function () { finish({ ok: false, error: 'réseau' }); };
+      var q = [];
+      for (var k in params) { if (params.hasOwnProperty(k)) { q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k])); } }
+      q.push('callback=' + name);
+      s.src = base + (base.indexOf('?') >= 0 ? '&' : '?') + q.join('&');
+      document.body.appendChild(s);
+    }
+
+    function syncPush(profil) {
+      var url = syncUrl();
+      if (!url) { return; }
+      setStatus('Envoi vers le Drive…');
+      jsonp(url, { action: 'save', data: JSON.stringify(profil) }, function (res) {
+        if (res && res.ok) { setStatus('Enregistré sur le Drive ✓', true); }
+        else { setStatus('Échec de l’envoi vers le Drive.', false); }
+      });
+    }
+
+    function syncPull(silent) {
+      var url = syncUrl();
+      if (!url) { if (!silent) { setStatus('Renseignez d’abord l’URL de synchronisation.', false); } return; }
+      if (!silent) { setStatus('Récupération depuis le Drive…'); }
+      jsonp(url, { action: 'load' }, function (res) {
+        if (res && res.ok && res.data) {
+          try {
+            var p = JSON.parse(res.data);
+            localStorage.setItem(LS_PROFIL, JSON.stringify(p));
+            fillForm(p);
+            renderHeader();
+            if (!silent) { setStatus('Profil récupéré depuis le Drive ✓', true); }
+          } catch (e) {
+            if (!silent) { setStatus('Données du Drive illisibles.', false); }
+          }
+        } else if (res && res.ok) {
+          if (!silent) { setStatus('Aucun profil enregistré sur le Drive pour le moment.'); }
+        } else {
+          if (!silent) { setStatus('Échec de la récupération.', false); }
+        }
+      });
+    }
+
+    document.getElementById('settings-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var nomEl = document.getElementById('f-nom');
+      if (!nomEl.value.trim()) { nomEl.focus(); return; }
+      var fondVal = document.getElementById('f-fond').value;
+      var profil = {
+        nom: nomEl.value.trim(),
+        adresse: document.getElementById('f-adresse').value.trim(),
+        tel: document.getElementById('f-tel').value.trim(),
+        mail: document.getElementById('f-mail').value.trim(),
+        fond: fondVal === '' ? null : (parseFloat(fondVal) || 0)
+      };
+      localStorage.setItem(LS_PROFIL, JSON.stringify(profil));
+      localStorage.setItem(LS_SYNC, document.getElementById('f-sync').value.trim());
+      renderHeader();
+      syncPush(profil);
+      closeModal();
+    });
+
+    document.getElementById('pull-sync').addEventListener('click', function () {
+      localStorage.setItem(LS_SYNC, document.getElementById('f-sync').value.trim());
+      syncPull(false);
+    });
+
+    document.getElementById('open-settings').addEventListener('click', openModal);
+    document.getElementById('setup-notice-btn').addEventListener('click', openModal);
+    document.getElementById('cancel-settings').addEventListener('click', closeModal);
+    document.getElementById('settings-modal').addEventListener('click', function (e) {
+      if (e.target === this) { closeModal(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeModal(); }
+    });
+
+    renderHeader();
+    if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
+  </script>
+
+</body>
+</html>
