@@ -326,6 +326,14 @@ body {
 #tools-grid.reveal-ready .tool-card { opacity: 0; transform: translateY(28px) scale(.985); }
 #tools-grid.reveal-ready .tool-card.is-visible { opacity: 1; transform: none; }
 
+/* Tactile : une fois l'apparition terminée, transition courte pour un suivi
+   gyroscope fluide et une pression réactive (transforms posés en inline par JS). */
+@media (hover: none) and (pointer: coarse) {
+  #tools-grid.touch-live .tool-card {
+    transition: transform .18s ease-out, box-shadow .3s ease;
+  }
+}
+
 .tool-card__header {
   display: flex;
   align-items: flex-start;
