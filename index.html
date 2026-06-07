@@ -95,11 +95,6 @@
           <input type="email" id="f-mail" placeholder="contact@votremagasin.fr" autocomplete="off">
         </label>
 
-        <label class="field">
-          <span class="field__lbl">Fond de caisse par défaut (&euro;) <span class="field__opt">facultatif</span></span>
-          <input type="number" id="f-fond" placeholder="53.80" min="0" step="0.01" autocomplete="off">
-        </label>
-
         <div class="sync-section">
           <p class="sync-title">Synchronisation Google Drive <span class="field__opt">facultatif</span></p>
           <p class="sync-desc">
@@ -163,7 +158,6 @@
       document.getElementById('f-adresse').value = p.adresse || '';
       document.getElementById('f-tel').value = p.tel || '';
       document.getElementById('f-mail').value = p.mail || '';
-      document.getElementById('f-fond').value = (p.fond || p.fond === 0) ? p.fond : '';
     }
 
     function openModal() {
@@ -243,13 +237,11 @@
       e.preventDefault();
       var nomEl = document.getElementById('f-nom');
       if (!nomEl.value.trim()) { nomEl.focus(); return; }
-      var fondVal = document.getElementById('f-fond').value;
       var profil = {
         nom: nomEl.value.trim(),
         adresse: document.getElementById('f-adresse').value.trim(),
         tel: document.getElementById('f-tel').value.trim(),
-        mail: document.getElementById('f-mail').value.trim(),
-        fond: fondVal === '' ? null : (parseFloat(fondVal) || 0)
+        mail: document.getElementById('f-mail').value.trim()
       };
       localStorage.setItem(LS_PROFIL, JSON.stringify(profil));
       localStorage.setItem(LS_SYNC, document.getElementById('f-sync').value.trim());
