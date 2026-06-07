@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clôture de Caisse</title>
-  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#1F6FB2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -311,7 +309,7 @@
       font-weight: 600;
       color: var(--grey);
     }
-    .kweb-input {
+    .ref-input {
       width: 130px;
       font-family: inherit;
       font-size: 15px;
@@ -325,10 +323,10 @@
       transition: border-color .15s;
       -moz-appearance: textfield;
     }
-    .kweb-input:focus { outline: none; border-color: var(--ec); }
-    .kweb-input::-webkit-inner-spin-button,
-    .kweb-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    .kweb-eur { font-size: 13px; font-weight: 600; color: var(--grey); }
+    .ref-input:focus { outline: none; border-color: var(--ec); }
+    .ref-input::-webkit-inner-spin-button,
+    .ref-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .ref-eur { font-size: 13px; font-weight: 600; color: var(--grey); }
 
     .ecart-result {
       display: flex;
@@ -634,9 +632,9 @@
         <div class="ecart-body">
 
           <div class="ecart-field">
-            <label for="kweb">Montant KWEB</label>
-            <input class="kweb-input" type="number" id="kweb" placeholder="0,00" min="0" step="0.01">
-            <span class="kweb-eur">&#8364;</span>
+            <label for="ref">Montant logiciel métier</label>
+            <input class="ref-input" type="number" id="ref" placeholder="0,00" min="0" step="0.01">
+            <span class="ref-eur">&#8364;</span>
           </div>
 
           <div class="ecart-result">
@@ -666,7 +664,7 @@
               <th>Date</th>
               <th class="h-r">Comptage du jour</th>
               <th class="h-r">Fond de caisse</th>
-              <th class="h-r">KWEB</th>
+              <th class="h-r">Logiciel métier</th>
               <th class="h-r">&#201;cart</th>
               <th></th>
             </tr>
@@ -859,11 +857,11 @@
       });
       document.getElementById('total-elec').textContent = fmt(totalElec);
 
-      var kweb = parseFloat(document.getElementById('kweb').value) || 0;
+      var ref = parseFloat(document.getElementById('ref').value) || 0;
 
       var ecartEl = document.getElementById('ecart-value');
-      if (kweb > 0 || document.getElementById('kweb').value !== '') {
-        var ecart = r2(totalEspeces + fond - kweb);
+      if (ref > 0 || document.getElementById('ref').value !== '') {
+        var ecart = r2(totalEspeces + fond - ref);
         ecartEl.textContent = (ecart >= 0 ? '+' : '') + fmt(ecart);
         ecartEl.className = 'er-val ' + (ecart > 0.005 ? 'pos' : ecart < -0.005 ? 'neg' : 'zero');
       } else {
@@ -926,7 +924,7 @@
           { cls: '', text: entry.date },
           { cls: 'h-r ht-bold', text: fmt(entry.comptage) },
           { cls: 'h-r', text: fmt(entry.fond) },
-          { cls: 'h-r', text: entry.kweb > 0 ? fmt(entry.kweb) : '—' },
+          { cls: 'h-r', text: entry.ref > 0 ? fmt(entry.ref) : '—' },
           { cls: 'h-r ' + ecartCls, text: ecartSign + fmt(entry.ecart) }
         ];
 
@@ -980,8 +978,8 @@
 
       var totalEspeces = r2(totalCoins + totalBills);
       var fond = r2(parseFloat(document.getElementById('fond-caisse').value) || 0);
-      var kweb = r2(parseFloat(document.getElementById('kweb').value) || 0);
-      var ecart = r2(totalEspeces + fond - kweb);
+      var ref = r2(parseFloat(document.getElementById('ref').value) || 0);
+      var ecart = r2(totalEspeces + fond - ref);
 
       var now = new Date();
       var dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -991,7 +989,7 @@
         ts: now.getTime(),
         comptage: totalEspeces,
         fond: fond,
-        kweb: kweb,
+        ref: ref,
         ecart: ecart,
         coins: coinQtys,
         bills: billQtys
@@ -1057,7 +1055,7 @@
       COINS.forEach(function(_, i) { document.getElementById('coin-qty-' + i).value = ''; });
       BILLS.forEach(function(_, i) { document.getElementById('bill-qty-' + i).value = ''; });
       ELEC.forEach(function(_, i) { document.getElementById('elec-' + i).value = ''; });
-      document.getElementById('kweb').value = '';
+      document.getElementById('ref').value = '';
       document.getElementById('fond-caisse').value = fondDefaut().toFixed(2);
       document.getElementById('prefill-banner').style.display = 'none';
       calculate();
@@ -1088,7 +1086,7 @@
       if (!isNaN(v)) { localStorage.setItem(LS_FOND, v); }
       calculate();
     });
-    document.getElementById('kweb').addEventListener('input', calculate);
+    document.getElementById('ref').addEventListener('input', calculate);
     document.getElementById('btn-save').addEventListener('click', saveEntry);
     document.getElementById('btn-reset').addEventListener('click', resetForm);
 
