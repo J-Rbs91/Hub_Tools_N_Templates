@@ -92,6 +92,20 @@
     summary { cursor: pointer; font-weight: 700; padding: 12px 14px; font-size: .9rem; color: var(--blue-d); }
     details[open] summary { border-bottom: 1px solid var(--border); }
     .details-body { padding: 12px 14px; font-size: .9rem; }
+
+    /* ── Reproduction de l'écran d'avertissement Google ── */
+    .gwarn { border: 1px solid var(--border); border-radius: 10px; background: #fff; max-width: 440px; margin: 12px 0 0; padding: 20px 22px; box-shadow: 0 2px 12px rgba(26,42,58,.10); }
+    .gwarn__icon { width: 40px; height: 40px; border-radius: 50%; background: #FCE8E6; color: #C5221F; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; }
+    .gwarn__title { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .gwarn__text { font-size: .82rem; color: var(--grey); line-height: 1.5; margin-bottom: 18px; }
+    .gwarn__actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .gwarn__adv { font-size: .85rem; font-weight: 600; color: var(--grey); text-decoration: underline; }
+    .gwarn__safe { font-size: .82rem; font-weight: 700; color: #fff; background: #1A73E8; border-radius: 6px; padding: 9px 16px; }
+    .gwarn__cap { font-size: .88rem; line-height: 1.7; margin: 12px 0 0; }
+    .gwarn__cap .ok { color: #137333; font-weight: 700; }
+    .gwarn__cap .no { color: #C5221F; font-weight: 700; }
+    .gw-steps { list-style: decimal; margin: 12px 0 0; padding-left: 20px; font-size: .92rem; line-height: 1.6; }
+    .gw-steps li { margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -223,11 +237,34 @@ function ecrire_(contenu) {
         <div class="step-title">Autoriser votre propre programme</div>
         <div class="step-body">
           Google vous demande d'autoriser l'accès à votre Drive : acceptez avec le compte du magasin.
-          <p class="why"><b>Un écran « Application non vérifiée » peut apparaître — c'est normal et
-          sans danger ici.</b> Google affiche cet avertissement pour tout script personnel qu'il n'a
-          pas audité&nbsp;; comme c'est <b>vous</b> qui venez de le créer, vous pouvez continuer :
-          cliquez sur <em>Paramètres avancés</em>, puis sur <em>Accéder à (nom du projet)</em>, et
-          <em>Autoriser</em>.</p>
+          <p class="why"><b>Un écran d'avertissement « Application non vérifiée » va apparaître — c'est
+          normal et sans danger ici.</b> Google l'affiche pour tout script personnel qu'il n'a pas
+          audité&nbsp;; comme c'est <b>vous</b> qui venez de le créer, vous pouvez continuer en toute confiance.</p>
+
+          <p style="font-weight:700;color:var(--ink);margin:14px 0 6px;">Voici l'écran que vous verrez, et où cliquer :</p>
+
+          <div class="gwarn" aria-label="Reproduction de l'écran Google : Application non vérifiée">
+            <div class="gwarn__icon">&#9888;</div>
+            <div class="gwarn__title">Google n'a pas validé cette application</div>
+            <div class="gwarn__text">L'application demande l'accès à des informations sensibles de votre compte Google. Tant que le développeur (votre adresse e-mail) n'a pas fait valider cette application, vous ne devriez pas l'utiliser.</div>
+            <div class="gwarn__actions">
+              <span class="gwarn__adv">Paramètres avancés</span>
+              <span class="gwarn__safe">Revenir à la sécurité</span>
+            </div>
+          </div>
+          <p class="gwarn__cap">
+            <span class="ok">&#10004; À faire :</span> cliquez sur le petit lien <b>« Paramètres avancés »</b> (en bas à gauche).<br>
+            <span class="no">&#10008; À éviter :</span> n'appuyez <b>pas</b> sur le gros bouton bleu <b>« Revenir à la sécurité »</b>.
+          </p>
+
+          <ol class="gw-steps">
+            <li>Un nouveau lien apparaît : cliquez sur <b>« Accéder à (nom du projet) (non sécurisé) »</b>.</li>
+            <li>Sur l'écran de permissions, cliquez sur <b>« Autoriser »</b>.</li>
+          </ol>
+
+          <p class="why">Si votre compte Google est en anglais, les libellés sont&nbsp;: <em>Advanced</em>, puis
+          <em>Go to (projet) (unsafe)</em>, puis <em>Allow</em>. La mention « non sécurisé / unsafe » veut juste
+          dire que Google n'a pas audité ce mini-script personnel — c'est attendu, et il ne touche qu'à votre Drive.</p>
         </div>
       </li>
 
