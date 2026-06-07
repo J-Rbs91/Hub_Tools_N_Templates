@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demande / Ordonnance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1F6FB2; --blue-d:#175A92; --ink:#1A2A3A; --grey:#5A6B7B;
+    --line:#C9D6E2; --light:#EEF4F9; --bg:#F4F7FA; --white:#fff;
+    --green:#1E8E5A; --green-d:#176E46;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Manrope","Segoe UI",-apple-system,Roboto,Helvetica,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.4;
+    padding:24px 16px 92px;
+  }
+  .sheet{
+    max-width:820px;margin:0 auto;background:var(--white);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    box-shadow:0 6px 30px rgba(26,42,58,.08);
+  }
+  header{background:var(--blue);color:#fff;padding:14px 28px}
+  header h1{font-size:17px;font-weight:700;letter-spacing:.2px}
+  header .meta{font-size:12px;opacity:.95;margin-top:3px}
+  .body{padding:18px 28px 26px}
+
+  table{width:100%;border-collapse:collapse}
+  td{border:1px solid var(--line);padding:7px 12px;vertical-align:middle;font-size:13px}
+
+  .sect td{
+    background:var(--light);border-left:4px solid var(--blue);
+    font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--ink);
+    text-transform:uppercase;padding:8px 12px;
+  }
+  .sect.first td{border-top:1px solid var(--line)}
+
+  .obj{
+    background:#F7FAFC;color:var(--grey);font-size:12.5px;
+    width:210px;font-weight:600;
+  }
+  .obj.sub{color:var(--ink);font-weight:700}
+
+  input[type=text]{
+    font-family:inherit;font-size:14px;color:var(--ink);
+    border:none;border-bottom:1.4px solid var(--line);
+    background:#FBFDFE;padding:4px 6px;border-radius:4px 4px 0 0;
+    transition:border-color .15s, background .15s;width:100%;
+  }
+  input[type=text]:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
+  input[type=text].inp-sm{width:80px}
+  input[type=text].inp-xs{width:48px}
+  input[type=text].inp-md{width:140px}
+
+  textarea{
+    font-family:inherit;font-size:13.5px;color:var(--ink);line-height:1.5;
+    border:1px solid var(--line);background:#FBFDFE;border-radius:6px;
+    padding:8px 10px;width:100%;resize:vertical;min-height:78px;
+    transition:border-color .15s, background .15s;
+  }
+  textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+  /* hauteurs bornées : le cumul des deux zones reste compatible A4 */
+  textarea[data-k="intro"]{max-height:130px}
+  textarea[data-k="commentaire"]{max-height:200px}
+
+  .pick{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-right:14px}
+  .pick input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+
+  .eye{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+  .eye .sep{color:var(--grey)}
+  /* chaque mesure (label + champ + unité) reste sur une même ligne insécable */
+  .grp{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+
+  .opt{display:flex;align-items:flex-start;gap:9px;padding:3px 0}
+  .opt input{margin-top:2px;width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex:none}
+  .opt .txt{font-size:13px}
+  .opt .sub{display:block;font-size:11px;color:var(--grey);font-style:italic;margin-top:1px}
+
+  .pgrid{display:grid;grid-template-columns:1fr 1fr}
+  .pf{display:flex;align-items:center;gap:10px;padding:7px 12px;min-width:0}
+  .pf:nth-child(odd){border-right:1px solid var(--line)}
+  .plab{color:var(--grey);font-size:12.5px;font-weight:600;white-space:nowrap}
+  .pf input[type=text]{flex:1;min-width:0}
+
+  /* en-tête de section avec action à droite (ex : Régénérer) */
+  .sect-act td{
+    background:var(--light);border-left:4px solid var(--blue);
+    padding:6px 12px;
+  }
+  .sect-act .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .sect-act .lbl{font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--ink);text-transform:uppercase}
+  .regen{
+    font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
+    border:1px solid var(--blue);color:var(--blue);background:#fff;
+    border-radius:6px;padding:4px 10px;transition:.15s;
+  }
+  .regen:hover{background:var(--blue);color:#fff}
+
+  .closing{font-size:12px;color:var(--grey);font-style:italic;margin:16px 0 0;line-height:1.55;padding:0 2px}
+  .sign{font-size:13px;font-weight:700;color:var(--ink);margin:10px 0 0;padding:0 2px}
+
+  .bar{
+    position:fixed;bottom:0;left:0;right:0;background:#fff;
+    border-top:1px solid var(--line);padding:12px 16px;
+    display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+    box-shadow:0 -4px 18px rgba(26,42,58,.06);z-index:10;
+  }
+  button.action{
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    border-radius:8px;padding:10px 22px;border:1.5px solid var(--blue);transition:.15s;
+  }
+  .btn-primary{background:var(--green);color:#fff;border-color:var(--green)}
+  .btn-primary:hover{background:var(--green-d);border-color:var(--green-d)}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-d);border-color:var(--blue-d)}
+  .btn-ghost{background:#fff;color:var(--blue)}
+  .btn-ghost:hover{background:var(--light)}
+
+  .toast{
+    position:fixed;bottom:78px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:9px;
+    font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;
+    transition:.25s;z-index:20;box-shadow:0 6px 22px rgba(26,42,58,.25);max-width:90%;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .help{max-width:820px;margin:0 auto 14px;font-size:12.5px;color:var(--grey)}
+  .help summary{cursor:pointer;font-weight:700;color:var(--blue);padding:8px 0}
+  .help ol{margin:4px 0 8px 20px;line-height:1.6}
+
+  /* retour aux outils (en haut, masqué au PDF) */
+  .topbar{max-width:820px;margin:0 auto 12px}
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+    font-size:13px;font-weight:700;color:var(--blue);
+    border:1px solid var(--line);background:var(--white);
+    padding:7px 14px;border-radius:8px;transition:.15s;
+  }
+  .back-link:hover{background:var(--light)}
+
+  /* bouton retour flottant (iOS : pas de bouton retour navigateur) */
+  .ios-back{
+    display:none;position:fixed;z-index:1000;align-items:center;gap:6px;
+    right:calc(env(safe-area-inset-right,0px) + 14px);
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    background:var(--blue);color:#fff;text-decoration:none;
+    font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;
+    box-shadow:0 4px 16px rgba(26,42,58,.32);
+  }
+  body.is-ios .ios-back{display:inline-flex}
+  body.is-ios .topbar{display:none}
+
+  /* responsive smartphone */
+  @media (max-width:640px){
+    body{padding:14px 10px 96px}
+    header{padding:12px 16px}
+    header h1{font-size:15.5px}
+    .body{padding:14px 14px 20px}
+    .obj{width:auto}
+    .pgrid{grid-template-columns:1fr}
+    .pf:nth-child(odd){border-right:none}
+    .bar{padding:10px;gap:8px}
+    button.action{padding:9px 14px;font-size:13px}
+    input[type=text].inp-md{width:120px}
+  }
+
+  @media print{
+    @page{size:A4 portrait;margin:9mm 11mm}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    html,body{background:#fff}
+    body{padding:0;line-height:1.3;font-size:12px}
+    .sheet{border:1px solid var(--line);box-shadow:none;max-width:none;border-radius:10px;overflow:hidden}
+    header{background:var(--blue);color:#fff;padding:9px 22px}
+    header h1{color:#fff;font-size:15.5px}
+    header .meta{color:#fff;opacity:.95;font-size:10.5px;margin-top:2px}
+    .body{padding:10px 22px 11px}
+    td{padding:3.2px 11px;font-size:12px}
+    .sect td,.sect-act td{padding:3.6px 11px;font-size:11px}
+    .obj{font-size:11.5px}
+    input[type=text]{font-size:12.5px;padding:2px 6px;background:#FBFDFE;border-bottom:1.2px solid var(--line)}
+    .opt{padding:1.4px 0}
+    .opt .txt{font-size:11.5px}
+    .opt .sub{font-size:9.5px;margin-top:0}
+    .pick{font-size:11.5px}
+    .pf{padding:3.6px 11px}
+    .plab{font-size:11.5px}
+    .closing{font-size:10.5px;margin:8px 0 0;line-height:1.45}
+    .sign{font-size:11.5px;margin:6px 0 0}
+    /* le paragraphe d'intro et tout l'interactif sont masqués au PDF */
+    #introRow,.bar,.help,.toast,.regen,.topbar,.ios-back{display:none!important}
+    tr,.pgrid,.pf,.sheet{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
+
+<div class="topbar"><a class="back-link" href="../../">&#8592; Retour aux outils</a></div>
+
+<details class="help">
+  <summary>Comment envoyer par mail sans pièce jointe ?</summary>
+  <ol>
+    <li>Remplissez le formulaire ci-dessous.</li>
+    <li>Cliquez sur <strong>« Copier pour Gmail »</strong>.</li>
+    <li>Dans Gmail, ouvrez un <strong>Nouveau message</strong>, cliquez dans le corps du mail puis <strong>Coller</strong> (Ctrl+V). La mise en page est conservée.</li>
+    <li>Saisissez l'adresse du médecin et envoyez.</li>
+  </ol>
+</details>
+
+<div class="sheet" id="sheet">
+  <header>
+    <h1 id="store-h1">Mon magasin</h1>
+    <div class="meta" id="store-meta"></div>
+  </header>
+
+  <div class="body">
+    <table>
+      <tr><td class="obj">À l'attention du Dr</td><td><input type="text" data-k="medecin" placeholder="Nom du médecin"></td></tr>
+
+      <!-- Paragraphe d'intro éditable (auto-généré, masqué au PDF) -->
+      <tr class="sect-act"><td colspan="2">
+        <div class="row">
+          <span class="lbl">Paragraphe d'introduction</span>
+          <button type="button" class="regen" onclick="regenIntro()">↻ Régénérer</button>
+        </div>
+      </td></tr>
+      <tr id="introRow"><td colspan="2" style="padding:10px 12px">
+        <textarea data-k="intro" placeholder="Le paragraphe se génère automatiquement à partir des champs. Vous pouvez le modifier librement."></textarea>
+      </td></tr>
+
+      <tr class="sect"><td colspan="2">Objet</td></tr>
+      <tr><td class="obj">Objet de la demande</td><td>
+        <div class="opt"><input type="checkbox" data-k="o_modif"><span class="txt">Demande d'autorisation de modification de prescription</span></div>
+        <div class="opt"><input type="checkbox" data-k="o_lentilles"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></div>
+        <div class="opt"><input type="checkbox" data-k="o_controle"><span class="txt">Compte rendu de contrôle de vision</span></div>
+        <div class="opt"><input type="checkbox" data-k="o_adapt"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon l'article L4362-10 du code de santé publique</span></span></div>
+        <div class="opt"><input type="checkbox" data-k="o_renouv"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon l'article D.4362-13 du code de santé publique — JO du 12/10/2016</span></span></div>
+      </td></tr>
+
+      <tr class="sect"><td colspan="2">Patient</td></tr>
+      <tr><td colspan="2" style="padding:0">
+        <div class="pgrid">
+          <div class="pf"><span class="plab">Nom / Prénom</span><input type="text" data-k="p_nom"></div>
+          <div class="pf"><span class="plab">Né(e) le</span><input type="text" class="inp-md" data-k="p_ne" placeholder="jj/mm/aaaa"></div>
+        </div>
+      </td></tr>
+
+      <tr class="sect"><td colspan="2">Prescription initiale</td></tr>
+      <tr><td class="obj">En date du</td><td><input type="text" class="inp-md" data-k="i_date" placeholder="jj/mm/aaaa"></td></tr>
+      <tr><td class="obj">Type d'équipement</td><td>
+        <label class="pick"><input type="checkbox" data-k="i_lunettes"> Lunettes</label>
+        <label class="pick"><input type="checkbox" data-k="i_lentilles"> Lentilles</label>
+      </td></tr>
+      <tr><td class="obj">Type de vision</td><td>
+        <label class="pick"><input type="checkbox" data-k="i_vl"> VL</label>
+        <label class="pick"><input type="checkbox" data-k="i_vp"> VP</label>
+        <label class="pick"><input type="checkbox" data-k="i_vi"> Vi</label>
+        <label class="pick"><input type="checkbox" data-k="i_prog"> Prog</label>
+        <label class="pick"><input type="checkbox" data-k="i_vpc"> Vp prof. de champ</label>
+      </td></tr>
+      <tr><td class="obj sub">OD</td><td><div class="eye">
+        <span class="grp"><input type="text" class="inp-sm" data-k="i_od_sph"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="i_od_cyl"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" class="inp-xs" data-k="i_od_axe"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="i_od_add"></span>
+      </div></td></tr>
+      <tr><td class="obj sub">OG</td><td><div class="eye">
+        <span class="grp"><input type="text" class="inp-sm" data-k="i_og_sph"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="i_og_cyl"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" class="inp-xs" data-k="i_og_axe"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="i_og_add"></span>
+      </div></td></tr>
+      <tr><td class="obj">Acuités</td><td><div class="eye">
+        <span class="grp"><span class="sep">OD</span><input type="text" class="inp-xs" data-k="i_ac_od"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">OG</span><input type="text" class="inp-xs" data-k="i_ac_og"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">ODG</span><input type="text" class="inp-xs" data-k="i_ac_odg"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" class="inp-sm" data-k="i_ac_p"><span class="sep">lu à 40 cm</span></span>
+      </div></td></tr>
+
+      <tr class="sect"><td colspan="2">Modifications demandées</td></tr>
+      <tr><td class="obj">Type d'équipement</td><td>
+        <label class="pick"><input type="checkbox" data-k="m_lunettes"> Lunettes</label>
+        <label class="pick"><input type="checkbox" data-k="m_lentilles"> Lentilles</label>
+      </td></tr>
+      <tr><td class="obj">Type de vision</td><td>
+        <label class="pick"><input type="checkbox" data-k="m_vl"> VL</label>
+        <label class="pick"><input type="checkbox" data-k="m_vp"> VP</label>
+        <label class="pick"><input type="checkbox" data-k="m_vi"> Vi</label>
+        <label class="pick"><input type="checkbox" data-k="m_prog"> Prog</label>
+        <label class="pick"><input type="checkbox" data-k="m_vpc"> Vp prof. de champ</label>
+      </td></tr>
+      <tr><td class="obj sub">OD</td><td><div class="eye">
+        <span class="grp"><input type="text" class="inp-sm" data-k="m_od_sph"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="m_od_cyl"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" class="inp-xs" data-k="m_od_axe"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="m_od_add"></span>
+      </div></td></tr>
+      <tr><td class="obj sub">OG</td><td><div class="eye">
+        <span class="grp"><input type="text" class="inp-sm" data-k="m_og_sph"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="m_og_cyl"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" class="inp-xs" data-k="m_og_axe"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="m_og_add"></span>
+      </div></td></tr>
+      <tr><td class="obj">Acuités</td><td><div class="eye">
+        <span class="grp"><span class="sep">OD</span><input type="text" class="inp-xs" data-k="m_ac_od"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">OG</span><input type="text" class="inp-xs" data-k="m_ac_og"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">ODG</span><input type="text" class="inp-xs" data-k="m_ac_odg"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" class="inp-sm" data-k="m_ac_p"><span class="sep">lu à 40 cm</span></span>
+      </div></td></tr>
+
+      <tr class="sect"><td colspan="2">Commentaire</td></tr>
+      <tr><td class="obj">Commentaire</td><td>
+        <textarea data-k="commentaire" placeholder="Saisie libre…" style="min-height:96px"></textarea>
+      </td></tr>
+
+      <tr class="sect"><td colspan="2">Suite à donner</td></tr>
+      <tr><td class="obj">Suite à donner</td><td>
+        <div class="opt"><input type="checkbox" data-k="s_equip"><span class="txt">Équipement délivré / en cours</span></div>
+        <div class="opt"><input type="checkbox" data-k="s_attente"><span class="txt">Attente d'approbation du Dr</span></div>
+        <div class="opt"><input type="checkbox" data-k="s_rdv"><span class="txt">Demande de RDV</span></div>
+      </td></tr>
+    </table>
+
+    <p class="closing">
+      Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir,
+      cher docteur, l'expression de mes respectueuses salutations.
+    </p>
+    <p class="sign" id="store-sign">Mon magasin</p>
+  </div>
+</div>
+
+<div class="bar">
+  <button class="action btn-ghost" onclick="resetForm()">Réinitialiser</button>
+  <button class="action btn-blue" onclick="window.print()">PDF / Imprimer</button>
+  <button class="action btn-primary" onclick="copyForGmail()">📋 Copier pour Gmail</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ---------- profil magasin (partagé via localStorage) ---------- */
+  function profil(){
+    try{ return JSON.parse(localStorage.getItem('profil-magasin-v1')||'{}')||{}; }
+    catch(e){ return {}; }
+  }
+  function storeName(){
+    return (profil().nom||'').trim() || 'Mon magasin';
+  }
+  function storeMeta(){
+    const p=profil(), parts=[];
+    if((p.tel||'').trim())  parts.push('Tél '+p.tel.trim());
+    if((p.mail||'').trim()) parts.push('Mail : '+p.mail.trim());
+    return parts.join(' · ');
+  }
+
+  /* ---------- utilitaires ---------- */
+  function val(k){const e=document.querySelector('[data-k="'+k+'"]');return e?e.value.trim():'';}
+  function chk(k){const e=document.querySelector('[data-k="'+k+'"]');return e?e.checked:false;}
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function toast(msg, ok){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.style.background = ok===false ? '#B23A2E' : '#1A2A3A';
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3200);
+  }
+
+  /* ---------- paragraphe d'intro auto + éditable ---------- */
+  let introDirty=false; // passe à true dès que l'utilisateur édite manuellement
+
+  function buildIntro(){
+    const dr=val('medecin');
+    const nom=val('p_nom');
+    const ne=val('p_ne');
+    const tete = dr ? ('Docteur '+dr+',') : 'Docteur,';
+
+    // patient : segment optionnel
+    let pat='';
+    if(nom){ pat=' votre patient(e) '+nom; if(ne) pat+=', né(e) le '+ne; pat+='.'; }
+    else { pat=' votre patient(e).'; }
+
+    // corps selon objet coché (priorité au premier coché)
+    let corps;
+    if(chk('o_modif'))      corps='je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, je sollicite votre autorisation pour la modification de la préscription détaillée ci-dessous.';
+    else if(chk('o_lentilles')) corps="Je vous transmets ce compte rendu d'adaptation de lentilles de contact concernant"+pat;
+    else if(chk('o_controle'))  corps='Je vous transmets ce compte rendu de contrôle de vision concernant'+pat;
+    else if(chk('o_adapt'))     corps="Je vous transmets ce compte rendu d'adaptation de prescription (art. L4362-10 CSP) concernant"+pat;
+    else if(chk('o_renouv'))    corps='Je vous transmets ce compte rendu de renouvellement exceptionnel (art. D.4362-13 CSP) concernant'+pat;
+    else                        corps='Je me permets de vous adresser ce document concernant'+pat;
+
+    return tete+'\n'+corps;
+  }
+
+  function refreshIntro(){
+    if(introDirty) return;            // ne pas écraser une saisie manuelle
+    const ta=document.querySelector('[data-k="intro"]');
+    if(ta) ta.value=buildIntro();
+  }
+  function regenIntro(){              // bouton ↻ : force la régénération
+    introDirty=false;
+    const ta=document.querySelector('[data-k="intro"]');
+    if(ta) ta.value=buildIntro();
+    toast('Paragraphe régénéré.');
+  }
+
+  /* ---------- rendu email-safe (masque le vide) ---------- */
+  function row(label, value){
+    return '<tr>'
+      + '<td style="border:1px solid #C9D6E2;padding:7px 12px;background:#F7FAFC;color:#5A6B7B;font-size:12.5px;font-weight:600;width:200px;vertical-align:top;">'+label+'</td>'
+      + '<td style="border:1px solid #C9D6E2;padding:7px 12px;font-size:13px;color:#1A2A3A;">'+value+'</td>'
+      + '</tr>';
+  }
+  function sect(title){
+    return '<tr><td colspan="2" style="border:1px solid #C9D6E2;border-left:4px solid #1F6FB2;background:#EEF4F9;padding:8px 12px;font-size:12px;font-weight:700;letter-spacing:.6px;color:#1A2A3A;text-transform:uppercase;">'+title+'</td></tr>';
+  }
+  function checkedList(items){ // [[clé,label],...] -> seulement les cochés, séparés par ·
+    const on=items.filter(([k])=>chk(k)).map(([,l])=>l);
+    return on.length? on.join(' &nbsp;·&nbsp; ') : '';
+  }
+  function objetList(){
+    return checkedList([
+      ['o_modif',"Demande d'autorisation de modification de prescription"],
+      ['o_lentilles',"Adaptation lentilles de contact"],
+      ['o_controle',"Contrôle de vision"],
+      ['o_adapt',"Adaptation de prescription (art. L4362-10 CSP)"],
+      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 CSP)"],
+    ]);
+  }
+  function suiteList(){
+    return checkedList([
+      ['s_equip',"Équipement délivré / en cours"],
+      ['s_attente',"Attente d'approbation du Dr"],
+      ['s_rdv',"Demande de RDV"],
+    ]);
+  }
+  function equipLine(p){ return checkedList([[p+'lunettes','Lunettes'],[p+'lentilles','Lentilles']]); }
+  function visionLine(p){
+    return checkedList([[p+'vl','VL'],[p+'vp','VP'],[p+'vi','Vi'],[p+'prog','Prog'],[p+'vpc','Vp prof. de champ']]);
+  }
+  function eyeLine(p,eye){
+    const sph=esc(val(p+eye+'_sph')), cyl=esc(val(p+eye+'_cyl')), axe=esc(val(p+eye+'_axe')), add=esc(val(p+eye+'_add'));
+    if(!sph&&!cyl&&!axe&&!add) return ''; // ligne vide -> masquée
+    let s='';
+    if(sph) s+=sph;
+    if(cyl) s+=' ('+cyl+')';
+    if(axe) s+=' '+axe+'°';
+    if(add) s+=' &nbsp;Add '+add;
+    return s.trim();
+  }
+  function acuLine(p){
+    const od=esc(val(p+'ac_od')), og=esc(val(p+'ac_og')), odg=esc(val(p+'ac_odg')), pp=esc(val(p+'ac_p'));
+    if(!od&&!og&&!odg&&!pp) return '';
+    const parts=[];
+    if(od) parts.push('OD '+od+'/10');
+    if(og) parts.push('OG '+og+'/10');
+    if(odg) parts.push('ODG '+odg+'/10');
+    if(pp) parts.push('VP P = '+pp+' lu à 40 cm');
+    return parts.join(' &nbsp; ');
+  }
+  // ajoute une section seulement si elle contient au moins une ligne non vide
+  function blocPrescription(titre, p){
+    const rows=[];
+    if(p==='i_'){ const d=esc(val('i_date')); if(d) rows.push(row('En date du', d)); }
+    const eq=equipLine(p); if(eq) rows.push(row("Type d'équipement", eq));
+    const vi=visionLine(p); if(vi) rows.push(row('Type de vision', vi));
+    const od=eyeLine(p,'od'); if(od) rows.push(row('OD', od));
+    const og=eyeLine(p,'og'); if(og) rows.push(row('OG', og));
+    const ac=acuLine(p); if(ac) rows.push(row('Acuités', ac));
+    if(!rows.length) return '';
+    return sect(titre)+rows.join('');
+  }
+
+  function buildEmailHTML(){
+    let h='<div style="font-family:Arial,Helvetica,sans-serif;max-width:760px;color:#1A2A3A;">';
+
+    // en-tête bleu (coordonnées reprises du profil magasin)
+    const metaTxt=storeMeta();
+    h+='<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">';
+    h+='<tr><td style="background:#1F6FB2;color:#fff;padding:14px 22px;border-radius:8px 8px 0 0;">'
+      +'<div style="font-size:17px;font-weight:700;">'+esc(storeName())+'</div>'
+      +(metaTxt?'<div style="font-size:12px;opacity:.95;margin-top:3px;">'+esc(metaTxt)+'</div>':'')
+      +'</td></tr></table>';
+
+    // paragraphe d'intro (éditable) — entre en-tête et tableau
+    const intro=val('intro');
+    if(intro){
+      h+='<p style="font-size:13.5px;color:#1A2A3A;line-height:1.6;margin:16px 2px 18px;">'+esc(intro).replace(/\n/g,'<br>')+'</p>';
+    }
+
+    // tableau technique (lignes vides masquées)
+    h+='<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">';
+
+    if(val('medecin')) h+=row("À l'attention du Dr", esc(val('medecin')));
+
+    const obj=objetList(); if(obj){ h+=sect('Objet'); h+=row('Objet de la demande', obj); }
+
+    const patRows=[];
+    if(val('p_nom')) patRows.push(row('Nom / Prénom', esc(val('p_nom'))));
+    if(val('p_ne'))  patRows.push(row('Né(e) le', esc(val('p_ne'))));
+    if(patRows.length){ h+=sect('Patient'); h+=patRows.join(''); }
+
+    h+=blocPrescription('Prescription initiale','i_');
+    h+=blocPrescription('Modifications demandées','m_');
+
+    const com=val('commentaire');
+    if(com){ h+=sect('Commentaire'); h+=row('Commentaire', esc(com).replace(/\n/g,'<br>')); }
+
+    const suite=suiteList(); if(suite){ h+=sect('Suite à donner'); h+=row('Suite à donner', suite); }
+
+    h+='</table>';
+
+    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:16px 2px 0;line-height:1.55;">'
+      +"Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir, cher docteur, l'expression de mes respectueuses salutations."
+      +'</p>';
+    h+='<p style="font-size:13px;font-weight:700;color:#1A2A3A;margin:10px 2px 0;">'+esc(storeName())+'</p>';
+    h+='</div>';
+    return h;
+  }
+
+  function plainFallback(){
+    let l=[];
+    l.push(storeName());
+    if(val('medecin')) l.push("À l'attention du Dr "+val('medecin'));
+    l.push('');
+    if(val('intro')){ l.push(val('intro')); l.push(''); }
+    if(val('p_nom')||val('p_ne')) l.push('PATIENT : '+(val('p_nom')||'')+(val('p_ne')?(' — Né(e) le '+val('p_ne')):''));
+    l.push('');
+    l.push("Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir, cher docteur, l'expression de mes respectueuses salutations.");
+    l.push(storeName());
+    return l.join('\n');
+  }
+
+  async function copyForGmail(){
+    const html=buildEmailHTML();
+    const text=plainFallback();
+    try{
+      const item=new ClipboardItem({
+        'text/html': new Blob([html], {type:'text/html'}),
+        'text/plain': new Blob([text], {type:'text/plain'})
+      });
+      await navigator.clipboard.write([item]);
+      toast('✓ Copié. Dans Gmail : Nouveau message → coller (Ctrl+V).');
+    }catch(e){
+      try{
+        const tmp=document.createElement('div');
+        tmp.style.position='fixed'; tmp.style.left='-9999px';
+        tmp.innerHTML=html; document.body.appendChild(tmp);
+        const range=document.createRange(); range.selectNodeContents(tmp);
+        const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        const ok=document.execCommand('copy');
+        sel.removeAllRanges(); document.body.removeChild(tmp);
+        toast(ok?'✓ Copié. Dans Gmail : Nouveau message → coller (Ctrl+V).':'Copie impossible sur ce navigateur. Utilisez le bouton PDF.', ok?undefined:false);
+      }catch(e2){
+        toast('Copie impossible sur ce navigateur. Utilisez le bouton PDF.', false);
+      }
+    }
+  }
+
+  function resetForm(){
+    if(!confirm('Effacer toutes les saisies ?')) return;
+    document.querySelectorAll('input[type=text]').forEach(i=>i.value='');
+    document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+    const ta=document.querySelector('[data-k="intro"]'); if(ta) ta.value='';
+    const tc=document.querySelector('[data-k="commentaire"]'); if(tc) tc.value='';
+    introDirty=false;
+    refreshIntro();
+  }
+
+  /* ---------- init & écoute ---------- */
+  document.addEventListener('DOMContentLoaded', function(){
+    // en-tête et signature depuis le profil magasin
+    document.getElementById('store-h1').textContent = storeName();
+    document.getElementById('store-meta').textContent = storeMeta();
+    document.getElementById('store-sign').textContent = storeName();
+
+    const ta=document.querySelector('[data-k="intro"]');
+    if(ta){
+      ta.addEventListener('input', ()=>{ introDirty=true; });
+    }
+    // régénère l'intro quand les champs clés changent (si non édité manuellement)
+    ['medecin','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv']
+      .forEach(k=>{
+        const e=document.querySelector('[data-k="'+k+'"]');
+        if(e){ const ev = e.type==='checkbox'?'change':'input'; e.addEventListener(ev, refreshIntro); }
+      });
+    refreshIntro();
+  });
+
+  /* Détection iOS : affiche le bouton retour flottant (iPhone/iPad n'ont
+     pas de bouton retour navigateur, notamment en mode plein écran) */
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
+    document.body.classList.add('is-ios');
+  }
+</script>
+</body>
+</html>
