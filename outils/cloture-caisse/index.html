@@ -718,6 +718,7 @@
 
     var LS_CAISSE = 'cloture-caisse-v1';
     var LS_FOND = 'cloture-fond-v1';
+    var HISTORY_DAYS = 15;   // historique plafonné à 15 jours glissants
 
     /* ── PROFIL MAGASIN (partagé via localStorage) ── */
     function profilMagasin() {
@@ -895,6 +896,21 @@
       localStorage.setItem(LS_CAISSE, JSON.stringify(data));
     }
 
+    /* Plafonne l'historique à 15 jours glissants : dédoublonne par date (garde
+       la saisie la plus récente), trie du plus récent au plus ancien, coupe à 15. */
+    function capHistory(data) {
+      if (!Array.isArray(data)) { return []; }
+      var byDate = {};
+      data.forEach(function (e) {
+        if (!e || !e.date) { return; }
+        var prev = byDate[e.date];
+        if (!prev || (e.ts || 0) >= (prev.ts || 0)) { byDate[e.date] = e; }
+      });
+      var arr = Object.keys(byDate).map(function (k) { return byDate[k]; });
+      arr.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+      return arr.slice(0, HISTORY_DAYS);
+    }
+
     function renderHistory() {
       var data = loadHistory();
       var tbody = document.getElementById('history-tbody');
@@ -998,19 +1014,12 @@
       };
 
       var data = loadHistory();
-      var todayIdx = -1;
-      data.forEach(function(e, i) { if (e.date === dateStr) { todayIdx = i; } });
-
-      if (todayIdx >= 0) {
-        data[todayIdx] = entry;
-        showToast('Comptage du jour mis à jour');
-      } else {
-        data.unshift(entry);
-        showToast('Comptage enregistré ✔');
-      }
-
+      var existsToday = data.some(function (e) { return e.date === dateStr; });
+      data.unshift(entry);
+      data = capHistory(data);   // dédoublonne (garde le plus récent) + plafond 15 jours
       saveHistoryData(data);
       renderHistory();
+      showToast(existsToday ? 'Comptage du jour mis à jour' : 'Comptage enregistré ✔');
     }
 
     /* ── REPORT DU COMPTAGE DE LA VEILLE ── */
@@ -1071,6 +1080,7 @@
     buildCoins();
     buildBills();
     buildElec();
+    saveHistoryData(capHistory(loadHistory()));   // applique le plafond 15 jours à l'historique existant
     prefillFromLast();
     renderHistory();
     calculate();

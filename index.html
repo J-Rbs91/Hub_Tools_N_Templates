@@ -128,6 +128,21 @@
           </div>
         </div>
 
+        <div class="sync-section">
+          <p class="sync-title">Sauvegarde du magasin <span class="field__opt">recommandé</span></p>
+          <p class="sync-desc">
+            Enregistre dans un fichier le profil, le fond de caisse et l'historique de clôture
+            (15 derniers jours). À conserver sur une clé USB ou à vous envoyer par e-mail, puis
+            à restaurer en cas de changement de poste ou de vidage du navigateur.
+          </p>
+          <div class="sync-actions">
+            <button type="button" class="btn btn--ghost" id="backup-save">Sauvegarder dans un fichier</button>
+            <button type="button" class="btn btn--ghost" id="backup-restore-btn">Restaurer un fichier…</button>
+            <input type="file" id="backup-file" accept="application/json,.json" hidden>
+          </div>
+          <span class="sync-status" id="backup-status" role="status"></span>
+        </div>
+
         <div class="modal__actions">
           <button type="button" class="btn btn--ghost" id="cancel-settings">Annuler</button>
           <button type="submit" class="btn btn--primary">Enregistrer</button>
@@ -139,6 +154,9 @@
   <script>
     var LS_PROFIL = 'profil-magasin-v1';
     var LS_SYNC   = 'sync-url-v1';
+    var LS_FOND   = 'cloture-fond-v1';
+    var LS_CAISSE = 'cloture-caisse-v1';
+    var HISTORY_DAYS = 15;
 
     function loadProfil() {
       try { return JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}; }
@@ -181,6 +199,7 @@
       fillForm(loadProfil());
       document.getElementById('f-sync').value = syncUrl();
       setStatus('');
+      setBackupStatus('');
       document.getElementById('settings-modal').hidden = false;
       document.getElementById('f-nom').focus();
     }
@@ -280,6 +299,99 @@
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { closeModal(); }
+    });
+
+    /* ── Sauvegarde / Restauration de tout le magasin (un seul fichier) ──
+       Toutes les pages partagent le même origine GitHub Pages : le hub peut donc
+       lire/écrire les clés du profil ET de l'outil caisse. Rien ne quitte le
+       navigateur, sauf si l'utilisateur dépose lui-même le fichier quelque part. */
+    function readJSON(key, fallback) {
+      try { var v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); }
+      catch (e) { return fallback; }
+    }
+
+    function capHistory(data) {
+      if (!Array.isArray(data)) { return []; }
+      var byDate = {};
+      data.forEach(function (e) {
+        if (!e || !e.date) { return; }
+        var prev = byDate[e.date];
+        if (!prev || (e.ts || 0) >= (prev.ts || 0)) { byDate[e.date] = e; }
+      });
+      var arr = Object.keys(byDate).map(function (k) { return byDate[k]; });
+      arr.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+      return arr.slice(0, HISTORY_DAYS);
+    }
+
+    function setBackupStatus(msg, ok) {
+      var el = document.getElementById('backup-status');
+      if (!el) { return; }
+      el.textContent = msg || '';
+      el.className = 'sync-status' + (ok === true ? ' ok' : ok === false ? ' err' : '');
+    }
+
+    function doBackup() {
+      var fondRaw = localStorage.getItem(LS_FOND);
+      var bundle = {
+        app: 'hub-magasin',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        profil: loadProfil(),
+        fond: fondRaw == null ? null : (parseFloat(fondRaw) || 0),
+        caisse: capHistory(readJSON(LS_CAISSE, []))
+      };
+      var nom = (loadProfil().nom || 'magasin').trim().toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'magasin';
+      var d = new Date();
+      var stamp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+      var blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'sauvegarde-magasin-' + nom + '-' + stamp + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      setBackupStatus('Sauvegarde téléchargée ✓', true);
+    }
+
+    function doRestore(file) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var bundle;
+        try { bundle = JSON.parse(reader.result); }
+        catch (e) { setBackupStatus('Fichier illisible (format invalide).', false); return; }
+        if (!bundle || bundle.app !== 'hub-magasin') {
+          setBackupStatus('Ce fichier n’est pas une sauvegarde du magasin.', false);
+          return;
+        }
+        if (bundle.profil && typeof bundle.profil === 'object') {
+          localStorage.setItem(LS_PROFIL, JSON.stringify(bundle.profil));
+          fillForm(bundle.profil);
+          renderHeader();
+        }
+        if (typeof bundle.fond === 'number') {
+          localStorage.setItem(LS_FOND, bundle.fond);
+        }
+        if (Array.isArray(bundle.caisse)) {
+          var local = readJSON(LS_CAISSE, []);
+          var merged = capHistory((Array.isArray(local) ? local : []).concat(bundle.caisse));
+          localStorage.setItem(LS_CAISSE, JSON.stringify(merged));
+        }
+        setBackupStatus('Sauvegarde restaurée ✓ — profil et fond remplacés, historique fusionné.', true);
+      };
+      reader.onerror = function () { setBackupStatus('Impossible de lire le fichier.', false); };
+      reader.readAsText(file);
+    }
+
+    document.getElementById('backup-save').addEventListener('click', doBackup);
+    document.getElementById('backup-restore-btn').addEventListener('click', function () {
+      document.getElementById('backup-file').click();
+    });
+    document.getElementById('backup-file').addEventListener('change', function () {
+      if (this.files && this.files[0]) { doRestore(this.files[0]); }
+      this.value = '';
     });
 
     renderHeader();
