@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Épaisseur des verres</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#1F6FB2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --ink: #1A2A3A; --bg: #F4F7FA;
+      --white: #fff; --line: #C9D6E2; --grey: #5A6B7B; --green: #2E8B57;
+      --radius: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Manrope", "Segoe UI", -apple-system, Roboto, Helvetica, sans-serif;
+      background: var(--bg); color: var(--ink); line-height: 1.4;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      background: var(--blue); color: #fff; padding: 13px 20px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .back-link {
+      color: rgba(255,255,255,.85); text-decoration: none; font-size: 13px;
+      font-weight: 600; border: 1px solid rgba(255,255,255,.35);
+      padding: 5px 12px; border-radius: 6px; white-space: nowrap; transition: background .15s;
+    }
+    .back-link:hover { background: rgba(255,255,255,.15); }
+    .hdr-title { font-size: 16px; font-weight: 800; }
+
+    /* ── bouton retour flottant iOS ── */
+    .ios-back {
+      display: none; position: fixed;
+      left: calc(env(safe-area-inset-left, 0px) + 16px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      z-index: 1000; align-items: center; gap: 6px;
+      background: var(--blue); color: #fff; text-decoration: none;
+      font-size: 14px; font-weight: 700; padding: 11px 17px; border-radius: 999px;
+      box-shadow: 0 4px 16px rgba(26,42,58,.32);
+    }
+    body.is-ios .ios-back { display: inline-flex; }
+    body.is-ios .back-link { display: none; }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 56px; }
+    .layout { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
+
+    .card {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: 10px; box-shadow: 0 2px 14px rgba(26,42,58,.06); padding: 18px;
+    }
+    .card h2 {
+      font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--grey); margin-bottom: 14px;
+    }
+
+    .field { margin-bottom: 13px; }
+    .field > label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 4px; }
+    .row { display: flex; gap: 10px; }
+    .row .field { flex: 1; }
+    input, select {
+      width: 100%; font-family: inherit; font-size: 14px; color: var(--ink);
+      border: 1.5px solid var(--line); border-radius: 6px; padding: 8px 10px;
+      background: #fff; transition: border-color .15s;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--blue); }
+    .hint { font-size: 11px; color: var(--grey); margin-top: 3px; line-height: 1.4; }
+
+    /* ── RÉSULTATS ── */
+    .res-type {
+      display: inline-block; font-size: 12px; font-weight: 700; border-radius: 20px;
+      padding: 3px 11px; margin-bottom: 14px;
+    }
+    .res-type.pos { background: #E6F4EE; color: var(--green); }
+    .res-type.neg { background: #EBF2FA; color: var(--blue-d); }
+    .res-type.mix { background: #FFF3E0; color: #B86A00; }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat {
+      background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .stat .lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--grey); }
+    .stat .val { font-size: 22px; font-weight: 800; color: var(--ink); margin-top: 2px; }
+    .stat .val small { font-size: 12px; font-weight: 700; color: var(--grey); }
+    .stat.center .val { color: var(--blue-d); }
+
+    table.merid { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12.5px; }
+    table.merid th, table.merid td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+    table.merid th:first-child, table.merid td:first-child { text-align: left; }
+    table.merid th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .3px; color: var(--grey); font-weight: 700; }
+
+    .notes { margin-top: 14px; padding: 10px 12px; background: #FFF7E6; border: 1px solid #F0C36D; border-left: 4px solid #D9911A; border-radius: 8px; font-size: 12px; color: #7A5500; line-height: 1.5; }
+    .notes ul { margin: 0 0 0 16px; }
+    .notes li { margin-bottom: 3px; }
+    .notes:empty { display: none; }
+
+    /* ── 3D ── */
+    .viewer-card { padding: 0; overflow: hidden; }
+    .viewer-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .viewer-head h2 { margin: 0; }
+    .viewer-badge { font-size: 10.5px; font-weight: 700; color: var(--grey); }
+    #viewport { position: relative; width: 100%; height: 460px; background: linear-gradient(160deg, #0E2233, #1B3A52); touch-action: none; cursor: grab; }
+    #viewport.dragging { cursor: grabbing; }
+    #viewport canvas { display: block; width: 100%; height: 100%; }
+    .vp-overlay {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px; text-align: center; padding: 24px;
+      color: #cfe0ee; font-size: 13px;
+    }
+    .vp-hint { position: absolute; left: 12px; bottom: 10px; font-size: 11px; color: rgba(255,255,255,.55); pointer-events: none; }
+
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .btn {
+      font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+      border: 1px solid var(--line); background: #fff; color: var(--blue-d);
+      border-radius: 6px; padding: 7px 12px; transition: .15s;
+    }
+    .btn:hover { background: var(--bg); }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      #viewport { height: 60vw; min-height: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="ios-back" href="../../" aria-label="Retour à l'accueil">&#8592; Retour</a>
+
+  <header class="site-header">
+    <a class="back-link" href="../../">&#8592; Retour</a>
+    <div class="hdr-title">Épaisseur des verres</div>
+  </header>
+
+  <main>
+    <div class="layout">
+
+      <!-- ── COLONNE GAUCHE : saisie + résultats ── -->
+      <div>
+        <section class="card">
+          <h2>Prescription &amp; verre</h2>
+
+          <div class="row">
+            <div class="field">
+              <label for="sph">Sphère (D)</label>
+              <input type="number" id="sph" step="0.25" value="-4.00">
+            </div>
+            <div class="field">
+              <label for="cyl">Cylindre (D)</label>
+              <input type="number" id="cyl" step="0.25" value="0.00">
+            </div>
+            <div class="field">
+              <label for="axe">Axe (°)</label>
+              <input type="number" id="axe" step="1" min="0" max="180" value="0">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="indice">Indice</label>
+              <select id="indice">
+                <option value="1.5">1.50 (organique)</option>
+                <option value="1.56">1.56</option>
+                <option value="1.6">1.60</option>
+                <option value="1.67">1.67</option>
+                <option value="1.74">1.74</option>
+                <option value="1.523">1.523 (minéral)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="diam">Diamètre Ø (mm)</label>
+              <input type="number" id="diam" step="1" min="30" max="85" value="65">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="monture">Monture (épaisseur de bord standard)</label>
+            <select id="monture">
+              <option value="0.4">Cerclée — 0,4 mm</option>
+              <option value="1.6">Nylor fil — 1,6 mm</option>
+              <option value="1.8">Nylor métal — 1,8 mm</option>
+              <option value="2.0">Percée — 2,0 mm</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="ebord">Ép. au bord (mm)</label>
+              <input type="number" id="ebord" step="0.1" min="0" value="0.4">
+              <div class="hint">Verre + : épaisseur de bord visée. Verre − : sert de plancher uniquement.</div>
+            </div>
+            <div class="field">
+              <label for="ecentre">Ép. mini au centre (mm)</label>
+              <input type="number" id="ecentre" step="0.1" min="1.2" value="1.2">
+              <div class="hint">Jamais &lt; 1,2 mm. Ignoré pour un verre convexe.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:16px;">
+          <h2>Résultat</h2>
+          <span class="res-type" id="res-type">—</span>
+          <div class="stat-grid">
+            <div class="stat center">
+              <div class="lbl">Épaisseur au centre</div>
+              <div class="val" id="r-centre">—</div>
+            </div>
+            <div class="stat">
+              <div class="lbl">Épaisseur au bord</div>
+              <div class="val" id="r-bord">—</div>
+            </div>
+          </div>
+
+          <table class="merid">
+            <thead>
+              <tr><th>Méridien</th><th>Puissance</th><th>Ép. bord</th></tr>
+            </thead>
+            <tbody id="merid-body"></tbody>
+          </table>
+
+          <div class="notes" id="notes"></div>
+        </section>
+      </div>
+
+      <!-- ── COLONNE DROITE : 3D ── -->
+      <section class="card viewer-card">
+        <div class="viewer-head">
+          <h2>Visualisation 3D</h2>
+          <span class="viewer-badge" id="vp-engine">…</span>
+        </div>
+        <div id="viewport">
+          <div class="vp-overlay" id="vp-overlay">Chargement de la 3D…</div>
+          <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer</div>
+        </div>
+        <div style="padding:12px 16px;">
+          <div class="btn-row">
+            <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
+            <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ═══════════ ÉTAT & UTILITAIRES ═══════════ */
+    var el = function (id) { return document.getElementById(id); };
+    var num = function (id) { var v = parseFloat(el(id).value); return isNaN(v) ? 0 : v; };
+    var fmt = function (mm) { return mm.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' mm'; };
+
+    var DEG = Math.PI / 180;
+    var model = null;          // dernier résultat de calcul
+    var renderer3d = null;     // interface { update(geom), resetView(), profile() }
+
+    /* ═══════════ CALCUL OPTIQUE ═══════════ */
+
+    // Sagitta exacte (mm) d'une surface de puissance P (dioptries) sur un rayon r (mm), indice n.
+    // Signe conservé : + = convexe.
+    function sag(P, r, n) {
+      if (P === 0 || r === 0) { return 0; }
+      var R = (n - 1) / Math.abs(P) * 1000;   // rayon de courbure en mm
+      var s;
+      if (r >= R) { s = R; }                    // garde-fou (forte puissance / grand Ø)
+      else { s = R - Math.sqrt(R * R - r * r); }
+      return (P > 0 ? 1 : -1) * s;
+    }
+
+    // Puissance dans le méridien d'angle théta (rad), pour Rx sphéro-cylindrique.
+    function powerAt(theta, sph, cyl, axeRad) {
+      var d = Math.sin(theta - axeRad);
+      return sph + cyl * d * d;
+    }
+
+    function compute() {
+      var sph = num('sph'), cyl = num('cyl'), axe = num('axe');
+      var n = parseFloat(el('indice').value) || 1.5;
+      var diam = num('diam');
+      var ebord = num('ebord');
+      var ecentre = Math.max(1.2, num('ecentre'));
+      var h = diam / 2;
+      var axeRad = axe * DEG;
+
+      // Puissances des deux méridiens principaux + balayage 0..180°.
+      var pMin = Infinity, pMax = -Infinity;
+      var dMin = Infinity, dMax = -Infinity;   // delta sagitta signé au bord
+      var k;
+      for (k = 0; k < 180; k++) {
+        var P = powerAt(k * DEG, sph, cyl, axeRad);
+        if (P < pMin) { pMin = P; }
+        if (P > pMax) { pMax = P; }
+        var d = sag(P, h, n);
+        if (d < dMin) { dMin = d; }
+        if (d > dMax) { dMax = d; }
+      }
+
+      var pureConvexe = pMin >= 0;
+      var cMin = pureConvexe ? 0 : ecentre;     // 1,2 ignoré si convexe pur
+
+      // Épaisseur au centre : assez épaisse pour tenir le bord mini ET le centre mini.
+      var CT = Math.max(cMin, ebord + dMax);
+
+      // Épaisseurs au bord par méridien : ET = CT − delta.
+      var etMin = CT - dMax;   // bord le plus fin (méridien le + convexe)
+      var etMax = CT - dMin;   // bord le plus épais
+
+      // Type de verre
+      var type = pMin >= 0 ? 'pos' : (pMax <= 0 ? 'neg' : 'mix');
+
+      // Méridiens principaux pour le tableau : axe et axe+90.
+      var mer = [];
+      function meridInfo(angleDeg) {
+        var P = powerAt(angleDeg * DEG, sph, cyl, axeRad);
+        var et = CT - sag(P, h, n);
+        return { a: ((angleDeg % 180) + 180) % 180, P: P, et: et };
+      }
+      mer.push(meridInfo(axe));
+      if (Math.abs(cyl) > 1e-6) { mer.push(meridInfo(axe + 90)); }
+
+      // Notes métier
+      var notes = [];
+      if (!pureConvexe && Math.abs(CT - cMin) < 1e-6) { notes.push('Centre porté à l’épaisseur mini (' + fmt(CT) + ').'); }
+      if (pureConvexe) { notes.push('Verre convexe : épaisseur mini au centre non applicable.'); }
+      if (type === 'neg') {
+        // le bord saisi a-t-il agi comme plancher ?
+        if (Math.abs(CT - (ebord + dMax)) < 1e-6 && ebord + dMax > cMin) {
+          notes.push('Bord du myope remonté au plancher saisi (' + fmt(ebord) + ').');
+        } else {
+          notes.push('Verre myope : l’épaisseur de bord saisie n’est pas contraignante ici (bord déterminé par la puissance).');
+        }
+      }
+      if (h >= ((n - 1) / Math.max(Math.abs(pMin), Math.abs(pMax), 1e-6) * 1000)) {
+        notes.push('⚠ Forte puissance / grand diamètre : sagitta plafonnée, valeurs approchées.');
+      }
+
+      model = {
+        sph: sph, cyl: cyl, axeRad: axeRad, n: n, h: h,
+        CT: CT, etMin: etMin, etMax: etMax,
+        pMin: pMin, pMax: pMax, type: type, mer: mer, notes: notes
+      };
+      renderResult();
+      if (renderer3d) { renderer3d.update(buildLens(model)); }
+    }
+
+    function renderResult() {
+      var m = model;
+      var t = el('res-type');
+      t.className = 'res-type ' + m.type;
+      t.textContent = m.type === 'pos' ? 'Verre convexe (+)' : m.type === 'neg' ? 'Verre concave (−)' : 'Verre mixte (torique)';
+
+      el('r-centre').innerHTML = fmt(m.CT);
+      if (Math.abs(m.etMax - m.etMin) < 0.01) {
+        el('r-bord').innerHTML = fmt(m.etMin);
+      } else {
+        el('r-bord').innerHTML = fmt(m.etMin) + ' <small>→ ' + fmt(m.etMax) + '</small>';
+      }
+
+      var body = el('merid-body');
+      while (body.firstChild) { body.removeChild(body.firstChild); }
+      m.mer.forEach(function (x) {
+        var tr = document.createElement('tr');
+        var c1 = document.createElement('td'); c1.textContent = Math.round(x.a) + '°';
+        var c2 = document.createElement('td'); c2.textContent = (x.P >= 0 ? '+' : '') + x.P.toFixed(2) + ' D';
+        var c3 = document.createElement('td'); c3.textContent = fmt(x.et);
+        tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3);
+        body.appendChild(tr);
+      });
+
+      var notes = el('notes');
+      if (m.notes.length) {
+        notes.innerHTML = '<ul>' + m.notes.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>';
+      } else { notes.innerHTML = ''; }
+    }
+
+    /* ═══════════ GÉOMÉTRIE 3D DU VERRE ═══════════ */
+    // Construit positions + normales + indices d'un solide de verre centré sur z=0.
+    // Échelle : 1 mm = 1 unité, puis recentré ; la caméra s'ajuste au diamètre.
+    function buildLens(m) {
+      var RINGS = 28, SEG = 96;
+      var h = m.h;
+      var EXAG = 6;   // exagération de l'épaisseur pour la lisibilité visuelle
+      function half(r, theta) {
+        var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
+        var t = m.CT - sag(P, r, m.n);
+        return (t * EXAG) / 2;
+      }
+
+      var verts = [];   // {x,y,z}
+      var i, j;
+      // index helpers
+      var topIdx = [], botIdx = [];
+      for (i = 0; i <= RINGS; i++) {
+        topIdx[i] = []; botIdx[i] = [];
+        var r = h * i / RINGS;
+        for (j = 0; j < SEG; j++) {
+          var th = 2 * Math.PI * j / SEG;
+          var x = r * Math.cos(th), y = r * Math.sin(th);
+          var hz = half(r, th);
+          topIdx[i][j] = verts.length; verts.push([x, y, hz]);
+          botIdx[i][j] = verts.length; verts.push([x, y, -hz]);
+        }
+      }
+
+      var tris = [];
+      function quad(a, b, c, d) { tris.push(a, b, c); tris.push(a, c, d); }
+      for (i = 0; i < RINGS; i++) {
+        for (j = 0; j < SEG; j++) {
+          var jn = (j + 1) % SEG;
+          // face avant (top) — normale vers +z
+          quad(topIdx[i][j], topIdx[i][jn], topIdx[i + 1][jn], topIdx[i + 1][j]);
+          // face arrière (bottom) — winding inversé
+          quad(botIdx[i][j], botIdx[i + 1][j], botIdx[i + 1][jn], botIdx[i][jn]);
+        }
+      }
+      // tranche (rim)
+      for (j = 0; j < SEG; j++) {
+        var jn2 = (j + 1) % SEG;
+        quad(topIdx[RINGS][j], botIdx[RINGS][j], botIdx[RINGS][jn2], topIdx[RINGS][jn2]);
+      }
+
+      // positions
+      var positions = new Float32Array(verts.length * 3);
+      for (i = 0; i < verts.length; i++) {
+        positions[i * 3] = verts[i][0]; positions[i * 3 + 1] = verts[i][1]; positions[i * 3 + 2] = verts[i][2];
+      }
+      var indices = (verts.length > 65000) ? new Uint32Array(tris) : new Uint16Array(tris);
+
+      // normales (moyenne des faces)
+      var normals = new Float32Array(verts.length * 3);
+      for (i = 0; i < tris.length; i += 3) {
+        var ia = tris[i], ib = tris[i + 1], ic = tris[i + 2];
+        var ax = positions[ia * 3], ay = positions[ia * 3 + 1], az = positions[ia * 3 + 2];
+        var bx = positions[ib * 3], by = positions[ib * 3 + 1], bz = positions[ib * 3 + 2];
+        var cx = positions[ic * 3], cy = positions[ic * 3 + 1], cz = positions[ic * 3 + 2];
+        var ux = bx - ax, uy = by - ay, uz = bz - az;
+        var vx = cx - ax, vy = cy - ay, vz = cz - az;
+        var nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        normals[ia * 3] += nx; normals[ia * 3 + 1] += ny; normals[ia * 3 + 2] += nz;
+        normals[ib * 3] += nx; normals[ib * 3 + 1] += ny; normals[ib * 3 + 2] += nz;
+        normals[ic * 3] += nx; normals[ic * 3 + 1] += ny; normals[ic * 3 + 2] += nz;
+      }
+      for (i = 0; i < normals.length; i += 3) {
+        var L = Math.hypot(normals[i], normals[i + 1], normals[i + 2]) || 1;
+        normals[i] /= L; normals[i + 1] /= L; normals[i + 2] /= L;
+      }
+      return { positions: positions, normals: normals, indices: indices, radius: h };
+    }
+
+    /* ═══════════ CONTRÔLES (rotation / zoom) partagés ═══════════ */
+    var view = { rx: -0.5, ry: 0.6, dist: 2.2 };
+    function attachControls(vp, onChange) {
+      var dragging = false, lx = 0, ly = 0;
+      vp.addEventListener('pointerdown', function (e) { dragging = true; lx = e.clientX; ly = e.clientY; vp.classList.add('dragging'); vp.setPointerCapture(e.pointerId); });
+      vp.addEventListener('pointermove', function (e) {
+        if (!dragging) { return; }
+        view.ry += (e.clientX - lx) * 0.01; view.rx += (e.clientY - ly) * 0.01;
+        view.rx = Math.max(-1.5, Math.min(1.5, view.rx));
+        lx = e.clientX; ly = e.clientY; onChange();
+      });
+      var stop = function () { dragging = false; vp.classList.remove('dragging'); };
+      vp.addEventListener('pointerup', stop); vp.addEventListener('pointercancel', stop);
+      vp.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        view.dist *= (e.deltaY > 0 ? 1.1 : 0.9);
+        view.dist = Math.max(1.2, Math.min(6, view.dist)); onChange();
+      }, { passive: false });
+    }
+
+    /* ═══════════ RENDU THREE.JS ═══════════ */
+    function initThree(THREE) {
+      var vp = el('viewport');
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      vp.appendChild(renderer.domElement);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+      var d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(1, 1.4, 1.6); scene.add(d1);
+      var d2 = new THREE.DirectionalLight(0x9fc4e6, 0.5); d2.position.set(-1.2, -0.6, -1); scene.add(d2);
+
+      var mat = new THREE.MeshStandardMaterial({ color: 0xbfe0ff, metalness: 0.05, roughness: 0.15, transparent: true, opacity: 0.92 });
+      var mesh = null, group = new THREE.Group(); scene.add(group);
+      var radius = 30;
+
+      function resize() {
+        var w = vp.clientWidth, hgt = vp.clientHeight;
+        renderer.setSize(w, hgt, false); camera.aspect = w / hgt; camera.updateProjectionMatrix();
+      }
+      function frame() {
+        group.rotation.x = view.rx; group.rotation.y = view.ry;
+        camera.position.set(0, 0, radius * view.dist);
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+      }
+      window.addEventListener('resize', function () { resize(); frame(); });
+      attachControls(vp, frame);
+
+      renderer3d = {
+        update: function (g) {
+          if (mesh) { group.remove(mesh); mesh.geometry.dispose(); }
+          var geo = new THREE.BufferGeometry();
+          geo.setAttribute('position', new THREE.BufferAttribute(g.positions, 3));
+          geo.setAttribute('normal', new THREE.BufferAttribute(g.normals, 3));
+          geo.setIndex(new THREE.BufferAttribute(g.indices, 1));
+          mesh = new THREE.Mesh(geo, mat); group.add(mesh);
+          radius = g.radius; resize(); frame();
+        },
+        resetView: function () { view.rx = -0.5; view.ry = 0.6; view.dist = 2.2; frame(); },
+        profile: function () { view.rx = 0; view.ry = Math.PI / 2; frame(); }
+      };
+      el('vp-overlay').style.display = 'none';
+      el('vp-engine').textContent = 'Three.js';
+      resize();
+      if (model) { renderer3d.update(buildLens(model)); }
+    }
+
+    /* ═══════════ RENDU WEBGL DE REPLI ═══════════ */
+    function initWebGLFallback() {
+      var vp = el('viewport');
+      var canvas = document.createElement('canvas');
+      vp.insertBefore(canvas, vp.firstChild);
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) { el('vp-overlay').textContent = '3D non disponible sur ce navigateur.'; el('vp-engine').textContent = 'indisponible'; return; }
+
+      var vsrc = 'attribute vec3 p;attribute vec3 nor;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;gl_Position=uMVP*vec4(p,1.0);}';
+      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(0.5,0.8,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),40.0);vec3 base=vec3(0.55,0.78,1.0);vec3 col=base*(0.35+0.75*diff)+vec3(1.0)*spec*0.5;gl_FragColor=vec4(col,0.92);}';
+      function sh(t, s) { var o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; }
+      var prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vsrc)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fsrc)); gl.linkProgram(prog); gl.useProgram(prog);
+      gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      var pLoc = gl.getAttribLocation(prog, 'p'), nLoc = gl.getAttribLocation(prog, 'nor');
+      var mvpLoc = gl.getUniformLocation(prog, 'uMVP'), mLoc = gl.getUniformLocation(prog, 'uM');
+      var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), iBuf = gl.createBuffer();
+      var count = 0, radius = 30;
+
+      function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
+      function persp(fov, asp, nr, fr) { var f = 1 / Math.tan(fov / 2); return new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, (2 * fr * nr) / (nr - fr), 0]); }
+      function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]); }
+      function rotY(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]); }
+      function trans(z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, z, 1]); }
+
+      function resize() { var w = vp.clientWidth, hh = vp.clientHeight, dpr = Math.min(window.devicePixelRatio, 2); canvas.width = w * dpr; canvas.height = hh * dpr; gl.viewport(0, 0, canvas.width, canvas.height); }
+      function frame() {
+        if (!count) { return; }
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        var asp = canvas.width / canvas.height;
+        var M = mul(rotY(view.ry), rotX(view.rx));
+        var MV = mul(trans(-radius * view.dist), M);
+        var MVP = mul(persp(40 * DEG, asp, 0.1, 2000), MV);
+        gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
+        gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf);
+        gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, 0);
+      }
+      window.addEventListener('resize', function () { resize(); frame(); });
+      attachControls(vp, frame);
+
+      renderer3d = {
+        update: function (g) {
+          var idx = g.indices;
+          if (idx instanceof Uint32Array) { idx = new Uint16Array(idx); }   // repli : 16 bits
+          gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, g.positions, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, g.normals, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
+          count = idx.length; radius = g.radius; resize(); frame();
+        },
+        resetView: function () { view.rx = -0.5; view.ry = 0.6; view.dist = 2.2; frame(); },
+        profile: function () { view.rx = 0; view.ry = Math.PI / 2; frame(); }
+      };
+      el('vp-overlay').style.display = 'none';
+      el('vp-engine').textContent = 'WebGL (repli)';
+      resize();
+      if (model) { renderer3d.update(buildLens(model)); }
+    }
+
+    /* ═══════════ CHARGEMENT 3D : Three.js (CDN) puis repli WebGL ═══════════ */
+    function load3D() {
+      var done = false;
+      var fail = function () { if (!done) { done = true; try { initWebGLFallback(); } catch (e) { el('vp-overlay').textContent = '3D indisponible.'; } } };
+      var timer = setTimeout(fail, 6000);   // CDN trop lent / coupé → repli
+      import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js')
+        .then(function (THREE) {
+          if (done) { return; } done = true; clearTimeout(timer);
+          try { initThree(THREE); } catch (e) { initWebGLFallback(); }
+        })
+        .catch(function () { clearTimeout(timer); fail(); });
+    }
+
+    /* ═══════════ INIT ═══════════ */
+    el('monture').addEventListener('change', function () { el('ebord').value = this.value; compute(); });
+    ['sph', 'cyl', 'axe', 'indice', 'diam', 'ebord', 'ecentre'].forEach(function (id) {
+      el(id).addEventListener('input', compute);
+      el(id).addEventListener('change', compute);
+    });
+    el('btn-reset-vue').addEventListener('click', function () { if (renderer3d) { renderer3d.resetView(); } });
+    el('btn-coupe').addEventListener('click', function () { if (renderer3d) { renderer3d.profile(); } });
+
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+      document.body.classList.add('is-ios');
+    }
+
+    compute();
+    load3D();
+  })();
+  </script>
+
+</body>
+</html>
