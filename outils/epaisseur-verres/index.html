@@ -416,35 +416,65 @@
     function saveCal() { try { localStorage.setItem(CAL_KEY, String(pxPerMM)); } catch (e) {} }
 
     /* ═══════════ FORMES DE MONTURE ═══════════ */
-    // Superellipse modulée (exposant haut/bas + échelle verticale + bosse temporale).
-    // Coordonnées canoniques : temporal = +x, haut = +y. Étirée ensuite à la boîte A×B.
-    var SHAPES = {
-      ronde:      { label: 'Ronde',       defA: 48, defB: 46, pTop: 2.0, pBot: 2.0, topScale: 1, botScale: 1 },
-      ovale:      { label: 'Ovale',       defA: 54, defB: 42, pTop: 2.0, pBot: 2.0, topScale: 1, botScale: 1 },
-      rectangle:  { label: 'Rect. arr.',  defA: 52, defB: 40, pTop: 4.0, pBot: 4.0, topScale: 1, botScale: 1 },
-      angulaire:  { label: 'Angulaire',   defA: 54, defB: 38, pTop: 8.0, pBot: 8.0, topScale: 1, botScale: 1 },
-      papillon:   { label: 'Papillon',    defA: 54, defB: 42, pTop: 2.4, pBot: 3.2, topScale: 1, botScale: 1, lift: 0.18, liftAng: 52, liftW: 26 },
-      pantos:     { label: 'Pantos',      defA: 50, defB: 44, pTop: 2.6, pBot: 3.0, topScale: 1.05, botScale: 0.9 },
-      aviateur:   { label: 'Aviateur',    defA: 56, defB: 48, pTop: 2.8, pBot: 2.2, topScale: 0.95, botScale: 1.12, lift: 0.08, liftAng: 40, liftW: 30 },
-      navigator:  { label: 'Navigator',   defA: 56, defB: 34, pTop: 6.0, pBot: 4.0, topScale: 1, botScale: 1 }
-    };
-    var SHAPE_KEYS = ['ronde', 'ovale', 'rectangle', 'angulaire', 'papillon', 'pantos', 'aviateur', 'navigator'];
-    var currentShape = 'ovale';
-
-    // Rayon du contour (depuis le centre-boîte) à l'angle phi (canonique), boîte ax×by (demi-côtes).
-    function frameRadius(cfg, phi, ax, by) {
-      var cx = Math.cos(phi), sy = Math.sin(phi);
-      var p = sy >= 0 ? cfg.pTop : cfg.pBot;
-      var b = by * (sy >= 0 ? cfg.topScale : cfg.botScale);
-      var c = Math.abs(cx / ax), s = Math.abs(sy / b);
-      var r = Math.pow(Math.pow(c, p) + Math.pow(s, p), -1 / p);
-      if (cfg.lift) {
-        var center = cfg.liftAng * DEG;
-        var d = Math.abs(((phi - center + Math.PI) % (2 * Math.PI)) - Math.PI);
-        var w = cfg.liftW * DEG;
-        r += cfg.lift * Math.max(ax, b) * Math.exp(-(d * d) / (2 * w * w));
+    // Chaque forme = silhouette normalisée dans la boîte [-1,1] (x = temporal +, y = haut +),
+    // décrite par points de contrôle lissés (Catmull-Rom fermé). Étirée ensuite à la boîte A×B.
+    function catmullClosed(keys, perSeg) {
+      var out = [], n = keys.length, i, j;
+      for (i = 0; i < n; i++) {
+        var p0 = keys[(i - 1 + n) % n], p1 = keys[i], p2 = keys[(i + 1) % n], p3 = keys[(i + 2) % n];
+        for (j = 0; j < perSeg; j++) {
+          var t = j / perSeg, t2 = t * t, t3 = t2 * t;
+          out.push([
+            0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+            0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
+          ]);
+        }
       }
-      return r;
+      return out;
+    }
+    function circlePts(n) { var p = [], i; for (i = 0; i < n; i++) { var a = 2 * Math.PI * i / n; p.push([Math.cos(a), Math.sin(a)]); } return p; }
+    function roundRectPts(rx, ry) {
+      var pts = [], k = 7, c, i, a;
+      var cor = [[1 - rx, 1 - ry, 0], [-1 + rx, 1 - ry, Math.PI / 2], [-1 + rx, -1 + ry, Math.PI], [1 - rx, -1 + ry, 3 * Math.PI / 2]];
+      for (c = 0; c < 4; c++) { for (i = 0; i <= k; i++) { a = cor[c][2] + Math.PI / 2 * i / k; pts.push([cor[c][0] + rx * Math.cos(a), cor[c][1] + ry * Math.sin(a)]); } }
+      return pts;
+    }
+
+    var SHAPES = {
+      ronde:     { label: 'Ronde',     defA: 47, defB: 46, pts: circlePts(56) },
+      ovale:     { label: 'Ovale',     defA: 55, defB: 40, pts: circlePts(56) },
+      rectangle: { label: 'Rectangle', defA: 55, defB: 38, pts: roundRectPts(0.22, 0.34) },
+      carree:    { label: 'Carrée',    defA: 49, defB: 44, pts: roundRectPts(0.26, 0.26) },
+      pantos:    { label: 'Pantos',    defA: 50, defB: 46, pts: catmullClosed([
+        [1.00, 0.12], [0.74, 0.74], [0.00, 0.96], [-0.74, 0.74], [-1.00, 0.10], [-0.66, -0.70], [0.00, -1.00], [0.66, -0.70]
+      ], 9) },
+      papillon:  { label: 'Papillon',  defA: 53, defB: 40, pts: catmullClosed([
+        [0.86, -0.20], [1.00, 0.72], [0.00, 0.62], [-1.00, 0.72], [-0.86, -0.20], [-0.50, -0.86], [0.00, -1.00], [0.50, -0.86]
+      ], 9) },
+      aviateur:  { label: 'Aviateur',  defA: 57, defB: 48, pts: catmullClosed([
+        [1.00, 0.00], [0.95, 0.55], [0.10, 0.92], [-0.78, 0.82], [-1.00, 0.28], [-0.86, -0.32], [0.05, -1.00], [0.70, -0.66]
+      ], 9) },
+      wayfarer:  { label: 'Wayfarer',  defA: 52, defB: 42, pts: catmullClosed([
+        [0.92, -0.10], [1.00, 0.85], [0.00, 0.82], [-1.00, 0.85], [-0.92, -0.10], [-0.62, -0.92], [0.00, -1.00], [0.62, -0.92]
+      ], 4) }
+    };
+    var SHAPE_KEYS = ['ronde', 'ovale', 'rectangle', 'carree', 'pantos', 'papillon', 'aviateur', 'wayfarer'];
+    var currentShape = 'rectangle';
+
+    // Distance du centre-boîte au contour, à l'angle phi (canonique), boîte ax×by (demi-côtes).
+    // Lancer de rayon contre la silhouette mise à l'échelle (contour étoilé depuis le centre).
+    function frameRadius(cfg, phi, ax, by) {
+      var pts = cfg.pts, n = pts.length, dx = Math.cos(phi), dy = Math.sin(phi), best = 0, i;
+      for (i = 0; i < n; i++) {
+        var a = pts[i], b = pts[(i + 1) % n];
+        var axp = a[0] * ax, ayp = a[1] * by, ex = b[0] * ax - axp, ey = b[1] * by - ayp;
+        var det = ex * dy - dx * ey;
+        if (det > -1e-9 && det < 1e-9) { continue; }
+        var t = (ex * ayp - axp * ey) / det;       // distance le long du rayon
+        var s = (dx * ayp - dy * axp) / det;        // position sur le segment [0,1]
+        if (t > 0 && s >= -1e-4 && s <= 1 + 1e-4 && t > best) { best = t; }
+      }
+      return best || Math.min(ax, by);
     }
 
     /* ═══════════ CALCUL OPTIQUE ═══════════ */
