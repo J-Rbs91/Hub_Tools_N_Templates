@@ -372,13 +372,18 @@
       return sph + cyl * d * d;
     }
 
-    // Base de la face avant (puissance D, convexe > 0). « auto » : règle de Vogel simplifiée
-    // (base plus plate quand le verre est plus négatif), bornée [0,5 ; 8,5].
+    // Base de la face avant (puissance D, convexe > 0). « auto » : règle ménisque best-form.
+    //  · Concave (−) : la face avant est la surface douce, qui s'aplatit vers +1 D
+    //    quand la puissance se renforce. La face arrière (torique) porte le reste.
+    //  · Convexe (+) : la face arrière est la surface douce, qui se creuse vers −1 D
+    //    quand la puissance se renforce. La face avant porte le reste.
+    // Les deux surfaces sont ancrées à ±6 D au neutre (ménisque base 6 pour le plan).
     function baseFront(sph, cyl, mode) {
       if (mode !== 'auto') { return parseFloat(mode) || 0.5; }
       var SE = sph + cyl / 2;
-      var F1 = SE > 0 ? SE + 6 : SE / 2 + 6;
-      return Math.max(0.5, Math.min(8.5, F1));
+      if (SE < 0) { return Math.max(1.0, 6.0 + 1.1 * SE); }   // face avant douce → +1
+      var F2 = Math.min(-1.0, -6.0 + 1.1 * SE);               // face arrière douce → −1
+      return SE - F2;                                          // face avant = complément
     }
 
     // Calcule un œil : décentration, base avant, balayage du contour réel, épaisseurs et Ø mini.
