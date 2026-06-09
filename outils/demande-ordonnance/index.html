@@ -10,6 +10,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* ── Transition d'écran native + fond animé doux (cohérents avec le hub) ── */
+  @view-transition { navigation: auto; }
+  body{ position: relative; isolation: isolate; }
+  body::before{
+    content:""; position:fixed; inset:-25%; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(38% 42% at 16% 18%, rgba(31,111,178,.08), transparent 60%),
+      radial-gradient(34% 40% at 84% 16%, rgba(255,196,140,.10), transparent 62%),
+      radial-gradient(46% 52% at 78% 88%, rgba(46,139,87,.06), transparent 60%);
+    filter:blur(8px);
+    animation:bg-drift 38s ease-in-out infinite alternate;
+  }
+  @keyframes bg-drift{
+    0%{transform:translate3d(-2%,-1.5%,0) scale(1.04)}
+    50%{transform:translate3d(1.5%,2%,0) scale(1.09)}
+    100%{transform:translate3d(2.5%,-1%,0) scale(1.05)}
+  }
+  @media print{ body::before{display:none} }
+  @media (prefers-reduced-motion: reduce){
+    @view-transition { navigation: none; }
+    body::before{animation:none}
+  }
   :root{
     --blue:#1F6FB2; --blue-d:#175A92; --ink:#1A2A3A; --grey:#5A6B7B;
     --line:#C9D6E2; --light:#EEF4F9; --bg:#F4F7FA; --white:#fff;

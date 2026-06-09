@@ -17,11 +17,51 @@
 /* l'attribut hidden doit l'emporter sur les display:flex ci-dessous */
 [hidden] { display: none !important; }
 
+/* Transition d'écran native (cross-document) entre le hub et les outils.
+   Amélioration progressive : ignorée par les navigateurs qui ne la gèrent pas,
+   neutralisée plus bas si l'utilisateur préfère réduire le mouvement. */
+@view-transition { navigation: auto; }
+
 body {
   font-family: 'Manrope', sans-serif;
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+}
+
+/* ── FOND ANIMÉ DOUX ──
+   Voile de lumière très léger qui dérive lentement derrière toute la page :
+   une touche bleue (identité) et une touche chaude (accueil chaleureux).
+   100 % CSS, transform/opacity uniquement, posé en fixed et non interactif. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 42% at 16% 18%, rgba(31,111,178,.10), transparent 60%),
+    radial-gradient(34% 40% at 84% 16%, rgba(255,196,140,.12), transparent 62%),
+    radial-gradient(46% 52% at 78% 88%, rgba(46,139,87,.07), transparent 60%),
+    radial-gradient(40% 46% at 22% 86%, rgba(31,111,178,.07), transparent 62%);
+  filter: blur(8px);
+  animation: bg-drift 38s ease-in-out infinite alternate;
+}
+
+@keyframes bg-drift {
+  0%   { transform: translate3d(-2%, -1.5%, 0) scale(1.04); }
+  50%  { transform: translate3d(1.5%, 2%, 0)  scale(1.09); }
+  100% { transform: translate3d(2.5%, -1%, 0) scale(1.05); }
+}
+
+/* Entrée de page en fondu/glissé doux — agréable même sans View Transitions. */
+.main { animation: page-enter .55s cubic-bezier(.22,.61,.36,1) both; }
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* ── HEADER ── */
@@ -116,6 +156,111 @@ body {
   margin-bottom: 20px;
 }
 
+/* ── ACCUEIL CHALEUREUX (salutation + éphéméride du jour) ── */
+.welcome {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FBFDFF 100%);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  animation: page-enter .6s .05s cubic-bezier(.22,.61,.36,1) both;
+}
+
+.welcome__greet {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.welcome__sub {
+  font-size: .88rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* Éphéméride : un bloc « calendrier » dont la page du jour se retourne. */
+.ephemeris {
+  flex-shrink: 0;
+  width: 60px;
+  height: 64px;
+  position: relative;
+  perspective: 320px;
+  filter: drop-shadow(0 4px 8px rgba(26,42,58,.14));
+}
+
+.ephemeris__base,
+.ephemeris__page {
+  position: absolute;
+  inset: 8px 0 0;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* La reliure rouge en haut du bloc. */
+.ephemeris::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 9px;
+  right: 9px;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #E0584B, #C5453A);
+  box-shadow: 0 1px 0 rgba(0,0,0,.08);
+  z-index: 3;
+}
+
+.ephemeris__wd {
+  font-size: .56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--blue);
+  margin-top: 6px;
+}
+
+.ephemeris__day {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.ephemeris__mo {
+  font-size: .54rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+}
+
+/* La page de surface se retourne une fois au chargement, révélant la base. */
+.ephemeris__page {
+  transform-origin: top center;
+  backface-visibility: hidden;
+  z-index: 2;
+  animation: page-flip 1.5s 1 cubic-bezier(.5,.05,.3,1) both;
+}
+
+@keyframes page-flip {
+  0%, 40% { transform: rotateX(0deg); opacity: 1; }
+  72%     { transform: rotateX(-92deg); opacity: 1; }
+  73%     { opacity: 0; }
+  100%    { transform: rotateX(-92deg); opacity: 0; }
+}
+
 /* ── NOTICE DE CONFIGURATION ── */
 .setup-notice {
   background: #FFF7E6;
@@ -195,6 +340,8 @@ body {
 .field__req { background: #FDECEC; color: #B23A2E; }
 .field__opt { background: #EEF2F7; color: var(--text-muted); }
 
+.field { position: relative; }
+
 .field input {
   width: 100%;
   font-family: inherit;
@@ -204,10 +351,39 @@ body {
   border-radius: var(--radius);
   padding: 9px 11px;
   background: #fff;
-  transition: border-color .15s;
+  transition: border-color .18s ease, box-shadow .25s ease, transform .18s ease;
 }
 
-.field input:focus { outline: none; border-color: var(--blue); }
+/* Au focus : halo bleu doux + très léger soulèvement (micro-interaction). */
+.field input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(31,111,178,.14);
+  transform: translateY(-1px);
+}
+
+/* L'intitulé du champ s'allume en bleu pendant la saisie. */
+.field:focus-within .field__lbl { color: var(--blue); }
+
+/* Trait d'accent qui se dessine sous le champ actif, de gauche à droite. */
+.field__lbl { transition: color .18s ease; }
+
+.field::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--blue);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .28s cubic-bezier(.22,.61,.36,1);
+  pointer-events: none;
+}
+
+.field:focus-within::after { transform: scaleX(1); }
 
 /* ── SECTION SYNCHRO ── */
 .sync-section {
@@ -303,8 +479,116 @@ body {
 
 /* Contenu au-dessus du reflet (lisibilité garantie). */
 .tool-card__header,
+.tool-card__top,
+.tool-card__title,
 .tool-card__desc,
 .tool-card .btn { position: relative; z-index: 1; }
+
+/* ── CARTE ENTIÈREMENT CLIQUABLE (stretched link) ──
+   Le bouton reste l'unique lien accessible, mais son ::after couvre toute la
+   carte : un clic n'importe où sur la carte ouvre l'outil, sans imbriquer de
+   liens. z-index 2 pour passer au-dessus du contenu, sous les transforms 3D. */
+.tool-card__cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+/* Un curseur « main » sur toute la carte signale qu'elle est cliquable. */
+.tool-card { cursor: pointer; }
+
+/* Ligne du haut : pastille d'icône thématique à gauche, badge d'état à droite. */
+.tool-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Pastille d'icône — visuel éphémère propre à chaque outil. */
+.tool-card__icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(140deg, #EAF3FB 0%, #F3F8FC 100%);
+  border: 1px solid var(--border);
+  transition: transform .4s cubic-bezier(.22,.61,.36,1), box-shadow .4s ease;
+}
+
+.tool-card__icon svg { width: 32px; height: 32px; display: block; overflow: visible; }
+
+.tool-card:hover .tool-card__icon {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(31,111,178,.20);
+}
+
+/* Traits communs des icônes (stylo, pied à coulisse, calculatrice).
+   La couleur de trait est posée sur le SVG et héritée par toutes les pièces. */
+.tool-card__icon svg        { stroke: var(--blue); fill: none; }
+.tool-card__icon svg .ink   { stroke: var(--blue-d); }
+.tool-card__icon svg .accent { fill: var(--blue); stroke: none; }
+
+/* Le trait écrit par le stylo et la pige du pied à coulisse partent « vides ». */
+.ti-line { stroke-dasharray: 40; stroke-dashoffset: 40; }
+
+/* Rotation/échelle calées sur le centre réel de chaque pièce d'icône. */
+.ti-pen { transform-box: fill-box; transform-origin: 50% 50%; }
+
+/* Couleurs de fond des pièces pleines (écran et touches de la calculatrice). */
+.tool-card__icon svg .screen { fill: #DCEBF8; stroke: none; }
+.tool-card__icon svg .ti-keys rect { fill: #EAF3FB; stroke: none; }
+
+/* Animations jouées au survol (desktop) et une fois à l'apparition (mobile,
+   via la classe .icon-play posée puis retirée par le JS). */
+.tool-card:hover .ti-line,
+.tool-card.icon-play .ti-line { animation: ti-write 2.4s ease-in-out infinite; }
+
+.tool-card:hover .ti-pen,
+.tool-card.icon-play .ti-pen { animation: ti-pen 2.4s ease-in-out infinite; }
+
+.tool-card:hover .ti-jaw,
+.tool-card.icon-play .ti-jaw { animation: ti-measure 2.6s ease-in-out infinite; }
+
+.tool-card:hover .ti-keys rect,
+.tool-card.icon-play .ti-keys rect { animation: ti-key 2.4s ease-in-out infinite; }
+
+.tool-card:hover .ti-keys rect:nth-child(2),
+.tool-card.icon-play .ti-keys rect:nth-child(2) { animation-delay: .2s; }
+.tool-card:hover .ti-keys rect:nth-child(3),
+.tool-card.icon-play .ti-keys rect:nth-child(3) { animation-delay: .4s; }
+.tool-card:hover .ti-keys rect:nth-child(4),
+.tool-card.icon-play .ti-keys rect:nth-child(4) { animation-delay: .6s; }
+.tool-card:hover .ti-keys rect:nth-child(5),
+.tool-card.icon-play .ti-keys rect:nth-child(5) { animation-delay: .8s; }
+.tool-card:hover .ti-keys rect:nth-child(6),
+.tool-card.icon-play .ti-keys rect:nth-child(6) { animation-delay: 1s; }
+
+/* Le stylo plume suit la pointe et trace une ligne d'écriture. */
+@keyframes ti-write {
+  0%        { stroke-dashoffset: 40; }
+  45%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes ti-pen {
+  0%        { transform: translate(-13px, 0) rotate(0deg); }
+  45%       { transform: translate(13px, 0) rotate(0deg); }
+  55%       { transform: translate(13px, -1px) rotate(-4deg); }
+  100%      { transform: translate(-13px, 0) rotate(0deg); }
+}
+/* Le mors mobile du pied à coulisse vient mesurer le verre, puis revient. */
+@keyframes ti-measure {
+  0%, 100%  { transform: translateX(0); }
+  40%, 60%  { transform: translateX(-9px); }
+}
+/* Les touches de la calculatrice s'allument en cascade. */
+@keyframes ti-key {
+  0%, 70%, 100% { fill: #EAF3FB; }
+  20%           { fill: var(--blue); }
+}
 
 /* Reflet « premium » qui suit le pointeur (--mx/--my posés en JS). */
 .tool-card__glare {
@@ -392,12 +676,41 @@ body {
 .btn:active { transform: scale(.98); }
 
 .btn--primary {
+  position: relative;
+  overflow: hidden;
   background: var(--blue);
   color: #fff;
   box-shadow: 0 2px 6px rgba(31,111,178,.28);
 }
 
 .btn--primary:hover {
+  background: var(--blue-d);
+  box-shadow: 0 6px 16px rgba(31,111,178,.34);
+}
+
+/* Reflet qui balaie le bouton au survol — micro-interaction discrète. */
+.btn--primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+
+.tool-card:hover .btn--primary::before,
+.btn--primary:hover::before { animation: btn-shine .8s ease-out; }
+
+@keyframes btn-shine {
+  from { left: -120%; }
+  to   { left: 160%; }
+}
+
+/* Au survol de la carte, le bouton se met aussi en avant (cohérence du clic global). */
+.tool-card:hover .btn--primary {
   background: var(--blue-d);
   box-shadow: 0 6px 16px rgba(31,111,178,.34);
 }
@@ -431,7 +744,16 @@ body {
 /* ── ACCESSIBILITÉ : on neutralise tout le mouvement si l'utilisateur
    préfère réduire les animations (le JS reste aussi conditionné à ce réglage). */
 @media (prefers-reduced-motion: reduce) {
-  .site-header::before { animation: none; }
+  @view-transition { navigation: none; }
+  .site-header::before,
+  body::before,
+  .main,
+  .welcome,
+  .ephemeris__page,
+  .ti-line, .ti-pen, .ti-jaw, .ti-keys rect,
+  .btn--primary::before { animation: none; }
+  .ephemeris__page { opacity: 0; }       /* la page retournée reste escamotée */
+  .ti-line { stroke-dashoffset: 0; }     /* le trait écrit s'affiche complet */
   .tool-card { transition: none; }
   #tools-grid.reveal-ready .tool-card { opacity: 1; transform: none; }
   .tool-card__glare { display: none; }
