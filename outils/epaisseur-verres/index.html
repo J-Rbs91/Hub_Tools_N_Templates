@@ -93,6 +93,16 @@
     .eyes thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .2px; color: var(--grey); text-align: center; }
     .eyes tbody th { font-size: 13px; font-weight: 800; color: var(--blue-d); text-align: left; padding-right: 6px; }
     .eyes input { padding: 7px 5px; text-align: center; font-size: 13px; }
+    .eyes-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+    .subhead { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--blue-d);
+      margin: 16px 0 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .subhead span { font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--grey); }
+    .slider-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--grey); margin-top: 2px; }
+    .vp-legend { display: flex; gap: 12px; font-size: 11px; color: var(--grey); margin-top: 8px; align-items: center; }
+    .vp-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+    .vp-legend .sw-lens { background: #9ecbff; }
+    .vp-legend .sw-frame { background: #4a4f57; }
 
     /* ── RÉSULTATS ── */
     .res-eyes { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -189,86 +199,54 @@
 
       <!-- ── COLONNE GAUCHE : saisie + résultats ── -->
       <div>
+        <!-- ── MONTURE ── -->
         <section class="card">
-          <h2>Forme de la monture</h2>
+          <h2>Monture — forme &amp; côtes</h2>
           <div class="shapes" id="shapes"></div>
-          <div class="hint" style="margin-bottom:12px;">Forme approchée (sans fichier OMA), ajustable par les côtes A / B / D du système Boxing.</div>
+          <div class="hint" style="margin-bottom:12px;">Forme approchée (sans fichier OMA), ajustable par les côtes A / B / D du système Boxing. Choisir une forme propose des côtes ; vos valeurs saisies sont conservées.</div>
 
           <div class="row">
             <div class="field">
               <label for="coteA">Côte A (mm)</label>
-              <input type="number" id="coteA" step="0.5" min="30" max="70" value="52">
+              <input type="text" inputmode="decimal" id="coteA" value="52">
               <div class="hint">Largeur de la boîte.</div>
             </div>
             <div class="field">
               <label for="coteB">Côte B (mm)</label>
-              <input type="number" id="coteB" step="0.5" min="20" max="65" value="42">
+              <input type="text" inputmode="decimal" id="coteB" value="42">
               <div class="hint">Hauteur de la boîte.</div>
             </div>
             <div class="field">
               <label for="coteD">Côte D (mm)</label>
-              <input type="number" id="coteD" step="0.5" min="10" max="30" value="18">
-              <div class="hint">Pont (entre verres).</div>
+              <input type="text" inputmode="decimal" id="coteD" value="18">
+              <div class="hint">Pont = écart entre verres.</div>
             </div>
           </div>
 
-          <div class="field">
-            <label for="cerclage">Type de cerclage (bord mini visé)</label>
-            <select id="cerclage">
-              <option value="0.4">Cerclée — 0,4 mm</option>
-              <option value="1.0" selected>Cerclée renforcée — 1,0 mm</option>
-              <option value="1.6">Nylor fil — 1,6 mm</option>
-              <option value="1.8">Nylor métal — 1,8 mm</option>
-              <option value="2.0">Percée — 2,0 mm</option>
-            </select>
-          </div>
-
+          <div class="subhead">Montage <span>— visualisation 3D uniquement (n'affecte pas les épaisseurs calculées)</span></div>
           <div class="row">
             <div class="field">
-              <label for="m-base">Base monture (D)</label>
-              <input type="number" id="m-base" step="0.5" min="0.5" max="10" value="3.5">
-              <div class="hint">Galbe : courbe commune aux deux verres (pivot à D/2).</div>
+              <label for="m-base">Galbe monture (base, D)</label>
+              <input type="text" inputmode="decimal" id="m-base" value="3.5">
+              <div class="hint">Courbe commune aux deux verres (pivot à D/2).</div>
             </div>
             <div class="field">
               <label for="m-ep">Épaisseur monture (mm)</label>
-              <input type="number" id="m-ep" step="0.5" min="0.5" max="10" value="3.0">
+              <input type="text" inputmode="decimal" id="m-ep" value="3.0">
               <div class="hint">Profondeur du cerclage (drageoir).</div>
             </div>
           </div>
-
           <div class="field">
             <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
             <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
-            <div class="hint">Glisser vers l'avant (−) ou l'arrière (+) du galbe. Défaut : biseau sur la base monture.</div>
+            <div class="slider-ends"><span>avant</span><span>base monture</span><span>arrière</span></div>
           </div>
         </section>
 
+        <!-- ── VERRE ── -->
         <section class="card">
-          <h2>Prescription (OD / OG)</h2>
-          <table class="eyes">
-            <thead>
-              <tr><th></th><th>Sphère</th><th>Cylindre</th><th>Axe</th><th>½-écart</th><th>Hauteur</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>OD</th>
-                <td><input type="number" id="od-sph" step="0.25" value="-4.00"></td>
-                <td><input type="number" id="od-cyl" step="0.25" value="0.00"></td>
-                <td><input type="number" id="od-axe" step="1" min="0" max="180" value="0"></td>
-                <td><input type="number" id="od-pd" step="0.5" min="20" max="40" value="32"></td>
-                <td><input type="number" id="od-h" step="0.5" min="5" max="60" value="22"></td>
-              </tr>
-              <tr>
-                <th>OG</th>
-                <td><input type="number" id="og-sph" step="0.25" value="-4.00"></td>
-                <td><input type="number" id="og-cyl" step="0.25" value="0.00"></td>
-                <td><input type="number" id="og-axe" step="1" min="0" max="180" value="0"></td>
-                <td><input type="number" id="og-pd" step="0.5" min="20" max="40" value="32"></td>
-                <td><input type="number" id="og-h" step="0.5" min="5" max="60" value="22"></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="row" style="margin-top:12px;">
+          <h2>Verre</h2>
+          <div class="row">
             <div class="field">
               <label for="indice">Indice</label>
               <select id="indice">
@@ -282,12 +260,7 @@
               </select>
             </div>
             <div class="field">
-              <label for="ecentre">Ép. mini au centre (mm)</label>
-              <input type="number" id="ecentre" step="0.1" min="1.2" value="1.2">
-              <div class="hint">Plancher pour les verres négatifs.</div>
-            </div>
-            <div class="field">
-              <label for="base">Base (face avant)</label>
+              <label for="base">Base du verre (face avant)</label>
               <select id="base">
                 <option value="auto" selected>Auto (selon puissance)</option>
                 <option value="0.5">Plate — +0,50</option>
@@ -297,11 +270,61 @@
                 <option value="6">+6,00</option>
                 <option value="8">+8,00</option>
               </select>
-              <div class="hint">Courbure sphérique avant ; le cylindre est porté par la face arrière.</div>
+              <div class="hint">Le cylindre est porté par la face arrière (torique).</div>
             </div>
           </div>
-          <div class="hint">½-écart = demi-écart pupillaire · Hauteur = montage depuis le bas de la boîte.</div>
+          <div class="row">
+            <div class="field">
+              <label for="ecentre">Ép. mini au centre (mm)</label>
+              <input type="text" inputmode="decimal" id="ecentre" value="1.2">
+              <div class="hint">Plancher — verres négatifs.</div>
+            </div>
+            <div class="field">
+              <label for="cerclage">Bord mini visé (mm)</label>
+              <select id="cerclage">
+                <option value="0.4">0,4 — cerclée</option>
+                <option value="1.0" selected>1,0 — cerclée renforcée</option>
+                <option value="1.6">1,6 — nylor fil</option>
+                <option value="1.8">1,8 — nylor métal</option>
+                <option value="2.0">2,0 — percée</option>
+              </select>
+              <div class="hint">Plancher — verres positifs (le type de monture est indicatif).</div>
+            </div>
+          </div>
         </section>
+
+        <!-- ── ORDONNANCE ── -->
+        <section class="card">
+          <h2>Ordonnance (OD / OG)</h2>
+          <table class="eyes">
+            <thead>
+              <tr><th></th><th>Sphère</th><th>Cylindre</th><th>Axe</th><th>½ écart</th><th>Hauteur</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>OD</th>
+                <td><input type="text" inputmode="decimal" id="od-sph" value="-4.00" aria-label="OD sphère (D)"></td>
+                <td><input type="text" inputmode="decimal" id="od-cyl" value="0.00" aria-label="OD cylindre (D)"></td>
+                <td><input type="text" inputmode="numeric" id="od-axe" value="0" aria-label="OD axe (°)"></td>
+                <td><input type="text" inputmode="decimal" id="od-pd" value="32" aria-label="OD demi-écart pupillaire (mm)"></td>
+                <td><input type="text" inputmode="decimal" id="od-h" value="22" aria-label="OD hauteur de montage (mm)"></td>
+              </tr>
+              <tr>
+                <th>OG</th>
+                <td><input type="text" inputmode="decimal" id="og-sph" value="-4.00" aria-label="OG sphère (D)"></td>
+                <td><input type="text" inputmode="decimal" id="og-cyl" value="0.00" aria-label="OG cylindre (D)"></td>
+                <td><input type="text" inputmode="numeric" id="og-axe" value="0" aria-label="OG axe (°)"></td>
+                <td><input type="text" inputmode="decimal" id="og-pd" value="32" aria-label="OG demi-écart pupillaire (mm)"></td>
+                <td><input type="text" inputmode="decimal" id="og-h" value="22" aria-label="OG hauteur de montage (mm)"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="eyes-actions">
+            <button class="btn" type="button" id="copy-od-og">Copier OD → OG</button>
+          </div>
+          <div class="hint">½ écart = demi-écart pupillaire <strong>monoculaire</strong> (axe du nez → pupille). Hauteur = hauteur de montage mesurée depuis le <strong>bas de la boîte</strong> (côte B). Saisie au point ou à la virgule.</div>
+        </section>
+
 
         <section class="card">
           <h2>Résultat</h2>
@@ -335,6 +358,7 @@
             <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
             <button class="btn" type="button" id="btn-11">Vue 1:1</button>
           </div>
+          <div class="vp-legend"><span><i class="sw-lens"></i>verre</span><span><i class="sw-frame"></i>monture</span></div>
           <div class="hint" style="margin-top:8px;">Scène de montage à l'échelle réelle (mm) : verres ménisques galbés sur la base monture (pivot à D/2), biseau sur le galbe et jonc de cerclage. Le bord du verre dépassant en avant/arrière du jonc se voit directement.</div>
 
           <div class="cal">
@@ -366,7 +390,9 @@
 
     /* ═══════════ UTILITAIRES ═══════════ */
     var el = function (id) { return document.getElementById(id); };
-    var num = function (id) { var v = parseFloat(el(id).value); return isNaN(v) ? 0 : v; };
+    // Tolère la virgule décimale (saisie FR) : "-4,25" → -4.25.
+    var num = function (id) { var v = parseFloat(String(el(id).value).replace(',', '.').replace(/\s/g, '')); return isNaN(v) ? 0 : v; };
+    var pos = function (id, def) { var v = num(id); return (isFinite(v) && v > 0) ? v : def; };
     var fmt = function (mm) { return mm.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' mm'; };
     var fmt0 = function (mm) { return Math.ceil(mm) + ' mm'; };
 
@@ -377,6 +403,13 @@
     var models = null;         // { od:{...}, og:{...}, common:{...} }
     var renderer3d = null;     // { update(geom), resetView(), profile(), setScale11() }
     var scale11 = false;       // mode 3D orthographique 1:1
+    var abTouched = false;      // l'utilisateur a saisi A/B manuellement → ne plus écraser
+    var rafPending = false;     // coalescence des recalculs (debounce léger)
+    function scheduleCompute() {
+      if (rafPending) { return; }
+      rafPending = true;
+      (window.requestAnimationFrame || function (f) { setTimeout(f, 16); })(function () { rafPending = false; compute(); });
+    }
 
     /* ═══════════ CALIBRAGE ÉCRAN (px CSS par mm) ═══════════ */
     var CAL_KEY = 'epaisseur-cal-v1';
@@ -527,7 +560,7 @@
     function compute() {
       var common = {
         n: parseFloat(el('indice').value) || 1.5,
-        A: num('coteA'), B: num('coteB'), D: num('coteD'),
+        A: pos('coteA', 52), B: pos('coteB', 42), D: pos('coteD', 18),
         etFloor: parseFloat(el('cerclage').value) || 0.4,
         ctFloor: num('ecentre'),
         baseMode: el('base').value,
@@ -599,7 +632,8 @@
       if (od.centreFloored || og.centreFloored) { notes.push('Centre porté à l’épaisseur mini sur au moins un verre.'); }
       var maxBlank = Math.max(od.blank, og.blank);
       notes.push('Palet à commander : Ø ≥ ' + fmt0(maxBlank) + ' (décentration comprise, marge de taillage ' + BLANK_MARGIN + ' mm).');
-      if (Math.abs(od.nasal) > 6 || Math.abs(og.nasal) > 6) { notes.push('⚠ Forte décentration (> 6 mm) : bord épais marqué côté temporal, vérifier le diamètre disponible.'); }
+      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentration temporale (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
+      if (Math.abs(od.nasal) > 6 || Math.abs(og.nasal) > 6) { notes.push('⚠ Forte décentration (> 6 mm) : bord épais marqué, vérifier le diamètre disponible.'); }
 
       var nEl = el('notes');
       nEl.innerHTML = notes.length ? '<ul>' + notes.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>' : '';
@@ -995,9 +1029,8 @@
           var prev = wrap.querySelector('.shape-btn.active');
           if (prev) { prev.classList.remove('active'); }
           btn.classList.add('active');
-          // Pré-remplir A/B avec les côtes par défaut de la forme.
-          el('coteA').value = cfg.defA;
-          el('coteB').value = cfg.defB;
+          // Proposer les côtes par défaut de la forme, sans écraser une saisie manuelle.
+          if (!abTouched) { el('coteA').value = cfg.defA; el('coteB').value = cfg.defB; }
           compute();
         });
         wrap.appendChild(btn);
@@ -1033,6 +1066,7 @@
       if (meas >= 20 && meas <= 400) {
         pxPerMM = Math.max(0.5, Math.min(40, 100 * pxPerMM / meas));
         saveCal(); el('cal-meas').value = 100; applyScale();
+        el('cal-state').textContent = '✓ Écran calé — ' + el('cal-state').textContent;
       }
     });
     el('cal-reset').addEventListener('click', function () {
@@ -1049,11 +1083,17 @@
       var v = num('m-bevel');
       el('bevel-val').textContent = (v > 0 ? '+' : '') + v.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
     });
+    el('coteA').addEventListener('input', function () { abTouched = true; });
+    el('coteB').addEventListener('input', function () { abTouched = true; });
     ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'ecentre', 'base', 'm-base', 'm-ep', 'm-bevel',
      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h'].forEach(function (id) {
-      el(id).addEventListener('input', compute);
-      el(id).addEventListener('change', compute);
+      el(id).addEventListener('input', scheduleCompute);
+      el(id).addEventListener('change', scheduleCompute);
+    });
+    el('copy-od-og').addEventListener('click', function () {
+      ['sph', 'cyl', 'axe', 'pd', 'h'].forEach(function (k) { el('og-' + k).value = el('od-' + k).value; });
+      compute();
     });
     el('btn-reset-vue').addEventListener('click', function () { if (renderer3d) { renderer3d.resetView(); } });
     el('btn-coupe').addEventListener('click', function () { if (renderer3d) { renderer3d.profile(); } });
