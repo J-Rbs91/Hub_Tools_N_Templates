@@ -729,7 +729,13 @@
       var Wf = 2.6;                        // largeur radiale du jonc (mm)
       var verts = [], triL = [], triF = [];     // sommets partagés ; triangles verre / monture
       function pushV(p) { verts.push(p); return verts.length - 1; }
-      function zArc(x) { var t = R * R - x * x; return -(R - Math.sqrt(t > 0 ? t : 0)); }
+
+      // Profil du jonc (ρ radial vers l'extérieur, z axial relatif au centre du drageoir).
+      // Extérieur légèrement bombé, gorge en V vers l'intérieur (reçoit le biseau).
+      var PROF = [
+        [0.0, Tf * 0.5], [Wf, Tf * 0.42], [Wf + 0.9, 0.0],
+        [Wf, -Tf * 0.42], [0.0, -Tf * 0.5], [-0.8, 0.0]
+      ];
 
       // Profil du jonc (ρ radial vers l'extérieur, z axial relatif au centre du drageoir).
       // Extérieur légèrement bombé, gorge en V vers l'intérieur (reçoit le biseau).
@@ -777,7 +783,9 @@
           var cx = (Fw[0] + Bw[0]) / 2, cy = (Fw[1] + Bw[1]) / 2;
           var rdx = Fw[0] - lc[0], rdy = Fw[1] - lc[1];
           var rl = Math.hypot(rdx, rdy) || 1; rdx /= rl; rdy /= rl;
-          var fcz = zArc(cx) + bevelOff;
+          // Le drageoir suit le bord du verre déjà galbé (milieu d'épaisseur) — pas de courbure
+          // supplémentaire : le galbe reste un wrap purement horizontal (visible de dessus seulement).
+          var fcz = (Fw[2] + Bw[2]) / 2 + bevelOff;
           apex[j] = pushV([cx + rdx * 0.35, cy + rdy * 0.35, fcz]);
           ring[j] = [];
           for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV([cx + rdx * PROF[p][0], cy + rdy * PROF[p][0], fcz + PROF[p][1]]); }
