@@ -202,6 +202,25 @@
               <option value="2.0">Percée — 2,0 mm</option>
             </select>
           </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="m-base">Base monture (D)</label>
+              <input type="number" id="m-base" step="0.5" min="0.5" max="10" value="3.5">
+              <div class="hint">Galbe : courbe commune aux deux verres (pivot à D/2).</div>
+            </div>
+            <div class="field">
+              <label for="m-ep">Épaisseur monture (mm)</label>
+              <input type="number" id="m-ep" step="0.5" min="0.5" max="10" value="3.0">
+              <div class="hint">Profondeur du cerclage (drageoir).</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
+            <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
+            <div class="hint">Glisser vers l'avant (−) ou l'arrière (+) du galbe. Défaut : biseau sur la base monture.</div>
+          </div>
         </section>
 
         <section class="card">
@@ -293,7 +312,7 @@
             <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
             <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
           </div>
-          <div class="hint" style="margin-top:8px;">Épaisseur réelle (mm). Verre ménisque : face avant sphérique (base), face arrière torique. Le centre optique de chaque verre est placé selon le demi-écart et la hauteur.</div>
+          <div class="hint" style="margin-top:8px;">Scène de montage à l'échelle réelle (mm) : verres ménisques galbés sur la base monture (pivot à D/2), biseau sur le galbe et jonc de cerclage. Le bord du verre dépassant en avant/arrière du jonc se voit directement.</div>
         </div>
       </section>
 
@@ -450,7 +469,10 @@
         A: num('coteA'), B: num('coteB'), D: num('coteD'),
         etFloor: parseFloat(el('cerclage').value) || 0.4,
         ctFloor: num('ecentre'),
-        baseMode: el('base').value
+        baseMode: el('base').value,
+        montureBase: num('m-base'),
+        montureEp: num('m-ep'),
+        bevel: num('m-bevel')
       };
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
       var og = eyeResult({ sph: num('og-sph'), cyl: num('og-cyl'), axe: num('og-axe'), pd: num('og-pd'), h: num('og-h') }, common, 'og');
@@ -583,26 +605,43 @@
       });
     }
 
-    /* ═══════════ GÉOMÉTRIE 3D : deux verres à la vraie forme ═══════════ */
-    // Maillage radial en éventail (étoilé depuis le centre-boîte), surfaces calculées
-    // depuis le centre optique décentré, miroir pour l'OD, écartement (A+D).
+    /* ═══════════ GÉOMÉTRIE 3D : scène de montage ═══════════ */
+    // Deux verres à la vraie forme (ménisque), galbés sur une base monture commune
+    // (pivot à D/2), avec biseau sur le galbe et jonc de cerclage (drageoir).
     function buildScene(mdl) {
       var common = mdl.common;
       var sep = (common.A + common.D) / 2;
-      var verts = [], tris = [];
+      var Bf = Math.max(0.5, common.montureBase || 3.5);
+      var R = 530 / Bf;                    // rayon du galbe monture (mm)
+      var Tf = Math.max(0.5, common.montureEp || 3.0);  // épaisseur (profondeur) du cerclage
+      var Wf = 2.5;                        // largeur visuelle du jonc (mm)
+      var bevelOff = common.bevel || 0;    // calage du biseau (mm, + = vers l'arrière)
+      var verts = [], cols = [], tris = [];
+      var LENS = [0.62, 0.80, 1.0], FRAME = [0.27, 0.30, 0.35];
+      function pushV(p, c) { verts.push(p); cols.push(c); return verts.length - 1; }
+      function zArc(x) { var t = R * R - x * x; return -(R - Math.sqrt(t > 0 ? t : 0)); }
 
       function addLens(m, screenSign, boxCenterX) {
         var RINGS = 26;
-        var flip = screenSign < 0;          // miroir → inverser le winding pour des normales sortantes
-        var base = [];                       // base[i][j] = index sommet « avant » ; +1 = « arrière »
-        var i, j;
-        // Surfaces réelles, en mm, centrées sur le centre optique (rayon r p/r à l'OC).
-        // Avant (sphérique, base F1) : zf = −flèche(F1). Arrière (torique, P − F1) : zb = −CT − flèche.
+        var flip = screenSign < 0;          // miroir → inverser le winding
+        var alpha = Math.asin(Math.min(0.95, sep / R));   // galbe : tangente au centre-verre
+        var beta = screenSign * alpha;                    // temporal vers l'arrière
+        var xp = screenSign * common.D / 2;               // pivot à D/2
+        var cb = Math.cos(beta), sb = Math.sin(beta);
+        // Place un point local (Xc,Yc surface, z) en monde : miroir, écartement, puis galbe (rot. /y autour de xp).
+        function place(Xc, Yc, z) {
+          var x = screenSign * Xc + boxCenterX, dx = x - xp;
+          return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb];
+        }
         function surf(r, theta) {
           var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
           return { zf: -surfSag(m.F1, r, m.n), zb: -m.CT - surfSag(P - m.F1, r, m.n) };
         }
+        function quad(a, b, c, d) {
+          if (flip) { tris.push(a, c, b, a, d, c); } else { tris.push(a, b, c, a, c, d); }
+        }
 
+        var base = [], i, j;
         for (i = 0; i <= RINGS; i++) {
           base[i] = [];
           var frac = i / RINGS;
@@ -612,28 +651,42 @@
             var Xc = frac * rc * Math.cos(phi), Yc = frac * rc * Math.sin(phi);
             var dx = Xc - m.decX, dy = Yc - m.decY;
             var z = surf(Math.hypot(dx, dy), Math.atan2(dy, dx));
-            var xs = screenSign * Xc + boxCenterX;
-            base[i][j] = verts.length;
-            verts.push([xs, Yc, z.zf]);      // face avant
-            verts.push([xs, Yc, z.zb]);      // face arrière
+            base[i][j] = pushV(place(Xc, Yc, z.zf), LENS);   // face avant
+            pushV(place(Xc, Yc, z.zb), LENS);                 // face arrière (+1)
           }
         }
-        function quad(a, b, c, d) {
-          if (flip) { tris.push(a, c, b, a, d, c); }
-          else { tris.push(a, b, c, a, c, d); }
-        }
+        // faces avant / arrière
         for (i = 0; i < RINGS; i++) {
           for (j = 0; j < SEG; j++) {
             var jn = (j + 1) % SEG;
-            var t00 = base[i][j], t01 = base[i][jn], t10 = base[i + 1][j], t11 = base[i + 1][jn];
-            quad(t00, t01, t11, t10);                 // face avant (top)
-            quad(t00 + 1, t10 + 1, t11 + 1, t01 + 1); // face arrière (bottom, winding inverse)
+            quad(base[i][j], base[i][jn], base[i + 1][jn], base[i + 1][j]);
+            quad(base[i][j] + 1, base[i + 1][j] + 1, base[i + 1][jn] + 1, base[i][jn] + 1);
           }
         }
-        // tranche (rim)
+        // Biseau (V sur le galbe) + jonc de cerclage sur l'anneau externe.
+        var lc = place(0, 0, 0);
+        var apex = [], fFI = [], fFO = [], fBO = [], fBI = [];
+        for (j = 0; j < SEG; j++) {
+          var Fw = verts[base[RINGS][j]], Bw = verts[base[RINGS][j] + 1];
+          var cx = (Fw[0] + Bw[0]) / 2, cy = (Fw[1] + Bw[1]) / 2;
+          var rdx = Fw[0] - lc[0], rdy = Fw[1] - lc[1];
+          var rl = Math.hypot(rdx, rdy) || 1; rdx /= rl; rdy /= rl;
+          var fcz = zArc(cx) + bevelOff;                  // biseau sur la base monture
+          apex[j] = pushV([cx + rdx * 0.6, cy + rdy * 0.6, fcz], LENS);
+          fFI[j] = pushV([cx, cy, fcz + Tf / 2], FRAME);
+          fFO[j] = pushV([cx + rdx * Wf, cy + rdy * Wf, fcz + Tf / 2], FRAME);
+          fBO[j] = pushV([cx + rdx * Wf, cy + rdy * Wf, fcz - Tf / 2], FRAME);
+          fBI[j] = pushV([cx, cy, fcz - Tf / 2], FRAME);
+        }
         for (j = 0; j < SEG; j++) {
           var jn2 = (j + 1) % SEG;
-          quad(base[RINGS][j], base[RINGS][j] + 1, base[RINGS][jn2] + 1, base[RINGS][jn2]);
+          var fI = base[RINGS][j], fIn = base[RINGS][jn2];
+          quad(fI, fIn, apex[jn2], apex[j]);              // biseau : avant → apex
+          quad(apex[j], apex[jn2], fIn + 1, fI + 1);      // biseau : apex → arrière
+          quad(fFI[j], fFI[jn2], fFO[jn2], fFO[j]);       // jonc : face avant
+          quad(fFO[j], fFO[jn2], fBO[jn2], fBO[j]);       // jonc : face externe
+          quad(fBO[j], fBO[jn2], fBI[jn2], fBI[j]);       // jonc : face arrière
+          quad(fBI[j], fBI[jn2], fFI[jn2], fFI[j]);       // jonc : face interne
         }
       }
 
@@ -641,8 +694,10 @@
       addLens(mdl.og, 1, sep);
 
       var positions = new Float32Array(verts.length * 3);
+      var colors = new Float32Array(verts.length * 3);
       for (var v = 0; v < verts.length; v++) {
         positions[v * 3] = verts[v][0]; positions[v * 3 + 1] = verts[v][1]; positions[v * 3 + 2] = verts[v][2];
+        colors[v * 3] = cols[v][0]; colors[v * 3 + 1] = cols[v][1]; colors[v * 3 + 2] = cols[v][2];
       }
       var indices = (verts.length > 65000) ? new Uint32Array(tris) : new Uint16Array(tris);
 
@@ -664,8 +719,8 @@
         normals[k] /= L; normals[k + 1] /= L; normals[k + 2] /= L;
       }
 
-      var sceneRadius = (sep + Math.max(common.A, common.B) / 2) * 1.15;
-      return { positions: positions, normals: normals, indices: indices, radius: sceneRadius };
+      var sceneRadius = (sep + Math.max(common.A, common.B) / 2 + Wf) * 1.2;
+      return { positions: positions, normals: normals, indices: indices, colors: colors, radius: sceneRadius };
     }
 
     /* ═══════════ CONTRÔLES (rotation / zoom) partagés ═══════════ */
@@ -701,7 +756,7 @@
       var d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(1, 1.4, 1.6); scene.add(d1);
       var d2 = new THREE.DirectionalLight(0x9fc4e6, 0.5); d2.position.set(-1.2, -0.6, -1); scene.add(d2);
 
-      var mat = new THREE.MeshStandardMaterial({ color: 0xbfe0ff, metalness: 0.05, roughness: 0.15, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
+      var mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.05, roughness: 0.2, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
       var mesh = null, group = new THREE.Group(); scene.add(group);
       var radius = 60;
 
@@ -724,6 +779,7 @@
           var geo = new THREE.BufferGeometry();
           geo.setAttribute('position', new THREE.BufferAttribute(g.positions, 3));
           geo.setAttribute('normal', new THREE.BufferAttribute(g.normals, 3));
+          geo.setAttribute('color', new THREE.BufferAttribute(g.colors, 3));
           geo.setIndex(new THREE.BufferAttribute(g.indices, 1));
           mesh = new THREE.Mesh(geo, mat); group.add(mesh);
           radius = g.radius; resize(); frame();
@@ -745,15 +801,15 @@
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
       if (!gl) { el('vp-overlay').textContent = '3D non disponible sur ce navigateur.'; el('vp-engine').textContent = 'indisponible'; return; }
 
-      var vsrc = 'attribute vec3 p;attribute vec3 nor;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;gl_Position=uMVP*vec4(p,1.0);}';
-      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.8,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),40.0);vec3 base=vec3(0.55,0.78,1.0);vec3 col=base*(0.35+0.75*diff)+vec3(1.0)*spec*0.5;gl_FragColor=vec4(col,0.92);}';
+      var vsrc = 'attribute vec3 p;attribute vec3 nor;attribute vec3 col;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;varying vec3 vC;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;vC=col;gl_Position=uMVP*vec4(p,1.0);}';
+      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;varying vec3 vC;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.8,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),40.0);vec3 col=vC*(0.35+0.75*diff)+vec3(1.0)*spec*0.45;gl_FragColor=vec4(col,0.92);}';
       function sh(t, s) { var o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; }
       var prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vsrc)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fsrc)); gl.linkProgram(prog); gl.useProgram(prog);
       gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-      var pLoc = gl.getAttribLocation(prog, 'p'), nLoc = gl.getAttribLocation(prog, 'nor');
+      var pLoc = gl.getAttribLocation(prog, 'p'), nLoc = gl.getAttribLocation(prog, 'nor'), cLoc = gl.getAttribLocation(prog, 'col');
       var mvpLoc = gl.getUniformLocation(prog, 'uMVP'), mLoc = gl.getUniformLocation(prog, 'uM');
-      var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), iBuf = gl.createBuffer();
+      var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), cBuf = gl.createBuffer(), iBuf = gl.createBuffer();
       var count = 0, radius = 60, idxType = gl.UNSIGNED_SHORT;
 
       function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
@@ -773,6 +829,7 @@
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, cBuf); gl.enableVertexAttribArray(cLoc); gl.vertexAttribPointer(cLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf);
         gl.drawElements(gl.TRIANGLES, count, idxType, 0);
       }
@@ -788,6 +845,7 @@
           idxType = (idx instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, g.positions, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, g.normals, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, cBuf); gl.bufferData(gl.ARRAY_BUFFER, g.colors, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
           count = idx.length; radius = g.radius; resize(); frame();
         },
@@ -856,7 +914,11 @@
     /* ═══════════ INIT ═══════════ */
     buildShapeButtons();
 
-    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'ecentre', 'base',
+    el('m-bevel').addEventListener('input', function () {
+      var v = num('m-bevel');
+      el('bevel-val').textContent = (v > 0 ? '+' : '') + v.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
+    });
+    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'ecentre', 'base', 'm-base', 'm-ep', 'm-bevel',
      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h'].forEach(function (id) {
       el(id).addEventListener('input', compute);
