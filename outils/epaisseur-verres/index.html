@@ -222,18 +222,6 @@
               <div class="hint">Pont = écart entre verres.</div>
             </div>
           </div>
-
-          <div class="subhead">Montage <span>— visualisation 3D uniquement (n'affecte pas les épaisseurs calculées)</span></div>
-          <div class="field">
-            <label for="m-ep">Épaisseur monture (mm)</label>
-            <input type="text" inputmode="decimal" id="m-ep" value="3.0">
-            <div class="hint">Profondeur du cerclage (drageoir).</div>
-          </div>
-          <div class="field">
-            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
-            <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
-            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
-          </div>
         </section>
 
         <!-- ── VERRE ── -->
@@ -352,7 +340,7 @@
             <button class="btn" type="button" id="btn-11">Vue 1:1</button>
           </div>
           <div class="vp-legend"><span><i class="sw-lens"></i>verre</span><span><i class="sw-frame"></i>monture</span></div>
-          <div class="hint" style="margin-top:8px;">Scène de montage à l'échelle réelle (mm) : verres ménisques galbés sur la base monture (pivot à D/2), biseau sur le galbe et jonc de cerclage. Le bord du verre dépassant en avant/arrière du jonc se voit directement.</div>
+          <div class="hint" style="margin-top:8px;">Scène de montage à l'échelle réelle (mm) : verres ménisques (face avant convexe, arrière creusée) calés dans le drageoir du cerclage. Le bord du verre dépassant en avant/arrière du jonc se voit directement.</div>
 
           <div class="cal">
             <div class="hint" style="margin-bottom:5px;"><strong>Calibrage écran (1:1)</strong> — la barre ci-dessous doit mesurer exactement 100 mm à la règle :</div>
@@ -363,6 +351,18 @@
               <button class="btn" type="button" id="cal-reset">Défaut</button>
             </div>
             <div class="cal-state" id="cal-state"></div>
+          </div>
+
+          <div class="subhead">Montage <span>— réglage du rendu présenté au client (n'affecte pas les épaisseurs calculées)</span></div>
+          <div class="field">
+            <label for="m-ep">Épaisseur monture (mm)</label>
+            <input type="text" inputmode="decimal" id="m-ep" value="3.0">
+            <div class="hint">Profondeur du cerclage (drageoir).</div>
+          </div>
+          <div class="field">
+            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
+            <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
+            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
           </div>
         </div>
       </section>
