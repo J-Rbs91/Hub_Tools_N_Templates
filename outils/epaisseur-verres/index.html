@@ -136,6 +136,19 @@
     }
     .btn:hover { background: var(--bg); }
 
+    /* ── coupe 2D ── */
+    .sec-eye { margin-bottom: 12px; }
+    .sec-eye:last-child { margin-bottom: 0; }
+    .sec-eye__hd { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .sec-eye__hd b { font-size: 14px; color: var(--blue-d); }
+    .sec-eye__hd span { font-size: 11px; color: var(--grey); }
+    .sec-eye svg { display: block; width: 100%; height: auto; background: #F8FBFE; border: 1px solid var(--line); border-radius: 8px; }
+    .sec-glass { fill: #CFE6FF; stroke: var(--blue-d); stroke-width: 1; }
+    .sec-dim { stroke: var(--grey); stroke-width: 1; }
+    .sec-axis { stroke: #B86A00; stroke-width: 1; stroke-dasharray: 4 3; }
+    .sec-txt { font: 700 11px "Manrope", sans-serif; fill: var(--ink); }
+    .sec-txt.mut { font-weight: 600; fill: var(--grey); }
+
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
       #viewport { height: 70vw; min-height: 300px; }
@@ -263,7 +276,8 @@
         </section>
       </div>
 
-      <!-- ── COLONNE DROITE : 3D ── -->
+      <!-- ── COLONNE DROITE : 3D + coupe ── -->
+      <div>
       <section class="card viewer-card">
         <div class="viewer-head">
           <h2>Visualisation 3D</h2>
@@ -282,6 +296,13 @@
           <div class="hint" style="margin-top:8px;">Épaisseur réelle (mm). Verre ménisque : face avant sphérique (base), face arrière torique. Le centre optique de chaque verre est placé selon le demi-écart et la hauteur.</div>
         </div>
       </section>
+
+      <section class="card" style="margin-top:16px;">
+        <h2>Coupe horizontale (profil réel · 1:1)</h2>
+        <div id="sections"></div>
+        <div class="hint" style="margin-top:6px;">Section au niveau du centre optique. Échelle réelle (1:1) : largeur et épaisseur à la même échelle. Côté <strong>temporal</strong> à l'extérieur, <strong>nasal</strong> vers le pont.</div>
+      </section>
+      </div>
 
     </div>
   </main>
@@ -478,6 +499,83 @@
 
       var nEl = el('notes');
       nEl.innerHTML = notes.length ? '<ul>' + notes.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>' : '';
+
+      renderSections();
+    }
+
+    /* ═══════════ COUPE 2D (profil réel, 1:1) ═══════════ */
+    function inContour(cfg, X, Y, ax, by) {
+      var ang = Math.atan2(Y, X);
+      return Math.hypot(X, Y) <= frameRadius(cfg, ang, ax, by);
+    }
+    // Distance (mm) du centre optique au bord, le long de l'horizontale (sign +1 = temporal, -1 = nasal).
+    function horizExtent(m, sign) {
+      var step = 0.5, last = 0;
+      for (var k = 1; k <= 240; k++) {
+        var u = k * step;
+        if (inContour(m.cfg, m.decX + sign * u, m.decY, m.ax, m.by)) { last = u; } else { break; }
+      }
+      return last;
+    }
+
+    // Construit le SVG d'une coupe horizontale au niveau du centre optique (échelle réelle 1:1).
+    function sectionSVG(m) {
+      var n = m.n, F1 = m.F1, CT = m.CT;
+      var Ph = powerAt(0, m.sph, m.cyl, m.axeRad);   // puissance du méridien horizontal
+      var backBase = Ph - F1;
+      var uT = horizExtent(m, 1), uN = horizExtent(m, -1);
+      if (uT + uN < 1) { uT = m.ax; uN = m.ax; }      // garde-fou (OC hors contour)
+
+      var N = 120, pts = [], i, u, r, yf, yb, minY = Infinity, maxY = -Infinity;
+      for (i = 0; i <= N; i++) {
+        u = -uN + (uT + uN) * i / N; r = Math.abs(u);
+        yf = -surfSag(F1, r, n);
+        yb = -CT - surfSag(Ph - F1, r, n);
+        pts.push([u, yf, yb]);
+        if (yf > maxY) { maxY = yf; }
+        if (yb < minY) { minY = yb; }
+      }
+
+      var chord = uT + uN;
+      var SCALE = 300 / chord;                         // px / mm (largeur cible 300)
+      var padX = 50, padTop = 22, padBot = 34;
+      var W = chord * SCALE + padX * 2;
+      var H = (maxY - minY) * SCALE + padTop + padBot;
+      var sx = function (uu) { return (padX + (uu + uN) * SCALE).toFixed(1); };
+      var sy = function (yy) { return (padTop + (maxY - yy) * SCALE).toFixed(1); };
+
+      var front = '', back = '';
+      for (i = 0; i <= N; i++) { front += (i ? 'L' : 'M') + sx(pts[i][0]) + ' ' + sy(pts[i][1]); }
+      for (i = N; i >= 0; i--) { back += 'L' + sx(pts[i][0]) + ' ' + sy(pts[i][2]); }
+
+      var etN = pts[0][1] - pts[0][2];                 // bord nasal
+      var etT = pts[N][1] - pts[N][2];                 // bord temporal
+      var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+
+      var s = '<svg viewBox="0 0 ' + W.toFixed(0) + ' ' + H.toFixed(0) + '" preserveAspectRatio="xMidYMid meet" role="img">';
+      s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
+      s += '<line class="sec-axis" x1="' + sx(0) + '" y1="' + (padTop - 8) + '" x2="' + sx(0) + '" y2="' + (H - padBot + 12).toFixed(1) + '"/>';
+      s += '<text class="sec-txt mut" x="4" y="' + (padTop + 4) + '">avant</text>';
+      s += '<text class="sec-txt mut" x="4" y="' + (H - padBot + 6).toFixed(1) + '">arrière</text>';
+      s += '<text class="sec-txt" text-anchor="middle" x="' + sx(0) + '" y="13">centre ' + f2(CT) + ' mm</text>';
+      s += '<text class="sec-txt" text-anchor="start" x="' + sx(-uN) + '" y="' + (H - 9).toFixed(1) + '">nasal ' + f2(etN) + '</text>';
+      s += '<text class="sec-txt" text-anchor="end" x="' + sx(uT) + '" y="' + (H - 9).toFixed(1) + '">temporal ' + f2(etT) + '</text>';
+      s += '</svg>';
+      return { svg: s, backBase: backBase };
+    }
+
+    function renderSections() {
+      var wrap = el('sections');
+      while (wrap.firstChild) { wrap.removeChild(wrap.firstChild); }
+      var fb = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2); };
+      [['OD', models.od], ['OG', models.og]].forEach(function (p) {
+        var res = sectionSVG(p[1]);
+        var div = document.createElement('div');
+        div.className = 'sec-eye';
+        div.innerHTML = '<div class="sec-eye__hd"><b>' + p[0] + '</b>' +
+          '<span>base avant ' + fb(p[1].F1) + ' D · base arrière ' + fb(res.backBase) + ' D (méridien horizontal)</span></div>' + res.svg;
+        wrap.appendChild(div);
+      });
     }
 
     /* ═══════════ GÉOMÉTRIE 3D : deux verres à la vraie forme ═══════════ */
