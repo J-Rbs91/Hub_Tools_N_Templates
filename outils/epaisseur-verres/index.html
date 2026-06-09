@@ -99,6 +99,8 @@
       margin: 16px 0 10px; padding-top: 12px; border-top: 1px solid var(--line); }
     .subhead span { font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--grey); }
     .slider-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--grey); margin-top: 2px; }
+    .check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px; cursor: pointer; }
+    .check input { width: auto; }
     .vp-legend { display: flex; gap: 12px; font-size: 11px; color: var(--grey); margin-top: 8px; align-items: center; }
     .vp-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
     .vp-legend .sw-lens { background: #9ecbff; }
@@ -354,6 +356,7 @@
           </div>
 
           <div class="subhead">Montage <span>— réglage du rendu présenté au client (n'affecte pas les épaisseurs calculées)</span></div>
+          <label class="check"><input type="checkbox" id="show-frame" checked> Afficher la monture (cerclage)</label>
           <div class="field">
             <label for="m-ep">Épaisseur monture (mm)</label>
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
@@ -396,6 +399,7 @@
     var models = null;         // { od:{...}, og:{...}, common:{...} }
     var renderer3d = null;     // { update(geom), resetView(), profile(), setScale11() }
     var scale11 = false;       // mode 3D orthographique 1:1
+    var showFrame = true;       // afficher la monture (cerclage) dans la 3D
     var abTouched = false;      // l'utilisateur a saisi A/B manuellement → ne plus écraser
     var rafPending = false;     // coalescence des recalculs (debounce léger)
     function scheduleCompute() {
@@ -716,22 +720,15 @@
       var sep = (common.A + common.D) / 2;
       var Tf = Math.max(0.5, common.montureEp || 3.0);  // profondeur du cerclage
       var bevelOff = common.bevel || 0;    // calage du biseau (mm, + = vers l'arrière)
-      var Wf = 2.6;                        // largeur radiale du jonc (mm)
+      var Wf = 1.7;                        // largeur radiale du jonc (mm) — cerclage fin
       var verts = [], triL = [], triF = [];     // sommets partagés ; triangles verre / monture
       function pushV(p) { verts.push(p); return verts.length - 1; }
 
       // Profil du jonc (ρ radial vers l'extérieur, z axial relatif au centre du drageoir).
-      // Extérieur légèrement bombé, gorge en V vers l'intérieur (reçoit le biseau).
+      // Cerclage fin : extérieur quasi droit, gorge en V vers l'intérieur (reçoit le biseau).
       var PROF = [
-        [0.0, Tf * 0.5], [Wf, Tf * 0.42], [Wf + 0.9, 0.0],
-        [Wf, -Tf * 0.42], [0.0, -Tf * 0.5], [-0.8, 0.0]
-      ];
-
-      // Profil du jonc (ρ radial vers l'extérieur, z axial relatif au centre du drageoir).
-      // Extérieur légèrement bombé, gorge en V vers l'intérieur (reçoit le biseau).
-      var PROF = [
-        [0.0, Tf * 0.5], [Wf, Tf * 0.42], [Wf + 0.9, 0.0],
-        [Wf, -Tf * 0.42], [0.0, -Tf * 0.5], [-0.8, 0.0]
+        [0.0, Tf * 0.5], [Wf, Tf * 0.46], [Wf + 0.25, 0.0],
+        [Wf, -Tf * 0.46], [0.0, -Tf * 0.5], [-0.7, 0.0]
       ];
 
       function addLens(m, screenSign, boxCenterX) {
@@ -890,6 +887,7 @@
       }
       function frame() {
         group.rotation.x = view.rx; group.rotation.y = view.ry;
+        if (frameMesh) { frameMesh.visible = showFrame; }
         var cam;
         if (scale11) {
           var wmm = vp.clientWidth / pxPerMM, hmm = vp.clientHeight / pxPerMM;
@@ -972,9 +970,11 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
         // Passe 1 : monture (opaque).
-        gl.disable(gl.BLEND); gl.depthMask(true);
-        gl.uniform3f(colLoc, 0.17, 0.18, 0.21); gl.uniform1f(glassLoc, 0.0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.drawElements(gl.TRIANGLES, countF, idxTypeF, 0);
+        if (showFrame) {
+          gl.disable(gl.BLEND); gl.depthMask(true);
+          gl.uniform3f(colLoc, 0.17, 0.18, 0.21); gl.uniform1f(glassLoc, 0.0);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.drawElements(gl.TRIANGLES, countF, idxTypeF, 0);
+        }
         // Passe 2 : verre (translucide, fresnel).
         gl.enable(gl.BLEND); gl.depthMask(false);
         gl.uniform3f(colLoc, 0.80, 0.88, 1.0); gl.uniform1f(glassLoc, 1.0);
@@ -1095,6 +1095,10 @@
     });
     el('cal-reset').addEventListener('click', function () {
       pxPerMM = DEFAULT_PPMM; saveCal(); el('cal-meas').value = 100; applyScale();
+    });
+    el('show-frame').addEventListener('change', function () {
+      showFrame = this.checked;
+      if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
     });
     el('btn-11').addEventListener('click', function () {
       scale11 = !scale11;
