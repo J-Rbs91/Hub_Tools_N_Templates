@@ -224,22 +224,15 @@
           </div>
 
           <div class="subhead">Montage <span>— visualisation 3D uniquement (n'affecte pas les épaisseurs calculées)</span></div>
-          <div class="row">
-            <div class="field">
-              <label for="m-base">Galbe monture (base, D)</label>
-              <input type="text" inputmode="decimal" id="m-base" value="3.5">
-              <div class="hint">Courbe commune aux deux verres (pivot à D/2).</div>
-            </div>
-            <div class="field">
-              <label for="m-ep">Épaisseur monture (mm)</label>
-              <input type="text" inputmode="decimal" id="m-ep" value="3.0">
-              <div class="hint">Profondeur du cerclage (drageoir).</div>
-            </div>
+          <div class="field">
+            <label for="m-ep">Épaisseur monture (mm)</label>
+            <input type="text" inputmode="decimal" id="m-ep" value="3.0">
+            <div class="hint">Profondeur du cerclage (drageoir).</div>
           </div>
           <div class="field">
             <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
             <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
-            <div class="slider-ends"><span>avant</span><span>base monture</span><span>arrière</span></div>
+            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
           </div>
         </section>
 
@@ -564,7 +557,6 @@
         etFloor: parseFloat(el('cerclage').value) || 0.4,
         ctFloor: num('ecentre'),
         baseMode: el('base').value,
-        montureBase: num('m-base'),
         montureEp: num('m-ep'),
         bevel: num('m-bevel')
       };
@@ -722,8 +714,6 @@
     function buildScene(mdl) {
       var common = mdl.common;
       var sep = (common.A + common.D) / 2;
-      var Bf = Math.max(0.5, common.montureBase || 3.5);
-      var R = 530 / Bf;                    // rayon du galbe monture (mm)
       var Tf = Math.max(0.5, common.montureEp || 3.0);  // profondeur du cerclage
       var bevelOff = common.bevel || 0;    // calage du biseau (mm, + = vers l'arrière)
       var Wf = 2.6;                        // largeur radiale du jonc (mm)
@@ -747,8 +737,9 @@
       function addLens(m, screenSign, boxCenterX) {
         var RINGS = 26;
         var flip = screenSign < 0;
-        var alpha = Math.asin(Math.min(0.9, sep / R)) * 0.72;   // galbe adouci
-        var beta = screenSign * alpha;                          // temporal vers l'arrière
+        // Verres coplanaires (pas d'inclinaison) : profil parfaitement droit, aucune courbe parasite.
+        var alpha = 0;
+        var beta = screenSign * alpha;
         var xp = screenSign * common.D / 2;                     // pivot à D/2
         var cb = Math.cos(beta), sb = Math.sin(beta);
         function place(Xc, Yc, z) { var x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb]; }
@@ -1118,7 +1109,7 @@
     });
     el('coteA').addEventListener('input', function () { abTouched = true; });
     el('coteB').addEventListener('input', function () { abTouched = true; });
-    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'ecentre', 'base', 'm-base', 'm-ep', 'm-bevel',
+    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'ecentre', 'base', 'm-ep', 'm-bevel',
      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h'].forEach(function (id) {
       el(id).addEventListener('input', scheduleCompute);
