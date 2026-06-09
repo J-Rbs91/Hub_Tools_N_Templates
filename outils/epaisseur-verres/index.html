@@ -154,18 +154,14 @@
 
     /* ── calibrage 1:1 ── */
     .cal { margin-top: 10px; }
-    .cal-bar-wrap { overflow-x: auto; padding-bottom: 4px; }
-    .cal-bar { height: 16px; border: 1px solid var(--blue-d); background-color: #EAF2FA;
-      background-image: repeating-linear-gradient(90deg, var(--blue-d) 0, var(--blue-d) 1px, transparent 1px, transparent 10%); }
-    .cal-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 7px; font-size: 12px; }
-    .cal-row input { width: 76px; }
     .cal-state { font-size: 11px; color: var(--grey); margin-top: 4px; }
 
-    /* ── règle/gabarit sur le viewport ── */
-    .ruler { position: absolute; left: 12px; bottom: 28px; height: 13px; pointer-events: none;
-      border-left: 1px solid #fff; border-right: 1px solid #fff; border-bottom: 1px solid #fff;
-      background-repeat: no-repeat; }
-    .ruler::after { content: attr(data-lbl); position: absolute; left: 0; top: -15px; font-size: 10px; color: rgba(255,255,255,.8); }
+    /* ── règle graduée sur le viewport (calibrage 1:1) ── */
+    .ruler { position: absolute; left: 14px; bottom: 22px; height: 26px; pointer-events: none; }
+    .ruler::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255,255,255,.92); }
+    .ruler .rt { position: absolute; bottom: 0; width: 1.5px; background: rgba(255,255,255,.92); }
+    .ruler .rl { position: absolute; bottom: 13px; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: rgba(255,255,255,.9); }
+    .ruler .rcm { position: absolute; bottom: 13px; left: 4px; font-size: 9px; color: rgba(255,255,255,.7); }
 
     /* ── coupe 2D ── */
     .sec-eye { margin-bottom: 12px; }
@@ -345,13 +341,7 @@
           <div class="hint" style="margin-top:8px;">Scène de montage à l'échelle réelle (mm) : verres ménisques (face avant convexe, arrière creusée) calés dans le drageoir du cerclage. Le bord du verre dépassant en avant/arrière du jonc se voit directement.</div>
 
           <div class="cal">
-            <div class="hint" style="margin-bottom:5px;"><strong>Calibrage écran (1:1)</strong> — la barre ci-dessous doit mesurer exactement 100 mm à la règle :</div>
-            <div class="cal-bar-wrap"><div class="cal-bar" id="cal-bar"></div></div>
-            <div class="cal-row">
-              <label>Longueur mesurée : <input type="number" id="cal-meas" step="0.5" min="20" value="100"> mm</label>
-              <button class="btn" type="button" id="cal-apply">Caler</button>
-              <button class="btn" type="button" id="cal-reset">Défaut</button>
-            </div>
+            <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> — cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, agrandissez/réduisez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
             <div class="cal-state" id="cal-state"></div>
           </div>
 
@@ -888,8 +878,16 @@
       vp.addEventListener('pointerup', stop); vp.addEventListener('pointercancel', stop);
       vp.addEventListener('wheel', function (e) {
         e.preventDefault();
-        view.dist *= (e.deltaY > 0 ? 1.1 : 0.9);
-        view.dist = Math.max(1.0, Math.min(6, view.dist)); onChange();
+        if (scale11) {
+          // En mode 1:1, la molette règle l'échelle (la règle ET la scène grandissent ensemble).
+          pxPerMM *= (e.deltaY > 0 ? 0.97 : 1.03);
+          pxPerMM = Math.max(1, Math.min(20, pxPerMM));
+          saveCal(); updateRuler(); updateScaleState();
+        } else {
+          view.dist *= (e.deltaY > 0 ? 1.1 : 0.9);
+          view.dist = Math.max(1.0, Math.min(6, view.dist));
+        }
+        onChange();
       }, { passive: false });
     }
 
@@ -1107,39 +1105,39 @@
     }
 
     /* ═══════════ CALIBRAGE & RÈGLE 1:1 ═══════════ */
-    function drawCalBar() {
-      el('cal-bar').style.width = (100 * pxPerMM).toFixed(1) + 'px';
+    function updateScaleState() {
       var calibrated = Math.abs(pxPerMM - DEFAULT_PPMM) > 1e-4;
-      el('cal-state').textContent = 'Échelle : ' + pxPerMM.toFixed(3) + ' px/mm' + (calibrated ? ' (calibré, mémorisé sur cet appareil)' : ' (défaut 96 dpi)');
+      el('cal-state').textContent = 'Échelle : ' + pxPerMM.toFixed(3) + ' px/mm' + (calibrated ? ' · calibré (mémorisé sur cet appareil)' : ' · défaut 96 dpi');
     }
+    // Règle graduée dans le viewport : ticks tous les cm, numérotés. Visible en mode 1:1.
     function updateRuler() {
       var r = el('ruler');
-      if (!scale11) { r.hidden = true; return; }
+      if (!scale11) { r.hidden = true; r.innerHTML = ''; return; }
+      var cm = 10 * pxPerMM;                                  // 1 cm en px CSS
+      var vpw = el('viewport').clientWidth || 320;
+      var ncm = Math.max(2, Math.min(10, Math.floor((vpw - 36) / cm)));   // nb de cm qui tiennent
       r.hidden = false;
-      r.style.width = (50 * pxPerMM).toFixed(1) + 'px';
-      r.style.backgroundImage = 'repeating-linear-gradient(90deg, rgba(255,255,255,.85) 0, rgba(255,255,255,.85) 1px, transparent 1px, transparent ' + (10 * pxPerMM).toFixed(2) + 'px)';
-      r.setAttribute('data-lbl', '50 mm · 1 trait = 1 cm');
+      r.style.width = (ncm * cm).toFixed(1) + 'px';
+      var html = '<span class="rcm">cm</span>', i;
+      for (i = 0; i <= ncm; i++) {
+        var x = (i * cm).toFixed(1);
+        html += '<span class="rt" style="left:' + x + 'px;height:' + (i % 5 === 0 ? 13 : 8) + 'px"></span>';
+        html += '<span class="rl" style="left:' + x + 'px">' + i + '</span>';
+      }
+      r.innerHTML = html;
     }
     function applyScale() {
-      drawCalBar(); updateRuler();
+      updateScaleState(); updateRuler();
       if (models) { renderSections(); }
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
     }
 
     /* ═══════════ INIT ═══════════ */
     buildShapeButtons();
-    drawCalBar();
+    updateScaleState();
 
-    el('cal-apply').addEventListener('click', function () {
-      var meas = num('cal-meas');
-      if (meas >= 20 && meas <= 400) {
-        pxPerMM = Math.max(0.5, Math.min(40, 100 * pxPerMM / meas));
-        saveCal(); el('cal-meas').value = 100; applyScale();
-        el('cal-state').textContent = '✓ Écran calé — ' + el('cal-state').textContent;
-      }
-    });
     el('cal-reset').addEventListener('click', function () {
-      pxPerMM = DEFAULT_PPMM; saveCal(); el('cal-meas').value = 100; applyScale();
+      pxPerMM = DEFAULT_PPMM; saveCal(); applyScale();
     });
     el('show-frame').addEventListener('change', function () {
       showFrame = this.checked;
