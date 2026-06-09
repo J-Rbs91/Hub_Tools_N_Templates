@@ -416,47 +416,62 @@
     function saveCal() { try { localStorage.setItem(CAL_KEY, String(pxPerMM)); } catch (e) {} }
 
     /* ═══════════ FORMES DE MONTURE ═══════════ */
-    // Chaque forme = silhouette normalisée dans la boîte [-1,1] (x = temporal +, y = haut +),
-    // décrite par points de contrôle lissés (Catmull-Rom fermé). Étirée ensuite à la boîte A×B.
-    function catmullClosed(keys, perSeg) {
-      var out = [], n = keys.length, i, j;
-      for (i = 0; i < n; i++) {
-        var p0 = keys[(i - 1 + n) % n], p1 = keys[i], p2 = keys[(i + 1) % n], p3 = keys[(i + 2) % n];
-        for (j = 0; j < perSeg; j++) {
-          var t = j / perSeg, t2 = t * t, t3 = t2 * t;
-          out.push([
-            0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
-            0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
-          ]);
+    // Chaque forme = silhouette normalisée dans la boîte [-1,1] (x = temporal +, y = haut +).
+    // Polygone de contrôle lissé par Chaikin (coupe de coins : ne déborde jamais, reste convexe),
+    // puis recadré sur la boîte. Étirée ensuite à la boîte A×B.
+    function chaikin(poly, iters) {
+      var p = poly, k, i;
+      for (k = 0; k < iters; k++) {
+        var q = [], n = p.length;
+        for (i = 0; i < n; i++) {
+          var a = p[i], b = p[(i + 1) % n];
+          q.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]]);
+          q.push([0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]);
         }
+        p = q;
       }
-      return out;
+      return p;
     }
-    function circlePts(n) { var p = [], i; for (i = 0; i < n; i++) { var a = 2 * Math.PI * i / n; p.push([Math.cos(a), Math.sin(a)]); } return p; }
-    function roundRectPts(rx, ry) {
-      var pts = [], k = 7, c, i, a;
-      var cor = [[1 - rx, 1 - ry, 0], [-1 + rx, 1 - ry, Math.PI / 2], [-1 + rx, -1 + ry, Math.PI], [1 - rx, -1 + ry, 3 * Math.PI / 2]];
-      for (c = 0; c < 4; c++) { for (i = 0; i <= k; i++) { a = cor[c][2] + Math.PI / 2 * i / k; pts.push([cor[c][0] + rx * Math.cos(a), cor[c][1] + ry * Math.sin(a)]); } }
+    function normBox(pts) {
+      var mx = 1e-6, my = 1e-6, i;
+      for (i = 0; i < pts.length; i++) { mx = Math.max(mx, Math.abs(pts[i][0])); my = Math.max(my, Math.abs(pts[i][1])); }
+      for (i = 0; i < pts.length; i++) { pts[i][0] /= mx; pts[i][1] /= my; }
       return pts;
     }
+    function smooth(poly, iters) { return normBox(chaikin(poly, iters || 3)); }
+    function circlePts(n) { var p = [], i; for (i = 0; i < n; i++) { var a = 2 * Math.PI * i / n; p.push([Math.cos(a), Math.sin(a)]); } return p; }
 
     var SHAPES = {
-      ronde:     { label: 'Ronde',     defA: 47, defB: 46, pts: circlePts(56) },
-      ovale:     { label: 'Ovale',     defA: 55, defB: 40, pts: circlePts(56) },
-      rectangle: { label: 'Rectangle', defA: 55, defB: 38, pts: roundRectPts(0.22, 0.34) },
-      carree:    { label: 'Carrée',    defA: 49, defB: 44, pts: roundRectPts(0.26, 0.26) },
-      pantos:    { label: 'Pantos',    defA: 50, defB: 46, pts: catmullClosed([
-        [1.00, 0.12], [0.74, 0.74], [0.00, 0.96], [-0.74, 0.74], [-1.00, 0.10], [-0.66, -0.70], [0.00, -1.00], [0.66, -0.70]
-      ], 9) },
-      papillon:  { label: 'Papillon',  defA: 53, defB: 40, pts: catmullClosed([
-        [0.86, -0.20], [1.00, 0.72], [0.00, 0.62], [-1.00, 0.72], [-0.86, -0.20], [-0.50, -0.86], [0.00, -1.00], [0.50, -0.86]
-      ], 9) },
-      aviateur:  { label: 'Aviateur',  defA: 57, defB: 48, pts: catmullClosed([
-        [1.00, 0.00], [0.95, 0.55], [0.10, 0.92], [-0.78, 0.82], [-1.00, 0.28], [-0.86, -0.32], [0.05, -1.00], [0.70, -0.66]
-      ], 9) },
-      wayfarer:  { label: 'Wayfarer',  defA: 52, defB: 42, pts: catmullClosed([
-        [0.92, -0.10], [1.00, 0.85], [0.00, 0.82], [-1.00, 0.85], [-0.92, -0.10], [-0.62, -0.92], [0.00, -1.00], [0.62, -0.92]
-      ], 4) }
+      ronde:     { label: 'Ronde',     defA: 47, defB: 46, pts: circlePts(60) },
+      ovale:     { label: 'Ovale',     defA: 55, defB: 40, pts: circlePts(60) },
+      // Rectangle large à coins arrondis.
+      rectangle: { label: 'Rectangle', defA: 55, defB: 38, pts: smooth([
+        [1, 0.62], [1, 1], [-1, 1], [-1, 0.62], [-1, -0.62], [-1, -1], [1, -1], [1, -0.62]
+      ], 3) },
+      // Carré à coins arrondis.
+      carree:    { label: 'Carrée',    defA: 49, defB: 44, pts: smooth([
+        [1, 0.55], [1, 1], [-1, 1], [-1, 0.55], [-1, -0.55], [-1, -1], [1, -1], [1, -0.55]
+      ], 3) },
+      // Pantos : rond, haut légèrement aplati, bas un peu plus pointu.
+      pantos:    { label: 'Pantos',    defA: 50, defB: 46, pts: smooth([
+        [0.98, 0.30], [0.78, 0.82], [0.30, 0.98], [-0.30, 0.98], [-0.78, 0.82], [-0.98, 0.30],
+        [-0.92, -0.35], [-0.55, -0.82], [0.00, -1.00], [0.55, -0.82], [0.92, -0.35]
+      ], 3) },
+      // Papillon (cat-eye) : bas arrondi, coin temporal-haut relevé en aile.
+      papillon:  { label: 'Papillon',  defA: 53, defB: 38, pts: smooth([
+        [1.00, 0.92], [0.30, 0.42], [-0.35, 0.42], [-0.86, 0.52], [-0.98, 0.05],
+        [-0.74, -0.62], [-0.25, -0.94], [0.30, -0.96], [0.74, -0.66], [0.97, -0.05]
+      ], 3) },
+      // Aviateur : goutte d'eau, haut large, bas qui se resserre.
+      aviateur:  { label: 'Aviateur',  defA: 57, defB: 46, pts: smooth([
+        [1.00, 0.20], [0.80, 0.74], [0.22, 0.94], [-0.45, 0.92], [-0.95, 0.50],
+        [-0.96, -0.10], [-0.58, -0.66], [-0.08, -0.96], [0.52, -0.84], [0.90, -0.42]
+      ], 3) },
+      // Wayfarer : trapèze (haut plus large que le bas), coins hauts marqués.
+      wayfarer:  { label: 'Wayfarer',  defA: 52, defB: 42, pts: smooth([
+        [1.00, 0.86], [0.00, 0.80], [-1.00, 0.86], [-0.88, 0.10], [-0.60, -0.86],
+        [0.00, -0.98], [0.60, -0.86], [0.88, 0.10]
+      ], 2) }
     };
     var SHAPE_KEYS = ['ronde', 'ovale', 'rectangle', 'carree', 'pantos', 'papillon', 'aviateur', 'wayfarer'];
     var currentShape = 'rectangle';
