@@ -717,40 +717,37 @@
     }
 
     /* ═══════════ GÉOMÉTRIE 3D : scène de montage ═══════════ */
-    // Deux verres à la vraie forme (ménisque), galbés sur une base monture commune
-    // (pivot à D/2), avec biseau sur le galbe et jonc de cerclage (drageoir).
+    // Verres ménisques galbés sur une base monture commune (pivot à D/2), biseau sur le galbe,
+    // et jonc de cerclage profilé. Sorties séparées verre / monture (matériaux distincts).
     function buildScene(mdl) {
       var common = mdl.common;
       var sep = (common.A + common.D) / 2;
       var Bf = Math.max(0.5, common.montureBase || 3.5);
       var R = 530 / Bf;                    // rayon du galbe monture (mm)
-      var Tf = Math.max(0.5, common.montureEp || 3.0);  // épaisseur (profondeur) du cerclage
-      var Wf = 2.5;                        // largeur visuelle du jonc (mm)
+      var Tf = Math.max(0.5, common.montureEp || 3.0);  // profondeur du cerclage
       var bevelOff = common.bevel || 0;    // calage du biseau (mm, + = vers l'arrière)
-      var verts = [], cols = [], tris = [];
-      var LENS = [0.62, 0.80, 1.0], FRAME = [0.27, 0.30, 0.35];
-      function pushV(p, c) { verts.push(p); cols.push(c); return verts.length - 1; }
+      var Wf = 2.6;                        // largeur radiale du jonc (mm)
+      var verts = [], triL = [], triF = [];     // sommets partagés ; triangles verre / monture
+      function pushV(p) { verts.push(p); return verts.length - 1; }
       function zArc(x) { var t = R * R - x * x; return -(R - Math.sqrt(t > 0 ? t : 0)); }
+
+      // Profil du jonc (ρ radial vers l'extérieur, z axial relatif au centre du drageoir).
+      // Extérieur légèrement bombé, gorge en V vers l'intérieur (reçoit le biseau).
+      var PROF = [
+        [0.0, Tf * 0.5], [Wf, Tf * 0.42], [Wf + 0.9, 0.0],
+        [Wf, -Tf * 0.42], [0.0, -Tf * 0.5], [-0.8, 0.0]
+      ];
 
       function addLens(m, screenSign, boxCenterX) {
         var RINGS = 26;
-        var flip = screenSign < 0;          // miroir → inverser le winding
-        var alpha = Math.asin(Math.min(0.95, sep / R));   // galbe : tangente au centre-verre
-        var beta = screenSign * alpha;                    // temporal vers l'arrière
-        var xp = screenSign * common.D / 2;               // pivot à D/2
+        var flip = screenSign < 0;
+        var alpha = Math.asin(Math.min(0.9, sep / R)) * 0.72;   // galbe adouci
+        var beta = screenSign * alpha;                          // temporal vers l'arrière
+        var xp = screenSign * common.D / 2;                     // pivot à D/2
         var cb = Math.cos(beta), sb = Math.sin(beta);
-        // Place un point local (Xc,Yc surface, z) en monde : miroir, écartement, puis galbe (rot. /y autour de xp).
-        function place(Xc, Yc, z) {
-          var x = screenSign * Xc + boxCenterX, dx = x - xp;
-          return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb];
-        }
-        function surf(r, theta) {
-          var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-          return { zf: -surfSag(m.F1, r, m.n), zb: -m.CT - surfSag(P - m.F1, r, m.n) };
-        }
-        function quad(a, b, c, d) {
-          if (flip) { tris.push(a, c, b, a, d, c); } else { tris.push(a, b, c, a, c, d); }
-        }
+        function place(Xc, Yc, z) { var x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb]; }
+        function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); return { zf: -surfSag(m.F1, r, m.n), zb: -m.CT - surfSag(P - m.F1, r, m.n) }; }
+        function quad(T, a, b, c, d) { if (flip) { T.push(a, c, b, a, d, c); } else { T.push(a, b, c, a, c, d); } }
 
         var base = [], i, j;
         for (i = 0; i <= RINGS; i++) {
@@ -762,76 +759,77 @@
             var Xc = frac * rc * Math.cos(phi), Yc = frac * rc * Math.sin(phi);
             var dx = Xc - m.decX, dy = Yc - m.decY;
             var z = surf(Math.hypot(dx, dy), Math.atan2(dy, dx));
-            base[i][j] = pushV(place(Xc, Yc, z.zf), LENS);   // face avant
-            pushV(place(Xc, Yc, z.zb), LENS);                 // face arrière (+1)
+            base[i][j] = pushV(place(Xc, Yc, z.zf));   // face avant
+            pushV(place(Xc, Yc, z.zb));                 // face arrière (+1)
           }
         }
-        // faces avant / arrière
         for (i = 0; i < RINGS; i++) {
           for (j = 0; j < SEG; j++) {
             var jn = (j + 1) % SEG;
-            quad(base[i][j], base[i][jn], base[i + 1][jn], base[i + 1][j]);
-            quad(base[i][j] + 1, base[i + 1][j] + 1, base[i + 1][jn] + 1, base[i][jn] + 1);
+            quad(triL, base[i][j], base[i][jn], base[i + 1][jn], base[i + 1][j]);
+            quad(triL, base[i][j] + 1, base[i + 1][j] + 1, base[i + 1][jn] + 1, base[i][jn] + 1);
           }
         }
-        // Biseau (V sur le galbe) + jonc de cerclage sur l'anneau externe.
-        var lc = place(0, 0, 0);
-        var apex = [], fFI = [], fFO = [], fBO = [], fBI = [];
+        // Biseau (verre) + jonc profilé (monture) sur l'anneau externe.
+        var lc = place(0, 0, 0), apex = [], ring = [], p;
         for (j = 0; j < SEG; j++) {
           var Fw = verts[base[RINGS][j]], Bw = verts[base[RINGS][j] + 1];
           var cx = (Fw[0] + Bw[0]) / 2, cy = (Fw[1] + Bw[1]) / 2;
           var rdx = Fw[0] - lc[0], rdy = Fw[1] - lc[1];
           var rl = Math.hypot(rdx, rdy) || 1; rdx /= rl; rdy /= rl;
-          var fcz = zArc(cx) + bevelOff;                  // biseau sur la base monture
-          apex[j] = pushV([cx + rdx * 0.6, cy + rdy * 0.6, fcz], LENS);
-          fFI[j] = pushV([cx, cy, fcz + Tf / 2], FRAME);
-          fFO[j] = pushV([cx + rdx * Wf, cy + rdy * Wf, fcz + Tf / 2], FRAME);
-          fBO[j] = pushV([cx + rdx * Wf, cy + rdy * Wf, fcz - Tf / 2], FRAME);
-          fBI[j] = pushV([cx, cy, fcz - Tf / 2], FRAME);
+          var fcz = zArc(cx) + bevelOff;
+          apex[j] = pushV([cx + rdx * 0.35, cy + rdy * 0.35, fcz]);
+          ring[j] = [];
+          for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV([cx + rdx * PROF[p][0], cy + rdy * PROF[p][0], fcz + PROF[p][1]]); }
         }
         for (j = 0; j < SEG; j++) {
-          var jn2 = (j + 1) % SEG;
-          var fI = base[RINGS][j], fIn = base[RINGS][jn2];
-          quad(fI, fIn, apex[jn2], apex[j]);              // biseau : avant → apex
-          quad(apex[j], apex[jn2], fIn + 1, fI + 1);      // biseau : apex → arrière
-          quad(fFI[j], fFI[jn2], fFO[jn2], fFO[j]);       // jonc : face avant
-          quad(fFO[j], fFO[jn2], fBO[jn2], fBO[j]);       // jonc : face externe
-          quad(fBO[j], fBO[jn2], fBI[jn2], fBI[j]);       // jonc : face arrière
-          quad(fBI[j], fBI[jn2], fFI[jn2], fFI[j]);       // jonc : face interne
+          var jn2 = (j + 1) % SEG, fI = base[RINGS][j], fIn = base[RINGS][jn2];
+          quad(triL, fI, fIn, apex[jn2], apex[j]);            // biseau : avant → apex
+          quad(triL, apex[j], apex[jn2], fIn + 1, fI + 1);    // biseau : apex → arrière
+          for (p = 0; p < PROF.length; p++) {                 // jonc profilé
+            var pn = (p + 1) % PROF.length;
+            quad(triF, ring[j][p], ring[jn2][p], ring[jn2][pn], ring[j][pn]);
+          }
         }
       }
 
       addLens(mdl.od, -1, -sep);
       addLens(mdl.og, 1, sep);
 
-      var positions = new Float32Array(verts.length * 3);
-      var colors = new Float32Array(verts.length * 3);
-      for (var v = 0; v < verts.length; v++) {
+      var positions = new Float32Array(verts.length * 3), v, zc = 0;
+      for (v = 0; v < verts.length; v++) {
         positions[v * 3] = verts[v][0]; positions[v * 3 + 1] = verts[v][1]; positions[v * 3 + 2] = verts[v][2];
-        colors[v * 3] = cols[v][0]; colors[v * 3 + 1] = cols[v][1]; colors[v * 3 + 2] = cols[v][2];
+        zc += verts[v][2];
       }
-      var indices = (verts.length > 65000) ? new Uint32Array(tris) : new Uint16Array(tris);
+      zc /= (verts.length || 1);
+      for (v = 0; v < verts.length; v++) { positions[v * 3 + 2] -= zc; }   // recentrage en z
 
       var normals = new Float32Array(verts.length * 3);
-      for (var t = 0; t < tris.length; t += 3) {
-        var ia = tris[t], ib = tris[t + 1], ic = tris[t + 2];
+      var allTri = triL.concat(triF);
+      for (var t = 0; t < allTri.length; t += 3) {
+        var ia = allTri[t], ib = allTri[t + 1], ic = allTri[t + 2];
         var ax = positions[ia * 3], ay = positions[ia * 3 + 1], az = positions[ia * 3 + 2];
         var bx = positions[ib * 3], by = positions[ib * 3 + 1], bz = positions[ib * 3 + 2];
-        var cx = positions[ic * 3], cy = positions[ic * 3 + 1], cz = positions[ic * 3 + 2];
-        var ux = bx - ax, uy = by - ay, uz = bz - az;
-        var vx = cx - ax, vy = cy - ay, vz = cz - az;
-        var nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        var cx2 = positions[ic * 3], cy2 = positions[ic * 3 + 1], cz2 = positions[ic * 3 + 2];
+        var ux = bx - ax, uy = by - ay, uz = bz - az, wx = cx2 - ax, wy = cy2 - ay, wz = cz2 - az;
+        var nx = uy * wz - uz * wy, ny = uz * wx - ux * wz, nz = ux * wy - uy * wx;
         normals[ia * 3] += nx; normals[ia * 3 + 1] += ny; normals[ia * 3 + 2] += nz;
         normals[ib * 3] += nx; normals[ib * 3 + 1] += ny; normals[ib * 3 + 2] += nz;
         normals[ic * 3] += nx; normals[ic * 3 + 1] += ny; normals[ic * 3 + 2] += nz;
       }
       for (var k = 0; k < normals.length; k += 3) {
-        var L = Math.hypot(normals[k], normals[k + 1], normals[k + 2]) || 1;
-        normals[k] /= L; normals[k + 1] /= L; normals[k + 2] /= L;
+        var Ln = Math.hypot(normals[k], normals[k + 1], normals[k + 2]) || 1;
+        normals[k] /= Ln; normals[k + 1] /= Ln; normals[k + 2] /= Ln;
       }
 
-      var sceneRadius = (sep + Math.max(common.A, common.B) / 2 + Wf) * 1.2;
-      return { positions: positions, normals: normals, indices: indices, colors: colors, radius: sceneRadius };
+      var big = verts.length > 65000;
+      var sceneRadius = (sep + Math.max(common.A, common.B) / 2 + Wf) * 1.18;
+      return {
+        positions: positions, normals: normals,
+        indicesLens: big ? new Uint32Array(triL) : new Uint16Array(triL),
+        indicesFrame: big ? new Uint32Array(triF) : new Uint16Array(triF),
+        radius: sceneRadius
+      };
     }
 
     /* ═══════════ CONTRÔLES (rotation / zoom) partagés ═══════════ */
@@ -868,8 +866,23 @@
       var d2 = new THREE.DirectionalLight(0x9fc4e6, 0.5); d2.position.set(-1.2, -0.6, -1); scene.add(d2);
 
       var ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 4000);
-      var mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.05, roughness: 0.2, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
-      var mesh = null, group = new THREE.Group(); scene.add(group);
+      // Environnement réfléchissant (dégradé) → reflets/fresnel sur le verre, sans dépendance externe.
+      try {
+        var ew = 8, eh = 32, edata = new Uint8Array(ew * eh * 4);
+        for (var ey = 0; ey < eh; ey++) {
+          var et = ey / (eh - 1);
+          var er = Math.round(196 * (1 - et) + 42 * et), eg = Math.round(214 * (1 - et) + 54 * et), eb = Math.round(238 * (1 - et) + 74 * et);
+          if (et < 0.18) { er = 245; eg = 250; eb = 255; }   // bande claire en haut (highlight)
+          for (var ex = 0; ex < ew; ex++) { var ei = (ey * ew + ex) * 4; edata[ei] = er; edata[ei + 1] = eg; edata[ei + 2] = eb; edata[ei + 3] = 255; }
+        }
+        var envTex = new THREE.DataTexture(edata, ew, eh, THREE.RGBAFormat); envTex.needsUpdate = true;
+        envTex.mapping = THREE.EquirectangularReflectionMapping;
+        scene.environment = envTex;
+      } catch (e) { /* env optionnel */ }
+
+      var glassMat = new THREE.MeshStandardMaterial({ color: 0xdbecfb, metalness: 0.0, roughness: 0.07, transparent: true, opacity: 0.52, envMapIntensity: 1.5, side: THREE.DoubleSide, depthWrite: false });
+      var frameMat = new THREE.MeshStandardMaterial({ color: 0x2a2e35, metalness: 0.35, roughness: 0.42, envMapIntensity: 0.85, side: THREE.DoubleSide });
+      var lensMesh = null, frameMesh = null, group = new THREE.Group(); scene.add(group);
       var radius = 60;
 
       function resize() {
@@ -894,13 +907,16 @@
 
       renderer3d = {
         update: function (g) {
-          if (mesh) { group.remove(mesh); mesh.geometry.dispose(); }
-          var geo = new THREE.BufferGeometry();
-          geo.setAttribute('position', new THREE.BufferAttribute(g.positions, 3));
-          geo.setAttribute('normal', new THREE.BufferAttribute(g.normals, 3));
-          geo.setAttribute('color', new THREE.BufferAttribute(g.colors, 3));
-          geo.setIndex(new THREE.BufferAttribute(g.indices, 1));
-          mesh = new THREE.Mesh(geo, mat); group.add(mesh);
+          if (lensMesh) { group.remove(lensMesh); lensMesh.geometry.dispose(); }
+          if (frameMesh) { group.remove(frameMesh); frameMesh.geometry.dispose(); }
+          var posA = new THREE.BufferAttribute(g.positions, 3), norA = new THREE.BufferAttribute(g.normals, 3);
+          var fg = new THREE.BufferGeometry();
+          fg.setAttribute('position', posA); fg.setAttribute('normal', norA); fg.setIndex(new THREE.BufferAttribute(g.indicesFrame, 1));
+          var lg = new THREE.BufferGeometry();
+          lg.setAttribute('position', posA); lg.setAttribute('normal', norA); lg.setIndex(new THREE.BufferAttribute(g.indicesLens, 1));
+          frameMesh = new THREE.Mesh(fg, frameMat); frameMesh.renderOrder = 1;
+          lensMesh = new THREE.Mesh(lg, glassMat); lensMesh.renderOrder = 2;
+          group.add(frameMesh); group.add(lensMesh);
           radius = g.radius; resize(); frame();
         },
         resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
@@ -921,16 +937,17 @@
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
       if (!gl) { el('vp-overlay').textContent = '3D non disponible sur ce navigateur.'; el('vp-engine').textContent = 'indisponible'; return; }
 
-      var vsrc = 'attribute vec3 p;attribute vec3 nor;attribute vec3 col;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;varying vec3 vC;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;vC=col;gl_Position=uMVP*vec4(p,1.0);}';
-      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;varying vec3 vC;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.8,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),40.0);vec3 col=vC*(0.35+0.75*diff)+vec3(1.0)*spec*0.45;gl_FragColor=vec4(col,0.92);}';
+      var vsrc = 'attribute vec3 p;attribute vec3 nor;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;gl_Position=uMVP*vec4(p,1.0);}';
+      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uColor;uniform float uGlass;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.85,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),50.0);vec3 col=uColor*(0.32+0.7*diff)+vec3(1.0)*spec*0.5;float a=1.0;if(uGlass>0.5){float fres=pow(1.0-max(dot(N,V),0.0),3.0);col+=vec3(0.6,0.72,0.9)*fres*0.85;a=mix(0.38,0.92,fres);}gl_FragColor=vec4(col,a);}';
       function sh(t, s) { var o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; }
       var prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vsrc)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fsrc)); gl.linkProgram(prog); gl.useProgram(prog);
-      gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.enable(gl.DEPTH_TEST); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-      var pLoc = gl.getAttribLocation(prog, 'p'), nLoc = gl.getAttribLocation(prog, 'nor'), cLoc = gl.getAttribLocation(prog, 'col');
+      var pLoc = gl.getAttribLocation(prog, 'p'), nLoc = gl.getAttribLocation(prog, 'nor');
       var mvpLoc = gl.getUniformLocation(prog, 'uMVP'), mLoc = gl.getUniformLocation(prog, 'uM');
-      var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), cBuf = gl.createBuffer(), iBuf = gl.createBuffer();
-      var count = 0, radius = 60, idxType = gl.UNSIGNED_SHORT;
+      var colLoc = gl.getUniformLocation(prog, 'uColor'), glassLoc = gl.getUniformLocation(prog, 'uGlass');
+      var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), iBufL = gl.createBuffer(), iBufF = gl.createBuffer();
+      var countL = 0, countF = 0, radius = 60, idxTypeL = gl.UNSIGNED_SHORT, idxTypeF = gl.UNSIGNED_SHORT;
 
       function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
       function persp(fov, asp, nr, fr) { var f = 1 / Math.tan(fov / 2); return new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, (2 * fr * nr) / (nr - fr), 0]); }
@@ -941,7 +958,7 @@
 
       function resize() { var w = vp.clientWidth, hh = vp.clientHeight, dpr = Math.min(window.devicePixelRatio, 2); canvas.width = w * dpr; canvas.height = hh * dpr; gl.viewport(0, 0, canvas.width, canvas.height); }
       function frame() {
-        if (!count) { return; }
+        if (!countL && !countF) { return; }
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         var asp = canvas.width / canvas.height;
         var M = mul(rotY(view.ry), rotX(view.rx));
@@ -955,9 +972,15 @@
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, cBuf); gl.enableVertexAttribArray(cLoc); gl.vertexAttribPointer(cLoc, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf);
-        gl.drawElements(gl.TRIANGLES, count, idxType, 0);
+        // Passe 1 : monture (opaque).
+        gl.disable(gl.BLEND); gl.depthMask(true);
+        gl.uniform3f(colLoc, 0.17, 0.18, 0.21); gl.uniform1f(glassLoc, 0.0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.drawElements(gl.TRIANGLES, countF, idxTypeF, 0);
+        // Passe 2 : verre (translucide, fresnel).
+        gl.enable(gl.BLEND); gl.depthMask(false);
+        gl.uniform3f(colLoc, 0.80, 0.88, 1.0); gl.uniform1f(glassLoc, 1.0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.drawElements(gl.TRIANGLES, countL, idxTypeL, 0);
+        gl.depthMask(true);
       }
       window.addEventListener('resize', function () { resize(); frame(); });
       attachControls(vp, frame);
@@ -966,14 +989,16 @@
 
       renderer3d = {
         update: function (g) {
-          var idx = g.indices;
-          if (idx instanceof Uint32Array && !uintOK) { idx = new Uint16Array(idx); }
-          idxType = (idx instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+          var idxL = g.indicesLens, idxF = g.indicesFrame;
+          if (idxL instanceof Uint32Array && !uintOK) { idxL = new Uint16Array(idxL); }
+          if (idxF instanceof Uint32Array && !uintOK) { idxF = new Uint16Array(idxF); }
+          idxTypeL = (idxL instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+          idxTypeF = (idxF instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, g.positions, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, g.normals, gl.STATIC_DRAW);
-          gl.bindBuffer(gl.ARRAY_BUFFER, cBuf); gl.bufferData(gl.ARRAY_BUFFER, g.colors, gl.STATIC_DRAW);
-          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
-          count = idx.length; radius = g.radius; resize(); frame();
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxL, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxF, gl.STATIC_DRAW);
+          countL = idxL.length; countF = idxF.length; radius = g.radius; resize(); frame();
         },
         resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
         profile: function () { view.rx = 0; view.ry = Math.PI / 2; frame(); },
