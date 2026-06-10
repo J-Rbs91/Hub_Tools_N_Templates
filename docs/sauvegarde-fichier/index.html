@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sauvegarde dans un fichier — Procédure et transparence</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#1F6FB2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --ink: #1A2A3A; --bg: #F4F7FA;
+      --white: #fff; --border: #D6E4F0; --grey: #5A7080; --green: #2E8B57; --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink);
+      line-height: 1.6; padding: 0 0 60px;
+    }
+    .site-header {
+      background: var(--blue); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .back-link {
+      color: rgba(255,255,255,.9); text-decoration: none; font-size: .85rem;
+      font-weight: 700; border: 1px solid rgba(255,255,255,.4);
+      padding: 6px 13px; border-radius: var(--radius); white-space: nowrap;
+    }
+    .back-link:hover { background: rgba(255,255,255,.16); }
+    .site-header h1 { font-size: 1.1rem; font-weight: 800; }
+    main { max-width: 760px; margin: 0 auto; padding: 28px 20px; }
+    h2 { font-size: 1.05rem; margin: 28px 0 12px; }
+    p { margin-bottom: 12px; }
+    .lead { font-size: 1rem; }
+    .panel {
+      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 22px;
+      font-size: .92rem;
+    }
+    .panel--info { background: #EAF2FA; border: 1px solid var(--border); }
+    .panel--safe { background: #ECF7F0; border: 1px solid #BFE3CD; }
+    .panel--warn { background: #FFF7E6; border: 1px solid #F0C36D; }
+    .panel h3 { font-size: .95rem; margin-bottom: 8px; }
+    .panel ul { margin: 6px 0 0 18px; }
+    .panel li { margin-bottom: 5px; }
+    .time {
+      display: inline-block; font-size: .8rem; font-weight: 700; color: var(--blue-d);
+      background: #fff; border: 1px solid var(--border); border-radius: 20px;
+      padding: 2px 12px; margin-bottom: 14px;
+    }
+    ol.steps { list-style: none; counter-reset: step; margin-top: 6px; }
+    ol.steps > li {
+      counter-increment: step; position: relative;
+      padding: 0 0 24px 48px; margin: 0;
+    }
+    ol.steps > li::before {
+      content: counter(step); position: absolute; left: 0; top: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue); color: #fff; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem;
+    }
+    ol.steps > li:not(:last-child)::after {
+      content: ''; position: absolute; left: 15px; top: 36px; bottom: 2px;
+      width: 2px; background: var(--border);
+    }
+    .step-title { font-weight: 700; margin-bottom: 4px; }
+    .step-body { font-size: .92rem; }
+    .step-body ul { margin: 6px 0 0 18px; }
+    .why {
+      font-size: .85rem; color: var(--grey); background: #fff;
+      border-left: 3px solid var(--blue); padding: 6px 0 6px 12px; margin: 8px 0 0;
+    }
+    .why b { color: var(--ink); }
+    code {
+      background: #EEF2F7; padding: 1px 6px; border-radius: 4px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em;
+    }
+    pre {
+      background: #0E2233; color: #E6EEF6; border-radius: var(--radius);
+      padding: 16px; overflow-x: auto; font-size: .8rem; line-height: 1.6;
+      font-family: ui-monospace, Menlo, Consolas, monospace; margin: 10px 0 4px;
+    }
+    .pre-cap { font-size: .82rem; color: var(--grey); margin: 4px 0 18px; }
+    table.fields {
+      width: 100%; border-collapse: collapse; font-size: .9rem; margin: 6px 0 4px;
+    }
+    table.fields th, table.fields td {
+      text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.fields th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--grey); }
+    table.fields td code { white-space: nowrap; }
+    .yes { color: var(--green); font-weight: 800; }
+    .no { color: #C5221F; font-weight: 800; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="back-link" href="../../">&#8592; Retour</a>
+    <h1>Sauvegarde dans un fichier — en toute transparence</h1>
+  </header>
+
+  <main>
+    <p class="lead">
+      Il existe <strong>deux façons</strong> d'enregistrer et de retrouver le paramétrage de votre
+      magasin&nbsp;: par <strong>Google&nbsp;Drive</strong> (partagé entre tous les postes) ou par
+      <strong>fichier</strong> (la présente page). Aucune n'est meilleure&nbsp;: c'est vous qui choisissez.
+      Cette page décrit, sans rien cacher, la façon <strong>par fichier</strong> — sans aucun compte
+      Google&nbsp;: <strong>comment l'enregistrer</strong> (clé USB ou ordinateur), <strong>ce que le
+      fichier contient exactement</strong>, et <strong>où vivent vos données</strong>.
+    </p>
+    <p>
+      <span class="time">Aucun compte, aucune installation &middot; quelques secondes</span>
+      &nbsp;&middot;&nbsp;
+      <a href="../sync-drive/">Voir plutôt la façon « Google&nbsp;Drive »</a>
+    </p>
+
+    <div class="panel panel--safe">
+      <h3>Où sont vos données, en réalité&nbsp;?</h3>
+      <ul>
+        <li><strong>Tout reste dans le navigateur de cet ordinateur.</strong> Vos coordonnées, le fond de
+          caisse et l'historique de clôture sont mémorisés <em>localement</em> (dans le stockage du
+          navigateur), sur <strong>ce poste uniquement</strong>. Rien n'est envoyé à un serveur.</li>
+        <li><strong>Le fichier n'est créé que si vous cliquez.</strong> Tant que vous ne cliquez pas sur
+          « Sauvegarder dans un fichier », aucun fichier n'existe et rien ne sort du navigateur.</li>
+        <li><strong>Vous décidez où il va.</strong> Le fichier est téléchargé comme n'importe quel
+          document&nbsp;: c'est vous qui le rangez (clé USB, dossier, e-mail à vous-même…).</li>
+        <li><strong>C'est un fichier texte lisible.</strong> Vous pouvez l'ouvrir avec le Bloc-notes pour
+          voir, de vos yeux, exactement ce qu'il contient — aucun format secret.</li>
+      </ul>
+    </div>
+
+    <h2>Comment ça fonctionne — un paramétrage par poste</h2>
+    <p>
+      Avec la façon « fichier », le paramétrage vit <strong>sur l'ordinateur où vous le faites</strong>.
+      Chaque poste a donc <strong>sa propre copie</strong>. Il est important de bien comprendre ce que
+      cela implique — voici les choses telles qu'elles sont&nbsp;:
+    </p>
+
+    <div class="panel panel--safe">
+      <h3>Les informations qui ne changent jamais&nbsp;: rien à entretenir</h3>
+      <p style="margin-bottom:0;">
+        Le <strong>nom, l'adresse, le téléphone et l'e-mail</strong> du magasin sont des informations
+        <strong>statiques</strong> : elles ne bougent quasiment jamais. Une fois posées sur un poste
+        (par la saisie, ou en restaurant le fichier), <strong>il n'y a plus rien à faire ni à mettre à
+        jour</strong>. C'est le cas d'usage le plus courant, et il fonctionne très bien ainsi.
+      </p>
+    </div>
+
+    <div class="panel panel--warn">
+      <h3>La contrepartie&nbsp;: ce qui n'est pas partagé entre les postes</h3>
+      <ul>
+        <li>Comme le fichier reste <strong>sur la machine</strong>, ce qui devrait être commun à tous les
+          postes <strong>n'est pas partagé automatiquement</strong>. Si vous modifiez le profil du magasin
+          sur un poste, <strong>les autres postes ne le savent pas</strong>.</li>
+        <li>Pour aligner les postes, il faut <strong>refaire une sauvegarde</strong> sur le poste modifié,
+          puis <strong>une restauration</strong> sur les autres. Une manipulation manuelle, à votre main.</li>
+        <li>Le <strong>fond de caisse</strong> et l'<strong>historique de clôture</strong> sont, de toute
+          façon, <strong>toujours propres à chaque poste</strong> (quelle que soit la façon choisie) : le
+          fichier sert surtout à les <strong>transférer</strong> lors d'un changement de poste, pas à les
+          synchroniser en continu.</li>
+      </ul>
+      <p style="margin-bottom:0;">
+        Si vous préférez au contraire que le <strong>profil du magasin se mette à jour tout seul</strong>
+        sur tous les postes, c'est la façon <a href="../sync-drive/">Google&nbsp;Drive</a> qu'il faut
+        choisir. À vous de voir ce qui convient le mieux à votre organisation.
+      </p>
+    </div>
+
+    <h2>Ce que contient le fichier — exactement</h2>
+    <p>
+      Le fichier porte un nom du type <code>sauvegarde-magasin-<em>votre-magasin</em>-2026-06-10.json</code>.
+      Voici précisément ce qu'on y trouve&nbsp;:
+    </p>
+
+    <pre>{
+  "app": "hub-magasin",
+  "version": 1,
+  "exportedAt": "2026-06-10T18:32:00.000Z",
+  "profil": {
+    "nom": "Optique du Centre",
+    "adresse": "12 rue des Lunettes, 34000 Ville",
+    "tel": "04.00.00.00.00",
+    "mail": "contact@votremagasin.fr"
+  },
+  "fond": 53.80,
+  "caisse": [
+    { "date": "2026-06-09", "total": 412.50, "ecart": 0 }
+  ]
+}</pre>
+    <p class="pre-cap">Exemple&nbsp;: vos vraies valeurs à la place de celles-ci. Le bloc
+      <code>caisse</code> contient au plus les <strong>15 derniers jours</strong>.</p>
+
+    <table class="fields">
+      <thead>
+        <tr><th>Dans le fichier</th><th>Ce que c'est</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>profil</code></td>
+          <td>Les coordonnées du magasin saisies dans « Mon magasin »&nbsp;:
+            <strong>nom, adresse, téléphone, e-mail</strong>.</td>
+        </tr>
+        <tr>
+          <td><code>fond</code></td>
+          <td>Le <strong>fond de caisse par défaut</strong> utilisé par la Clôture de Caisse (un montant).</td>
+        </tr>
+        <tr>
+          <td><code>caisse</code></td>
+          <td>L'<strong>historique de clôture des 15 derniers jours</strong>&nbsp;: par jour, des
+            <strong>montants</strong> (total espèces, écart…). Ce sont des chiffres de caisse, pas des
+            informations sur des personnes.</td>
+        </tr>
+        <tr>
+          <td><code>app</code>, <code>version</code>, <code>exportedAt</code></td>
+          <td>Des repères techniques&nbsp;: le type de fichier, sa version et la date d'export, pour que
+            la restauration reconnaisse un fichier valide.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="panel panel--info" style="margin-top:18px;">
+      <h3>Ce que le fichier ne contient <span class="no">jamais</span></h3>
+      <ul>
+        <li><span class="no">&#10008;</span> <strong>Aucune donnée patient</strong> — rien des demandes
+          ou ordonnances (noms de clients, prescriptions, motifs…). Ces saisies ne sont d'ailleurs jamais
+          conservées&nbsp;: elles servent à générer le document, puis disparaissent.</li>
+        <li><span class="no">&#10008;</span> <strong>Pas l'adresse de synchronisation Drive</strong>
+          (le cas échéant), ni aucun mot de passe.</li>
+      </ul>
+    </div>
+
+    <h2>Sauvegarder (créer le fichier)</h2>
+    <ol class="steps">
+      <li>
+        <div class="step-title">Ouvrir « Mon magasin »</div>
+        <div class="step-body">
+          Sur le hub, cliquez sur <strong>&#9881; Mon magasin</strong>, puis descendez jusqu'à la section
+          <strong>« Façon 2 — par fichier »</strong>.
+        </div>
+      </li>
+      <li>
+        <div class="step-title">Cliquer sur « Sauvegarder dans un fichier »</div>
+        <div class="step-body">
+          Un fichier <code>.json</code> se télécharge aussitôt (dans vos « Téléchargements », comme un
+          document classique).
+          <p class="why"><b>Ce qui se passe&nbsp;:</b> le navigateur rassemble le profil, le fond de caisse
+          et l'historique (15 jours) déjà présents sur ce poste, et les écrit dans ce fichier. Aucune
+          connexion, aucun envoi — le fichier est fabriqué sur votre ordinateur.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-title">Mettre le fichier en lieu sûr</div>
+        <div class="step-body">
+          Copiez-le sur une <strong>clé USB</strong>, dans un <strong>dossier sauvegardé</strong>, ou
+          <strong>envoyez-le-vous par e-mail</strong>. Refaites une sauvegarde de temps en temps (le fichier
+          le plus récent contient l'historique le plus à jour).
+        </div>
+      </li>
+    </ol>
+
+    <h2>Restaurer (réinjecter le fichier)</h2>
+    <p>Utile en cas de <strong>changement de poste</strong>, de <strong>vidage du navigateur</strong>, ou
+      pour recopier le paramétrage sur un <strong>autre ordinateur</strong>.</p>
+    <ol class="steps">
+      <li>
+        <div class="step-title">Ouvrir « Mon magasin » sur le poste à restaurer</div>
+        <div class="step-body">
+          Section <strong>« Façon 2 — par fichier »</strong>, cliquez sur
+          <strong>« Restaurer un fichier… »</strong>.
+        </div>
+      </li>
+      <li>
+        <div class="step-title">Choisir votre fichier <code>.json</code></div>
+        <div class="step-body">
+          Sélectionnez le fichier de sauvegarde. L'outil vérifie d'abord qu'il s'agit bien d'une sauvegarde
+          du magasin avant d'agir.
+        </div>
+      </li>
+      <li>
+        <div class="step-title">Vérifier le résultat</div>
+        <div class="step-body">
+          Un message confirme la restauration. Concrètement&nbsp;:
+          <ul>
+            <li>le <strong>profil</strong> et le <strong>fond de caisse</strong> sont
+              <strong>remplacés</strong> par ceux du fichier&nbsp;;</li>
+            <li>l'<strong>historique de clôture</strong> est <strong>fusionné</strong> (les jours du fichier
+              s'ajoutent à ceux déjà présents, en gardant les 15 jours les plus récents).</li>
+          </ul>
+          <p class="why"><b>Bon à savoir&nbsp;:</b> tout se passe sur ce poste, dans le navigateur. Le
+          fichier n'est pas « ouvert » par un service extérieur — c'est l'outil, dans votre navigateur, qui
+          le lit.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="panel panel--warn">
+      <h3>Votre responsabilité, une fois le fichier créé</h3>
+      <ul>
+        <li>À partir du moment où vous <strong>déposez le fichier quelque part</strong> (clé USB, e-mail,
+          cloud personnel), il <strong>quitte la protection de l'outil</strong> et devient un document comme
+          un autre&nbsp;: rangez-le en lieu sûr, en interne.</li>
+        <li>Il ne contient <strong>aucune donnée patient</strong>, mais il contient les <strong>informations
+          de votre magasin</strong> et des <strong>montants de caisse</strong>&nbsp;: traitez-le avec le
+          même soin que vos documents internes.</li>
+        <li>Pour repartir de zéro sur un poste, il suffit de <strong>vider les données du site</strong> dans
+          le navigateur&nbsp;; rien ne subsiste ailleurs.</li>
+      </ul>
+    </div>
+
+    <div class="panel panel--info">
+      Un doute&nbsp;? Ouvrez le fichier avec le Bloc-notes&nbsp;: vous y verrez, en clair, exactement les
+      informations décrites ci-dessus. C'est tout ce qu'il contient.
+    </div>
+  </main>
+</body>
+</html>
