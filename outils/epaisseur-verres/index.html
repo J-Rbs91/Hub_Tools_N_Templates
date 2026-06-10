@@ -196,15 +196,21 @@
     .profiles-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .profiles-head h2 { margin: 0; }
     .profiles-nav { display: flex; align-items: center; gap: 7px; }
-    .profiles-nav .btn { min-width: 38px; min-height: 38px; padding: 6px 10px; font-size: 18px; line-height: 1; }
-    .profiles-nav .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .profiles-status { min-width: 116px; text-align: center; font-size: 11px; font-weight: 700; color: var(--grey); }
-    .profiles-carousel {
-      display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
-      scroll-behavior: smooth; scrollbar-width: thin; padding-bottom: 8px;
+    .profiles-nav .btn {
+      min-width: 38px; min-height: 38px; padding: 6px 10px; font-size: 18px; line-height: 1;
+      animation: profiles-arrow-hint 3s ease-in-out infinite;
     }
-    .profiles-carousel:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-    .profiles-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+    .profiles-nav .btn:disabled { opacity: .4; cursor: not-allowed; animation: none; }
+    .profiles-nav .btn:hover, .profiles-nav .btn:focus-visible { animation: none; transform: translateX(0); }
+    .profiles-status { min-width: 116px; text-align: center; font-size: 11px; font-weight: 700; color: var(--grey); }
+    .profiles-carousel { overflow: hidden; }
+    .profiles-slide { display: none; min-width: 0; }
+    .profiles-slide.is-active { display: block; }
+    @keyframes profiles-arrow-hint {
+      0%, 16.67%, 100% { transform: translateX(0); }
+      3.33%, 10% { transform: translateX(-2px); }
+      6.67%, 13.33% { transform: translateX(2px); }
+    }
     .profiles-slide h3 { font-size: 14px; color: var(--blue-d); margin-bottom: 10px; }
     .profiles-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .profile-eye { min-width: 0; padding: 10px; background: #F8FBFE; border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
@@ -230,6 +236,9 @@
       .profiles-grid { grid-template-columns: 1fr; }
       .profiles-head { align-items: flex-start; }
       .profiles-status { min-width: 90px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .profiles-nav .btn { animation: none; }
     }
   </style>
 </head>
@@ -432,9 +441,13 @@
             <button class="btn" type="button" id="profiles-next" aria-label="Vue suivante">&#8594;</button>
           </div>
         </div>
-        <div class="profiles-carousel" id="profiles-carousel" tabindex="0" aria-label="Vues 2D des verres">
-          <article class="profiles-slide" data-profile-title="Profil temporal">
-            <h3>Profil côté temporal</h3>
+        <div class="profiles-carousel" id="profiles-carousel" aria-label="Vues 2D des verres">
+          <article class="profiles-slide is-active" data-profile-title="Vue de face">
+            <h3>Cartographie des épaisseurs — vue de face</h3>
+            <div class="profiles-grid" id="profile-face"></div>
+          </article>
+          <article class="profiles-slide" data-profile-title="Vue côté temporal">
+            <h3>Vue de profil côté temporal — depuis la tempe</h3>
             <div class="profiles-grid" id="profile-temporal"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessus">
@@ -444,10 +457,6 @@
           <article class="profiles-slide" data-profile-title="Vue du dessous">
             <h3>Vue du dessous</h3>
             <div class="profiles-grid" id="profile-bottom"></div>
-          </article>
-          <article class="profiles-slide" data-profile-title="Vue de face">
-            <h3>Cartographie des épaisseurs — vue de face</h3>
-            <div class="profiles-grid" id="profile-face"></div>
           </article>
         </div>
       </section>
@@ -862,6 +871,15 @@
       return Math.hypot(X, Y) <= frameRadius(cfg, ang, ax, by);
     }
 
+    function surfacePoint(m, X, Y) {
+      var dx = X - m.decX, dy = Y - m.decY;
+      var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
+      var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
+      var zf = -surfSag(m.F1, r, m.n);
+      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+      return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
+    }
+
     function edgePoint(m, theta) {
       var step = 0.25, last = 0, cx = Math.cos(theta), cy = Math.sin(theta);
       for (var k = 1; k <= 480; k++) {
@@ -886,13 +904,68 @@
       return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
 
+    // Projection reelle du verre vu depuis la tempe. Pour chaque hauteur, on conserve
+    // la surface la plus en avant et la surface la plus en arriere sur toute la largeur.
+    function temporalProfileSVG(m) {
+      var rows = [], edgePts = [], yi, xi;
+      for (yi = 0; yi <= 120; yi++) {
+        var Y = -m.by + 2 * m.by * yi / 120;
+        var front = null, back = null;
+        for (xi = 0; xi <= 240; xi++) {
+          var X = -m.ax + 2 * m.ax * xi / 240;
+          if (!inContour(m.cfg, X, Y, m.ax, m.by)) { continue; }
+          var p = surfacePoint(m, X, Y);
+          if (!front || p.zf > front.zf) { front = p; }
+          if (!back || p.zb < back.zb) { back = p; }
+        }
+        if (front && back) { rows.push({ Y: Y, zf: front.zf, zb: back.zb }); }
+      }
+      for (yi = 0; yi < SEG; yi++) { edgePts.push(rimPoint(m, 2 * Math.PI * yi / SEG)); }
+
+      var minPt = edgePts[0], maxPt = edgePts[0];
+      edgePts.forEach(function (p) {
+        if (p.thickness < minPt.thickness) { minPt = p; }
+        if (p.thickness > maxPt.thickness) { maxPt = p; }
+      });
+
+      var yMin = -m.by, yMax = m.by;
+      var zMin = Infinity, zMax = -Infinity;
+      rows.forEach(function (p) { zMin = Math.min(zMin, p.zb); zMax = Math.max(zMax, p.zf); });
+
+      var W = 420, H = 250, padX = 62, padY = 34;
+      var scale = Math.min((W - padX * 2) / Math.max(1, zMax - zMin), (H - padY * 2) / Math.max(1, yMax - yMin));
+      var usedW = (zMax - zMin) * scale, usedH = (yMax - yMin) * scale;
+      var x0 = padX + ((W - padX * 2) - usedW) / 2;
+      var y0 = padY + ((H - padY * 2) - usedH) / 2;
+      var sx = function (z) { return x0 + (zMax - z) * scale; };
+      var sy = function (Y) { return y0 + (yMax - Y) * scale; };
+      var frontPath = '', backPath = '', i;
+      for (i = rows.length - 1; i >= 0; i--) {
+        frontPath += (i === rows.length - 1 ? 'M' : 'L') + sx(rows[i].zf).toFixed(1) + ' ' + sy(rows[i].Y).toFixed(1);
+      }
+      for (i = 0; i < rows.length; i++) {
+        backPath += 'L' + sx(rows[i].zb).toFixed(1) + ' ' + sy(rows[i].Y).toFixed(1);
+      }
+      var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profil vu depuis la tempe, face avant a gauche, epaisseur minimum ' + f2(m.etMin) + ' mm, maximum ' + f2(m.etMax) + ' mm">';
+      s += '<path class="sec-glass" d="' + frontPath + backPath + 'Z"/>';
+      s += '<circle class="sec-mark" cx="' + sx((minPt.zf + minPt.zb) / 2).toFixed(1) + '" cy="' + sy(minPt.Y).toFixed(1) + '" r="3"/>';
+      s += '<circle class="sec-mark" cx="' + sx((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" cy="' + sy(maxPt.Y).toFixed(1) + '" r="3"/>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="72" y="' + (H / 2).toFixed(1) + '">face avant</text>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W - 72) + '" y="' + (H / 2).toFixed(1) + '">face arri&#232;re</text>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W / 2).toFixed(1) + '" y="18">haut</text>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W / 2).toFixed(1) + '" y="' + (H - 8) + '">bas</text>';
+      s += '</svg>';
+      return { svg: s, min: m.etMin, max: m.etMax };
+    }
+
     function profileSVG(m, view) {
-      var range = view === 'temporal' ? [-Math.PI / 2, Math.PI / 2] :
-        view === 'top' ? [0, Math.PI] : [Math.PI, 2 * Math.PI];
+      if (view === 'temporal') { return temporalProfileSVG(m); }
+      var range = view === 'top' ? [0, Math.PI] : [Math.PI, 2 * Math.PI];
       var pts = [], i;
       for (i = 0; i <= 90; i++) {
         var p = rimPoint(m, range[0] + (range[1] - range[0]) * i / 90);
-        p.u = view === 'temporal' ? p.Y : p.X;
+        p.u = p.X;
         pts.push(p);
       }
       pts.sort(function (a, b) { return a.u - b.u; });
@@ -915,7 +988,7 @@
       pts.forEach(function (p, n) { front += (n ? 'L' : 'M') + sx(p.u).toFixed(1) + ' ' + sy(p.zf).toFixed(1); });
       for (i = pts.length - 1; i >= 0; i--) { back += 'L' + sx(pts[i].u).toFixed(1) + ' ' + sy(pts[i].zb).toFixed(1); }
       var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      var labels = view === 'temporal' ? ['bas', 'haut'] : ['nasal', 'temporal'];
+      var labels = ['nasal', 'temporal'];
       var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profil ' + view + ', épaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
       s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
       s += '<circle class="sec-mark" cx="' + sx(minPt.u).toFixed(1) + '" cy="' + sy((minPt.zf + minPt.zb) / 2).toFixed(1) + '" r="3"/>';
@@ -1005,6 +1078,11 @@
       var carousel = el('profiles-carousel');
       var slides = carousel.querySelectorAll('.profiles-slide');
       profileCarouselIndex = Math.max(0, Math.min(slides.length - 1, profileCarouselIndex));
+      Array.prototype.forEach.call(slides, function (slide, index) {
+        var active = index === profileCarouselIndex;
+        slide.classList.toggle('is-active', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
       el('profiles-prev').disabled = profileCarouselIndex === 0;
       el('profiles-next').disabled = profileCarouselIndex === slides.length - 1;
       el('profiles-status').textContent = (profileCarouselIndex + 1) + ' / ' + slides.length + ' · ' +
@@ -1012,33 +1090,14 @@
     }
 
     function goProfile(index) {
-      var carousel = el('profiles-carousel');
-      var slides = carousel.querySelectorAll('.profiles-slide');
+      var slides = el('profiles-carousel').querySelectorAll('.profiles-slide');
       profileCarouselIndex = Math.max(0, Math.min(slides.length - 1, index));
-      carousel.scrollTo({ left: slides[profileCarouselIndex].offsetLeft - carousel.offsetLeft, behavior: 'smooth' });
       updateProfileNav();
     }
 
     function initProfilesCarousel() {
-      var carousel = el('profiles-carousel'), scrollTimer = null;
       el('profiles-prev').addEventListener('click', function () { goProfile(profileCarouselIndex - 1); });
       el('profiles-next').addEventListener('click', function () { goProfile(profileCarouselIndex + 1); });
-      carousel.addEventListener('keydown', function (event) {
-        if (event.key === 'ArrowLeft') { event.preventDefault(); goProfile(profileCarouselIndex - 1); }
-        if (event.key === 'ArrowRight') { event.preventDefault(); goProfile(profileCarouselIndex + 1); }
-      });
-      carousel.addEventListener('scroll', function () {
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(function () {
-          var slides = carousel.querySelectorAll('.profiles-slide'), best = 0, distance = Infinity;
-          Array.prototype.forEach.call(slides, function (slide, index) {
-            var d = Math.abs((slide.offsetLeft - carousel.offsetLeft) - carousel.scrollLeft);
-            if (d < distance) { distance = d; best = index; }
-          });
-          profileCarouselIndex = best;
-          updateProfileNav();
-        }, 80);
-      });
       updateProfileNav();
     }
 
