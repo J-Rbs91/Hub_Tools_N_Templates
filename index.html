@@ -170,10 +170,17 @@
         </label>
 
         <div class="sync-section">
-          <p class="sync-title">Synchronisation Google Drive <span class="field__opt">facultatif</span></p>
+          <p class="sync-title">Retrouver votre paramétrage sur plusieurs postes <span class="field__opt">facultatif</span></p>
           <p class="sync-desc">
-            Pour retrouver ce paramétrage sur tous vos postes, collez l'URL de votre script Drive.
-            <a href="docs/sync-drive/" target="_blank" rel="noopener">Procédure d'installation</a>.
+            Deux façons possibles, au choix — aucune n'est obligatoire ni « meilleure » que l'autre :
+            c'est vous qui décidez selon votre situation.
+          </p>
+
+          <p class="sync-title" style="margin-top:16px;">Façon 1 — avec Google Drive (partagé entre les postes)</p>
+          <p class="sync-desc">
+            Relie tous les ordinateurs connectés au compte Google du magasin : vous paramétrez
+            <strong>une seule fois</strong> et le profil se retrouve automatiquement sur chaque poste.
+            <a href="docs/sync-drive/" target="_blank" rel="noopener">Procédure et transparence</a>.
           </p>
           <label class="field">
             <span class="field__lbl">URL de synchronisation</span>
@@ -186,11 +193,12 @@
         </div>
 
         <div class="sync-section">
-          <p class="sync-title">Sauvegarde du magasin <span class="field__opt">recommandé</span></p>
+          <p class="sync-title">Façon 2 — par fichier (clé USB ou ordinateur)</p>
           <p class="sync-desc">
-            Enregistre dans un fichier le profil, le fond de caisse et l'historique de clôture
-            (15 derniers jours). À conserver sur une clé USB ou à vous envoyer par e-mail, puis
-            à restaurer en cas de changement de poste ou de vidage du navigateur.
+            Sans compte Google. Le paramétrage est <strong>propre à chaque poste</strong> : vous
+            l'enregistrez dans un fichier que vous conservez (clé USB ou sur l'ordinateur) et que
+            vous restaurez où vous voulez.
+            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener">Procédure et transparence</a>.
           </p>
           <div class="sync-actions">
             <button type="button" class="btn btn--ghost" id="backup-save">Sauvegarder dans un fichier</button>
