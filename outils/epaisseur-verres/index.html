@@ -390,9 +390,13 @@
         </div>
         <div style="padding:12px 16px;">
           <div class="field">
+            <label class="check" for="m-bevel-auto">
+              <input type="checkbox" id="m-bevel-auto"> Calage automatique 1/3 avant · 2/3 arrière
+            </label>
             <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
-            <input type="range" id="m-bevel" min="-3" max="3" step="0.1" value="0">
+            <input type="range" id="m-bevel" min="-5" max="5" step="0.1" value="0">
             <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
+            <div class="hint" id="bevel-auto-state"></div>
           </div>
           <div class="btn-row">
             <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
@@ -672,6 +676,102 @@
       ];
     }
 
+    function clippedArea(points, values) {
+      var polygon = points.map(function (point, i) { return { point: point, value: values[i] }; });
+      var clipped = [], i;
+      function crossing(a, b) {
+        var t = a.value / (a.value - b.value);
+        return {
+          point: [
+            a.point[0] + (b.point[0] - a.point[0]) * t,
+            a.point[1] + (b.point[1] - a.point[1]) * t,
+            a.point[2] + (b.point[2] - a.point[2]) * t
+          ],
+          value: 0
+        };
+      }
+      for (i = 0; i < polygon.length; i++) {
+        var current = polygon[i], previous = polygon[(i + polygon.length - 1) % polygon.length];
+        if (current.value > 0) {
+          if (previous.value <= 0) { clipped.push(crossing(previous, current)); }
+          clipped.push(current);
+        } else if (previous.value > 0) {
+          clipped.push(crossing(previous, current));
+        }
+      }
+      if (clipped.length < 3) { return 0; }
+      var area = 0, origin = clipped[0].point;
+      for (i = 1; i < clipped.length - 1; i++) {
+        var b = clipped[i].point, c = clipped[i + 1].point;
+        var ux = b[0] - origin[0], uy = b[1] - origin[1], uz = b[2] - origin[2];
+        var vx = c[0] - origin[0], vy = c[1] - origin[1], vz = c[2] - origin[2];
+        area += Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 2;
+      }
+      return area;
+    }
+
+    // Aire de la tranche biseautée visible hors du cerclage, identique aux surfaces colorées en 3D.
+    function overhangAreas(mdl, bevel) {
+      var Tf = Math.max(0.5, mdl.common.montureEp || 3.0);
+      var front = 0, back = 0;
+      [mdl.od, mdl.og].forEach(function (m) {
+        var samples = [], j;
+        for (j = 0; j < SEG; j++) {
+          var phi = 2 * Math.PI * j / SEG;
+          var rc = frameRadius(m.cfg, phi, m.ax, m.by);
+          var X = rc * Math.cos(phi), Y = rc * Math.sin(phi);
+          var dx = X - m.decX, dy = Y - m.decY;
+          var r = Math.hypot(dx, dy);
+          var P = powerAt(Math.atan2(dy, dx), m.sph, m.cyl, m.axeRad);
+          var zf = -surfSag(m.F1, r, m.n);
+          var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+          var mid = (zf + zb) / 2 + bevel;
+          var radialLength = Math.hypot(X, Y) || 1;
+          var apex = [X + X / radialLength * 0.35, Y + Y / radialLength * 0.35, mid];
+          samples.push({
+            front: [X, Y, zf], back: [X, Y, zb], apex: apex,
+            frontLimit: mid + Tf / 2, backLimit: mid - Tf / 2
+          });
+        }
+        for (j = 0; j < SEG; j++) {
+          var a = samples[j], b = samples[(j + 1) % SEG];
+          front += clippedArea(
+            [a.front, b.front, b.apex, a.apex],
+            [a.front[2] - a.frontLimit, b.front[2] - b.frontLimit, b.apex[2] - b.frontLimit, a.apex[2] - a.frontLimit]
+          );
+          back += clippedArea(
+            [a.apex, b.apex, b.back, a.back],
+            [a.backLimit - a.apex[2], b.backLimit - b.apex[2], b.backLimit - b.back[2], a.backLimit - a.back[2]]
+          );
+        }
+      });
+      return { front: front, back: back, total: front + back };
+    }
+
+    function autoBevel(mdl) {
+      var best = { bevel: 0, ratio: 0, error: Infinity, areas: { front: 0, back: 0, total: 0 } };
+      var contained = null;
+      for (var tenth = -50; tenth <= 50; tenth++) {
+        var bevel = tenth / 10;
+        var areas = overhangAreas(mdl, bevel);
+        if (areas.total <= 1e-6) {
+          if (!contained || Math.abs(bevel) < Math.abs(contained.bevel)) { contained = { bevel: bevel, ratio: 0, areas: areas, contained: true }; }
+          continue;
+        }
+        var ratio = areas.front / areas.total;
+        var error = Math.abs(ratio - 1 / 3);
+        if (error < best.error) { best = { bevel: bevel, ratio: ratio, error: error, areas: areas }; }
+      }
+      return contained || best;
+    }
+
+    function setBevelDisplay(value, automatic, ratio, contained) {
+      el('bevel-val').textContent = (value > 0 ? '+' : '') + value.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
+      el('m-bevel').disabled = automatic;
+      el('bevel-auto-state').textContent = automatic && contained ? 'Aucun dépassement de tranche' : automatic ?
+        'Répartition calculée : ' + Math.round(ratio * 100) + ' % avant · ' + Math.round((1 - ratio) * 100) + ' % arrière' : '';
+    }
+
     function compute() {
       var common = {
         n: parseFloat(el('indice').value) || 1.5,
@@ -684,6 +784,14 @@
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
       var og = eyeResult({ sph: num('og-sph'), cyl: num('og-cyl'), axe: num('og-axe'), pd: num('og-pd'), h: num('og-h') }, common, 'og');
       models = { od: od, og: og, common: common };
+      if (el('m-bevel-auto').checked) {
+        var automatic = autoBevel(models);
+        common.bevel = automatic.bevel;
+        el('m-bevel').value = automatic.bevel.toFixed(1);
+        setBevelDisplay(automatic.bevel, true, automatic.ratio, automatic.contained);
+      } else {
+        setBevelDisplay(common.bevel, false, 0, false);
+      }
       renderResult();
       if (renderer3d) { renderer3d.update(buildScene(models)); }
     }
@@ -1424,6 +1532,7 @@
       el('base').disabled = !this.checked;
       scheduleCompute();
     });
+    el('m-bevel-auto').addEventListener('change', scheduleCompute);
     el('btn-11').addEventListener('click', function () {
       scale11 = !scale11;
       el('btn-11').textContent = scale11 ? 'Échelle libre' : 'Vue 1:1';
