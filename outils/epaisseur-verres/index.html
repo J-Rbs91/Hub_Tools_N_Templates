@@ -229,6 +229,28 @@
     .map-value { font: 800 13px "Manrope", sans-serif; fill: var(--ink); }
     .map-cross { stroke: var(--blue-d); stroke-width: 1.6; stroke-linecap: round; }
 
+    /* ── comparaison client ── */
+    .compare-card[hidden] { display: none; }
+    .compare-head, .compare-profiles-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;
+    }
+    .compare-head h2, .compare-profiles-head h3 { margin: 0; }
+    .compare-slots, .compare-viewers, .compare-profiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .compare-slots { margin-bottom: 12px; }
+    .compare-slot { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #F8FBFE; }
+    .compare-slot__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+    .compare-slot__head b { color: var(--blue-d); }
+    .compare-slot p { margin: 0; font-size: 11px; color: var(--grey); line-height: 1.45; }
+    .compare-remove { border: 0; background: transparent; color: var(--grey); cursor: pointer; font: inherit; font-size: 11px; text-decoration: underline; }
+    .compare-viewer { position: relative; height: 320px; background: linear-gradient(160deg, #0E2233, #1B3A52); border-radius: 8px; touch-action: none; cursor: grab; overflow: hidden; }
+    .compare-viewer.dragging { cursor: grabbing; }
+    .compare-viewer canvas { display: block; width: 100%; height: 100%; }
+    .compare-viewer-label { position: absolute; left: 10px; top: 9px; z-index: 2; color: #fff; font-size: 11px; font-weight: 800; pointer-events: none; }
+    .compare-viewer-hint { position: absolute; bottom: 8px; left: 0; right: 0; z-index: 2; text-align: center; color: rgba(255,255,255,.65); font-size: 9px; pointer-events: none; }
+    .compare-profiles-head { margin-top: 18px; }
+    .compare-profiles .profile-eye { height: 100%; }
+    .compare-profiles .profiles-grid { grid-template-columns: 1fr; }
+
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
       #viewport { height: 70vw; min-height: 300px; }
@@ -237,6 +259,7 @@
       .profiles-grid { grid-template-columns: 1fr; }
       .profiles-head { align-items: flex-start; }
       .profiles-status { min-width: 90px; }
+      .compare-viewers, .compare-profiles { grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce) {
       .profiles-nav .btn { animation: none; }
@@ -409,6 +432,7 @@
             <div class="hint" id="bevel-auto-state"></div>
           </div>
           <div class="btn-row">
+            <button class="btn" type="button" id="compare-save">Enregistrer pour comparer (0/2)</button>
             <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
             <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
             <button class="btn" type="button" id="btn-11">Vue 1:1</button>
@@ -461,6 +485,24 @@
           </article>
         </div>
       </section>
+
+      <section class="card compare-card" id="compare-card" hidden aria-labelledby="compare-title">
+        <div class="compare-head">
+          <h2 id="compare-title">Comparaison client</h2>
+          <button class="btn" type="button" id="compare-clear">Effacer la comparaison</button>
+        </div>
+        <div class="compare-slots" id="compare-slots"></div>
+        <div class="compare-viewers" id="compare-viewers"></div>
+        <div class="compare-profiles-head">
+          <h3>Profils et cartographie des épaisseurs</h3>
+          <div class="profiles-nav">
+            <button class="btn" type="button" id="compare-prev" aria-label="Vue de comparaison précédente">&#8592;</button>
+            <span class="profiles-status" id="compare-status" aria-live="polite"></span>
+            <button class="btn" type="button" id="compare-next" aria-label="Vue de comparaison suivante">&#8594;</button>
+          </div>
+        </div>
+        <div class="compare-profiles" id="compare-profiles"></div>
+      </section>
       </div>
 
     </div>
@@ -488,6 +530,9 @@
     var scale11 = false;       // mode 3D orthographique 1:1
     var showFrame = true;      // afficher la monture (cerclage) dans la 3D
     var showOverhang = false;  // colorer les parties de tranche hors du cerclage
+    var comparisonModels = []; // deux configurations figées pour la présentation client
+    var comparisonRenderers = [];
+    var comparisonProfileIndex = 0;
     var abTouched = false;      // l'utilisateur a saisi A/B manuellement → ne plus écraser
     var rafPending = false;     // coalescence des recalculs (debounce léger)
     function scheduleCompute() {
@@ -1106,6 +1151,103 @@
       updateProfileNav();
     }
 
+    var COMPARE_PROFILE_VIEWS = [
+      { key: 'face', label: 'Vue de face' },
+      { key: 'temporal', label: 'Vue côté temporal' },
+      { key: 'top', label: 'Vue du dessus' },
+      { key: 'bottom', label: 'Vue du dessous' }
+    ];
+
+    function comparisonSummary(mdl) {
+      var shape = mdl.shapeLabel || 'Monture';
+      var index = mdl.common.n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      var power = function (eye) {
+        var sph = eye.sph > 0 ? '+' + eye.sph : String(eye.sph);
+        var cyl = eye.cyl > 0 ? '+' + eye.cyl : String(eye.cyl);
+        return sph.replace('.', ',') + ' (' + cyl.replace('.', ',') + ')';
+      };
+      return shape + ' · ' + mdl.common.A + ' × ' + mdl.common.B + ' mm · indice ' + index +
+        ' · OD ' + power(mdl.od) + ' · OG ' + power(mdl.og);
+    }
+
+    function comparisonProfilesHTML(mdl, view) {
+      if (view === 'face') {
+        return faceEyeHTML('OD', mdl.od, 'od') + faceEyeHTML('OG', mdl.og, 'og');
+      }
+      return profileEyeHTML('OD', mdl.od, view) + profileEyeHTML('OG', mdl.og, view);
+    }
+
+    function renderComparisonProfiles() {
+      var view = COMPARE_PROFILE_VIEWS[comparisonProfileIndex];
+      el('compare-status').textContent = (comparisonProfileIndex + 1) + ' / ' + COMPARE_PROFILE_VIEWS.length + ' · ' + view.label;
+      el('compare-prev').disabled = comparisonProfileIndex === 0;
+      el('compare-next').disabled = comparisonProfileIndex === COMPARE_PROFILE_VIEWS.length - 1;
+      el('compare-profiles').innerHTML = comparisonModels.map(function (mdl, index) {
+        return '<div><h3>Comparaison ' + (index + 1) + '</h3><div class="profiles-grid">' +
+          comparisonProfilesHTML(mdl, view.key) + '</div></div>';
+      }).join('');
+    }
+
+    function destroyComparisonRenderers() {
+      comparisonRenderers.forEach(function (renderer) { if (renderer.destroy) { renderer.destroy(); } });
+      comparisonRenderers = [];
+    }
+
+    function refreshComparison3D() {
+      comparisonRenderers.forEach(function (renderer) { renderer.refresh(); });
+    }
+
+    function renderComparison() {
+      var card = el('compare-card');
+      card.hidden = comparisonModels.length === 0;
+      el('compare-save').disabled = comparisonModels.length >= 2;
+      el('compare-save').textContent = comparisonModels.length >= 2 ? 'Comparaison complète (2/2)' :
+        'Enregistrer pour comparer (' + comparisonModels.length + '/2)';
+      if (!comparisonModels.length) {
+        destroyComparisonRenderers();
+        return;
+      }
+      el('compare-slots').innerHTML = comparisonModels.map(function (mdl, index) {
+        return '<div class="compare-slot"><div class="compare-slot__head"><b>Comparaison ' + (index + 1) +
+          '</b><button class="compare-remove" type="button" data-compare-remove="' + index + '">Supprimer</button></div><p>' +
+          comparisonSummary(mdl) + '</p></div>';
+      }).join('');
+      el('compare-viewers').innerHTML = comparisonModels.map(function (_, index) {
+        return '<div class="compare-viewer" id="compare-viewer-' + index + '"><span class="compare-viewer-label">Comparaison ' +
+          (index + 1) + '</span><span class="compare-viewer-hint">Mouvement synchronisé</span></div>';
+      }).join('');
+      destroyComparisonRenderers();
+      comparisonModels.forEach(function (mdl, index) {
+        comparisonRenderers.push(createComparisonRenderer(el('compare-viewer-' + index), buildScene(mdl)));
+      });
+      renderComparisonProfiles();
+    }
+
+    function saveComparison() {
+      if (comparisonModels.length >= 2 || !models) { return; }
+      var snapshot = {
+        od: models.od, og: models.og,
+        common: Object.assign({}, models.common),
+        shapeLabel: SHAPES[currentShape].label
+      };
+      var key = function (mdl) {
+        return JSON.stringify([
+          mdl.shapeLabel, mdl.common.n, mdl.common.A, mdl.common.B, mdl.common.D, mdl.common.etFloor,
+          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel,
+          mdl.od.sph, mdl.od.cyl, mdl.od.axeDeg, mdl.od.decX, mdl.od.decY,
+          mdl.og.sph, mdl.og.cyl, mdl.og.axeDeg, mdl.og.decX, mdl.og.decY
+        ]);
+      };
+      if (comparisonModels.some(function (mdl) { return key(mdl) === key(snapshot); })) { return; }
+      comparisonModels.push(snapshot);
+      renderComparison();
+    }
+
+    function removeComparison(index) {
+      comparisonModels.splice(index, 1);
+      renderComparison();
+    }
+
     /* ═══════════ GÉOMÉTRIE 3D : scène de montage ═══════════ */
     // Verres ménisques galbés sur une base monture commune (pivot à D/2), biseau sur le galbe,
     // et jonc de cerclage profilé. Sorties séparées verre / monture (matériaux distincts).
@@ -1278,7 +1420,7 @@
 
     /* ═══════════ CONTRÔLES (rotation / zoom) partagés ═══════════ */
     var view = { rx: -0.5, ry: 0.0, dist: 1.8 };
-    function attachControls(vp, onChange) {
+    function attachControls(vp, onChange, allowScale11) {
       var dragging = false, lx = 0, ly = 0;
       vp.addEventListener('pointerdown', function (e) { dragging = true; lx = e.clientX; ly = e.clientY; vp.classList.add('dragging'); vp.setPointerCapture(e.pointerId); });
       vp.addEventListener('pointermove', function (e) {
@@ -1291,7 +1433,7 @@
       vp.addEventListener('pointerup', stop); vp.addEventListener('pointercancel', stop);
       vp.addEventListener('wheel', function (e) {
         e.preventDefault();
-        if (scale11) {
+        if (scale11 && allowScale11 !== false) {
           // En mode 1:1, la molette règle l'échelle (la règle ET la scène grandissent ensemble).
           pxPerMM *= (e.deltaY > 0 ? 0.97 : 1.03);
           pxPerMM = Math.max(1, Math.min(20, pxPerMM));
@@ -1302,6 +1444,73 @@
         }
         onChange();
       }, { passive: false });
+    }
+
+    // Visualiseur WebGL compact dédié à la comparaison. Les deux instances utilisent
+    // l'objet global `view`, puis sont rafraîchies ensemble par refreshComparison3D().
+    function createComparisonRenderer(vp, geometry) {
+      var canvas = document.createElement('canvas');
+      vp.insertBefore(canvas, vp.firstChild);
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        vp.querySelector('.compare-viewer-hint').textContent = '3D indisponible';
+        return { refresh: function () {}, destroy: function () {} };
+      }
+      var vsrc = 'attribute vec3 p;attribute vec3 nor;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;gl_Position=uMVP*vec4(p,1.0);}';
+      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uColor;uniform float uGlass;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.85,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),50.0);vec3 col=uColor*(0.32+0.7*diff)+vec3(1.0)*spec*0.5;float a=1.0;if(uGlass>0.5){float fres=pow(1.0-max(dot(N,V),0.0),3.0);col+=vec3(0.6,0.72,0.9)*fres*0.85;a=mix(0.38,0.92,fres);}gl_FragColor=vec4(col,a);}';
+      function shader(type, source) { var out = gl.createShader(type); gl.shaderSource(out, source); gl.compileShader(out); return out; }
+      var program = gl.createProgram();
+      gl.attachShader(program, shader(gl.VERTEX_SHADER, vsrc)); gl.attachShader(program, shader(gl.FRAGMENT_SHADER, fsrc));
+      gl.linkProgram(program); gl.useProgram(program); gl.enable(gl.DEPTH_TEST); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      var pLoc = gl.getAttribLocation(program, 'p'), nLoc = gl.getAttribLocation(program, 'nor');
+      var mvpLoc = gl.getUniformLocation(program, 'uMVP'), mLoc = gl.getUniformLocation(program, 'uM');
+      var colLoc = gl.getUniformLocation(program, 'uColor'), glassLoc = gl.getUniformLocation(program, 'uGlass');
+      var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), buffers = [];
+      function indexBuffer(data) {
+        var value = data;
+        if (value instanceof Uint32Array && !gl.getExtension('OES_element_index_uint')) { value = new Uint16Array(value); }
+        var buffer = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, value, gl.STATIC_DRAW);
+        return { buffer: buffer, count: value.length, type: value instanceof Uint32Array ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT };
+      }
+      gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, geometry.positions, gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, geometry.normals, gl.STATIC_DRAW);
+      buffers = [indexBuffer(geometry.indicesFrame), indexBuffer(geometry.indicesLens), indexBuffer(geometry.indicesFront), indexBuffer(geometry.indicesBack)];
+      function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
+      function persp(fov, asp, nr, fr) { var f = 1 / Math.tan(fov / 2); return new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, (2 * fr * nr) / (nr - fr), 0]); }
+      function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]); }
+      function rotY(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]); }
+      function trans(z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, z, 1]); }
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio, 2), w = vp.clientWidth, h = vp.clientHeight;
+        canvas.width = w * dpr; canvas.height = h * dpr; gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      function draw(item, color, glass) {
+        gl.uniform3f(colLoc, color[0], color[1], color[2]); gl.uniform1f(glassLoc, glass);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, item.buffer); gl.drawElements(gl.TRIANGLES, item.count, item.type, 0);
+      }
+      function frame() {
+        resize();
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        var M = mul(rotY(view.ry), rotX(view.rx));
+        var MVP = mul(persp(40 * DEG, canvas.width / canvas.height, 0.1, 8000), mul(trans(-geometry.radius * view.dist), M));
+        gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
+        gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
+        if (showFrame) { gl.disable(gl.BLEND); gl.depthMask(true); draw(buffers[0], [0.17, 0.18, 0.21], 0); }
+        gl.enable(gl.BLEND); gl.depthMask(false); draw(buffers[1], [0.80, 0.88, 1.0], 1); gl.depthMask(true);
+        if (showOverhang) {
+          gl.disable(gl.BLEND); draw(buffers[2], [0.85, 0.23, 0.23], 0); draw(buffers[3], [0.14, 0.55, 0.34], 0);
+        }
+      }
+      attachControls(vp, refreshComparison3D, false);
+      frame();
+      return {
+        refresh: frame,
+        destroy: function () {
+          buffers.forEach(function (item) { gl.deleteBuffer(item.buffer); });
+          gl.deleteBuffer(pBuf); gl.deleteBuffer(nBuf); gl.deleteProgram(program);
+        }
+      };
     }
 
     /* ═══════════ RENDU THREE.JS ═══════════ */
@@ -1360,7 +1569,7 @@
         renderer.render(scene, cam);
       }
       window.addEventListener('resize', function () { resize(); frame(); });
-      attachControls(vp, frame);
+      attachControls(vp, function () { frame(); refreshComparison3D(); });
 
       renderer3d = {
         update: function (g) {
@@ -1461,7 +1670,7 @@
         }
       }
       window.addEventListener('resize', function () { resize(); frame(); });
-      attachControls(vp, frame);
+      attachControls(vp, function () { frame(); refreshComparison3D(); });
 
       var uintOK = !!gl.getExtension('OES_element_index_uint');
 
@@ -1586,11 +1795,13 @@
     el('show-frame').addEventListener('change', function () {
       showFrame = this.checked;
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
+      refreshComparison3D();
     });
     el('show-overhang').addEventListener('change', function () {
       showOverhang = this.checked;
       el('overhang-legend').hidden = !showOverhang;
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
+      refreshComparison3D();
     });
     el('base-speciale').addEventListener('change', function () {
       el('base').disabled = !this.checked;
@@ -1620,8 +1831,26 @@
       ['sph', 'cyl', 'axe', 'pd', 'h'].forEach(function (k) { el('og-' + k).value = el('od-' + k).value; });
       compute();
     });
-    el('btn-reset-vue').addEventListener('click', function () { if (renderer3d) { renderer3d.resetView(); } });
-    el('btn-coupe').addEventListener('click', function () { if (renderer3d) { renderer3d.profile(); } });
+    el('compare-save').addEventListener('click', saveComparison);
+    el('compare-clear').addEventListener('click', function () { comparisonModels = []; renderComparison(); });
+    el('compare-slots').addEventListener('click', function (event) {
+      var button = event.target.closest('[data-compare-remove]');
+      if (button) { removeComparison(parseInt(button.getAttribute('data-compare-remove'), 10)); }
+    });
+    el('compare-prev').addEventListener('click', function () {
+      comparisonProfileIndex = Math.max(0, comparisonProfileIndex - 1); renderComparisonProfiles();
+    });
+    el('compare-next').addEventListener('click', function () {
+      comparisonProfileIndex = Math.min(COMPARE_PROFILE_VIEWS.length - 1, comparisonProfileIndex + 1); renderComparisonProfiles();
+    });
+    el('btn-reset-vue').addEventListener('click', function () {
+      if (renderer3d) { renderer3d.resetView(); }
+      refreshComparison3D();
+    });
+    el('btn-coupe').addEventListener('click', function () {
+      if (renderer3d) { renderer3d.profile(); }
+      refreshComparison3D();
+    });
 
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
