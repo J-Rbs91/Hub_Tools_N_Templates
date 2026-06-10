@@ -389,6 +389,11 @@
           <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer</div>
         </div>
         <div style="padding:12px 16px;">
+          <div class="field">
+            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
+            <input type="range" id="m-bevel" min="-3" max="3" step="0.1" value="0">
+            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
+          </div>
           <div class="btn-row">
             <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
             <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
@@ -410,11 +415,6 @@
           <div class="field">
             <label for="m-ep">Épaisseur monture (mm)</label>
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
-          </div>
-          <div class="field">
-            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
-            <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
-            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
           </div>
         </div>
       </section>
