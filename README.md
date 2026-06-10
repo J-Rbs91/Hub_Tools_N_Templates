@@ -24,18 +24,22 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 > d'un magasin ne se mélangent jamais avec celles d'un autre — mais elles ne se partagent pas non
 > plus entre deux postes d'un même magasin, sauf si la synchronisation Drive ci-dessous est activée.
 
-### Synchronisation et sauvegarde (facultatives)
+### Deux façons d'enregistrer le magasin (au choix, facultatives)
 
-- **Synchronisation Google Drive** — pour retrouver le profil sur tous les postes d'un même magasin,
-  le hub peut le copier sur le Drive du magasin via un **script Apps Script** déployé par le magasin
-  lui-même (aucun backend du projet). La procédure et le script sont fournis dans
-  [`docs/sync-drive/`](docs/sync-drive/). **Seul le profil est synchronisé — jamais de donnée patient.**
-- **Sauvegarde dans un fichier** (sans Google) — pour ceux qui ne veulent ou ne peuvent pas utiliser
-  le Drive&nbsp;: depuis « Mon magasin », on exporte dans un fichier JSON le profil, le fond de caisse
-  et l'historique de clôture (15 derniers jours), puis on le restaure en cas de changement de poste ou
-  de vidage du navigateur. La page [`docs/sauvegarde-fichier/`](docs/sauvegarde-fichier/) détaille en
-  toute transparence **ce que le fichier contient** (et ce qu'il ne contient jamais — aucune donnée
-  patient) et **où vivent les données**.
+Aucune n'est recommandée plus que l'autre&nbsp;: l'utilisateur choisit selon sa situation. Les deux sont
+documentées avec la même transparence (ce qui se passe, ce qui est enregistré, où vivent les données).
+
+- **Façon 1 — Google Drive (partagé entre les postes)** — le hub copie le profil sur le Drive du magasin
+  via un **script Apps Script** déployé par le magasin lui-même (aucun backend du projet) ; le profil se
+  retrouve alors **automatiquement sur tous les postes** connectés au compte Google. Procédure et script
+  dans [`docs/sync-drive/`](docs/sync-drive/). **Seul le profil est synchronisé — jamais de donnée patient.**
+- **Façon 2 — fichier, sur clé USB ou ordinateur (sans Google)** — depuis « Mon magasin », on exporte
+  dans un fichier JSON le profil, le fond de caisse et l'historique de clôture (15 derniers jours), puis
+  on le restaure en cas de changement de poste ou de vidage du navigateur. Le paramétrage est alors
+  **propre à chaque poste** : les informations statiques (adresse…) ne demandent aucun entretien, mais
+  ce qui gagnerait à être commun n'est **pas partagé automatiquement** entre les postes. La page
+  [`docs/sauvegarde-fichier/`](docs/sauvegarde-fichier/) détaille **ce que le fichier contient** (et ce
+  qu'il ne contient jamais — aucune donnée patient) et **où vivent les données**.
 
 ---
 
