@@ -30,9 +30,12 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
   le hub peut le copier sur le Drive du magasin via un **script Apps Script** déployé par le magasin
   lui-même (aucun backend du projet). La procédure et le script sont fournis dans
   [`docs/sync-drive/`](docs/sync-drive/). **Seul le profil est synchronisé — jamais de donnée patient.**
-- **Sauvegarde dans un fichier** — depuis « Mon magasin », on peut exporter dans un fichier JSON le
-  profil, le fond de caisse et l'historique de clôture (15 derniers jours), puis le restaurer en cas
-  de changement de poste ou de vidage du navigateur.
+- **Sauvegarde dans un fichier** (sans Google) — pour ceux qui ne veulent ou ne peuvent pas utiliser
+  le Drive&nbsp;: depuis « Mon magasin », on exporte dans un fichier JSON le profil, le fond de caisse
+  et l'historique de clôture (15 derniers jours), puis on le restaure en cas de changement de poste ou
+  de vidage du navigateur. La page [`docs/sauvegarde-fichier/`](docs/sauvegarde-fichier/) détaille en
+  toute transparence **ce que le fichier contient** (et ce qu'il ne contient jamais — aucune donnée
+  patient) et **où vivent les données**.
 
 ---
 
@@ -82,8 +85,10 @@ Le fichier `.nojekyll` à la racine désactive le traitement Jekyll et assure la
 │   └── css/
 │       └── hub.css              (styles du hub uniquement + design tokens)
 ├── docs/
-│   └── sync-drive/
-│       └── index.html           (procédure + script Apps Script de synchro Drive)
+│   ├── sync-drive/
+│   │   └── index.html           (procédure + script Apps Script de synchro Drive)
+│   └── sauvegarde-fichier/
+│       └── index.html           (procédure « fichier » + transparence sur les données)
 ├── .github/
 │   ├── dependabot.yml           (maj auto des versions d'actions)
 │   ├── ISSUE_TEMPLATE/          (modèles de bug / amélioration)
