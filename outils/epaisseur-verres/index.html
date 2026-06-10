@@ -196,15 +196,21 @@
     .profiles-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .profiles-head h2 { margin: 0; }
     .profiles-nav { display: flex; align-items: center; gap: 7px; }
-    .profiles-nav .btn { min-width: 38px; min-height: 38px; padding: 6px 10px; font-size: 18px; line-height: 1; }
-    .profiles-nav .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .profiles-status { min-width: 116px; text-align: center; font-size: 11px; font-weight: 700; color: var(--grey); }
-    .profiles-carousel {
-      display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
-      scroll-behavior: smooth; scrollbar-width: thin; padding-bottom: 8px;
+    .profiles-nav .btn {
+      min-width: 38px; min-height: 38px; padding: 6px 10px; font-size: 18px; line-height: 1;
+      animation: profiles-arrow-hint 3s ease-in-out infinite;
     }
-    .profiles-carousel:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-    .profiles-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+    .profiles-nav .btn:disabled { opacity: .4; cursor: not-allowed; animation: none; }
+    .profiles-nav .btn:hover, .profiles-nav .btn:focus-visible { animation: none; transform: translateX(0); }
+    .profiles-status { min-width: 116px; text-align: center; font-size: 11px; font-weight: 700; color: var(--grey); }
+    .profiles-carousel { overflow: hidden; }
+    .profiles-slide { display: none; min-width: 0; }
+    .profiles-slide.is-active { display: block; }
+    @keyframes profiles-arrow-hint {
+      0%, 16.67%, 100% { transform: translateX(0); }
+      3.33%, 10% { transform: translateX(-2px); }
+      6.67%, 13.33% { transform: translateX(2px); }
+    }
     .profiles-slide h3 { font-size: 14px; color: var(--blue-d); margin-bottom: 10px; }
     .profiles-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .profile-eye { min-width: 0; padding: 10px; background: #F8FBFE; border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
@@ -230,6 +236,9 @@
       .profiles-grid { grid-template-columns: 1fr; }
       .profiles-head { align-items: flex-start; }
       .profiles-status { min-width: 90px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .profiles-nav .btn { animation: none; }
     }
   </style>
 </head>
@@ -432,7 +441,11 @@
             <button class="btn" type="button" id="profiles-next" aria-label="Vue suivante">&#8594;</button>
           </div>
         </div>
-        <div class="profiles-carousel" id="profiles-carousel" tabindex="0" aria-label="Vues 2D des verres">
+        <div class="profiles-carousel" id="profiles-carousel" aria-label="Vues 2D des verres">
+          <article class="profiles-slide is-active" data-profile-title="Vue de face">
+            <h3>Cartographie des épaisseurs — vue de face</h3>
+            <div class="profiles-grid" id="profile-face"></div>
+          </article>
           <article class="profiles-slide" data-profile-title="Vue côté temporal">
             <h3>Vue de profil côté temporal — depuis la tempe</h3>
             <div class="profiles-grid" id="profile-temporal"></div>
@@ -444,10 +457,6 @@
           <article class="profiles-slide" data-profile-title="Vue du dessous">
             <h3>Vue du dessous</h3>
             <div class="profiles-grid" id="profile-bottom"></div>
-          </article>
-          <article class="profiles-slide" data-profile-title="Vue de face">
-            <h3>Cartographie des épaisseurs — vue de face</h3>
-            <div class="profiles-grid" id="profile-face"></div>
           </article>
         </div>
       </section>
@@ -1069,6 +1078,11 @@
       var carousel = el('profiles-carousel');
       var slides = carousel.querySelectorAll('.profiles-slide');
       profileCarouselIndex = Math.max(0, Math.min(slides.length - 1, profileCarouselIndex));
+      Array.prototype.forEach.call(slides, function (slide, index) {
+        var active = index === profileCarouselIndex;
+        slide.classList.toggle('is-active', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
       el('profiles-prev').disabled = profileCarouselIndex === 0;
       el('profiles-next').disabled = profileCarouselIndex === slides.length - 1;
       el('profiles-status').textContent = (profileCarouselIndex + 1) + ' / ' + slides.length + ' · ' +
@@ -1076,33 +1090,14 @@
     }
 
     function goProfile(index) {
-      var carousel = el('profiles-carousel');
-      var slides = carousel.querySelectorAll('.profiles-slide');
+      var slides = el('profiles-carousel').querySelectorAll('.profiles-slide');
       profileCarouselIndex = Math.max(0, Math.min(slides.length - 1, index));
-      carousel.scrollTo({ left: slides[profileCarouselIndex].offsetLeft - carousel.offsetLeft, behavior: 'smooth' });
       updateProfileNav();
     }
 
     function initProfilesCarousel() {
-      var carousel = el('profiles-carousel'), scrollTimer = null;
       el('profiles-prev').addEventListener('click', function () { goProfile(profileCarouselIndex - 1); });
       el('profiles-next').addEventListener('click', function () { goProfile(profileCarouselIndex + 1); });
-      carousel.addEventListener('keydown', function (event) {
-        if (event.key === 'ArrowLeft') { event.preventDefault(); goProfile(profileCarouselIndex - 1); }
-        if (event.key === 'ArrowRight') { event.preventDefault(); goProfile(profileCarouselIndex + 1); }
-      });
-      carousel.addEventListener('scroll', function () {
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(function () {
-          var slides = carousel.querySelectorAll('.profiles-slide'), best = 0, distance = Infinity;
-          Array.prototype.forEach.call(slides, function (slide, index) {
-            var d = Math.abs((slide.offsetLeft - carousel.offsetLeft) - carousel.scrollLeft);
-            if (d < distance) { distance = d; best = index; }
-          });
-          profileCarouselIndex = best;
-          updateProfileNav();
-        }, 80);
-      });
       updateProfileNav();
     }
 
