@@ -91,7 +91,10 @@
       border: 1.5px solid var(--line); border-radius: 6px; padding: 8px 10px;
       background: #fff; transition: border-color .15s;
     }
-    input:focus, select:focus { outline: none; border-color: var(--blue); }
+    input:focus, select:focus, button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--blue); outline-offset: 2px; border-color: var(--blue);
+    }
+    select:disabled { background: #EDF2F6; color: var(--grey); cursor: not-allowed; }
     .hint { font-size: 11px; color: var(--grey); margin-top: 3px; line-height: 1.4; }
 
     /* ── sélecteur de formes ── */
@@ -122,11 +125,15 @@
     .subhead span { font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--grey); }
     .slider-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--grey); margin-top: 2px; }
     .check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px; cursor: pointer; }
+    .field > label.check { display: flex; }
     .check input { width: auto; }
     .vp-legend { display: flex; gap: 12px; font-size: 11px; color: var(--grey); margin-top: 8px; align-items: center; }
     .vp-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
     .vp-legend .sw-lens { background: #9ecbff; }
     .vp-legend .sw-frame { background: #4a4f57; }
+    .vp-legend .sw-front { background: #D83A3A; }
+    .vp-legend .sw-back { background: #238B57; }
+    .vp-legend-overhang[hidden] { display: none; }
 
     /* ── RÉSULTATS ── */
     .res-eyes { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -229,17 +236,14 @@
             <div class="field">
               <label for="coteA">Côte A (mm)</label>
               <input type="text" inputmode="decimal" id="coteA" value="52">
-              <div class="hint">Largeur de la boîte.</div>
             </div>
             <div class="field">
               <label for="coteB">Côte B (mm)</label>
               <input type="text" inputmode="decimal" id="coteB" value="42">
-              <div class="hint">Hauteur de la boîte.</div>
             </div>
             <div class="field">
               <label for="coteD">Côte D (mm)</label>
               <input type="text" inputmode="decimal" id="coteD" value="18">
-              <div class="hint">Pont = écart entre verres.</div>
             </div>
           </div>
         </section>
@@ -247,49 +251,59 @@
         <!-- ── VERRE ── -->
         <section class="card">
           <h2>Verre</h2>
-          <div class="row">
-            <div class="field">
-              <label for="indice">Indice</label>
-              <select id="indice">
-                <option value="1.5">CR39 — 1,50</option>
-                <option value="1.59">Polycarbonate — 1,59</option>
-                <option value="1.6">1,60</option>
-                <option value="1.67">1,67</option>
-                <option value="1.74">1,74</option>
-                <option value="1.8">Minéral — 1,80</option>
-                <option value="1.9">Minéral — 1,90</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="base">Base du verre (face avant)</label>
-              <select id="base">
-                <option value="auto" selected>Auto (selon puissance)</option>
-                <option value="0.5">Plate — +0,50</option>
-                <option value="2">+2,00</option>
-                <option value="2.5">+2,50</option>
-                <option value="4">+4,00</option>
-                <option value="6">+6,00</option>
-                <option value="8">+8,00</option>
-              </select>
-              <div class="hint">Le cylindre est porté par la face arrière (torique).</div>
-            </div>
+          <div class="field">
+            <label for="indice">Indice</label>
+            <select id="indice">
+              <option value="1.5">CR39 — 1,50</option>
+              <option value="1.59">Polycarbonate — 1,59</option>
+              <option value="1.6">1,60</option>
+              <option value="1.67">1,67</option>
+              <option value="1.74">1,74</option>
+              <option value="1.8">Minéral — 1,80</option>
+              <option value="1.9">Minéral — 1,90</option>
+            </select>
           </div>
           <div class="row">
             <div class="field">
-              <label for="ecentre">Ép. mini au centre (mm)</label>
-              <input type="text" inputmode="decimal" id="ecentre" value="1.2">
-              <div class="hint">Plancher — verres négatifs.</div>
+              <label class="check" for="base-speciale">
+                <input type="checkbox" id="base-speciale"> Base spéciale
+              </label>
+              <select id="base" disabled aria-label="Base spéciale de la face avant">
+                <option value="4">B4</option>
+                <option value="6">B6</option>
+                <option value="8">B8</option>
+              </select>
+              <div class="hint">Active une base face avant imposée. Sinon, la base est calculée automatiquement.</div>
             </div>
             <div class="field">
-              <label for="cerclage">Bord mini visé (mm)</label>
+              <label for="cerclage">Épaisseur au bord (mm)</label>
               <select id="cerclage">
-                <option value="0.4">0,4 — cerclée</option>
-                <option value="1.0" selected>1,0 — cerclée renforcée</option>
-                <option value="1.6">1,6 — nylor fil</option>
-                <option value="1.8">1,8 — nylor métal</option>
-                <option value="2.0">2,0 — percée</option>
+                <option value="0.1">0,1</option>
+                <option value="0.2">0,2</option>
+                <option value="0.3">0,3</option>
+                <option value="0.4">0,4</option>
+                <option value="0.5">0,5</option>
+                <option value="0.6">0,6</option>
+                <option value="0.7">0,7</option>
+                <option value="0.8">0,8</option>
+                <option value="0.9">0,9</option>
+                <option value="1.0" selected>1,0</option>
+                <option value="1.1">1,1</option>
+                <option value="1.2">1,2</option>
+                <option value="1.3">1,3</option>
+                <option value="1.4">1,4</option>
+                <option value="1.5">1,5</option>
+                <option value="1.6">1,6</option>
+                <option value="1.7">1,7</option>
+                <option value="1.8">1,8</option>
+                <option value="1.9">1,9</option>
+                <option value="2.0">2,0</option>
+                <option value="2.1">2,1</option>
+                <option value="2.2">2,2</option>
+                <option value="2.3">2,3</option>
+                <option value="2.4">2,4</option>
+                <option value="2.5">2,5</option>
               </select>
-              <div class="hint">Plancher — verres positifs (le type de monture est indicatif).</div>
             </div>
           </div>
         </section>
@@ -323,7 +337,7 @@
           <div class="eyes-actions">
             <button class="btn" type="button" id="copy-od-og">Copier OD → OG</button>
           </div>
-          <div class="hint">½ écart = demi-écart pupillaire <strong>monoculaire</strong> (axe du nez → pupille). Hauteur = hauteur de montage mesurée depuis le <strong>bas de la boîte</strong> (côte B). Saisie au point ou à la virgule.</div>
+          <div class="hint">Prise de mesure Boxing</div>
         </section>
 
 
@@ -360,19 +374,21 @@
             <button class="btn" type="button" id="btn-11">Vue 1:1</button>
           </div>
           <div class="vp-legend"><span><i class="sw-lens"></i>verre</span><span><i class="sw-frame"></i>monture</span></div>
-          <div class="hint" style="margin-top:8px;">Scène de montage à l'échelle réelle (mm) : verres ménisques (face avant convexe, arrière creusée) calés dans le drageoir du cerclage. Le bord du verre dépassant en avant/arrière du jonc se voit directement.</div>
-
+          <div class="vp-legend vp-legend-overhang" id="overhang-legend" hidden>
+            <span><i class="sw-front"></i>dépassement avant</span>
+            <span><i class="sw-back"></i>dépassement arrière</span>
+          </div>
           <div class="cal">
             <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> — cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, agrandissez/réduisez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
             <div class="cal-state" id="cal-state"></div>
           </div>
 
-          <div class="subhead">Montage <span>— réglage du rendu présenté au client (n'affecte pas les épaisseurs calculées)</span></div>
+          <div class="subhead">Montage</div>
           <label class="check"><input type="checkbox" id="show-frame" checked> Afficher la monture (cerclage)</label>
+          <label class="check"><input type="checkbox" id="show-overhang"> Colorer les dépassements du verre</label>
           <div class="field">
             <label for="m-ep">Épaisseur monture (mm)</label>
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
-            <div class="hint">Profondeur du cerclage (drageoir).</div>
           </div>
           <div class="field">
             <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
@@ -407,11 +423,13 @@
     var DEG = Math.PI / 180;
     var SEG = 120;             // échantillons angulaires du contour
     var BLANK_MARGIN = 2;      // marge de taillage pour le Ø mini palet (mm)
+    var MYOPE_CENTER_MIN = 1.2; // épaisseur mini fixe au centre pour un verre comportant une puissance négative
 
     var models = null;         // { od:{...}, og:{...}, common:{...} }
     var renderer3d = null;     // { update(geom), resetView(), profile(), setScale11() }
     var scale11 = false;       // mode 3D orthographique 1:1
-    var showFrame = true;       // afficher la monture (cerclage) dans la 3D
+    var showFrame = true;      // afficher la monture (cerclage) dans la 3D
+    var showOverhang = false;  // colorer les parties de tranche hors du cerclage
     var abTouched = false;      // l'utilisateur a saisi A/B manuellement → ne plus écraser
     var rafPending = false;     // coalescence des recalculs (debounce léger)
     function scheduleCompute() {
@@ -575,8 +593,7 @@
         if (delta > dMax) { dMax = delta; }
       }
 
-      var pureConvexe = pMin >= 0;
-      var cMin = Math.max(1.2, common.ctFloor);
+      var cMin = MYOPE_CENTER_MIN;
       // CT (épaisseur au centre) : assez épais pour tenir le bord mini ET le plancher au centre.
       var CT = Math.max(cMin, common.etFloor - dMin);
       var etMin = CT + dMin;     // bord le plus fin
@@ -588,7 +605,7 @@
         sph: sph, cyl: cyl, axeDeg: eye.axe, axeRad: axeRad, n: n, ax: ax, by: by, cfg: cfg, F1: F1,
         decX: decX, decY: decY, nasal: nasal,
         CT: CT, etMin: etMin, etMax: etMax, blank: blank,
-        pMin: pMin, pMax: pMax, type: type, pureConvexe: pureConvexe, centreFloored: Math.abs(CT - cMin) < 1e-6
+        pMin: pMin, pMax: pMax, type: type
       };
     }
 
@@ -616,8 +633,7 @@
         n: parseFloat(el('indice').value) || 1.5,
         A: pos('coteA', 52), B: pos('coteB', 42), D: pos('coteD', 18),
         etFloor: parseFloat(el('cerclage').value) || 0.4,
-        ctFloor: num('ecentre'),
-        baseMode: el('base').value,
+        baseMode: el('base-speciale').checked ? el('base').value : 'auto',
         montureEp: num('m-ep'),
         bevel: num('m-bevel')
       };
@@ -680,11 +696,6 @@
       // Notes métier (agrégées).
       var notes = [];
       var od = models.od, og = models.og;
-      var fb = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2); };
-      notes.push('Base face avant : OD ' + fb(od.F1) + ' D · OG ' + fb(og.F1) + ' D (face arrière torique).');
-      if (od.centreFloored || og.centreFloored) { notes.push('Centre porté à l’épaisseur mini sur au moins un verre.'); }
-      var maxBlank = Math.max(od.blank, og.blank);
-      notes.push('Palet à commander : Ø ≥ ' + fmt0(maxBlank) + ' (décentration comprise, marge de taillage ' + BLANK_MARGIN + ' mm).');
       if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentration temporale (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
       if (Math.abs(od.nasal) > 6 || Math.abs(og.nasal) > 6) { notes.push('⚠ Forte décentration (> 6 mm) : bord épais marqué, vérifier le diamètre disponible.'); }
 
@@ -778,8 +789,38 @@
       var Tf = Math.max(0.5, common.montureEp || 3.0);  // profondeur du cerclage
       var bevelOff = common.bevel || 0;    // calage du biseau (mm, + = vers l'arrière)
       var Wf = 1.7;                        // largeur radiale du jonc (mm) — cerclage fin
-      var verts = [], triL = [], triF = [];     // sommets partagés ; triangles verre / monture
+      var verts = [], triL = [], triF = [], triFront = [], triBack = [];
       function pushV(p) { verts.push(p); return verts.length - 1; }
+      function clippedQuad(T, pts, values, flip) {
+        var poly = pts.map(function (p, i) { return { p: p, d: values[i] }; });
+        var out = [], i;
+        function cross(a, b) {
+          var t = a.d / (a.d - b.d);
+          return {
+            p: [
+              a.p[0] + (b.p[0] - a.p[0]) * t,
+              a.p[1] + (b.p[1] - a.p[1]) * t,
+              a.p[2] + (b.p[2] - a.p[2]) * t
+            ],
+            d: 0
+          };
+        }
+        for (i = 0; i < poly.length; i++) {
+          var cur = poly[i], prev = poly[(i + poly.length - 1) % poly.length];
+          if (cur.d > 0) {
+            if (prev.d <= 0) { out.push(cross(prev, cur)); }
+            out.push(cur);
+          } else if (prev.d > 0) {
+            out.push(cross(prev, cur));
+          }
+        }
+        if (out.length < 3) { return; }
+        var ids = out.map(function (x) { return pushV(x.p); });
+        for (i = 1; i < ids.length - 1; i++) {
+          if (flip) { T.push(ids[0], ids[i + 1], ids[i]); }
+          else { T.push(ids[0], ids[i], ids[i + 1]); }
+        }
+      }
 
       // Profil du jonc (ρ radial vers l'extérieur, z axial relatif au centre du drageoir).
       // Cerclage fin : extérieur quasi droit, gorge en V vers l'intérieur (reçoit le biseau).
@@ -822,7 +863,7 @@
           }
         }
         // Biseau (verre) + jonc profilé (monture) sur l'anneau externe.
-        var lc = place(0, 0, 0), apex = [], ring = [], p;
+        var lc = place(0, 0, 0), apex = [], ring = [], frontLim = [], backLim = [], p;
         for (j = 0; j < SEG; j++) {
           var Fw = verts[base[RINGS][j]], Bw = verts[base[RINGS][j] + 1];
           var cx = (Fw[0] + Bw[0]) / 2, cy = (Fw[1] + Bw[1]) / 2;
@@ -831,6 +872,8 @@
           // Le drageoir suit le bord du verre déjà galbé (milieu d'épaisseur) — pas de courbure
           // supplémentaire : le galbe reste un wrap purement horizontal (visible de dessus seulement).
           var fcz = (Fw[2] + Bw[2]) / 2 + bevelOff;
+          frontLim[j] = fcz + Tf * 0.5;
+          backLim[j] = fcz - Tf * 0.5;
           apex[j] = pushV([cx + rdx * 0.35, cy + rdy * 0.35, fcz]);
           ring[j] = [];
           for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV([cx + rdx * PROF[p][0], cy + rdy * PROF[p][0], fcz + PROF[p][1]]); }
@@ -839,6 +882,26 @@
           var jn2 = (j + 1) % SEG, fI = base[RINGS][j], fIn = base[RINGS][jn2];
           quad(triL, fI, fIn, apex[jn2], apex[j]);            // biseau : avant → apex
           quad(triL, apex[j], apex[jn2], fIn + 1, fI + 1);    // biseau : apex → arrière
+          clippedQuad(triFront,
+            [verts[fI], verts[fIn], verts[apex[jn2]], verts[apex[j]]],
+            [
+              verts[fI][2] - frontLim[j],
+              verts[fIn][2] - frontLim[jn2],
+              verts[apex[jn2]][2] - frontLim[jn2],
+              verts[apex[j]][2] - frontLim[j]
+            ],
+            flip
+          );
+          clippedQuad(triBack,
+            [verts[apex[j]], verts[apex[jn2]], verts[fIn + 1], verts[fI + 1]],
+            [
+              backLim[j] - verts[apex[j]][2],
+              backLim[jn2] - verts[apex[jn2]][2],
+              backLim[jn2] - verts[fIn + 1][2],
+              backLim[j] - verts[fI + 1][2]
+            ],
+            flip
+          );
           for (p = 0; p < PROF.length; p++) {                 // jonc profilé
             var pn = (p + 1) % PROF.length;
             quad(triF, ring[j][p], ring[jn2][p], ring[jn2][pn], ring[j][pn]);
@@ -858,7 +921,7 @@
       for (v = 0; v < verts.length; v++) { positions[v * 3 + 2] -= zc; }   // recentrage en z
 
       var normals = new Float32Array(verts.length * 3);
-      var allTri = triL.concat(triF);
+      var allTri = triL.concat(triF, triFront, triBack);
       for (var t = 0; t < allTri.length; t += 3) {
         var ia = allTri[t], ib = allTri[t + 1], ic = allTri[t + 2];
         var ax = positions[ia * 3], ay = positions[ia * 3 + 1], az = positions[ia * 3 + 2];
@@ -881,6 +944,8 @@
         positions: positions, normals: normals,
         indicesLens: big ? new Uint32Array(triL) : new Uint16Array(triL),
         indicesFrame: big ? new Uint32Array(triF) : new Uint16Array(triF),
+        indicesFront: big ? new Uint32Array(triFront) : new Uint16Array(triFront),
+        indicesBack: big ? new Uint32Array(triBack) : new Uint16Array(triBack),
         radius: sceneRadius
       };
     }
@@ -943,7 +1008,9 @@
 
       var glassMat = new THREE.MeshStandardMaterial({ color: 0xdbecfb, metalness: 0.0, roughness: 0.07, transparent: true, opacity: 0.52, envMapIntensity: 1.5, side: THREE.DoubleSide, depthWrite: false });
       var frameMat = new THREE.MeshStandardMaterial({ color: 0x2a2e35, metalness: 0.35, roughness: 0.42, envMapIntensity: 0.85, side: THREE.DoubleSide });
-      var lensMesh = null, frameMesh = null, group = new THREE.Group(); scene.add(group);
+      var frontMat = new THREE.MeshStandardMaterial({ color: 0xd83a3a, roughness: 0.55, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+      var backMat = new THREE.MeshStandardMaterial({ color: 0x238b57, roughness: 0.55, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+      var lensMesh = null, frameMesh = null, frontMesh = null, backMesh = null, group = new THREE.Group(); scene.add(group);
       var radius = 60;
 
       function resize() {
@@ -953,6 +1020,8 @@
       function frame() {
         group.rotation.x = view.rx; group.rotation.y = view.ry;
         if (frameMesh) { frameMesh.visible = showFrame; }
+        if (frontMesh) { frontMesh.visible = showOverhang; }
+        if (backMesh) { backMesh.visible = showOverhang; }
         var cam;
         if (scale11) {
           var wmm = vp.clientWidth / pxPerMM, hmm = vp.clientHeight / pxPerMM;
@@ -971,14 +1040,22 @@
         update: function (g) {
           if (lensMesh) { group.remove(lensMesh); lensMesh.geometry.dispose(); }
           if (frameMesh) { group.remove(frameMesh); frameMesh.geometry.dispose(); }
+          if (frontMesh) { group.remove(frontMesh); frontMesh.geometry.dispose(); }
+          if (backMesh) { group.remove(backMesh); backMesh.geometry.dispose(); }
           var posA = new THREE.BufferAttribute(g.positions, 3), norA = new THREE.BufferAttribute(g.normals, 3);
           var fg = new THREE.BufferGeometry();
           fg.setAttribute('position', posA); fg.setAttribute('normal', norA); fg.setIndex(new THREE.BufferAttribute(g.indicesFrame, 1));
           var lg = new THREE.BufferGeometry();
           lg.setAttribute('position', posA); lg.setAttribute('normal', norA); lg.setIndex(new THREE.BufferAttribute(g.indicesLens, 1));
+          var frg = new THREE.BufferGeometry();
+          frg.setAttribute('position', posA); frg.setAttribute('normal', norA); frg.setIndex(new THREE.BufferAttribute(g.indicesFront, 1));
+          var brg = new THREE.BufferGeometry();
+          brg.setAttribute('position', posA); brg.setAttribute('normal', norA); brg.setIndex(new THREE.BufferAttribute(g.indicesBack, 1));
           frameMesh = new THREE.Mesh(fg, frameMat); frameMesh.renderOrder = 1;
           lensMesh = new THREE.Mesh(lg, glassMat); lensMesh.renderOrder = 2;
-          group.add(frameMesh); group.add(lensMesh);
+          frontMesh = new THREE.Mesh(frg, frontMat); frontMesh.renderOrder = 3; frontMesh.visible = showOverhang;
+          backMesh = new THREE.Mesh(brg, backMat); backMesh.renderOrder = 3; backMesh.visible = showOverhang;
+          group.add(frameMesh); group.add(lensMesh); group.add(frontMesh); group.add(backMesh);
           radius = g.radius; resize(); frame();
         },
         resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
@@ -1009,7 +1086,10 @@
       var mvpLoc = gl.getUniformLocation(prog, 'uMVP'), mLoc = gl.getUniformLocation(prog, 'uM');
       var colLoc = gl.getUniformLocation(prog, 'uColor'), glassLoc = gl.getUniformLocation(prog, 'uGlass');
       var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), iBufL = gl.createBuffer(), iBufF = gl.createBuffer();
-      var countL = 0, countF = 0, radius = 60, idxTypeL = gl.UNSIGNED_SHORT, idxTypeF = gl.UNSIGNED_SHORT;
+      var iBufFront = gl.createBuffer(), iBufBack = gl.createBuffer();
+      var countL = 0, countF = 0, countFront = 0, countBack = 0, radius = 60;
+      var idxTypeL = gl.UNSIGNED_SHORT, idxTypeF = gl.UNSIGNED_SHORT;
+      var idxTypeFront = gl.UNSIGNED_SHORT, idxTypeBack = gl.UNSIGNED_SHORT;
 
       function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
       function persp(fov, asp, nr, fr) { var f = 1 / Math.tan(fov / 2); return new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, (2 * fr * nr) / (nr - fr), 0]); }
@@ -1045,6 +1125,14 @@
         gl.uniform3f(colLoc, 0.80, 0.88, 1.0); gl.uniform1f(glassLoc, 1.0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.drawElements(gl.TRIANGLES, countL, idxTypeL, 0);
         gl.depthMask(true);
+        if (showOverhang) {
+          gl.disable(gl.BLEND); gl.depthMask(true);
+          gl.uniform1f(glassLoc, 0.0);
+          gl.uniform3f(colLoc, 0.85, 0.23, 0.23);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufFront); gl.drawElements(gl.TRIANGLES, countFront, idxTypeFront, 0);
+          gl.uniform3f(colLoc, 0.14, 0.55, 0.34);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufBack); gl.drawElements(gl.TRIANGLES, countBack, idxTypeBack, 0);
+        }
       }
       window.addEventListener('resize', function () { resize(); frame(); });
       attachControls(vp, frame);
@@ -1053,16 +1141,23 @@
 
       renderer3d = {
         update: function (g) {
-          var idxL = g.indicesLens, idxF = g.indicesFrame;
+          var idxL = g.indicesLens, idxF = g.indicesFrame, idxFront = g.indicesFront, idxBack = g.indicesBack;
           if (idxL instanceof Uint32Array && !uintOK) { idxL = new Uint16Array(idxL); }
           if (idxF instanceof Uint32Array && !uintOK) { idxF = new Uint16Array(idxF); }
+          if (idxFront instanceof Uint32Array && !uintOK) { idxFront = new Uint16Array(idxFront); }
+          if (idxBack instanceof Uint32Array && !uintOK) { idxBack = new Uint16Array(idxBack); }
           idxTypeL = (idxL instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           idxTypeF = (idxF instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+          idxTypeFront = (idxFront instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+          idxTypeBack = (idxBack instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, g.positions, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, g.normals, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxL, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxF, gl.STATIC_DRAW);
-          countL = idxL.length; countF = idxF.length; radius = g.radius; resize(); frame();
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufFront); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxFront, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufBack); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxBack, gl.STATIC_DRAW);
+          countL = idxL.length; countF = idxF.length; countFront = idxFront.length; countBack = idxBack.length;
+          radius = g.radius; resize(); frame();
         },
         resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
         profile: function () { view.rx = 0; view.ry = Math.PI / 2; frame(); },
@@ -1165,6 +1260,15 @@
       showFrame = this.checked;
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
     });
+    el('show-overhang').addEventListener('change', function () {
+      showOverhang = this.checked;
+      el('overhang-legend').hidden = !showOverhang;
+      if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
+    });
+    el('base-speciale').addEventListener('change', function () {
+      el('base').disabled = !this.checked;
+      scheduleCompute();
+    });
     el('btn-11').addEventListener('click', function () {
       scale11 = !scale11;
       el('btn-11').textContent = scale11 ? 'Échelle libre' : 'Vue 1:1';
@@ -1178,7 +1282,7 @@
     });
     el('coteA').addEventListener('input', function () { abTouched = true; });
     el('coteB').addEventListener('input', function () { abTouched = true; });
-    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'ecentre', 'base', 'm-ep', 'm-bevel',
+    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'base', 'm-ep', 'm-bevel',
      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h'].forEach(function (id) {
       el(id).addEventListener('input', scheduleCompute);
