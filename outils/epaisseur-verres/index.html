@@ -552,7 +552,7 @@
       return SE - F2;                                          // face avant = complément
     }
 
-    // Calcule un œil : décentration, base avant, balayage du contour réel, épaisseurs et Ø mini.
+    // Calcule un œil : décentrement, base avant, balayage du contour réel, épaisseurs et Ø mini.
     // Modèle ménisque : face avant sphérique (base F1), face arrière torique (F2 = P − F1).
     // Épaisseur axiale au rayon r : t(r) = CT + flèche_arrière(r) − flèche_avant(r).
     function eyeResult(eye, common, side) {
@@ -564,7 +564,7 @@
       // Axe TABO mesuré depuis l'horizontal. En repère canonique (temporal = +x), l'OD est miroir.
       var axeRad = (side === 'od' ? (180 - eye.axe) : eye.axe) * DEG;
 
-      // Décentration du centre optique p/r au centre-boîte (repère canonique : nasal = -x).
+      // Décentrement du centre optique p/r au centre-boîte (repère canonique : nasal = -x).
       var nasal = (common.A + common.D) / 2 - eye.pd;   // > 0 : décentré en nasal
       var decX = -nasal;
       var decY = eye.h - by;                            // > 0 : OC au-dessus du centre-boîte
@@ -696,8 +696,7 @@
       // Notes métier (agrégées).
       var notes = [];
       var od = models.od, og = models.og;
-      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentration temporale (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
-      if (Math.abs(od.nasal) > 6 || Math.abs(og.nasal) > 6) { notes.push('⚠ Forte décentration (> 6 mm) : bord épais marqué, vérifier le diamètre disponible.'); }
+      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentrement temporal (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
 
       var nEl = el('notes');
       nEl.innerHTML = notes.length ? '<ul>' + notes.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>' : '';
