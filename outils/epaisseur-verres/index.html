@@ -192,23 +192,44 @@
     .ruler .rl { position: absolute; bottom: 13px; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: rgba(255,255,255,.9); }
     .ruler .rcm { position: absolute; bottom: 13px; left: 4px; font-size: 9px; color: rgba(255,255,255,.7); }
 
-    /* ── coupe 2D ── */
-    .sec-eye { margin-bottom: 12px; }
-    .sec-eye:last-child { margin-bottom: 0; }
-    .sec-eye__hd { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-    .sec-eye__hd b { font-size: 14px; color: var(--blue-d); }
-    .sec-eye__hd span { font-size: 11px; color: var(--grey); }
-    #sections { overflow-x: auto; }
-    .sec-eye svg { display: block; max-width: none; background: #F8FBFE; border: 1px solid var(--line); border-radius: 8px; }
+    /* ── vues 2D ── */
+    .profiles-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .profiles-head h2 { margin: 0; }
+    .profiles-nav { display: flex; align-items: center; gap: 7px; }
+    .profiles-nav .btn { min-width: 38px; min-height: 38px; padding: 6px 10px; font-size: 18px; line-height: 1; }
+    .profiles-nav .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .profiles-status { min-width: 116px; text-align: center; font-size: 11px; font-weight: 700; color: var(--grey); }
+    .profiles-carousel {
+      display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+      scroll-behavior: smooth; scrollbar-width: thin; padding-bottom: 8px;
+    }
+    .profiles-carousel:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    .profiles-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+    .profiles-slide h3 { font-size: 14px; color: var(--blue-d); margin-bottom: 10px; }
+    .profiles-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .profile-eye { min-width: 0; padding: 10px; background: #F8FBFE; border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+    .profile-eye__hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 7px; flex-wrap: wrap; }
+    .profile-eye__hd b { font-size: 14px; color: var(--blue-d); }
+    .profile-eye__hd span { font-size: 10.5px; font-weight: 700; color: var(--grey); }
+    .profile-eye svg { display: block; width: 100%; min-width: 280px; height: auto; }
+    .profile-axis-summary { margin-top: 7px; font-size: 10.5px; font-weight: 600; color: var(--grey); line-height: 1.5; }
     .sec-glass { fill: #CFE6FF; stroke: var(--blue-d); stroke-width: 1; }
-    .sec-dim { stroke: var(--grey); stroke-width: 1; }
     .sec-axis { stroke: #B86A00; stroke-width: 1; stroke-dasharray: 4 3; }
+    .sec-counter { stroke: var(--blue); stroke-width: 1; stroke-dasharray: 2 3; }
+    .sec-mark { fill: var(--blue-d); }
     .sec-txt { font: 700 11px "Manrope", sans-serif; fill: var(--ink); }
     .sec-txt.mut { font-weight: 600; fill: var(--grey); }
+    .map-angle { font: 600 8px "Manrope", sans-serif; fill: var(--grey); }
+    .map-value { font: 800 9px "Manrope", sans-serif; fill: var(--ink); }
 
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
       #viewport { height: 70vw; min-height: 300px; }
+    }
+    @media (max-width: 640px) {
+      .profiles-grid { grid-template-columns: 1fr; }
+      .profiles-head { align-items: flex-start; }
+      .profiles-status { min-width: 90px; }
     }
   </style>
 </head>
@@ -354,7 +375,7 @@
         </section>
       </div>
 
-      <!-- ── COLONNE DROITE : 3D + coupe ── -->
+      <!-- ── COLONNE DROITE : 3D + profils ── -->
       <div>
       <section class="card viewer-card">
         <div class="viewer-head">
@@ -368,6 +389,11 @@
           <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer</div>
         </div>
         <div style="padding:12px 16px;">
+          <div class="field">
+            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
+            <input type="range" id="m-bevel" min="-3" max="3" step="0.1" value="0">
+            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
+          </div>
           <div class="btn-row">
             <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
             <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
@@ -390,18 +416,36 @@
             <label for="m-ep">Épaisseur monture (mm)</label>
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
           </div>
-          <div class="field">
-            <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
-            <input type="range" id="m-bevel" min="-3" max="3" step="0.25" value="0">
-            <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
-          </div>
         </div>
       </section>
 
-      <section class="card" style="margin-top:16px;">
-        <h2>Coupe horizontale (profil réel · 1:1)</h2>
-        <div id="sections"></div>
-        <div class="hint" style="margin-top:6px;">Section au niveau du centre optique. Échelle réelle (1:1) : largeur et épaisseur à la même échelle. Côté <strong>temporal</strong> à l'extérieur, <strong>nasal</strong> vers le pont.</div>
+      <section class="card" style="margin-top:16px;" aria-labelledby="profiles-title">
+        <div class="profiles-head">
+          <h2 id="profiles-title">Profils et cartographie des épaisseurs</h2>
+          <div class="profiles-nav">
+            <button class="btn" type="button" id="profiles-prev" aria-label="Vue précédente">&#8592;</button>
+            <span class="profiles-status" id="profiles-status" aria-live="polite"></span>
+            <button class="btn" type="button" id="profiles-next" aria-label="Vue suivante">&#8594;</button>
+          </div>
+        </div>
+        <div class="profiles-carousel" id="profiles-carousel" tabindex="0" aria-label="Vues 2D des verres">
+          <article class="profiles-slide" data-profile-title="Profil temporal">
+            <h3>Profil côté temporal</h3>
+            <div class="profiles-grid" id="profile-temporal"></div>
+          </article>
+          <article class="profiles-slide" data-profile-title="Vue du dessus">
+            <h3>Vue du dessus</h3>
+            <div class="profiles-grid" id="profile-top"></div>
+          </article>
+          <article class="profiles-slide" data-profile-title="Vue du dessous">
+            <h3>Vue du dessous</h3>
+            <div class="profiles-grid" id="profile-bottom"></div>
+          </article>
+          <article class="profiles-slide" data-profile-title="Vue de face">
+            <h3>Cartographie des épaisseurs — vue de face</h3>
+            <div class="profiles-grid" id="profile-face"></div>
+          </article>
+        </div>
       </section>
       </div>
 
@@ -552,7 +596,7 @@
       return SE - F2;                                          // face avant = complément
     }
 
-    // Calcule un œil : décentration, base avant, balayage du contour réel, épaisseurs et Ø mini.
+    // Calcule un œil : décentrement, base avant, balayage du contour réel, épaisseurs et Ø mini.
     // Modèle ménisque : face avant sphérique (base F1), face arrière torique (F2 = P − F1).
     // Épaisseur axiale au rayon r : t(r) = CT + flèche_arrière(r) − flèche_avant(r).
     function eyeResult(eye, common, side) {
@@ -564,7 +608,7 @@
       // Axe TABO mesuré depuis l'horizontal. En repère canonique (temporal = +x), l'OD est miroir.
       var axeRad = (side === 'od' ? (180 - eye.axe) : eye.axe) * DEG;
 
-      // Décentration du centre optique p/r au centre-boîte (repère canonique : nasal = -x).
+      // Décentrement du centre optique p/r au centre-boîte (repère canonique : nasal = -x).
       var nasal = (common.A + common.D) / 2 - eye.pd;   // > 0 : décentré en nasal
       var decX = -nasal;
       var decY = eye.h - by;                            // > 0 : OC au-dessus du centre-boîte
@@ -696,88 +740,198 @@
       // Notes métier (agrégées).
       var notes = [];
       var od = models.od, og = models.og;
-      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentration temporale (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
-      if (Math.abs(od.nasal) > 6 || Math.abs(og.nasal) > 6) { notes.push('⚠ Forte décentration (> 6 mm) : bord épais marqué, vérifier le diamètre disponible.'); }
+      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentrement temporal (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
 
       var nEl = el('notes');
       nEl.innerHTML = notes.length ? '<ul>' + notes.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>' : '';
 
-      renderSections();
+      renderProfiles();
     }
 
-    /* ═══════════ COUPE 2D (profil réel, 1:1) ═══════════ */
+    /* ═══════════ VUES 2D DES ÉPAISSEURS ═══════════ */
     function inContour(cfg, X, Y, ax, by) {
       var ang = Math.atan2(Y, X);
       return Math.hypot(X, Y) <= frameRadius(cfg, ang, ax, by);
     }
-    // Distance (mm) du centre optique au bord, le long de l'horizontale (sign +1 = temporal, -1 = nasal).
-    function horizExtent(m, sign) {
-      var step = 0.5, last = 0;
-      for (var k = 1; k <= 240; k++) {
-        var u = k * step;
-        if (inContour(m.cfg, m.decX + sign * u, m.decY, m.ax, m.by)) { last = u; } else { break; }
+
+    function edgePoint(m, theta) {
+      var step = 0.25, last = 0, cx = Math.cos(theta), cy = Math.sin(theta);
+      for (var k = 1; k <= 480; k++) {
+        var t = k * step;
+        if (inContour(m.cfg, m.decX + t * cx, m.decY + t * cy, m.ax, m.by)) { last = t; } else { break; }
       }
-      return last;
+      var X = m.decX + last * cx, Y = m.decY + last * cy;
+      var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
+      var zf = -surfSag(m.F1, last, m.n);
+      var zb = -m.CT - surfSag(P - m.F1, last, m.n);
+      return { X: X, Y: Y, theta: theta, zf: zf, zb: zb, thickness: zf - zb };
     }
 
-    // Construit le SVG d'une coupe horizontale au niveau du centre optique (échelle réelle 1:1).
-    function sectionSVG(m) {
-      var n = m.n, F1 = m.F1, CT = m.CT;
-      var Ph = powerAt(0, m.sph, m.cyl, m.axeRad);   // puissance du méridien horizontal
-      var backBase = Ph - F1;
-      var uT = horizExtent(m, 1), uN = horizExtent(m, -1);
-      if (uT + uN < 1) { uT = m.ax; uN = m.ax; }      // garde-fou (OC hors contour)
-
-      var N = 120, pts = [], i, u, r, yf, yb, minY = Infinity, maxY = -Infinity;
-      for (i = 0; i <= N; i++) {
-        u = -uN + (uT + uN) * i / N; r = Math.abs(u);
-        yf = -surfSag(F1, r, n);
-        yb = -CT - surfSag(Ph - F1, r, n);
-        pts.push([u, yf, yb]);
-        if (yf > maxY) { maxY = yf; }
-        if (yb < minY) { minY = yb; }
-      }
-
-      var chord = uT + uN;
-      var SCALE = pxPerMM;                             // px CSS / mm → vrai 1:1
-      var padX = 50, padTop = 22, padBot = 34;
-      var W = chord * SCALE + padX * 2;
-      var H = (maxY - minY) * SCALE + padTop + padBot;
-      var sx = function (uu) { return (padX + (uu + uN) * SCALE).toFixed(1); };
-      var sy = function (yy) { return (padTop + (maxY - yy) * SCALE).toFixed(1); };
-
-      var front = '', back = '';
-      for (i = 0; i <= N; i++) { front += (i ? 'L' : 'M') + sx(pts[i][0]) + ' ' + sy(pts[i][1]); }
-      for (i = N; i >= 0; i--) { back += 'L' + sx(pts[i][0]) + ' ' + sy(pts[i][2]); }
-
-      var etN = pts[0][1] - pts[0][2];                 // bord nasal
-      var etT = pts[N][1] - pts[N][2];                 // bord temporal
-      var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-
-      var s = '<svg width="' + W.toFixed(0) + '" height="' + H.toFixed(0) + '" viewBox="0 0 ' + W.toFixed(0) + ' ' + H.toFixed(0) + '" role="img">';
-      s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
-      s += '<line class="sec-axis" x1="' + sx(0) + '" y1="' + (padTop - 8) + '" x2="' + sx(0) + '" y2="' + (H - padBot + 12).toFixed(1) + '"/>';
-      s += '<text class="sec-txt mut" x="4" y="' + (padTop + 4) + '">avant</text>';
-      s += '<text class="sec-txt mut" x="4" y="' + (H - padBot + 6).toFixed(1) + '">arrière</text>';
-      s += '<text class="sec-txt" text-anchor="middle" x="' + sx(0) + '" y="13">centre ' + f2(CT) + ' mm</text>';
-      s += '<text class="sec-txt" text-anchor="start" x="' + sx(-uN) + '" y="' + (H - 9).toFixed(1) + '">nasal ' + f2(etN) + '</text>';
-      s += '<text class="sec-txt" text-anchor="end" x="' + sx(uT) + '" y="' + (H - 9).toFixed(1) + '">temporal ' + f2(etT) + '</text>';
-      s += '</svg>';
-      return { svg: s, backBase: backBase };
+    function rimPoint(m, phi) {
+      var rc = frameRadius(m.cfg, phi, m.ax, m.by);
+      var X = rc * Math.cos(phi), Y = rc * Math.sin(phi);
+      var dx = X - m.decX, dy = Y - m.decY;
+      var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
+      var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
+      var zf = -surfSag(m.F1, r, m.n);
+      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+      return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
 
-    function renderSections() {
-      var wrap = el('sections');
-      while (wrap.firstChild) { wrap.removeChild(wrap.firstChild); }
-      var fb = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2); };
-      [['OD', models.od], ['OG', models.og]].forEach(function (p) {
-        var res = sectionSVG(p[1]);
-        var div = document.createElement('div');
-        div.className = 'sec-eye';
-        div.innerHTML = '<div class="sec-eye__hd"><b>' + p[0] + '</b>' +
-          '<span>base avant ' + fb(p[1].F1) + ' D · base arrière ' + fb(res.backBase) + ' D (méridien horizontal)</span></div>' + res.svg;
-        wrap.appendChild(div);
+    function profileSVG(m, view) {
+      var range = view === 'temporal' ? [-Math.PI / 2, Math.PI / 2] :
+        view === 'top' ? [0, Math.PI] : [Math.PI, 2 * Math.PI];
+      var pts = [], i;
+      for (i = 0; i <= 90; i++) {
+        var p = rimPoint(m, range[0] + (range[1] - range[0]) * i / 90);
+        p.u = view === 'temporal' ? p.Y : p.X;
+        pts.push(p);
+      }
+      pts.sort(function (a, b) { return a.u - b.u; });
+
+      var uMin = Infinity, uMax = -Infinity, zMin = Infinity, zMax = -Infinity;
+      var minPt = pts[0], maxPt = pts[0];
+      pts.forEach(function (p) {
+        uMin = Math.min(uMin, p.u); uMax = Math.max(uMax, p.u);
+        zMin = Math.min(zMin, p.zb); zMax = Math.max(zMax, p.zf);
+        if (p.thickness < minPt.thickness) { minPt = p; }
+        if (p.thickness > maxPt.thickness) { maxPt = p; }
       });
+      var W = 420, H = 210, padX = 42, padY = 38;
+      var scale = Math.min((W - padX * 2) / Math.max(1, uMax - uMin), (H - padY * 2) / Math.max(1, zMax - zMin));
+      var usedH = (zMax - zMin) * scale;
+      var y0 = padY + ((H - padY * 2) - usedH) / 2;
+      var sx = function (u) { return padX + (u - uMin) * scale; };
+      var sy = function (z) { return y0 + (zMax - z) * scale; };
+      var front = '', back = '';
+      pts.forEach(function (p, n) { front += (n ? 'L' : 'M') + sx(p.u).toFixed(1) + ' ' + sy(p.zf).toFixed(1); });
+      for (i = pts.length - 1; i >= 0; i--) { back += 'L' + sx(pts[i].u).toFixed(1) + ' ' + sy(pts[i].zb).toFixed(1); }
+      var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+      var labels = view === 'temporal' ? ['bas', 'haut'] : ['nasal', 'temporal'];
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profil ' + view + ', épaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
+      s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
+      s += '<circle class="sec-mark" cx="' + sx(minPt.u).toFixed(1) + '" cy="' + sy((minPt.zf + minPt.zb) / 2).toFixed(1) + '" r="3"/>';
+      s += '<circle class="sec-mark" cx="' + sx(maxPt.u).toFixed(1) + '" cy="' + sy((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" r="3"/>';
+      s += '<text class="sec-txt mut" x="5" y="18">avant</text>';
+      s += '<text class="sec-txt mut" x="5" y="' + (H - 12) + '">arrière</text>';
+      s += '<text class="sec-txt mut" text-anchor="start" x="' + padX + '" y="' + (H - 8) + '">' + labels[0] + '</text>';
+      s += '<text class="sec-txt mut" text-anchor="end" x="' + (W - padX) + '" y="' + (H - 8) + '">' + labels[1] + '</text>';
+      s += '</svg>';
+      return { svg: s, min: minPt.thickness, max: maxPt.thickness };
+    }
+
+    function degreeNorm(deg) { return ((Math.round(deg) % 180) + 180) % 180; }
+
+    function faceMapSVG(m, side) {
+      var W = 440, H = 360, cx = W / 2, cy = 164;
+      var scale = Math.min((W - 150) / (m.ax * 2), (H - 112) / (m.by * 2));
+      var mirror = side === 'od' ? -1 : 1;
+      var sx = function (X) { return cx + mirror * X * scale; };
+      var sy = function (Y) { return cy - Y * scale; };
+      var path = '', k;
+      for (k = 0; k <= SEG; k++) {
+        var phi = 2 * Math.PI * k / SEG;
+        var rc = frameRadius(m.cfg, phi, m.ax, m.by);
+        path += (k ? 'L' : 'M') + sx(rc * Math.cos(phi)).toFixed(1) + ' ' + sy(rc * Math.sin(phi)).toFixed(1);
+      }
+      path += 'Z';
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Cartographie des épaisseurs tous les 30 degrés">';
+      s += '<path class="sec-glass" d="' + path + '"/>';
+
+      function axisLine(theta, cls) {
+        var a = edgePoint(m, theta), b = edgePoint(m, theta + Math.PI);
+        return '<line class="' + cls + '" x1="' + sx(a.X).toFixed(1) + '" y1="' + sy(a.Y).toFixed(1) +
+          '" x2="' + sx(b.X).toFixed(1) + '" y2="' + sy(b.Y).toFixed(1) + '"/>';
+      }
+      if (Math.abs(m.cyl) > 1e-6) {
+        s += axisLine(m.axeRad, 'sec-axis');
+        s += axisLine(m.axeRad + Math.PI / 2, 'sec-counter');
+      }
+      s += '<circle class="sec-mark" cx="' + sx(m.decX).toFixed(1) + '" cy="' + sy(m.decY).toFixed(1) + '" r="3"/>';
+
+      for (k = 0; k < 360; k += 30) {
+        var theta = (side === 'od' ? 180 - k : k) * DEG;
+        var ep = edgePoint(m, theta);
+        var dx = mirror * Math.cos(theta), dy = -Math.sin(theta);
+        var lx = sx(ep.X) + dx * 24, ly = sy(ep.Y) + dy * 24;
+        var anchor = dx > 0.3 ? 'start' : dx < -0.3 ? 'end' : 'middle';
+        s += '<circle class="sec-mark" cx="' + sx(ep.X).toFixed(1) + '" cy="' + sy(ep.Y).toFixed(1) + '" r="2.3"/>';
+        s += '<text class="map-angle" text-anchor="' + anchor + '" x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '">' + k + '°</text>';
+        s += '<text class="map-value" text-anchor="' + anchor + '" x="' + lx.toFixed(1) + '" y="' + (ly + 8).toFixed(1) + '">' + ep.thickness.toFixed(2).replace('.', ',') + '</text>';
+      }
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + cx + '" y="' + (H - 8) + '">valeurs en mm</text>';
+      s += '</svg>';
+
+      var summary = 'Sans astigmatisme';
+      if (Math.abs(m.cyl) > 1e-6) {
+        var a1 = edgePoint(m, m.axeRad), a2 = edgePoint(m, m.axeRad + Math.PI);
+        var c1 = edgePoint(m, m.axeRad + Math.PI / 2), c2 = edgePoint(m, m.axeRad - Math.PI / 2);
+        summary = 'Axe ' + degreeNorm(m.axeDeg) + '° : ' + fmt(a1.thickness) + ' / ' + fmt(a2.thickness) +
+          ' · Contre-axe ' + degreeNorm(m.axeDeg + 90) + '° : ' + fmt(c1.thickness) + ' / ' + fmt(c2.thickness);
+      }
+      return { svg: s, summary: summary };
+    }
+
+    function profileEyeHTML(name, m, view) {
+      var res = profileSVG(m, view);
+      return '<div class="profile-eye"><div class="profile-eye__hd"><b>' + name + '</b><span>mini ' +
+        fmt(res.min) + ' · maxi ' + fmt(res.max) + '</span></div>' + res.svg + '</div>';
+    }
+
+    function faceEyeHTML(name, m, side) {
+      var res = faceMapSVG(m, side);
+      return '<div class="profile-eye"><div class="profile-eye__hd"><b>' + name + '</b><span>mini ' +
+        fmt(m.etMin) + ' · maxi ' + fmt(m.etMax) + '</span></div>' + res.svg +
+        '<div class="profile-axis-summary">' + res.summary + '</div></div>';
+    }
+
+    function renderProfiles() {
+      ['temporal', 'top', 'bottom'].forEach(function (view) {
+        el('profile-' + view).innerHTML = profileEyeHTML('OD', models.od, view) + profileEyeHTML('OG', models.og, view);
+      });
+      el('profile-face').innerHTML = faceEyeHTML('OD', models.od, 'od') + faceEyeHTML('OG', models.og, 'og');
+    }
+
+    var profileCarouselIndex = 0;
+    function updateProfileNav() {
+      var carousel = el('profiles-carousel');
+      var slides = carousel.querySelectorAll('.profiles-slide');
+      profileCarouselIndex = Math.max(0, Math.min(slides.length - 1, profileCarouselIndex));
+      el('profiles-prev').disabled = profileCarouselIndex === 0;
+      el('profiles-next').disabled = profileCarouselIndex === slides.length - 1;
+      el('profiles-status').textContent = (profileCarouselIndex + 1) + ' / ' + slides.length + ' · ' +
+        slides[profileCarouselIndex].getAttribute('data-profile-title');
+    }
+
+    function goProfile(index) {
+      var carousel = el('profiles-carousel');
+      var slides = carousel.querySelectorAll('.profiles-slide');
+      profileCarouselIndex = Math.max(0, Math.min(slides.length - 1, index));
+      carousel.scrollTo({ left: slides[profileCarouselIndex].offsetLeft - carousel.offsetLeft, behavior: 'smooth' });
+      updateProfileNav();
+    }
+
+    function initProfilesCarousel() {
+      var carousel = el('profiles-carousel'), scrollTimer = null;
+      el('profiles-prev').addEventListener('click', function () { goProfile(profileCarouselIndex - 1); });
+      el('profiles-next').addEventListener('click', function () { goProfile(profileCarouselIndex + 1); });
+      carousel.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowLeft') { event.preventDefault(); goProfile(profileCarouselIndex - 1); }
+        if (event.key === 'ArrowRight') { event.preventDefault(); goProfile(profileCarouselIndex + 1); }
+      });
+      carousel.addEventListener('scroll', function () {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function () {
+          var slides = carousel.querySelectorAll('.profiles-slide'), best = 0, distance = Infinity;
+          Array.prototype.forEach.call(slides, function (slide, index) {
+            var d = Math.abs((slide.offsetLeft - carousel.offsetLeft) - carousel.scrollLeft);
+            if (d < distance) { distance = d; best = index; }
+          });
+          profileCarouselIndex = best;
+          updateProfileNav();
+        }, 80);
+      });
+      updateProfileNav();
     }
 
     /* ═══════════ GÉOMÉTRIE 3D : scène de montage ═══════════ */
@@ -1245,13 +1399,14 @@
     }
     function applyScale() {
       updateScaleState(); updateRuler();
-      if (models) { renderSections(); }
+      if (models) { renderProfiles(); }
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
     }
 
     /* ═══════════ INIT ═══════════ */
     buildShapeButtons();
     updateScaleState();
+    initProfilesCarousel();
 
     el('cal-reset').addEventListener('click', function () {
       pxPerMM = DEFAULT_PPMM; saveCal(); applyScale();
