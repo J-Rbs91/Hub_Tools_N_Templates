@@ -433,8 +433,8 @@
           </div>
         </div>
         <div class="profiles-carousel" id="profiles-carousel" tabindex="0" aria-label="Vues 2D des verres">
-          <article class="profiles-slide" data-profile-title="Profil temporal">
-            <h3>Profil côté temporal</h3>
+          <article class="profiles-slide" data-profile-title="Vue côté temporal">
+            <h3>Vue de profil côté temporal — depuis la tempe</h3>
             <div class="profiles-grid" id="profile-temporal"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessus">
@@ -862,6 +862,15 @@
       return Math.hypot(X, Y) <= frameRadius(cfg, ang, ax, by);
     }
 
+    function surfacePoint(m, X, Y) {
+      var dx = X - m.decX, dy = Y - m.decY;
+      var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
+      var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
+      var zf = -surfSag(m.F1, r, m.n);
+      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+      return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
+    }
+
     function edgePoint(m, theta) {
       var step = 0.25, last = 0, cx = Math.cos(theta), cy = Math.sin(theta);
       for (var k = 1; k <= 480; k++) {
@@ -886,13 +895,68 @@
       return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
 
+    // Projection reelle du verre vu depuis la tempe. Pour chaque hauteur, on conserve
+    // la surface la plus en avant et la surface la plus en arriere sur toute la largeur.
+    function temporalProfileSVG(m) {
+      var rows = [], edgePts = [], yi, xi;
+      for (yi = 0; yi <= 120; yi++) {
+        var Y = -m.by + 2 * m.by * yi / 120;
+        var front = null, back = null;
+        for (xi = 0; xi <= 240; xi++) {
+          var X = -m.ax + 2 * m.ax * xi / 240;
+          if (!inContour(m.cfg, X, Y, m.ax, m.by)) { continue; }
+          var p = surfacePoint(m, X, Y);
+          if (!front || p.zf > front.zf) { front = p; }
+          if (!back || p.zb < back.zb) { back = p; }
+        }
+        if (front && back) { rows.push({ Y: Y, zf: front.zf, zb: back.zb }); }
+      }
+      for (yi = 0; yi < SEG; yi++) { edgePts.push(rimPoint(m, 2 * Math.PI * yi / SEG)); }
+
+      var minPt = edgePts[0], maxPt = edgePts[0];
+      edgePts.forEach(function (p) {
+        if (p.thickness < minPt.thickness) { minPt = p; }
+        if (p.thickness > maxPt.thickness) { maxPt = p; }
+      });
+
+      var yMin = -m.by, yMax = m.by;
+      var zMin = Infinity, zMax = -Infinity;
+      rows.forEach(function (p) { zMin = Math.min(zMin, p.zb); zMax = Math.max(zMax, p.zf); });
+
+      var W = 420, H = 250, padX = 62, padY = 34;
+      var scale = Math.min((W - padX * 2) / Math.max(1, zMax - zMin), (H - padY * 2) / Math.max(1, yMax - yMin));
+      var usedW = (zMax - zMin) * scale, usedH = (yMax - yMin) * scale;
+      var x0 = padX + ((W - padX * 2) - usedW) / 2;
+      var y0 = padY + ((H - padY * 2) - usedH) / 2;
+      var sx = function (z) { return x0 + (zMax - z) * scale; };
+      var sy = function (Y) { return y0 + (yMax - Y) * scale; };
+      var frontPath = '', backPath = '', i;
+      for (i = rows.length - 1; i >= 0; i--) {
+        frontPath += (i === rows.length - 1 ? 'M' : 'L') + sx(rows[i].zf).toFixed(1) + ' ' + sy(rows[i].Y).toFixed(1);
+      }
+      for (i = 0; i < rows.length; i++) {
+        backPath += 'L' + sx(rows[i].zb).toFixed(1) + ' ' + sy(rows[i].Y).toFixed(1);
+      }
+      var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profil vu depuis la tempe, face avant a gauche, epaisseur minimum ' + f2(m.etMin) + ' mm, maximum ' + f2(m.etMax) + ' mm">';
+      s += '<path class="sec-glass" d="' + frontPath + backPath + 'Z"/>';
+      s += '<circle class="sec-mark" cx="' + sx((minPt.zf + minPt.zb) / 2).toFixed(1) + '" cy="' + sy(minPt.Y).toFixed(1) + '" r="3"/>';
+      s += '<circle class="sec-mark" cx="' + sx((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" cy="' + sy(maxPt.Y).toFixed(1) + '" r="3"/>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="72" y="' + (H / 2).toFixed(1) + '">face avant</text>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W - 72) + '" y="' + (H / 2).toFixed(1) + '">face arri&#232;re</text>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W / 2).toFixed(1) + '" y="18">haut</text>';
+      s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W / 2).toFixed(1) + '" y="' + (H - 8) + '">bas</text>';
+      s += '</svg>';
+      return { svg: s, min: m.etMin, max: m.etMax };
+    }
+
     function profileSVG(m, view) {
-      var range = view === 'temporal' ? [-Math.PI / 2, Math.PI / 2] :
-        view === 'top' ? [0, Math.PI] : [Math.PI, 2 * Math.PI];
+      if (view === 'temporal') { return temporalProfileSVG(m); }
+      var range = view === 'top' ? [0, Math.PI] : [Math.PI, 2 * Math.PI];
       var pts = [], i;
       for (i = 0; i <= 90; i++) {
         var p = rimPoint(m, range[0] + (range[1] - range[0]) * i / 90);
-        p.u = view === 'temporal' ? p.Y : p.X;
+        p.u = p.X;
         pts.push(p);
       }
       pts.sort(function (a, b) { return a.u - b.u; });
@@ -915,7 +979,7 @@
       pts.forEach(function (p, n) { front += (n ? 'L' : 'M') + sx(p.u).toFixed(1) + ' ' + sy(p.zf).toFixed(1); });
       for (i = pts.length - 1; i >= 0; i--) { back += 'L' + sx(pts[i].u).toFixed(1) + ' ' + sy(pts[i].zb).toFixed(1); }
       var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      var labels = view === 'temporal' ? ['bas', 'haut'] : ['nasal', 'temporal'];
+      var labels = ['nasal', 'temporal'];
       var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profil ' + view + ', épaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
       s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
       s += '<circle class="sec-mark" cx="' + sx(minPt.u).toFixed(1) + '" cy="' + sy((minPt.zf + minPt.zb) / 2).toFixed(1) + '" r="3"/>';
