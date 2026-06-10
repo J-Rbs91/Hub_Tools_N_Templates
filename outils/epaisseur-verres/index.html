@@ -225,8 +225,9 @@
     .sec-mark { fill: var(--blue-d); }
     .sec-txt { font: 700 11px "Manrope", sans-serif; fill: var(--ink); }
     .sec-txt.mut { font-weight: 600; fill: var(--grey); }
-    .map-angle { font: 600 8px "Manrope", sans-serif; fill: var(--grey); }
-    .map-value { font: 800 9px "Manrope", sans-serif; fill: var(--ink); }
+    .map-angle { font: 600 10.5px "Manrope", sans-serif; fill: var(--grey); }
+    .map-value { font: 800 13px "Manrope", sans-serif; fill: var(--ink); }
+    .map-cross { stroke: var(--blue-d); stroke-width: 1.6; stroke-linecap: round; }
 
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
@@ -372,10 +373,10 @@
 
 
         <section class="card">
-          <h2>Résultat</h2>
+          <h2>Synthèse</h2>
           <table class="res-eyes">
             <thead>
-              <tr><th>Œil</th><th>Type</th><th>Centre</th><th>Bord</th><th>Ø mini palet</th></tr>
+              <tr><th>Œil</th><th>Indice</th><th>Ép. mini</th><th>Ép. max</th><th>Ø utile</th></tr>
             </thead>
             <tbody id="res-body"></tbody>
           </table>
@@ -811,29 +812,30 @@
 
       [['OD', models.od], ['OG', models.og]].forEach(function (pair) {
         var name = pair[0], m = pair[1];
+        var epMini = Math.min(m.CT, m.etMin);    // point le plus fin (centre ou bord)
+        var epMax = Math.max(m.CT, m.etMax);     // point le plus épais
+        var diamUtile = m.blank - BLANK_MARGIN;  // Ø utile = 2 × rayon maxi, sans marge de taillage
         var tr = document.createElement('tr');
 
-        var th = document.createElement('th'); th.textContent = name; tr.appendChild(th);
-
-        var tdType = document.createElement('td');
+        var th = document.createElement('th');
+        th.appendChild(document.createTextNode(name + ' '));
         var b = document.createElement('span');
         b.className = 'badge ' + m.type;
         b.textContent = m.type === 'pos' ? '+' : m.type === 'neg' ? '−' : 'torique';
-        tdType.appendChild(b); tr.appendChild(tdType);
+        th.appendChild(b); tr.appendChild(th);
 
-        var tdC = document.createElement('td');
-        tdC.className = 'big'; tdC.textContent = fmt(m.CT); tr.appendChild(tdC);
+        var tdN = document.createElement('td');
+        tdN.textContent = m.n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        tr.appendChild(tdN);
 
-        var tdE = document.createElement('td');
-        if (Math.abs(m.etMax - m.etMin) < 0.01) {
-          tdE.innerHTML = '<span class="big">' + fmt(m.etMin) + '</span>';
-        } else {
-          tdE.innerHTML = '<span class="big">' + fmt(m.etMax) + '</span><br><span class="muted">mini ' + fmt(m.etMin) + '</span>';
-        }
-        tr.appendChild(tdE);
+        var tdMin = document.createElement('td');
+        tdMin.className = 'big'; tdMin.textContent = fmt(epMini); tr.appendChild(tdMin);
 
-        var tdB = document.createElement('td');
-        tdB.innerHTML = '<span class="big">' + fmt0(m.blank) + '</span>'; tr.appendChild(tdB);
+        var tdMax = document.createElement('td');
+        tdMax.className = 'big'; tdMax.textContent = fmt(epMax); tr.appendChild(tdMax);
+
+        var tdD = document.createElement('td');
+        tdD.innerHTML = '<span class="big">' + fmt0(diamUtile) + '</span>'; tr.appendChild(tdD);
 
         body.appendChild(tr);
       });
@@ -1028,17 +1030,20 @@
         s += axisLine(m.axeRad, 'sec-axis');
         s += axisLine(m.axeRad + Math.PI / 2, 'sec-counter');
       }
-      s += '<circle class="sec-mark" cx="' + sx(m.decX).toFixed(1) + '" cy="' + sy(m.decY).toFixed(1) + '" r="3"/>';
+      // Croix de centrage (convention optique) au centre optique, plutôt qu'un simple point.
+      var ccx = sx(m.decX), ccy = sy(m.decY), arm = 9;
+      s += '<line class="map-cross" x1="' + (ccx - arm).toFixed(1) + '" y1="' + ccy.toFixed(1) + '" x2="' + (ccx + arm).toFixed(1) + '" y2="' + ccy.toFixed(1) + '"/>';
+      s += '<line class="map-cross" x1="' + ccx.toFixed(1) + '" y1="' + (ccy - arm).toFixed(1) + '" x2="' + ccx.toFixed(1) + '" y2="' + (ccy + arm).toFixed(1) + '"/>';
 
       for (k = 0; k < 360; k += 30) {
         var theta = (side === 'od' ? 180 - k : k) * DEG;
         var ep = edgePoint(m, theta);
         var dx = mirror * Math.cos(theta), dy = -Math.sin(theta);
-        var lx = sx(ep.X) + dx * 24, ly = sy(ep.Y) + dy * 24;
+        var lx = sx(ep.X) + dx * 25, ly = sy(ep.Y) + dy * 25;
         var anchor = dx > 0.3 ? 'start' : dx < -0.3 ? 'end' : 'middle';
         s += '<circle class="sec-mark" cx="' + sx(ep.X).toFixed(1) + '" cy="' + sy(ep.Y).toFixed(1) + '" r="2.3"/>';
-        s += '<text class="map-angle" text-anchor="' + anchor + '" x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '">' + k + '°</text>';
-        s += '<text class="map-value" text-anchor="' + anchor + '" x="' + lx.toFixed(1) + '" y="' + (ly + 8).toFixed(1) + '">' + ep.thickness.toFixed(2).replace('.', ',') + '</text>';
+        s += '<text class="map-angle" text-anchor="' + anchor + '" x="' + lx.toFixed(1) + '" y="' + (ly - 6).toFixed(1) + '">' + k + '°</text>';
+        s += '<text class="map-value" text-anchor="' + anchor + '" x="' + lx.toFixed(1) + '" y="' + (ly + 11).toFixed(1) + '">' + ep.thickness.toFixed(2).replace('.', ',') + '</text>';
       }
       s += '<text class="sec-txt mut" text-anchor="middle" x="' + cx + '" y="' + (H - 8) + '">valeurs en mm</text>';
       s += '</svg>';
