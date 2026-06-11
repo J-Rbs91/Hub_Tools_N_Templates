@@ -472,15 +472,15 @@
             <div class="profiles-grid" id="profile-face"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue côté temporal">
-            <h3>Vue de profil côté temporal — moitié temporale, coupe verticale au centre optique</h3>
+            <h3>Vue de profil côté temporal — coupe verticale au centre optique</h3>
             <div class="profiles-grid" id="profile-temporal"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessus">
-            <h3>Vue du dessus — moitié supérieure, coupe horizontale au centre optique</h3>
+            <h3>Vue du dessus — coupe horizontale au centre optique</h3>
             <div class="profiles-grid" id="profile-top"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessous">
-            <h3>Vue du dessous — moitié inférieure, coupe horizontale au centre optique</h3>
+            <h3>Vue du dessous — coupe horizontale au centre optique, face avant en bas</h3>
             <div class="profiles-grid" id="profile-bottom"></div>
           </article>
         </div>
@@ -1012,50 +1012,30 @@
       return { X: X, Y: Y, theta: theta, zf: zf, zb: zb, thickness: zf - zb };
     }
 
-    function rimPoint(m, phi) {
-      var rc = frameRadius(m.cfg, phi, m.ax, m.by);
-      var X = rc * Math.cos(phi), Y = rc * Math.sin(phi);
-      var dx = X - m.decX, dy = Y - m.decY;
-      var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
-      var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-      var zf = -surfSag(m.F1, r, m.n);
-      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
-      return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
+    // Section nette du verre par un plan passant par le centre optique.
+    // horizontal=true : plan horizontal (du bord nasal au bord temporal) ;
+    // horizontal=false : plan vertical (du bord bas au bord haut).
+    // On ne trace que cette section : aucune projection du reste du demi-verre,
+    // dont le galbe de la base arrondirait faussement les extremites de la coupe.
+    function sectionPoints(m, horizontal) {
+      var a = horizontal ? edgePoint(m, Math.PI) : edgePoint(m, -Math.PI / 2);
+      var b = horizontal ? edgePoint(m, 0) : edgePoint(m, Math.PI / 2);
+      var pts = [], N = 160, i;
+      for (i = 0; i <= N; i++) {
+        var t = i / N;
+        pts.push(surfacePoint(m, a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t));
+      }
+      return pts;
     }
 
-    // Projection reelle du verre vu depuis la tempe, limitee a la demi-coupe temporale :
-    // le verre est coupe en deux verticalement par le plan passant par le centre optique,
-    // et seule la moitie temporale (X >= centre optique) est projetee. La moitie nasale
-    // est ignoree pour ne pas fausser visuellement les epaisseurs temporales.
+    // Vue de profil cote temporal : coupe verticale au centre optique, vue depuis la tempe.
     function temporalProfileSVG(m) {
-      var cutX = Math.max(-m.ax, Math.min(m.ax, m.decX));
-      var rows = [], edgePts = [], yi, xi;
-      for (yi = 0; yi <= 120; yi++) {
-        var Y = -m.by + 2 * m.by * yi / 120;
-        var front = null, back = null;
-        for (xi = 0; xi <= 240; xi++) {
-          var X = cutX + (m.ax - cutX) * xi / 240;
-          if (!inContour(m.cfg, X, Y, m.ax, m.by)) { continue; }
-          var p = surfacePoint(m, X, Y);
-          if (!front || p.zf > front.zf) { front = p; }
-          if (!back || p.zb < back.zb) { back = p; }
-        }
-        if (front && back) { rows.push({ Y: Y, zf: front.zf, zb: back.zb }); }
-      }
-      for (yi = 0; yi < SEG; yi++) {
-        var rp = rimPoint(m, 2 * Math.PI * yi / SEG);
-        if (rp.X >= cutX) { edgePts.push(rp); }
-      }
-      if (!rows.length || !edgePts.length) { return { svg: '<svg viewBox="0 0 420 250"></svg>', min: 0, max: 0 }; }
-
-      var minPt = edgePts[0], maxPt = edgePts[0];
-      edgePts.forEach(function (p) {
+      var pts = sectionPoints(m, false);   // du bas vers le haut
+      var minPt = pts[0], maxPt = pts[0];
+      var yMin = Infinity, yMax = -Infinity, zMin = Infinity, zMax = -Infinity;
+      pts.forEach(function (p) {
         if (p.thickness < minPt.thickness) { minPt = p; }
         if (p.thickness > maxPt.thickness) { maxPt = p; }
-      });
-
-      var yMin = Infinity, yMax = -Infinity, zMin = Infinity, zMax = -Infinity;
-      rows.forEach(function (p) {
         yMin = Math.min(yMin, p.Y); yMax = Math.max(yMax, p.Y);
         zMin = Math.min(zMin, p.zb); zMax = Math.max(zMax, p.zf);
       });
@@ -1068,14 +1048,14 @@
       var sx = function (z) { return x0 + (zMax - z) * scale; };
       var sy = function (Y) { return y0 + (yMax - Y) * scale; };
       var frontPath = '', backPath = '', i;
-      for (i = rows.length - 1; i >= 0; i--) {
-        frontPath += (i === rows.length - 1 ? 'M' : 'L') + sx(rows[i].zf).toFixed(1) + ' ' + sy(rows[i].Y).toFixed(1);
+      for (i = pts.length - 1; i >= 0; i--) {
+        frontPath += (i === pts.length - 1 ? 'M' : 'L') + sx(pts[i].zf).toFixed(1) + ' ' + sy(pts[i].Y).toFixed(1);
       }
-      for (i = 0; i < rows.length; i++) {
-        backPath += 'L' + sx(rows[i].zb).toFixed(1) + ' ' + sy(rows[i].Y).toFixed(1);
+      for (i = 0; i < pts.length; i++) {
+        backPath += 'L' + sx(pts[i].zb).toFixed(1) + ' ' + sy(pts[i].Y).toFixed(1);
       }
       var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profil vu depuis la tempe, moitie temporale coupee au centre optique, face avant a gauche, epaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Coupe verticale au centre optique vue depuis la tempe, face avant a gauche, epaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
       s += '<path class="sec-glass" d="' + frontPath + backPath + 'Z"/>';
       s += '<circle class="sec-mark" cx="' + sx((minPt.zf + minPt.zb) / 2).toFixed(1) + '" cy="' + sy(minPt.Y).toFixed(1) + '" r="3"/>';
       s += '<circle class="sec-mark" cx="' + sx((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" cy="' + sy(maxPt.Y).toFixed(1) + '" r="3"/>';
@@ -1087,64 +1067,41 @@
       return { svg: s, min: minPt.thickness, max: maxPt.thickness };
     }
 
-    // Vue de dessus / de dessous : projection reelle de la seule moitie concernee.
-    // Le verre est coupe en deux par l'horizontale passant par le centre optique ;
-    // la moitie opposee est ignoree pour ne pas fausser visuellement les epaisseurs.
+    // Vue de dessus / de dessous : coupe horizontale au centre optique.
+    // La meme section est vue d'en haut (face avant vers le haut du schema)
+    // ou d'en bas (schema retourne, face avant vers le bas).
     function profileSVG(m, view) {
       if (view === 'temporal') { return temporalProfileSVG(m); }
-      var cutY = Math.max(-m.by, Math.min(m.by, m.decY));
-      var yLo = view === 'top' ? cutY : -m.by;
-      var yHi = view === 'top' ? m.by : cutY;
-      var rows = [], xi, yi, i;
-      for (xi = 0; xi <= 240; xi++) {
-        var X = -m.ax + 2 * m.ax * xi / 240;
-        var front = null, back = null;
-        for (yi = 0; yi <= 120; yi++) {
-          var Y = yLo + (yHi - yLo) * yi / 120;
-          if (!inContour(m.cfg, X, Y, m.ax, m.by)) { continue; }
-          var p = surfacePoint(m, X, Y);
-          if (!front || p.zf > front.zf) { front = p; }
-          if (!back || p.zb < back.zb) { back = p; }
-        }
-        if (front && back) { rows.push({ u: X, zf: front.zf, zb: back.zb }); }
-      }
-      var edgePts = [];
-      for (yi = 0; yi < SEG; yi++) {
-        var rp = rimPoint(m, 2 * Math.PI * yi / SEG);
-        if (view === 'top' ? rp.Y >= cutY : rp.Y <= cutY) { edgePts.push(rp); }
-      }
-      if (!rows.length || !edgePts.length) { return { svg: '<svg viewBox="0 0 420 210"></svg>', min: 0, max: 0 }; }
-
+      var flip = view === 'bottom';
+      var pts = sectionPoints(m, true);   // du nasal vers le temporal
       var uMin = Infinity, uMax = -Infinity, zMin = Infinity, zMax = -Infinity;
-      rows.forEach(function (p) {
-        uMin = Math.min(uMin, p.u); uMax = Math.max(uMax, p.u);
+      var minPt = pts[0], maxPt = pts[0];
+      pts.forEach(function (p) {
+        uMin = Math.min(uMin, p.X); uMax = Math.max(uMax, p.X);
         zMin = Math.min(zMin, p.zb); zMax = Math.max(zMax, p.zf);
-      });
-      var minPt = edgePts[0], maxPt = edgePts[0];
-      edgePts.forEach(function (p) {
         if (p.thickness < minPt.thickness) { minPt = p; }
         if (p.thickness > maxPt.thickness) { maxPt = p; }
       });
-      var W = 420, H = 210, padX = 42, padY = 38;
+      var W = 420, H = 210, padX = 42, padY = 38, i;
       var scale = Math.min((W - padX * 2) / Math.max(1, uMax - uMin), (H - padY * 2) / Math.max(1, zMax - zMin));
       var usedH = (zMax - zMin) * scale;
       var y0 = padY + ((H - padY * 2) - usedH) / 2;
       var sx = function (u) { return padX + (u - uMin) * scale; };
-      var sy = function (z) { return y0 + (zMax - z) * scale; };
-      var front2 = '', back2 = '';
-      rows.forEach(function (p, n) { front2 += (n ? 'L' : 'M') + sx(p.u).toFixed(1) + ' ' + sy(p.zf).toFixed(1); });
-      for (i = rows.length - 1; i >= 0; i--) { back2 += 'L' + sx(rows[i].u).toFixed(1) + ' ' + sy(rows[i].zb).toFixed(1); }
+      var sy = flip ? function (z) { return y0 + (z - zMin) * scale; }
+                    : function (z) { return y0 + (zMax - z) * scale; };
+      var front = '', back = '';
+      pts.forEach(function (p, n) { front += (n ? 'L' : 'M') + sx(p.X).toFixed(1) + ' ' + sy(p.zf).toFixed(1); });
+      for (i = pts.length - 1; i >= 0; i--) { back += 'L' + sx(pts[i].X).toFixed(1) + ' ' + sy(pts[i].zb).toFixed(1); }
       var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      var labels = ['nasal', 'temporal'];
-      var viewLabel = view === 'top' ? 'de dessus, moitié supérieure' : 'de dessous, moitié inférieure';
-      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Vue ' + viewLabel + ' coupée au centre optique, épaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
-      s += '<path class="sec-glass" d="' + front2 + back2 + 'Z"/>';
+      var viewLabel = flip ? 'de dessous' : 'de dessus';
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Vue ' + viewLabel + ', coupe horizontale au centre optique, épaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
+      s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
       s += '<circle class="sec-mark" cx="' + sx(minPt.X).toFixed(1) + '" cy="' + sy((minPt.zf + minPt.zb) / 2).toFixed(1) + '" r="3"/>';
       s += '<circle class="sec-mark" cx="' + sx(maxPt.X).toFixed(1) + '" cy="' + sy((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" r="3"/>';
-      s += '<text class="sec-txt mut" x="5" y="18">avant</text>';
-      s += '<text class="sec-txt mut" x="5" y="' + (H - 12) + '">arrière</text>';
-      s += '<text class="sec-txt mut" text-anchor="start" x="' + padX + '" y="' + (H - 8) + '">' + labels[0] + '</text>';
-      s += '<text class="sec-txt mut" text-anchor="end" x="' + (W - padX) + '" y="' + (H - 8) + '">' + labels[1] + '</text>';
+      s += '<text class="sec-txt mut" x="5" y="18">' + (flip ? 'arrière' : 'avant') + '</text>';
+      s += '<text class="sec-txt mut" x="5" y="' + (H - 12) + '">' + (flip ? 'avant' : 'arrière') + '</text>';
+      s += '<text class="sec-txt mut" text-anchor="start" x="' + padX + '" y="' + (H - 8) + '">nasal</text>';
+      s += '<text class="sec-txt mut" text-anchor="end" x="' + (W - padX) + '" y="' + (H - 8) + '">temporal</text>';
       s += '</svg>';
       return { svg: s, min: minPt.thickness, max: maxPt.thickness };
     }
