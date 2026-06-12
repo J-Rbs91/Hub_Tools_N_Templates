@@ -304,7 +304,8 @@
   <script>
     var LS_PROFIL = 'profil-magasin-v1';
     var LS_SYNC   = 'sync-url-v1';
-    var LS_FOND   = 'cloture-fond-v1';
+    var LS_RESERVE = 'cloture-fond-v1';
+    var LS_FOND_CIBLE = 'cloture-fond-cible-v1';
     var LS_CAISSE = 'cloture-caisse-v1';
     var HISTORY_DAYS = 15;
 
@@ -481,13 +482,15 @@
     }
 
     function doBackup() {
-      var fondRaw = localStorage.getItem(LS_FOND);
+      var reserveRaw = localStorage.getItem(LS_RESERVE);
+      var fondCibleRaw = localStorage.getItem(LS_FOND_CIBLE);
       var bundle = {
         app: 'hub-magasin',
         version: 1,
         exportedAt: new Date().toISOString(),
         profil: loadProfil(),
-        fond: fondRaw == null ? null : (parseFloat(fondRaw) || 0),
+        reserve: reserveRaw == null ? null : (parseFloat(reserveRaw) || 0),
+        fondCible: fondCibleRaw == null ? null : (parseFloat(fondCibleRaw) || 0),
         caisse: capHistory(readJSON(LS_CAISSE, []))
       };
       var nom = (loadProfil().nom || 'magasin').trim().toLowerCase()
@@ -521,15 +524,19 @@
           fillForm(bundle.profil);
           renderHeader();
         }
-        if (typeof bundle.fond === 'number') {
-          localStorage.setItem(LS_FOND, bundle.fond);
+        var reserve = typeof bundle.reserve === 'number' ? bundle.reserve : bundle.fond;
+        if (typeof reserve === 'number') {
+          localStorage.setItem(LS_RESERVE, reserve);
+        }
+        if (typeof bundle.fondCible === 'number') {
+          localStorage.setItem(LS_FOND_CIBLE, bundle.fondCible);
         }
         if (Array.isArray(bundle.caisse)) {
           var local = readJSON(LS_CAISSE, []);
           var merged = capHistory((Array.isArray(local) ? local : []).concat(bundle.caisse));
           localStorage.setItem(LS_CAISSE, JSON.stringify(merged));
         }
-        setBackupStatus('Sauvegarde restaurée ✓ — profil et fond remplacés, historique fusionné.', true);
+        setBackupStatus('Sauvegarde restaurée ✓ — profil et paramètres de caisse remplacés, historique fusionné.', true);
       };
       reader.onerror = function () { setBackupStatus('Impossible de lire le fichier.', false); };
       reader.readAsText(file);
