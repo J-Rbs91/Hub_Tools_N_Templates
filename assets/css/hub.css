@@ -458,22 +458,18 @@ body::before {
   flex-direction: column;
   gap: 12px;
   overflow: hidden;
-  transform-style: preserve-3d;
-  will-change: transform;
-  transition: transform .5s cubic-bezier(.22,.61,.36,1),
-              box-shadow .45s ease,
-              border-color .45s ease,
+  transition: transform .35s cubic-bezier(.22,.61,.36,1),
+              box-shadow .35s ease,
+              border-color .35s ease,
               opacity .6s ease;
 }
 
-/* Pendant le suivi du pointeur, on coupe la transition de transform pour un
-   suivi instantané ; au pointerleave la classe retombe et la carte revient
-   en douceur grâce à la transition ci-dessus. */
-.tool-card.is-tilting {
-  transition: box-shadow .45s ease, border-color .45s ease;
-}
-
-.tool-card:hover {
+/* Survol : la carte se sur-élève légèrement (sans inclinaison). Le sélecteur
+   composé bat en spécificité la règle d'apparition « .is-visible » pour que la
+   levée s'applique aussi aux cartes déjà révélées. */
+.tool-card:hover,
+#tools-grid.reveal-ready .tool-card.is-visible:hover {
+  transform: translateY(-6px);
   border-color: #BBD6EE;
   box-shadow: 0 18px 40px rgba(26,42,58,.18);
 }
@@ -485,19 +481,12 @@ body::before {
 .tool-card__desc,
 .tool-card .btn { position: relative; z-index: 1; }
 
-/* ── CARTE ENTIÈREMENT CLIQUABLE (stretched link) ──
-   Le bouton reste l'unique lien accessible, mais son ::after couvre toute la
-   carte : un clic n'importe où sur la carte ouvre l'outil, sans imbriquer de
-   liens. z-index 2 pour passer au-dessus du contenu, sous les transforms 3D. */
-.tool-card__cta::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-}
-
-/* Un curseur « main » sur toute la carte signale qu'elle est cliquable. */
+/* ── CARTE ENTIÈREMENT CLIQUABLE ──
+   Le bouton « Accéder à l'outil » reste le lien réel (focusable au clavier,
+   clic-droit « ouvrir dans un nouvel onglet »). Pour rendre TOUTE la carte
+   cliquable sans imbriquer de liens ni rogner le reflet du bouton (qui exige
+   overflow:hidden), un clic ailleurs sur la carte est relayé vers ce lien en
+   JS. Le curseur « main » signale la zone cliquable. */
 .tool-card { cursor: pointer; }
 
 /* Ligne du haut : pastille d'icône thématique à gauche, badge d'état à droite. */
@@ -597,7 +586,7 @@ body::before {
   18%           { fill: var(--sky); }
 }
 
-/* Reflet « premium » qui suit le pointeur (--mx/--my posés en JS). */
+/* Léger reflet de surface, révélé en douceur au survol (purement décoratif). */
 .tool-card__glare {
   position: absolute;
   inset: 0;
@@ -606,8 +595,8 @@ body::before {
   pointer-events: none;
   opacity: 0;
   transition: opacity .4s ease;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
-              rgba(255,255,255,.45), rgba(255,255,255,0) 45%);
+  background: radial-gradient(120% 80% at 50% 0%,
+              rgba(255,255,255,.5), rgba(255,255,255,0) 55%);
   mix-blend-mode: soft-light;
 }
 
@@ -616,14 +605,6 @@ body::before {
 /* Apparition en cascade (posée par IntersectionObserver, décalage en JS). */
 #tools-grid.reveal-ready .tool-card { opacity: 0; transform: translateY(28px) scale(.985); }
 #tools-grid.reveal-ready .tool-card.is-visible { opacity: 1; transform: none; }
-
-/* Tactile : une fois l'apparition terminée, transition courte pour un suivi
-   gyroscope fluide et une pression réactive (transforms posés en inline par JS). */
-@media (hover: none) and (pointer: coarse) {
-  #tools-grid.touch-live .tool-card {
-    transition: transform .18s ease-out, box-shadow .3s ease;
-  }
-}
 
 .tool-card__header {
   display: flex;
@@ -763,5 +744,8 @@ body::before {
   .ti-line { stroke-dashoffset: 0; }     /* le trait écrit s'affiche complet */
   .tool-card { transition: none; }
   #tools-grid.reveal-ready .tool-card { opacity: 1; transform: none; }
+  /* Pas de sur-élévation animée : on garde un retour visuel discret (ombre). */
+  .tool-card:hover,
+  #tools-grid.reveal-ready .tool-card.is-visible:hover { transform: none; }
   .tool-card__glare { display: none; }
 }
