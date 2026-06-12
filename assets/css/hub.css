@@ -1,6 +1,7 @@
 :root {
   --blue:     #1F6FB2;
   --blue-d:   #175A92;
+  --sky:      #36B3F0;
   --ink:      #1A2A3A;
   --bg:       #F4F7FA;
   --card-bg:  #FFFFFF;
@@ -515,69 +516,75 @@ body::before {
   display: grid;
   place-items: center;
   border-radius: 14px;
-  background: linear-gradient(140deg, #EAF3FB 0%, #F3F8FC 100%);
-  border: 1px solid var(--border);
+  background: linear-gradient(150deg, #1A4C95 0%, #103A78 55%, #0C2C5E 100%);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 2px 6px rgba(12,44,94,.30);
   transition: transform .4s cubic-bezier(.22,.61,.36,1), box-shadow .4s ease;
 }
 
-.tool-card__icon svg { width: 32px; height: 32px; display: block; overflow: visible; }
+.tool-card__icon svg { width: 34px; height: 34px; display: block; overflow: visible; }
 
 .tool-card:hover .tool-card__icon {
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 16px rgba(31,111,178,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px rgba(16,58,120,.40);
 }
 
-/* Traits communs des icônes (stylo, pied à coulisse, calculatrice).
-   La couleur de trait est posée sur le SVG et héritée par toutes les pièces. */
-.tool-card__icon svg        { stroke: var(--blue); fill: none; }
-.tool-card__icon svg .ink   { stroke: var(--blue-d); }
-.tool-card__icon svg .accent { fill: var(--blue); stroke: none; }
+/* Icônes « app » : pièces blanches et accents bleu ciel sur la pastille marine.
+   Couleurs posées par classe ; les pièces sans classe héritent du trait blanc. */
+.tool-card__icon svg          { stroke: #fff; fill: none; stroke-width: 2.2; stroke-linejoin: round; }
+.tool-card__icon svg .fill    { fill: #fff; stroke: none; }
+.tool-card__icon svg .accent  { fill: var(--sky); stroke: none; }
+.tool-card__icon svg .accent-s { stroke: var(--sky); }
+.tool-card__icon svg .ink     { stroke: var(--sky); }
+.tool-card__icon svg .ti-keys rect { fill: #fff; stroke: none; }
 
-/* Le trait écrit par le stylo et la pige du pied à coulisse partent « vides ». */
-.ti-line { stroke-dasharray: 40; stroke-dashoffset: 40; }
+/* La signature du stylo part « vide » et se trace (path normalisé sur 100). */
+.ti-line { stroke-dasharray: 100; stroke-dashoffset: 100; }
 
-/* Rotation/échelle calées sur le centre réel de chaque pièce d'icône. */
+/* Rotation/échelle calées sur le centre réel de la pièce. */
 .ti-pen { transform-box: fill-box; transform-origin: 50% 50%; }
-
-/* Couleurs de fond des pièces pleines (écran et touches de la calculatrice). */
-.tool-card__icon svg .screen { fill: #DCEBF8; stroke: none; }
-.tool-card__icon svg .ti-keys rect { fill: #EAF3FB; stroke: none; }
 
 /* Animations jouées au survol (desktop) et une fois à l'apparition (mobile,
    via la classe .icon-play posée puis retirée par le JS). */
 .tool-card:hover .ti-line,
-.tool-card.icon-play .ti-line { animation: ti-write 2.4s ease-in-out infinite; }
+.tool-card.icon-play .ti-line { animation: ti-write 2.6s ease-in-out infinite; }
 
 .tool-card:hover .ti-pen,
-.tool-card.icon-play .ti-pen { animation: ti-pen 2.4s ease-in-out infinite; }
+.tool-card.icon-play .ti-pen { animation: ti-pen 2.6s ease-in-out infinite; }
 
 .tool-card:hover .ti-jaw,
 .tool-card.icon-play .ti-jaw { animation: ti-measure 2.6s ease-in-out infinite; }
 
 .tool-card:hover .ti-keys rect,
-.tool-card.icon-play .ti-keys rect { animation: ti-key 2.4s ease-in-out infinite; }
+.tool-card.icon-play .ti-keys rect { animation: ti-key 2.2s ease-in-out infinite; }
 
 .tool-card:hover .ti-keys rect:nth-child(2),
-.tool-card.icon-play .ti-keys rect:nth-child(2) { animation-delay: .2s; }
+.tool-card.icon-play .ti-keys rect:nth-child(2) { animation-delay: .15s; }
 .tool-card:hover .ti-keys rect:nth-child(3),
-.tool-card.icon-play .ti-keys rect:nth-child(3) { animation-delay: .4s; }
+.tool-card.icon-play .ti-keys rect:nth-child(3) { animation-delay: .3s; }
 .tool-card:hover .ti-keys rect:nth-child(4),
-.tool-card.icon-play .ti-keys rect:nth-child(4) { animation-delay: .6s; }
+.tool-card.icon-play .ti-keys rect:nth-child(4) { animation-delay: .45s; }
 .tool-card:hover .ti-keys rect:nth-child(5),
-.tool-card.icon-play .ti-keys rect:nth-child(5) { animation-delay: .8s; }
+.tool-card.icon-play .ti-keys rect:nth-child(5) { animation-delay: .6s; }
 .tool-card:hover .ti-keys rect:nth-child(6),
-.tool-card.icon-play .ti-keys rect:nth-child(6) { animation-delay: 1s; }
+.tool-card.icon-play .ti-keys rect:nth-child(6) { animation-delay: .75s; }
+.tool-card:hover .ti-keys rect:nth-child(7),
+.tool-card.icon-play .ti-keys rect:nth-child(7) { animation-delay: .9s; }
+.tool-card:hover .ti-keys rect:nth-child(8),
+.tool-card.icon-play .ti-keys rect:nth-child(8) { animation-delay: 1.05s; }
+.tool-card:hover .ti-keys rect:nth-child(9),
+.tool-card.icon-play .ti-keys rect:nth-child(9) { animation-delay: 1.2s; }
 
-/* Le stylo plume suit la pointe et trace une ligne d'écriture. */
+/* Le stylo descend en signant pendant que le paraphe se trace sous la plume. */
 @keyframes ti-write {
-  0%        { stroke-dashoffset: 40; }
-  45%, 100% { stroke-dashoffset: 0; }
+  0%        { stroke-dashoffset: 100; }
+  55%, 100% { stroke-dashoffset: 0; }
 }
 @keyframes ti-pen {
-  0%        { transform: translate(-13px, 0) rotate(0deg); }
-  45%       { transform: translate(13px, 0) rotate(0deg); }
-  55%       { transform: translate(13px, -1px) rotate(-4deg); }
-  100%      { transform: translate(-13px, 0) rotate(0deg); }
+  0%        { transform: translate(-3px, -1px) rotate(-2deg); }
+  55%       { transform: translate(12px, 1px) rotate(2deg); }
+  68%       { transform: translate(12px, 1px) rotate(2deg); }
+  100%      { transform: translate(-3px, -1px) rotate(-2deg); }
 }
 /* Le mors mobile du pied à coulisse vient mesurer le verre, puis revient. */
 @keyframes ti-measure {
@@ -586,8 +593,8 @@ body::before {
 }
 /* Les touches de la calculatrice s'allument en cascade. */
 @keyframes ti-key {
-  0%, 70%, 100% { fill: #EAF3FB; }
-  20%           { fill: var(--blue); }
+  0%, 65%, 100% { fill: #fff; }
+  18%           { fill: var(--sky); }
 }
 
 /* Reflet « premium » qui suit le pointeur (--mx/--my posés en JS). */
