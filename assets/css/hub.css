@@ -40,7 +40,7 @@ body::before {
   content: "";
   position: fixed;
   inset: -25%;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
   background:
     radial-gradient(38% 42% at 16% 18%, rgba(31,111,178,.10), transparent 60%),
@@ -55,6 +55,53 @@ body::before {
   0%   { transform: translate3d(-2%, -1.5%, 0) scale(1.04); }
   50%  { transform: translate3d(1.5%, 2%, 0)  scale(1.09); }
   100% { transform: translate3d(2.5%, -1%, 0) scale(1.05); }
+}
+
+/* ── FOND OPTIQUE ──
+   Motifs « lunettes » très estompés, répartis sur 3 plans de profondeur qui
+   dérivent doucement avec la souris (parallaxe posée en JS). Flou décroissant
+   du lointain vers le proche = légère « mise au point » optique. Couche fixe en
+   z-index -1 : au-dessus du voile lumineux (-2), derrière tout le contenu. */
+.optic {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.optic .layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  transition: transform .25s cubic-bezier(.22,.61,.36,1);
+}
+.optic .far  { opacity: .055; filter: blur(1.1px); }
+.optic .mid  { opacity: .07;  filter: blur(.5px); }
+.optic .near { opacity: .085; filter: blur(.2px); }
+
+.optic .m {
+  position: absolute;
+  width: var(--w, 160px);
+  transform: translate(-50%, -50%);
+}
+.optic .m svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-origin: 50% 50%;
+  animation: optic-float var(--dur, 22s) ease-in-out var(--del, 0s) infinite;
+}
+.optic .m.sky svg { stroke: var(--sky); }
+
+/* Respiration très lente, indépendante de la souris (vie au repos). */
+@keyframes optic-float {
+  0%, 100% { transform: translateY(0)     rotate(var(--r, 0deg)); }
+  50%      { transform: translateY(-10px) rotate(calc(var(--r, 0deg) + 2deg)); }
 }
 
 /* Entrée de page en fondu/glissé doux — agréable même sans View Transitions. */
@@ -748,4 +795,7 @@ body::before {
   .tool-card:hover,
   #tools-grid.reveal-ready .tool-card.is-visible:hover { transform: none; }
   .tool-card__glare { display: none; }
+  /* Fond optique figé : motifs présents mais immobiles. */
+  .optic .layer { transition: none; }
+  .optic .m svg { animation: none; }
 }
