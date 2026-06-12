@@ -19,8 +19,8 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 
 > **Profil magasin** — un profil partagé (clé `localStorage` `profil-magasin-v1`, contenant nom,
 > adresse, téléphone et e-mail) renseigné une fois sur le hub pré-remplit l'en-tête de la
-> Demande/Ordonnance. Le fond de caisse par défaut est mémorisé séparément par la Clôture de Caisse
-> (clé `cloture-fond-v1`). Comme `localStorage` est propre à chaque navigateur/poste, les données
+> Demande/Ordonnance. La réserve de monnaie et le fond de caisse cible sont mémorisés séparément par
+> la Clôture de Caisse (clés `cloture-fond-v1` et `cloture-fond-cible-v1`). Comme `localStorage` est propre à chaque navigateur/poste, les données
 > d'un magasin ne se mélangent jamais avec celles d'un autre — mais elles ne se partagent pas non
 > plus entre deux postes d'un même magasin, sauf si la synchronisation Drive ci-dessous est activée.
 
@@ -34,7 +34,7 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
   retrouve alors **automatiquement sur tous les postes** connectés au compte Google. Procédure et script
   dans [`docs/sync-drive/`](docs/sync-drive/). **Seul le profil est synchronisé — jamais de donnée patient.**
 - **Façon 2 — fichier, sur clé USB ou ordinateur (sans Google)** — depuis « Mon magasin », on exporte
-  dans un fichier JSON le profil, le fond de caisse et l'historique de clôture (15 derniers jours), puis
+  dans un fichier JSON le profil, les paramètres de caisse et l'historique de clôture (15 derniers jours), puis
   on le restaure en cas de changement de poste ou de vidage du navigateur. Le paramétrage est alors
   **propre à chaque poste** : les informations statiques (adresse…) ne demandent aucun entretien, mais
   ce qui gagnerait à être commun n'est **pas partagé automatiquement** entre les postes. La page

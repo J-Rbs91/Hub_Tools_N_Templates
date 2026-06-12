@@ -250,7 +250,7 @@
     .amt-input::-webkit-inner-spin-button,
     .amt-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-    /* ── FOND DE CAISSE row (jaune) ── */
+    /* ── RÉSERVE / FOND CIBLE rows (jaune) ── */
     .fond-row {
       display: flex;
       align-items: center;
@@ -584,8 +584,8 @@
           </tfoot>
         </table>
         <div class="fond-row">
-          <label for="fond-caisse">Fond de caisse</label>
-          <input class="fond-input" type="number" id="fond-caisse" value="53.80" min="0" step="0.01">
+          <label for="reserve-monnaie">R&#233;serve de monnaie</label>
+          <input class="fond-input" type="number" id="reserve-monnaie" value="53.80" min="0" step="0.01">
           <span class="fond-eur">&#8364;</span>
         </div>
       </section>
@@ -622,12 +622,12 @@
       <section class="block block--comptage">
         <div class="block-hdr">
           <h2>Comptage Esp&#232;ces</h2>
-          <span class="block-badge">Total tiroir</span>
+          <span class="block-badge">Total caisse</span>
         </div>
         <div class="comptage-body">
-          <div class="comptage-lbl">Total tiroir-caisse</div>
+          <div class="comptage-lbl">Total esp&#232;ces en caisse</div>
           <div class="comptage-total" id="total-especes">0,00&#160;&#8364;</div>
-          <div class="comptage-sub">Pi&#232;ces + Billets + Fond</div>
+          <div class="comptage-sub">Pi&#232;ces + Billets + R&#233;serve de monnaie</div>
           <div class="comptage-breakdown">
             <div class="cb-item">
               <div class="cb-val" id="sub-coins">0,00&#160;&#8364;</div>
@@ -640,8 +640,8 @@
             </div>
             <div class="cb-sep">+</div>
             <div class="cb-item">
-              <div class="cb-val" id="sub-fond">0,00&#160;&#8364;</div>
-              <div class="cb-lbl">Fond</div>
+              <div class="cb-val" id="sub-reserve">0,00&#160;&#8364;</div>
+              <div class="cb-lbl">R&#233;serve</div>
             </div>
           </div>
         </div>
@@ -654,6 +654,12 @@
           <span class="block-badge">Cl&#244;ture</span>
         </div>
         <div class="ecart-body">
+
+          <div class="ecart-field">
+            <label for="fond-cible">Fond de caisse cible</label>
+            <input class="ref-input fond-input" type="number" id="fond-cible" placeholder="0,00" min="0" step="0.01">
+            <span class="ref-eur">&#8364;</span>
+          </div>
 
           <div class="ecart-field">
             <label for="ref">Montant logiciel métier</label>
@@ -686,8 +692,10 @@
           <thead>
             <tr>
               <th>Date</th>
-              <th class="h-r">Comptage du jour</th>
-              <th class="h-r">Fond de caisse</th>
+              <th class="h-r">Pi&#232;ces + billets</th>
+              <th class="h-r">R&#233;serve monnaie</th>
+              <th class="h-r">Fond cible</th>
+              <th class="h-r">Sortie</th>
               <th class="h-r">Logiciel métier</th>
               <th class="h-r">&#201;cart</th>
               <th></th>
@@ -695,7 +703,7 @@
           </thead>
           <tbody id="history-tbody">
             <tr>
-              <td class="history-empty" colspan="6">Aucun comptage enregistr&#233; pour le moment.</td>
+              <td class="history-empty" colspan="8">Aucun comptage enregistr&#233; pour le moment.</td>
             </tr>
           </tbody>
         </table>
@@ -739,7 +747,9 @@
     var ELEC = ['CB', 'Sans Contact', 'Amex', 'Autre'];
 
     var LS_CAISSE = 'cloture-caisse-v1';
-    var LS_FOND = 'cloture-fond-v1';
+    // Clé historique conservée pour ne pas perdre la valeur déjà saisie.
+    var LS_RESERVE = 'cloture-fond-v1';
+    var LS_FOND_CIBLE = 'cloture-fond-cible-v1';
     var HISTORY_DAYS = 15;   // historique plafonné à 15 jours glissants
 
     /* ── PROFIL MAGASIN (partagé via localStorage) ── */
@@ -747,9 +757,13 @@
       try { return JSON.parse(localStorage.getItem('profil-magasin-v1') || '{}') || {}; }
       catch (e) { return {}; }
     }
-    function fondDefaut() {
-      var f = parseFloat(localStorage.getItem(LS_FOND));
+    function reserveDefaut() {
+      var f = parseFloat(localStorage.getItem(LS_RESERVE));
       return isNaN(f) ? 53.80 : f;
+    }
+    function fondCibleDefaut() {
+      var f = parseFloat(localStorage.getItem(LS_FOND_CIBLE));
+      return isNaN(f) ? 0 : f;
     }
     function storeSubtitle() {
       return (profilMagasin().nom || '').trim() || 'Mon magasin';
@@ -884,12 +898,12 @@
       document.getElementById('total-bills').textContent = fmt(totalBills);
       document.getElementById('sub-bills').textContent = fmt(totalBills);
 
-      var fond = r2(parseFloat(document.getElementById('fond-caisse').value) || 0);
-      document.getElementById('sub-fond').textContent = fmt(fond);
+      var reserve = r2(parseFloat(document.getElementById('reserve-monnaie').value) || 0);
+      document.getElementById('sub-reserve').textContent = fmt(reserve);
 
       var totalEspeces = r2(totalCoins + totalBills);
-      var totalTiroir = r2(totalEspeces + fond);
-      document.getElementById('total-especes').textContent = fmt(totalTiroir);
+      var totalCaisse = r2(totalEspeces + reserve);
+      document.getElementById('total-especes').textContent = fmt(totalCaisse);
 
       var totalElec = 0;
       ELEC.forEach(function(_, i) {
@@ -902,7 +916,7 @@
 
       var ecartEl = document.getElementById('ecart-value');
       if (ref > 0 || document.getElementById('ref').value !== '') {
-        var ecart = r2(totalEspeces + fond - ref);
+        var ecart = r2(totalCaisse - ref);
         ecartEl.textContent = (ecart >= 0 ? '+' : '') + fmt(ecart);
         ecartEl.className = 'er-val ' + (ecart > 0.005 ? 'pos' : ecart < -0.005 ? 'neg' : 'zero');
       } else {
@@ -910,11 +924,11 @@
         ecartEl.className = 'er-val zero';
       }
 
-      var remise = r2(totalEspeces - fond);
+      var fondCible = r2(parseFloat(document.getElementById('fond-cible').value) || 0);
+      var remise = r2(Math.max(0, totalCaisse - fondCible));
       var remiseEl = document.getElementById('remise-alert');
-      if (totalEspeces > 0 && remise > fond) {
-        var remiseRounded = Math.floor(remise / 10) * 10;
-        remiseEl.textContent = 'Une remise d’espèce d’environ ' + remiseRounded + ' € est à effectuer.';
+      if (fondCible > 0 && remise > 0) {
+        remiseEl.textContent = 'Sortie de caisse à effectuer : ' + fmt(remise) + '.';
         remiseEl.style.display = 'block';
       } else {
         remiseEl.style.display = 'none';
@@ -964,7 +978,7 @@
         var emptyTr = document.createElement('tr');
         var emptyTd = document.createElement('td');
         emptyTd.className = 'history-empty';
-        emptyTd.colSpan = 6;
+        emptyTd.colSpan = 8;
         emptyTd.textContent = 'Aucun comptage enregistré pour le moment.';
         emptyTr.appendChild(emptyTd);
         tbody.appendChild(emptyTr);
@@ -979,7 +993,9 @@
         var cells = [
           { cls: '', text: entry.date },
           { cls: 'h-r ht-bold', text: fmt(entry.comptage) },
-          { cls: 'h-r', text: fmt(entry.fond) },
+          { cls: 'h-r', text: fmt(typeof entry.reserve === 'number' ? entry.reserve : entry.fond || 0) },
+          { cls: 'h-r', text: typeof entry.fondCible === 'number' ? fmt(entry.fondCible) : '—' },
+          { cls: 'h-r', text: typeof entry.sortie === 'number' ? fmt(entry.sortie) : '—' },
           { cls: 'h-r', text: entry.ref > 0 ? fmt(entry.ref) : '—' },
           { cls: 'h-r ' + ecartCls, text: ecartSign + fmt(entry.ecart) }
         ];
@@ -1033,9 +1049,12 @@
       });
 
       var totalEspeces = r2(totalCoins + totalBills);
-      var fond = r2(parseFloat(document.getElementById('fond-caisse').value) || 0);
+      var reserve = r2(parseFloat(document.getElementById('reserve-monnaie').value) || 0);
+      var fondCible = r2(parseFloat(document.getElementById('fond-cible').value) || 0);
+      var totalCaisse = r2(totalEspeces + reserve);
+      var sortie = r2(Math.max(0, totalCaisse - fondCible));
       var ref = r2(parseFloat(document.getElementById('ref').value) || 0);
-      var ecart = r2(totalEspeces + fond - ref);
+      var ecart = r2(totalCaisse - ref);
 
       var now = new Date();
       var dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -1044,7 +1063,9 @@
         date: dateStr,
         ts: now.getTime(),
         comptage: totalEspeces,
-        fond: fond,
+        reserve: reserve,
+        fondCible: fondCible,
+        sortie: sortie,
         ref: ref,
         ecart: ecart,
         coins: coinQtys,
@@ -1079,8 +1100,9 @@
           if (el && qty > 0) { el.value = qty; }
         });
       }
-      if (typeof last.fond === 'number') {
-        document.getElementById('fond-caisse').value = last.fond.toFixed(2);
+      var lastReserve = typeof last.reserve === 'number' ? last.reserve : last.fond;
+      if (typeof lastReserve === 'number') {
+        document.getElementById('reserve-monnaie').value = lastReserve.toFixed(2);
       }
 
       var banner = document.getElementById('prefill-banner');
@@ -1105,7 +1127,8 @@
       BILLS.forEach(function(_, i) { document.getElementById('bill-qty-' + i).value = ''; });
       ELEC.forEach(function(_, i) { document.getElementById('elec-' + i).value = ''; });
       document.getElementById('ref').value = '';
-      document.getElementById('fond-caisse').value = fondDefaut().toFixed(2);
+      document.getElementById('reserve-monnaie').value = reserveDefaut().toFixed(2);
+      document.getElementById('fond-cible').value = fondCibleDefaut() ? fondCibleDefaut().toFixed(2) : '';
       document.getElementById('prefill-banner').style.display = 'none';
       calculate();
       showToast('Formulaire réinitialisé');
@@ -1113,7 +1136,8 @@
 
     /* ── INIT ── */
     document.getElementById('hdr-sub').textContent = storeSubtitle();
-    document.getElementById('fond-caisse').value = fondDefaut().toFixed(2);
+    document.getElementById('reserve-monnaie').value = reserveDefaut().toFixed(2);
+    document.getElementById('fond-cible').value = fondCibleDefaut() ? fondCibleDefaut().toFixed(2) : '';
 
     buildCoins();
     buildBills();
@@ -1132,9 +1156,15 @@
     document.getElementById('coins-tbody').addEventListener('input', calculate);
     document.getElementById('bills-tbody').addEventListener('input', calculate);
     document.getElementById('elec-tbody').addEventListener('input', calculate);
-    document.getElementById('fond-caisse').addEventListener('input', function () {
-      var v = parseFloat(document.getElementById('fond-caisse').value);
-      if (!isNaN(v)) { localStorage.setItem(LS_FOND, v); }
+    document.getElementById('reserve-monnaie').addEventListener('input', function () {
+      var v = parseFloat(document.getElementById('reserve-monnaie').value);
+      if (!isNaN(v)) { localStorage.setItem(LS_RESERVE, v); }
+      calculate();
+    });
+    document.getElementById('fond-cible').addEventListener('input', function () {
+      var v = parseFloat(document.getElementById('fond-cible').value);
+      if (isNaN(v)) { localStorage.removeItem(LS_FOND_CIBLE); }
+      else { localStorage.setItem(LS_FOND_CIBLE, v); }
       calculate();
     });
     document.getElementById('ref').addEventListener('input', calculate);
