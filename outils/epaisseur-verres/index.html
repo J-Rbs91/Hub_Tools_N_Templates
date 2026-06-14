@@ -1397,10 +1397,11 @@
         var RINGS = 26;
         var flip = screenSign < 0;
         // Angle de galbe : chaque verre pivote autour de l'axe vertical passant par le milieu du nez
-        // (x = 0). Les deux plans frontaux des cercles convergent en ce point central et y forment
-        // l'angle de galbe ; les bords temporaux reculent. La cambrure du cerclage (cambZ) ajoute,
-        // elle, un galbe horizontal propre à chaque cercle — les deux se cumulent, sans courbure verticale.
-        var alpha = (common.galbe || 0) * DEG;
+        // (x = 0). Les deux lignes frontales des cercles passent par ce pivot central et forment entre
+        // elles l'angle d'ouverture de la monture = 180° − galbe (galbe 0 → 180° à plat, 35 → 145°).
+        // Chaque cercle tourne donc de la moitié du galbe ; ses bords temporaux reculent. La cambrure
+        // du cerclage (cambZ) ajoute un galbe horizontal propre à chaque cercle — les deux se cumulent.
+        var alpha = (common.galbe || 0) / 2 * DEG;
         var beta = screenSign * alpha;
         var xp = 0;                                             // pivot au milieu du nez (axe central)
         var cb = Math.cos(beta), sb = Math.sin(beta);
