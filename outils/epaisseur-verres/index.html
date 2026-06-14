@@ -317,10 +317,10 @@
           </div>
 
           <div class="field">
-            <label for="galbe">Angle de galbe <span id="galbe-val" class="hint" style="display:inline;">0°</span></label>
-            <input type="range" id="galbe" min="0" max="30" step="1" value="0">
+            <label for="galbe">Angle de galbe <span id="galbe-val" class="hint" style="display:inline;">10°</span></label>
+            <input type="range" id="galbe" min="0" max="35" step="1" value="10">
             <div class="slider-ends"><span>plat</span><span>galbé</span></div>
-            <div class="hint">Angle entre les deux verres, pivot au niveau du nez.</div>
+            <div class="hint">Angle entre les deux verres, pivot au milieu du nez (axe central).</div>
           </div>
         </section>
 
@@ -1396,12 +1396,13 @@
       function addLens(m, screenSign, boxCenterX) {
         var RINGS = 26;
         var flip = screenSign < 0;
-        // Angle de galbe : chaque verre pivote autour de l'axe vertical passant par le nez (x = D/2),
-        // ses bords temporaux reculant. La cambrure du cerclage (cambZ) ajoute, elle, un galbe
-        // horizontal propre à chaque cercle — les deux se cumulent, sans aucune courbure verticale.
+        // Angle de galbe : chaque verre pivote autour de l'axe vertical passant par le milieu du nez
+        // (x = 0). Les deux plans frontaux des cercles convergent en ce point central et y forment
+        // l'angle de galbe ; les bords temporaux reculent. La cambrure du cerclage (cambZ) ajoute,
+        // elle, un galbe horizontal propre à chaque cercle — les deux se cumulent, sans courbure verticale.
         var alpha = (common.galbe || 0) * DEG;
         var beta = screenSign * alpha;
-        var xp = screenSign * common.D / 2;                     // pivot à D/2
+        var xp = 0;                                             // pivot au milieu du nez (axe central)
         var cb = Math.cos(beta), sb = Math.sin(beta);
         function place(Xc, Yc, z) { var zc = z + cambZ(m, Xc), x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + zc * sb, Yc, -dx * sb + zc * cb]; }
         function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); return { zf: -surfSag(m.F1, r, m.n), zb: -m.CT - surfSag(P - m.F1, r, m.n) }; }
