@@ -776,7 +776,9 @@
 
       // Balayage du contour réel depuis le centre optique décentré.
       // delta(r,θ) = flèche_arrière − flèche_avant : variation d'épaisseur p/r au centre.
-      var dMin = Infinity, dMax = -Infinity, rMax = 0;
+      // En parallèle, version « centrée » (rayon mesuré depuis le centre-boîte, OC supposé centré)
+      // qui sert à fixer une épaisseur centre réaliste, indépendante du décentrement.
+      var dMin = Infinity, dMax = -Infinity, rMax = 0, dMinCen = Infinity;
       for (k = 0; k < SEG; k++) {
         var phi = 2 * Math.PI * k / SEG;
         var rc = frameRadius(cfg, phi, ax, by);
@@ -788,13 +790,18 @@
         var delta = surfSag(Pr - F1, r, n) - surfSag(F1, r, n);
         if (delta < dMin) { dMin = delta; }
         if (delta > dMax) { dMax = delta; }
+        var rCen = Math.hypot(X, Y);
+        var deltaCen = surfSag(powerAt(Math.atan2(Y, X), sph, cyl, axeRad) - F1, rCen, n) - surfSag(F1, rCen, n);
+        if (deltaCen < dMinCen) { dMinCen = deltaCen; }
       }
 
       var cMin = MYOPE_CENTER_MIN;
-      // CT (épaisseur au centre) : assez épais pour tenir le bord mini ET le plancher au centre.
-      var CT = Math.max(cMin, common.etFloor - dMin);
-      var etMin = CT + dMin;     // bord le plus fin
-      var etMax = CT + dMax;     // bord le plus épais
+      // CT (épaisseur au centre) = propriété du palet : on la fixe sur le verre centré et on NE la
+      // gonfle PAS pour compenser un décentrement marqué (on n'ajoute pas de matière au centre en
+      // taillant hors axe). La tranche du côté décentré peut donc s'amincir jusqu'au fil (couteau).
+      var CT = Math.max(cMin, common.etFloor - dMinCen);
+      var etMin = Math.max(0, CT + dMin);     // bord le plus fin (peut tomber au fil si très décentré)
+      var etMax = CT + dMax;                   // bord le plus épais
       var blank = 2 * rMax + BLANK_MARGIN;
       var type = pMin >= 0 ? 'pos' : (pMax <= 0 ? 'neg' : 'mix');
 
@@ -876,6 +883,7 @@
           var P = powerAt(Math.atan2(dy, dx), m.sph, m.cyl, m.axeRad);
           var zf = -surfSag(m.F1, r, m.n);
           var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+          if (zb > zf) { zb = zf; }   // tranche au fil : pas d'épaisseur négative
           var mid = (zf + zb) / 2 + bevel;
           var radialLength = Math.hypot(X, Y) || 1;
           var apex = [X + X / radialLength * 0.35, Y + Y / radialLength * 0.35, mid];
@@ -1033,6 +1041,7 @@
       var c = cambZ(m, X);
       var zf = -surfSag(m.F1, r, m.n) + c;
       var zb = -m.CT - surfSag(P - m.F1, r, m.n) + c;
+      if (zb > zf) { zb = zf; }   // pas d'épaisseur négative : la tranche s'arrête au fil
       return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
 
@@ -1047,6 +1056,7 @@
       var c = cambZ(m, X);
       var zf = -surfSag(m.F1, last, m.n) + c;
       var zb = -m.CT - surfSag(P - m.F1, last, m.n) + c;
+      if (zb > zf) { zb = zf; }   // pas d'épaisseur négative : la tranche s'arrête au fil
       return { X: X, Y: Y, theta: theta, zf: zf, zb: zb, thickness: zf - zb };
     }
 
@@ -1406,7 +1416,7 @@
         var xp = 0;                                             // pivot au milieu du nez (axe central)
         var cb = Math.cos(beta), sb = Math.sin(beta);
         function place(Xc, Yc, z) { var zc = z + cambZ(m, Xc), x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + zc * sb, Yc, -dx * sb + zc * cb]; }
-        function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); return { zf: -surfSag(m.F1, r, m.n), zb: -m.CT - surfSag(P - m.F1, r, m.n) }; }
+        function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); var zf = -surfSag(m.F1, r, m.n), zb = -m.CT - surfSag(P - m.F1, r, m.n); if (zb > zf) { zb = zf; } return { zf: zf, zb: zb }; }
         function quad(T, a, b, c, d) { if (flip) { T.push(a, c, b, a, d, c); } else { T.push(a, b, c, a, c, d); } }
 
         var base = [], i, j;
