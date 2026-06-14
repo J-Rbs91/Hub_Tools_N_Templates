@@ -299,6 +299,29 @@
               <input type="text" inputmode="decimal" id="coteD" value="18">
             </div>
           </div>
+
+          <div class="field">
+            <label for="cambrure">Base du cercle — cambrure</label>
+            <select id="cambrure">
+              <option value="0">Plate</option>
+              <option value="2">B2</option>
+              <option value="3">B3</option>
+              <option value="3.5" selected>B3,5</option>
+              <option value="4">B4</option>
+              <option value="5">B5</option>
+              <option value="6">B6</option>
+              <option value="8">B8</option>
+            </select>
+            <div class="hint">Cambrure du cerclage, exprimée en base. Galbe horizontal uniquement
+              (visible en vue de dessus) — aucune cambrure verticale.</div>
+          </div>
+
+          <div class="field">
+            <label for="galbe">Angle de galbe <span id="galbe-val" class="hint" style="display:inline;">0°</span></label>
+            <input type="range" id="galbe" min="0" max="30" step="1" value="0">
+            <div class="slider-ends"><span>plat</span><span>galbé</span></div>
+            <div class="hint">Angle entre les deux verres, pivot au niveau du nez.</div>
+          </div>
         </section>
 
         <!-- ── VERRE ── -->
@@ -779,7 +802,9 @@
         sph: sph, cyl: cyl, axeDeg: eye.axe, axeRad: axeRad, n: n, ax: ax, by: by, cfg: cfg, F1: F1,
         decX: decX, decY: decY, nasal: nasal,
         CT: CT, etMin: etMin, etMax: etMax, blank: blank,
-        pMin: pMin, pMax: pMax, type: type
+        pMin: pMin, pMax: pMax, type: type,
+        // Rayon de cambrure du cerclage (mm) : base → R = 530/base (indice de réf. 1,53). 0 = plate.
+        cambR: common.camb > 0 ? 530 / common.camb : 0
       };
     }
 
@@ -905,7 +930,9 @@
         etFloor: parseFloat(el('cerclage').value) || 0.4,
         baseMode: el('base-speciale').checked ? el('base').value : 'auto',
         montureEp: num('m-ep'),
-        bevel: num('m-bevel')
+        bevel: num('m-bevel'),
+        camb: parseFloat(el('cambrure').value) || 0,   // base de cambrure du cerclage (0 = plate)
+        galbe: num('galbe')                            // angle de galbe (°), pivot au nez
       };
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
       var og = eyeResult({ sph: num('og-sph'), cyl: num('og-cyl'), axe: num('og-axe'), pd: num('og-pd'), h: num('og-h') }, common, 'og');
@@ -989,12 +1016,23 @@
       return Math.hypot(X, Y) <= frameRadius(cfg, ang, ax, by);
     }
 
+    // Décalage axial (z) dû à la cambrure du cerclage : galbe horizontal uniquement, donc
+    // fonction de la seule abscisse X (par rapport au centre-boîte). Appliqué identiquement à la
+    // face avant et arrière → courbe le verre sans changer son épaisseur axiale. Invisible de côté.
+    function cambZ(m, X) {
+      var R = m.cambR;
+      if (!R) { return 0; }
+      var x = Math.min(Math.abs(X), R - 0.001);
+      return -(R - Math.sqrt(R * R - x * x));
+    }
+
     function surfacePoint(m, X, Y) {
       var dx = X - m.decX, dy = Y - m.decY;
       var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-      var zf = -surfSag(m.F1, r, m.n);
-      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+      var c = cambZ(m, X);
+      var zf = -surfSag(m.F1, r, m.n) + c;
+      var zb = -m.CT - surfSag(P - m.F1, r, m.n) + c;
       return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
 
@@ -1006,8 +1044,9 @@
       }
       var X = m.decX + last * cx, Y = m.decY + last * cy;
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-      var zf = -surfSag(m.F1, last, m.n);
-      var zb = -m.CT - surfSag(P - m.F1, last, m.n);
+      var c = cambZ(m, X);
+      var zf = -surfSag(m.F1, last, m.n) + c;
+      var zb = -m.CT - surfSag(P - m.F1, last, m.n) + c;
       return { X: X, Y: Y, theta: theta, zf: zf, zb: zb, thickness: zf - zb };
     }
 
@@ -1290,7 +1329,7 @@
       var key = function (mdl) {
         return JSON.stringify([
           mdl.shapeLabel, mdl.common.n, mdl.common.A, mdl.common.B, mdl.common.D, mdl.common.etFloor,
-          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel,
+          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel, mdl.common.camb, mdl.common.galbe,
           mdl.od.sph, mdl.od.cyl, mdl.od.axeDeg, mdl.od.decX, mdl.od.decY,
           mdl.og.sph, mdl.og.cyl, mdl.og.axeDeg, mdl.og.decX, mdl.og.decY
         ]);
@@ -1357,12 +1396,14 @@
       function addLens(m, screenSign, boxCenterX) {
         var RINGS = 26;
         var flip = screenSign < 0;
-        // Verres coplanaires (pas d'inclinaison) : profil parfaitement droit, aucune courbe parasite.
-        var alpha = 0;
+        // Angle de galbe : chaque verre pivote autour de l'axe vertical passant par le nez (x = D/2),
+        // ses bords temporaux reculant. La cambrure du cerclage (cambZ) ajoute, elle, un galbe
+        // horizontal propre à chaque cercle — les deux se cumulent, sans aucune courbure verticale.
+        var alpha = (common.galbe || 0) * DEG;
         var beta = screenSign * alpha;
         var xp = screenSign * common.D / 2;                     // pivot à D/2
         var cb = Math.cos(beta), sb = Math.sin(beta);
-        function place(Xc, Yc, z) { var x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb]; }
+        function place(Xc, Yc, z) { var zc = z + cambZ(m, Xc), x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + zc * sb, Yc, -dx * sb + zc * cb]; }
         function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); return { zf: -surfSag(m.F1, r, m.n), zb: -m.CT - surfSag(P - m.F1, r, m.n) }; }
         function quad(T, a, b, c, d) { if (flip) { T.push(a, c, b, a, d, c); } else { T.push(a, b, c, a, c, d); } }
 
@@ -1876,9 +1917,12 @@
       var v = num('m-bevel');
       el('bevel-val').textContent = (v > 0 ? '+' : '') + v.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
     });
+    el('galbe').addEventListener('input', function () {
+      el('galbe-val').textContent = num('galbe').toLocaleString('fr-FR') + '°';
+    });
     el('coteA').addEventListener('input', function () { abTouched = true; });
     el('coteB').addEventListener('input', function () { abTouched = true; });
-    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'base', 'm-ep', 'm-bevel',
+    ['coteA', 'coteB', 'coteD', 'cerclage', 'indice', 'base', 'm-ep', 'm-bevel', 'cambrure', 'galbe',
      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h'].forEach(function (id) {
       el(id).addEventListener('input', scheduleCompute);
