@@ -484,7 +484,7 @@
             <span><i class="sw-back"></i>dépassement arrière</span>
           </div>
           <div class="cal">
-            <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> — cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, agrandissez/réduisez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
+            <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> — cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, calibrez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). La 3D passe alors en <strong>perspective réaliste</strong> : le plan du point le plus proche de la monture est à l'échelle exacte (mesurez de face), le reste fuit en profondeur comme à l'œil. <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
             <div class="cal-state" id="cal-state"></div>
           </div>
 
@@ -563,6 +563,7 @@
 
     var DEG = Math.PI / 180;
     var SEG = 120;             // échantillons angulaires du contour
+    var FOV3D = 35;            // focale 3D en degrés (≈ vision humaine) — perspective réaliste
     var BLANK_MARGIN = 2;      // marge de taillage pour le Ø mini palet (mm)
     var MYOPE_CENTER_MIN = 1.2; // épaisseur mini fixe au centre pour un verre comportant une puissance négative
 
@@ -1711,12 +1712,14 @@
         resize();
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         var M = mul(rotY(view.ry), rotX(view.rx));
-        var MVP = mul(persp(40 * DEG, canvas.width / canvas.height, 0.1, 8000), mul(trans(-geometry.radius * view.dist), M));
+        var MVP = mul(persp(FOV3D * DEG, canvas.width / canvas.height, 0.1, 8000), mul(trans(-geometry.radius * view.dist), M));
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
         if (showFrame) { gl.disable(gl.BLEND); gl.depthMask(true); draw(buffers[0], [0.17, 0.18, 0.21], 0); }
-        gl.enable(gl.BLEND); gl.depthMask(false); draw(buffers[1], [0.80, 0.88, 1.0], 1); gl.depthMask(true);
+        // Verre translucide mais ÉCRIVANT la profondeur : on ne voit plus à travers le verre
+        // la tranche / le débordement situés derrière, ni le verre de l'autre œil (ordre correct).
+        gl.enable(gl.BLEND); gl.depthMask(true); draw(buffers[1], [0.80, 0.88, 1.0], 1);
         if (showOverhang) {
           gl.disable(gl.BLEND); draw(buffers[2], [0.85, 0.23, 0.23], 0); draw(buffers[3], [0.14, 0.55, 0.34], 0);
         }
@@ -1751,7 +1754,7 @@
       var colLoc = gl.getUniformLocation(prog, 'uColor'), glassLoc = gl.getUniformLocation(prog, 'uGlass');
       var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), iBufL = gl.createBuffer(), iBufF = gl.createBuffer();
       var iBufFront = gl.createBuffer(), iBufBack = gl.createBuffer();
-      var countL = 0, countF = 0, countFront = 0, countBack = 0, radius = 60;
+      var countL = 0, countF = 0, countFront = 0, countBack = 0, radius = 60, positions = null;
       var idxTypeL = gl.UNSIGNED_SHORT, idxTypeF = gl.UNSIGNED_SHORT;
       var idxTypeFront = gl.UNSIGNED_SHORT, idxTypeBack = gl.UNSIGNED_SHORT;
 
@@ -1760,7 +1763,6 @@
       function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]); }
       function rotY(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]); }
       function trans(z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, z, 1]); }
-      function orthoM(w, h, nr, fr) { return new Float32Array([2 / w, 0, 0, 0, 0, 2 / h, 0, 0, 0, 0, -2 / (fr - nr), 0, 0, 0, -(fr + nr) / (fr - nr), 1]); }
 
       function resize() { var w = vp.clientWidth, hh = vp.clientHeight, dpr = Math.min(window.devicePixelRatio, 2); canvas.width = w * dpr; canvas.height = hh * dpr; gl.viewport(0, 0, canvas.width, canvas.height); }
       function frame() {
@@ -1770,10 +1772,24 @@
         var M = mul(rotY(view.ry), rotX(view.rx));
         var MVP;
         if (scale11) {
-          var wmm = vp.clientWidth / pxPerMM, hmm = vp.clientHeight / pxPerMM;
-          MVP = mul(orthoM(wmm, hmm, -2000, 2000), M);
+          // Vue 1:1 réaliste : perspective (focale FOV3D ≈ œil humain) calée pour que le PLAN
+          // du point le plus proche de la monture soit rendu à l'échelle exacte
+          // (1 mm écran = 1 mm réel selon pxPerMM calibré). Le reste fuit en profondeur comme
+          // à l'œil : en pivotant, la monture « recule » et les cotes hors de ce plan raccourcissent.
+          var f3 = 1 / Math.tan(FOV3D * DEG / 2);
+          var hmmReel = vp.clientHeight / pxPerMM;          // hauteur physique du viewport (mm)
+          var d0 = (hmmReel / 2) * f3;                       // distance œil → plan 1:1 (mm)
+          var zNear = -Infinity;                            // z (repère caméra) du point le plus proche
+          if (positions) {
+            for (var vi = 0; vi < positions.length; vi += 3) {
+              var zc = M[2] * positions[vi] + M[6] * positions[vi + 1] + M[10] * positions[vi + 2];
+              if (zc > zNear) { zNear = zc; }
+            }
+          }
+          if (zNear === -Infinity) { zNear = 0; }
+          MVP = mul(persp(FOV3D * DEG, asp, 1, 8000), mul(trans(-d0 - zNear), M));
         } else {
-          MVP = mul(persp(40 * DEG, asp, 0.1, 8000), mul(trans(-radius * view.dist), M));
+          MVP = mul(persp(FOV3D * DEG, asp, 0.1, 8000), mul(trans(-radius * view.dist), M));
         }
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
@@ -1784,11 +1800,12 @@
           gl.uniform3f(colLoc, 0.17, 0.18, 0.21); gl.uniform1f(glassLoc, 0.0);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.drawElements(gl.TRIANGLES, countF, idxTypeF, 0);
         }
-        // Passe 2 : verre (translucide, fresnel).
-        gl.enable(gl.BLEND); gl.depthMask(false);
+        // Passe 2 : verre (translucide, fresnel) ÉCRIVANT la profondeur (depthMask true) :
+        // on ne voit plus à travers le verre la tranche / le débordement situés derrière, ni le
+        // verre de l'autre œil — l'occlusion devient correcte (corrige aussi l'ordre des 2 verres).
+        gl.enable(gl.BLEND); gl.depthMask(true);
         gl.uniform3f(colLoc, 0.80, 0.88, 1.0); gl.uniform1f(glassLoc, 1.0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.drawElements(gl.TRIANGLES, countL, idxTypeL, 0);
-        gl.depthMask(true);
         if (showOverhang) {
           gl.disable(gl.BLEND); gl.depthMask(true);
           gl.uniform1f(glassLoc, 0.0);
@@ -1814,6 +1831,7 @@
           idxTypeF = (idxF instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           idxTypeFront = (idxFront instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           idxTypeBack = (idxBack instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+          positions = g.positions;   // copie de référence pour calculer le point le plus proche (Vue 1:1)
           gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, g.positions, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, g.normals, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxL, gl.STATIC_DRAW);
