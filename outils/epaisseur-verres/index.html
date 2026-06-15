@@ -320,10 +320,17 @@
           </div>
 
           <div class="field">
-            <label for="cambrure">Base du cercle — cambrure</label>
+            <label for="cambrure">Base du cercle — cambrure horizontale (axe 0/180)</label>
             <input type="text" inputmode="decimal" id="cambrure" value="3.5">
-            <div class="hint">Cambrure du cerclage, exprimée en base (0 = plate, ex. 3,5). Galbe horizontal
-              uniquement (visible en vue de dessus) — aucune cambrure verticale.</div>
+            <div class="hint">Cambrure horizontale du cerclage, exprimée en base (0 = plate, ex. 3,5).
+              Galbe dans le plan horizontal, visible en vue de dessus.</div>
+          </div>
+
+          <div class="field">
+            <label for="cambrure-v">Base du cercle — cambrure verticale (axe 90/270)</label>
+            <input type="text" inputmode="decimal" id="cambrure-v" value="3.5">
+            <div class="hint">Léger galbe vertical du cerclage, exprimé en base (0 = plat, ex. 3,5).
+              Galbe dans le plan vertical, visible en vue de profil.</div>
           </div>
 
           <div class="field">
@@ -832,7 +839,9 @@
         CT: CT, etMin: etMin, etMax: etMax, blank: blank,
         pMin: pMin, pMax: pMax, type: type,
         // Rayon de cambrure du cerclage (mm) : base → R = 530/base (indice de réf. 1,53). 0 = plate.
-        cambR: common.camb > 0 ? 530 / common.camb : 0
+        cambR: common.camb > 0 ? 530 / common.camb : 0,
+        // Rayon de cambrure verticale du cerclage (axe 90/270), même conversion base → rayon.
+        cambRV: common.cambV > 0 ? 530 / common.cambV : 0
       };
     }
 
@@ -919,7 +928,7 @@
           var zf = -surfSag(m.F1, r, m.n);
           var zb = -m.CT - surfSag(P - m.F1, r, m.n);
           if (zb > zf) { zb = zf; }   // tranche au fil : pas d'épaisseur négative
-          var mid = meanMid + cambZ(m, X) + bevel;   // centre du drageoir (cerclage indépendant)
+          var mid = meanMid + cambZ(m, X, Y) + bevel;   // centre du drageoir (cerclage indépendant)
           var radialLength = Math.hypot(X, Y) || 1;
           var apex = [X + X / radialLength * 0.35, Y + Y / radialLength * 0.35, mid];
           samples.push({
@@ -973,13 +982,13 @@
         var zf = -surfSag(m.F1, r, m.n);
         var zb = -m.CT - surfSag(P - m.F1, r, m.n);
         if (zb > zf) { zb = zf; }
-        edges.push({ Xc: Xc, zf: zf, zb: zb });
+        edges.push({ Xc: Xc, Yc: Yc, zf: zf, zb: zb });
         zRef += (zf + zb) / 2;
       }
       zRef /= SEG;
       var bmin = -Infinity, bmax = Infinity;
       for (j = 0; j < SEG; j++) {
-        var e = edges[j], cz = cambZ(m, e.Xc);
+        var e = edges[j], cz = cambZ(m, e.Xc, e.Yc);
         var dBack = e.zb - zRef - cz;    // bevelOff ≥ dBack (sinon le fond passe derrière la tranche)
         var dFront = e.zf - zRef - cz;   // bevelOff ≤ dFront (sinon le fond passe devant la tranche)
         if (dBack > bmin) { bmin = dBack; }
@@ -1033,7 +1042,8 @@
         baseMode: el('base-speciale').checked ? el('base').value : 'auto',
         montureEp: num('m-ep'),
         bevel: num('m-bevel'),
-        camb: Math.max(0, num('cambrure')),   // base de cambrure du cerclage, champ libre (0 = plate)
+        camb: Math.max(0, num('cambrure')),    // base de cambrure horizontale du cerclage (0 = plate)
+        cambV: Math.max(0, num('cambrure-v')), // base de cambrure verticale du cerclage (0 = plate)
         galbe: num('galbe')                            // angle de galbe (°), pivot au nez
       };
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
@@ -1120,14 +1130,21 @@
       return Math.hypot(X, Y) <= frameRadius(cfg, ang, ax, by);
     }
 
-    // Décalage axial (z) dû à la cambrure du cerclage : galbe horizontal uniquement, donc
-    // fonction de la seule abscisse X (par rapport au centre-boîte). Appliqué identiquement à la
-    // face avant et arrière → courbe le verre sans changer son épaisseur axiale. Invisible de côté.
-    function cambZ(m, X) {
-      var R = m.cambR;
-      if (!R) { return 0; }
-      var x = Math.min(Math.abs(X), R - 0.001);
-      return -(R - Math.sqrt(R * R - x * x));
+    // Décalage axial (z) dû à la cambrure du cerclage. Deux composantes indépendantes, sommées :
+    //   • cambrure horizontale (axe 0/180), fonction de l'abscisse X → galbe vu de dessus ;
+    //   • cambrure verticale (axe 90/270), fonction de l'ordonnée Y → léger galbe vu de profil.
+    // Chaque composante est la flèche d'un cylindre de rayon R = 530/base (0 = plat).
+    function cambZ(m, X, Y) {
+      var z = 0;
+      if (m.cambR) {
+        var x = Math.min(Math.abs(X), m.cambR - 0.001);
+        z -= m.cambR - Math.sqrt(m.cambR * m.cambR - x * x);
+      }
+      if (m.cambRV) {
+        var y = Math.min(Math.abs(Y || 0), m.cambRV - 0.001);
+        z -= m.cambRV - Math.sqrt(m.cambRV * m.cambRV - y * y);
+      }
+      return z;
     }
 
     function surfacePoint(m, X, Y) {
@@ -1433,7 +1450,7 @@
       var key = function (mdl) {
         return JSON.stringify([
           mdl.shapeLabel, mdl.common.n, mdl.common.A, mdl.common.B, mdl.common.D, mdl.common.etFloor,
-          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel, mdl.common.camb, mdl.common.galbe,
+          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel, mdl.common.camb, mdl.common.cambV, mdl.common.galbe,
           mdl.od.sph, mdl.od.cyl, mdl.od.axeDeg, mdl.od.decX, mdl.od.decY,
           mdl.og.sph, mdl.og.cyl, mdl.og.axeDeg, mdl.og.decX, mdl.og.decY
         ]);
@@ -1559,7 +1576,7 @@
           var rcJ = frameRadius(m.cfg, phiJ, m.ax, m.by);
           var Xc = rcJ * Math.cos(phiJ), Yc = rcJ * Math.sin(phiJ);
           var rl = Math.hypot(Xc, Yc) || 1, rdx = Xc / rl, rdy = Yc / rl;
-          var zc = zRefLocal + cambZ(m, Xc) + bevelOff;
+          var zc = zRefLocal + cambZ(m, Xc, Yc) + bevelOff;
           frontLim[j] = place(Xc, Yc, zc + Tf * 0.5)[2];
           backLim[j] = place(Xc, Yc, zc - Tf * 0.5)[2];
           apex[j] = pushV(place(Xc + rdx * 0.35, Yc + rdy * 0.35, zc));
