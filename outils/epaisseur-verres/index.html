@@ -124,6 +124,25 @@
       margin: 16px 0 10px; padding-top: 12px; border-top: 1px solid var(--line); }
     .subhead span { font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--grey); }
     .slider-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--grey); margin-top: 2px; }
+
+    /* ── curseur de calage du biseau : bande bleue = bornes de contact, hachuré pâle = hors bornes ── */
+    .bevel-range { --bmin: 0%; --bmax: 100%; -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: transparent; padding: 0; border: 0; cursor: pointer; }
+    .bevel-range:focus { outline: none; }
+    .bevel-range:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+    .bevel-range::-webkit-slider-runnable-track { background:
+        linear-gradient(to right, transparent var(--bmin), var(--blue) var(--bmin), var(--blue) var(--bmax), transparent var(--bmax)),
+        repeating-linear-gradient(45deg, #DCE8F5, #DCE8F5 5px, #E6E9EC 5px, #E6E9EC 10px);
+      border: 1px solid var(--line); border-radius: 5px; height: 10px; }
+    .bevel-range::-moz-range-track { background:
+        linear-gradient(to right, transparent var(--bmin), var(--blue) var(--bmin), var(--blue) var(--bmax), transparent var(--bmax)),
+        repeating-linear-gradient(45deg, #DCE8F5, #DCE8F5 5px, #E6E9EC 5px, #E6E9EC 10px);
+      border: 1px solid var(--line); border-radius: 5px; height: 10px; }
+    .bevel-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -4px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--blue-d); box-shadow: 0 1px 3px rgba(26,42,58,.3); }
+    .bevel-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--blue-d); box-shadow: 0 1px 3px rgba(26,42,58,.3); }
+    .bevel-range:disabled::-webkit-slider-thumb { background: #EDF2F6; border-color: var(--grey); }
+    .bevel-range:disabled::-moz-range-thumb { background: #EDF2F6; border-color: var(--grey); }
+    .bevel-warn { margin-top: 8px; padding: 9px 11px; background: #FDECEC; border: 1px solid #E2A0A0; border-left: 4px solid #C0392B; border-radius: 8px; font-size: 12px; color: #8A2A20; line-height: 1.45; }
+    .bevel-warn[hidden] { display: none; }
     .check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px; cursor: pointer; }
     .field > label.check { display: flex; }
     .check input { width: auto; }
@@ -302,18 +321,9 @@
 
           <div class="field">
             <label for="cambrure">Base du cercle — cambrure</label>
-            <select id="cambrure">
-              <option value="0">Plate</option>
-              <option value="2">B2</option>
-              <option value="3">B3</option>
-              <option value="3.5" selected>B3,5</option>
-              <option value="4">B4</option>
-              <option value="5">B5</option>
-              <option value="6">B6</option>
-              <option value="8">B8</option>
-            </select>
-            <div class="hint">Cambrure du cerclage, exprimée en base. Galbe horizontal uniquement
-              (visible en vue de dessus) — aucune cambrure verticale.</div>
+            <input type="text" inputmode="decimal" id="cambrure" value="3.5">
+            <div class="hint">Cambrure du cerclage, exprimée en base (0 = plate, ex. 3,5). Galbe horizontal
+              uniquement (visible en vue de dessus) — aucune cambrure verticale.</div>
           </div>
 
           <div class="field">
@@ -449,8 +459,17 @@
               <input type="checkbox" id="m-bevel-auto"> Calage automatique 1/3 avant · 2/3 arrière
             </label>
             <label for="m-bevel">Calage du biseau <span id="bevel-val" class="hint" style="display:inline;">0,0 mm</span></label>
-            <input type="range" id="m-bevel" min="-5" max="5" step="0.1" value="0">
+            <input type="range" id="m-bevel" class="bevel-range" min="-5" max="5" step="0.1" value="0">
             <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
+            <div class="hint" id="bevel-bounds"></div>
+            <label class="check" for="bevel-unlock">
+              <input type="checkbox" id="bevel-unlock"> Déverrouiller les bornes (franchir le contact au fond du drageoir)
+            </label>
+            <div class="bevel-warn" id="bevel-warn" hidden>
+              Incompatibilité entre le galbe de la monture (base du cercle) et le type / la correction du
+              verre : le verre ne peut pas reposer au fond du drageoir sur tout le pourtour. Ajustez la base
+              du cercle, le galbe ou la base du verre.
+            </div>
             <div class="hint" id="bevel-auto-state"></div>
           </div>
           <div class="btn-row">
@@ -552,6 +571,7 @@
     var scale11 = false;       // mode 3D orthographique 1:1
     var showFrame = true;      // afficher la monture (cerclage) dans la 3D
     var showOverhang = false;  // colorer les parties de tranche hors du cerclage
+    var bevelBounds = { min: -5, max: 5, ok: true }; // bornes de calage gardant le verre au contact du fond du drageoir
     var comparisonModels = []; // deux configurations figées pour la présentation client
     var comparisonRenderers = [];
     var comparisonProfileIndex = 0;
@@ -938,6 +958,65 @@
       return contained || best;
     }
 
+    // Bornes de calage pour un œil : plage de translation (bevelOff) gardant le point central du
+    // drageoir (zRef + cambZ) compris dans l'épaisseur de la tranche (entre face arrière et avant)
+    // en TOUT point du contour → le verre reste au contact du fond du drageoir partout.
+    function bevelRangeForEye(m) {
+      var zRef = 0, j, edges = [];
+      for (j = 0; j < SEG; j++) {
+        var phi = 2 * Math.PI * j / SEG;
+        var rc = frameRadius(m.cfg, phi, m.ax, m.by);
+        var Xc = rc * Math.cos(phi), Yc = rc * Math.sin(phi);
+        var r = Math.hypot(Xc - m.decX, Yc - m.decY);
+        var P = powerAt(Math.atan2(Yc - m.decY, Xc - m.decX), m.sph, m.cyl, m.axeRad);
+        var zf = -surfSag(m.F1, r, m.n);
+        var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+        if (zb > zf) { zb = zf; }
+        edges.push({ Xc: Xc, zf: zf, zb: zb });
+        zRef += (zf + zb) / 2;
+      }
+      zRef /= SEG;
+      var bmin = -Infinity, bmax = Infinity;
+      for (j = 0; j < SEG; j++) {
+        var e = edges[j], cz = cambZ(m, e.Xc);
+        var dBack = e.zb - zRef - cz;    // bevelOff ≥ dBack (sinon le fond passe derrière la tranche)
+        var dFront = e.zf - zRef - cz;   // bevelOff ≤ dFront (sinon le fond passe devant la tranche)
+        if (dBack > bmin) { bmin = dBack; }
+        if (dFront < bmax) { bmax = dFront; }
+      }
+      return { min: bmin, max: bmax };
+    }
+
+    // Bornes communes (intersection OD ∩ OG, un seul curseur) + bande colorée + avertissement.
+    function updateBevelBounds(mdl) {
+      var rOD = bevelRangeForEye(mdl.od), rOG = bevelRangeForEye(mdl.og);
+      var bmin = Math.max(rOD.min, rOG.min), bmax = Math.min(rOD.max, rOG.max);
+      bevelBounds = { min: bmin, max: bmax, ok: bmin <= bmax };
+      var slider = el('m-bevel');
+      var lo = parseFloat(slider.min), hi = parseFloat(slider.max);
+      var pct = function (x) { return Math.max(0, Math.min(100, (x - lo) / (hi - lo) * 100)); };
+      if (bevelBounds.ok) {
+        slider.style.setProperty('--bmin', pct(bmin).toFixed(1) + '%');
+        slider.style.setProperty('--bmax', pct(bmax).toFixed(1) + '%');
+        el('bevel-bounds').textContent = 'Contact garanti de ' +
+          bmin.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' à ' +
+          bmax.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
+      } else {
+        slider.style.setProperty('--bmin', '50%');
+        slider.style.setProperty('--bmax', '50%');
+        el('bevel-bounds').textContent = '';
+      }
+      el('bevel-warn').hidden = bevelBounds.ok;
+    }
+
+    // Ramène la valeur du curseur dans les bornes, sauf si l'utilisateur a déverrouillé.
+    function clampBevelValue() {
+      if (el('bevel-unlock').checked || !bevelBounds.ok) { return num('m-bevel'); }
+      var v = num('m-bevel'), c = Math.max(bevelBounds.min, Math.min(bevelBounds.max, v));
+      if (Math.abs(c - v) > 1e-9) { el('m-bevel').value = c.toFixed(1); }
+      return c;
+    }
+
     function setBevelDisplay(value, automatic, ratio, contained) {
       el('bevel-val').textContent = (value > 0 ? '+' : '') + value.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
       el('m-bevel').disabled = automatic;
@@ -953,18 +1032,20 @@
         baseMode: el('base-speciale').checked ? el('base').value : 'auto',
         montureEp: num('m-ep'),
         bevel: num('m-bevel'),
-        camb: parseFloat(el('cambrure').value) || 0,   // base de cambrure du cerclage (0 = plate)
+        camb: Math.max(0, num('cambrure')),   // base de cambrure du cerclage, champ libre (0 = plate)
         galbe: num('galbe')                            // angle de galbe (°), pivot au nez
       };
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
       var og = eyeResult({ sph: num('og-sph'), cyl: num('og-cyl'), axe: num('og-axe'), pd: num('og-pd'), h: num('og-h') }, common, 'og');
       models = { od: od, og: og, common: common };
+      updateBevelBounds(models);   // bornes de contact + bande colorée + avertissement (avant le calage)
       if (el('m-bevel-auto').checked) {
         var automatic = autoBevel(models);
         common.bevel = automatic.bevel;
         el('m-bevel').value = automatic.bevel.toFixed(1);
         setBevelDisplay(automatic.bevel, true, automatic.ratio, automatic.contained);
       } else {
+        common.bevel = clampBevelValue();   // verrou : on garde le verre au contact, sauf déverrouillage
         setBevelDisplay(common.bevel, false, 0, false);
       }
       renderResult();
@@ -1848,6 +1929,7 @@
       scheduleCompute();
     });
     el('m-bevel-auto').addEventListener('change', scheduleCompute);
+    el('bevel-unlock').addEventListener('change', scheduleCompute);
     el('btn-11').addEventListener('click', function () {
       scale11 = !scale11;
       el('btn-11').textContent = scale11 ? 'Échelle libre' : 'Vue 1:1';
@@ -1856,7 +1938,7 @@
     });
 
     el('m-bevel').addEventListener('input', function () {
-      var v = num('m-bevel');
+      var v = clampBevelValue();   // bloque le pouce aux bornes (sauf déverrouillage)
       el('bevel-val').textContent = (v > 0 ? '+' : '') + v.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
     });
     el('galbe').addEventListener('input', function () {
