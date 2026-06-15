@@ -323,14 +323,8 @@
             <label for="cambrure">Base du cercle — cambrure horizontale (axe 0/180)</label>
             <input type="text" inputmode="decimal" id="cambrure" value="3.5">
             <div class="hint">Cambrure horizontale du cerclage, exprimée en base (0 = plate, ex. 3,5).
-              Galbe dans le plan horizontal, visible en vue de dessus.</div>
-          </div>
-
-          <div class="field">
-            <label for="cambrure-v">Base du cercle — cambrure verticale (axe 90/270)</label>
-            <input type="text" inputmode="decimal" id="cambrure-v" value="3.5">
-            <div class="hint">Léger galbe vertical du cerclage, exprimé en base (0 = plat, ex. 3,5).
-              Galbe dans le plan vertical, visible en vue de profil.</div>
+              Galbe dans le plan horizontal, visible en vue de dessus. Un léger galbe vertical
+              fixe (axe 90/270, base 3,5) est appliqué en plus, visible en vue de profil.</div>
           </div>
 
           <div class="field">
@@ -1043,7 +1037,7 @@
         montureEp: num('m-ep'),
         bevel: num('m-bevel'),
         camb: Math.max(0, num('cambrure')),    // base de cambrure horizontale du cerclage (0 = plate)
-        cambV: Math.max(0, num('cambrure-v')), // base de cambrure verticale du cerclage (0 = plate)
+        cambV: 3.5,                            // léger galbe vertical fixe (axe 90/270), non réglable
         galbe: num('galbe')                            // angle de galbe (°), pivot au nez
       };
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
@@ -1450,7 +1444,7 @@
       var key = function (mdl) {
         return JSON.stringify([
           mdl.shapeLabel, mdl.common.n, mdl.common.A, mdl.common.B, mdl.common.D, mdl.common.etFloor,
-          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel, mdl.common.camb, mdl.common.cambV, mdl.common.galbe,
+          mdl.common.baseMode, mdl.common.montureEp, mdl.common.bevel, mdl.common.camb, mdl.common.galbe,
           mdl.od.sph, mdl.od.cyl, mdl.od.axeDeg, mdl.od.decX, mdl.od.decY,
           mdl.og.sph, mdl.og.cyl, mdl.og.axeDeg, mdl.og.decX, mdl.og.decY
         ]);
