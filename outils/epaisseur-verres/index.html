@@ -141,7 +141,7 @@
     .bevel-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--blue-d); box-shadow: 0 1px 3px rgba(26,42,58,.3); }
     .bevel-range:disabled::-webkit-slider-thumb { background: #EDF2F6; border-color: var(--grey); }
     .bevel-range:disabled::-moz-range-thumb { background: #EDF2F6; border-color: var(--grey); }
-    .bevel-warn { margin-top: 8px; padding: 9px 11px; background: #FDECEC; border: 1px solid #E2A0A0; border-left: 4px solid #C0392B; border-radius: 8px; font-size: 12px; color: #8A2A20; line-height: 1.45; }
+    .bevel-warn { margin-top: 8px; padding: 9px 11px; background: #EBF2FA; border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 8px; font-size: 12px; color: var(--blue-d); line-height: 1.45; }
     .bevel-warn[hidden] { display: none; }
     .check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px; cursor: pointer; }
     .field > label.check { display: flex; }
@@ -467,9 +467,9 @@
               <input type="checkbox" id="bevel-unlock"> Déverrouiller les bornes (franchir le contact au fond du drageoir)
             </label>
             <div class="bevel-warn" id="bevel-warn" hidden>
-              Incompatibilité entre le galbe de la monture (base du cercle) et le type / la correction du
-              verre : le verre ne peut pas reposer au fond du drageoir sur tout le pourtour. Ajustez la base
-              du cercle, le galbe ou la base du verre.
+              Le biseau épouse la cambrure du cercle (base) et s'inscrit dans la tranche du verre : là où le
+              verre est plus mince (fort cylindre ou base plate), l'apex se cale au plus près sans dépasser,
+              comme au tracé à l'atelier. Le montage reste réalisable ; ajustez le calage selon le rendu voulu.
             </div>
             <div class="hint" id="bevel-auto-state"></div>
           </div>
@@ -922,7 +922,10 @@
           var zf = -surfSag(m.F1, r, m.n);
           var zb = -m.CT - surfSag(P - m.F1, r, m.n);
           if (zb > zf) { zb = zf; }   // tranche au fil : pas d'épaisseur négative
-          var mid = meanMid + cambZ(m, X, Y) + bevel;   // centre du drageoir (cerclage indépendant)
+          // Apex du biseau : il suit la cambrure du cercle (cambZ + calage), mais reste INSCRIT dans la
+          // tranche du verre [zb, zf]. Là où le verre est plus mince (fort cylindre, base plate), l'apex se
+          // cale dans l'épaisseur disponible au lieu d'en sortir — comme un biseau tracé à l'atelier.
+          var mid = Math.max(zb, Math.min(zf, meanMid + cambZ(m, X, Y) + bevel));
           var radialLength = Math.hypot(X, Y) || 1;
           var apex = [X + X / radialLength * 0.35, Y + Y / radialLength * 0.35, mid];
           samples.push({
@@ -962,9 +965,11 @@
       return contained || best;
     }
 
-    // Bornes de calage pour un œil : plage de translation (bevelOff) gardant le point central du
-    // drageoir (zRef + cambZ) compris dans l'épaisseur de la tranche (entre face arrière et avant)
-    // en TOUT point du contour → le verre reste au contact du fond du drageoir partout.
+    // Plage de calage IDÉAL pour un œil : translation (bevelOff) gardant la courbe de la base du cercle
+    // (zRef + cambZ) comprise dans l'épaisseur de la tranche (entre face arrière et avant) en TOUT point
+    // du contour → le biseau épouse pleinement le fond du drageoir partout, sans avoir à se caler dans
+    // l'épaisseur. Hors de cette plage, le montage reste possible : l'apex s'inscrit dans la tranche là
+    // où le verre est plus mince (voir le calage par point dans overhangAreas / buildScene).
     function bevelRangeForEye(m) {
       var zRef = 0, j, edges = [];
       for (j = 0; j < SEG; j++) {
@@ -991,7 +996,9 @@
       return { min: bmin, max: bmax };
     }
 
-    // Bornes communes (intersection OD ∩ OG, un seul curseur) + bande colorée + avertissement.
+    // Plage commune (intersection OD ∩ OG, un seul curseur) + bande colorée + note de montage.
+    // « ok » = il existe un calage où le biseau épouse PLEINEMENT la base du cercle sur tout le pourtour ;
+    // sinon le montage reste réalisable (l'apex s'inscrit dans la tranche) et on l'indique sans alarme.
     function updateBevelBounds(mdl) {
       var rOD = bevelRangeForEye(mdl.od), rOG = bevelRangeForEye(mdl.og);
       var bmin = Math.max(rOD.min, rOG.min), bmax = Math.min(rOD.max, rOG.max);
@@ -1002,12 +1009,12 @@
       if (bevelBounds.ok) {
         slider.style.setProperty('--bmin', pct(bmin).toFixed(1) + '%');
         slider.style.setProperty('--bmax', pct(bmax).toFixed(1) + '%');
-        el('bevel-bounds').textContent = 'Contact garanti de ' +
+        el('bevel-bounds').textContent = 'Contact plein sur la base du cercle de ' +
           bmin.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' à ' +
           bmax.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mm';
       } else {
-        slider.style.setProperty('--bmin', '50%');
-        slider.style.setProperty('--bmax', '50%');
+        slider.style.setProperty('--bmin', '0%');
+        slider.style.setProperty('--bmax', '100%');
         el('bevel-bounds').textContent = '';
       }
       el('bevel-warn').hidden = bevelBounds.ok;
@@ -1570,7 +1577,11 @@
           var rcJ = frameRadius(m.cfg, phiJ, m.ax, m.by);
           var Xc = rcJ * Math.cos(phiJ), Yc = rcJ * Math.sin(phiJ);
           var rl = Math.hypot(Xc, Yc) || 1, rdx = Xc / rl, rdy = Yc / rl;
-          var zc = zRefLocal + cambZ(m, Xc, Yc) + bevelOff;
+          // Apex du biseau : cible = cambrure du cercle (cambZ + calage), calée dans la tranche [zb, zf]
+          // du verre en ce point. Le biseau suit donc la base du cercle, mais s'inscrit dans l'épaisseur
+          // disponible là où le verre est mince, au lieu de percer la face (montage réel à l'atelier).
+          var sJ = surf(Math.hypot(Xc - m.decX, Yc - m.decY), Math.atan2(Yc - m.decY, Xc - m.decX));
+          var zc = Math.max(sJ.zb, Math.min(sJ.zf, zRefLocal + cambZ(m, Xc, Yc) + bevelOff));
           frontLim[j] = place(Xc, Yc, zc + Tf * 0.5)[2];
           backLim[j] = place(Xc, Yc, zc - Tf * 0.5)[2];
           apex[j] = pushV(place(Xc + rdx * 0.35, Yc + rdy * 0.35, zc));
