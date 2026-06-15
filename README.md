@@ -15,7 +15,7 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 |---|---|---|
 | [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
 | [Clôture de Caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
-| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi, Ø mini du palet) selon la correction, l'indice et la forme de monture (côtes A / B / D), décentration OD / OG et visualisation 3D manipulable | Disponible |
+| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi, Ø mini du palet) selon la correction, l'indice et la forme de monture (côtes A / B / D), décentrement OD / OG et visualisation 3D manipulable | Disponible |
 
 > **Profil magasin** — un profil partagé (clé `localStorage` `profil-magasin-v1`, contenant nom,
 > adresse, téléphone et e-mail) renseigné une fois sur le hub pré-remplit l'en-tête de la
