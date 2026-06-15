@@ -151,7 +151,7 @@
     .vp-legend .sw-lens { background: #9ecbff; }
     .vp-legend .sw-frame { background: #4a4f57; }
     .vp-legend .sw-front { background: #D83A3A; }
-    .vp-legend .sw-back { background: #1A613B; }
+    .vp-legend .sw-back { background: #238B57; }
     .vp-legend-overhang[hidden] { display: none; }
 
     /* ── RÉSULTATS ── */
@@ -1457,7 +1457,7 @@
       var Tf = Math.max(0.5, common.montureEp || 3.0);  // profondeur du cerclage
       var bevelOff = common.bevel || 0;    // calage du biseau (mm, + = vers l'arrière)
       var Wf = 1.7;                        // largeur radiale du jonc (mm) — cerclage fin
-      var verts = [], triL = [], triF = [], triFront = [], triBack = [];
+      var verts = [], triL = [], triF = [], triFront = [], triBack = [], triEdge = [];
       function pushV(p) { verts.push(p); return verts.length - 1; }
       function clippedQuad(T, pts, values, flip) {
         var poly = pts.map(function (p, i) { return { p: p, d: values[i] }; });
@@ -1568,8 +1568,8 @@
         }
         for (j = 0; j < SEG; j++) {
           var jn2 = (j + 1) % SEG, fI = base[RINGS][j], fIn = base[RINGS][jn2];
-          quad(triL, fI, fIn, apex[jn2], apex[j]);            // biseau : avant → apex
-          quad(triL, apex[j], apex[jn2], fIn + 1, fI + 1);    // biseau : apex → arrière
+          quad(triEdge, fI, fIn, apex[jn2], apex[j]);         // tranche (biseau) : avant → apex
+          quad(triEdge, apex[j], apex[jn2], fIn + 1, fI + 1); // tranche (biseau) : apex → arrière
           clippedQuad(triFront,
             [verts[fI], verts[fIn], verts[apex[jn2]], verts[apex[j]]],
             [
@@ -1609,7 +1609,7 @@
       for (v = 0; v < verts.length; v++) { positions[v * 3 + 2] -= zc; }   // recentrage en z
 
       var normals = new Float32Array(verts.length * 3);
-      var allTri = triL.concat(triF, triFront, triBack);
+      var allTri = triL.concat(triF, triFront, triBack, triEdge);
       for (var t = 0; t < allTri.length; t += 3) {
         var ia = allTri[t], ib = allTri[t + 1], ic = allTri[t + 2];
         var ax = positions[ia * 3], ay = positions[ia * 3 + 1], az = positions[ia * 3 + 2];
@@ -1634,6 +1634,7 @@
         indicesFrame: big ? new Uint32Array(triF) : new Uint16Array(triF),
         indicesFront: big ? new Uint32Array(triFront) : new Uint16Array(triFront),
         indicesBack: big ? new Uint32Array(triBack) : new Uint16Array(triBack),
+        indicesEdge: big ? new Uint32Array(triEdge) : new Uint16Array(triEdge),
         radius: sceneRadius
       };
     }
@@ -1677,7 +1678,7 @@
         return { refresh: function () {}, destroy: function () {} };
       }
       var vsrc = 'attribute vec3 p;attribute vec3 nor;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;gl_Position=uMVP*vec4(p,1.0);}';
-      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uColor;uniform float uGlass;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.85,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),50.0);vec3 col=uColor*(0.32+0.7*diff)+vec3(1.0)*spec*0.5;float a=1.0;if(uGlass>0.5){float fres=pow(1.0-max(dot(N,V),0.0),3.0);col+=vec3(0.6,0.72,0.9)*fres*0.85;a=mix(0.38,0.92,fres);}gl_FragColor=vec4(col,a);}';
+      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uColor;uniform float uGlass;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.85,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),50.0);vec3 col=uColor*(0.32+0.7*diff);float specK=0.5;float a=1.0;if(uGlass>0.5){specK=0.30;float fres=pow(1.0-max(dot(N,V),0.0),3.0);col+=vec3(0.55,0.66,0.85)*fres*0.45;a=mix(0.40,0.90,fres);}col+=vec3(1.0)*spec*specK;gl_FragColor=vec4(col,a);}';
       function shader(type, source) { var out = gl.createShader(type); gl.shaderSource(out, source); gl.compileShader(out); return out; }
       var program = gl.createProgram();
       gl.attachShader(program, shader(gl.VERTEX_SHADER, vsrc)); gl.attachShader(program, shader(gl.FRAGMENT_SHADER, fsrc));
@@ -1694,7 +1695,7 @@
       }
       gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, geometry.positions, gl.STATIC_DRAW);
       gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, geometry.normals, gl.STATIC_DRAW);
-      buffers = [indexBuffer(geometry.indicesFrame), indexBuffer(geometry.indicesLens), indexBuffer(geometry.indicesFront), indexBuffer(geometry.indicesBack)];
+      buffers = [indexBuffer(geometry.indicesFrame), indexBuffer(geometry.indicesLens), indexBuffer(geometry.indicesFront), indexBuffer(geometry.indicesBack), indexBuffer(geometry.indicesEdge)];
       function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
       function persp(fov, asp, nr, fr) { var f = 1 / Math.tan(fov / 2); return new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, (2 * fr * nr) / (nr - fr), 0]); }
       function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]); }
@@ -1716,16 +1717,20 @@
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
-        if (showFrame) { gl.disable(gl.BLEND); gl.depthMask(true); draw(buffers[0], [0.17, 0.18, 0.21], 0); }
-        // Verre translucide mais ÉCRIVANT la profondeur : on ne voit plus à travers le verre
+        // Monture + tranche du verre (opaques) : la tranche (biseau) est rendue en matériau plein,
+        // plus soutenu que les faces, pour bien la démarquer des faces avant/arrière.
+        gl.disable(gl.BLEND); gl.depthMask(true);
+        if (showFrame) { draw(buffers[0], [0.17, 0.18, 0.21], 0); }
+        draw(buffers[4], [0.40, 0.54, 0.72], 0);
+        // Faces translucides mais ÉCRIVANT la profondeur : on ne voit plus à travers le verre
         // la tranche / le débordement situés derrière, ni le verre de l'autre œil (ordre correct).
-        gl.enable(gl.BLEND); gl.depthMask(true); draw(buffers[1], [0.80, 0.88, 1.0], 1);
+        gl.enable(gl.BLEND); gl.depthMask(true); draw(buffers[1], [0.55, 0.68, 0.86], 1);
         if (showOverhang) {
           // Le débordement coloré reprend les MÊMES triangles de biseau que le verre (coplanaires) :
           // on le tire légèrement vers la caméra (polygonOffset) pour qu'il gagne proprement, sans z-fighting.
           gl.disable(gl.BLEND);
           gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-1.5, -2.0);
-          draw(buffers[2], [0.85, 0.23, 0.23], 0); draw(buffers[3], [0.10, 0.38, 0.23], 0);
+          draw(buffers[2], [0.85, 0.23, 0.23], 0); draw(buffers[3], [0.14, 0.55, 0.34], 0);
           gl.disable(gl.POLYGON_OFFSET_FILL);
         }
       }
@@ -1749,7 +1754,7 @@
       if (!gl) { el('vp-overlay').textContent = '3D non disponible sur ce navigateur.'; el('vp-engine').textContent = 'indisponible'; return; }
 
       var vsrc = 'attribute vec3 p;attribute vec3 nor;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec3 vP;void main(){vN=mat3(uM)*nor;vP=(uM*vec4(p,1.0)).xyz;gl_Position=uMVP*vec4(p,1.0);}';
-      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uColor;uniform float uGlass;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.85,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),50.0);vec3 col=uColor*(0.32+0.7*diff)+vec3(1.0)*spec*0.5;float a=1.0;if(uGlass>0.5){float fres=pow(1.0-max(dot(N,V),0.0),3.0);col+=vec3(0.6,0.72,0.9)*fres*0.85;a=mix(0.38,0.92,fres);}gl_FragColor=vec4(col,a);}';
+      var fsrc = 'precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uColor;uniform float uGlass;void main(){vec3 N=normalize(vN);if(!gl_FrontFacing)N=-N;vec3 L=normalize(vec3(0.5,0.85,0.9));float diff=max(dot(N,L),0.0);vec3 V=normalize(-vP);vec3 H=normalize(L+V);float spec=pow(max(dot(N,H),0.0),50.0);vec3 col=uColor*(0.32+0.7*diff);float specK=0.5;float a=1.0;if(uGlass>0.5){specK=0.30;float fres=pow(1.0-max(dot(N,V),0.0),3.0);col+=vec3(0.55,0.66,0.85)*fres*0.45;a=mix(0.40,0.90,fres);}col+=vec3(1.0)*spec*specK;gl_FragColor=vec4(col,a);}';
       function sh(t, s) { var o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; }
       var prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vsrc)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fsrc)); gl.linkProgram(prog); gl.useProgram(prog);
       gl.enable(gl.DEPTH_TEST); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -1758,10 +1763,10 @@
       var mvpLoc = gl.getUniformLocation(prog, 'uMVP'), mLoc = gl.getUniformLocation(prog, 'uM');
       var colLoc = gl.getUniformLocation(prog, 'uColor'), glassLoc = gl.getUniformLocation(prog, 'uGlass');
       var pBuf = gl.createBuffer(), nBuf = gl.createBuffer(), iBufL = gl.createBuffer(), iBufF = gl.createBuffer();
-      var iBufFront = gl.createBuffer(), iBufBack = gl.createBuffer();
-      var countL = 0, countF = 0, countFront = 0, countBack = 0, radius = 60, positions = null;
+      var iBufFront = gl.createBuffer(), iBufBack = gl.createBuffer(), iBufEdge = gl.createBuffer();
+      var countL = 0, countF = 0, countFront = 0, countBack = 0, countEdge = 0, radius = 60, positions = null;
       var idxTypeL = gl.UNSIGNED_SHORT, idxTypeF = gl.UNSIGNED_SHORT;
-      var idxTypeFront = gl.UNSIGNED_SHORT, idxTypeBack = gl.UNSIGNED_SHORT;
+      var idxTypeFront = gl.UNSIGNED_SHORT, idxTypeBack = gl.UNSIGNED_SHORT, idxTypeEdge = gl.UNSIGNED_SHORT;
 
       function mul(a, b) { var c = new Float32Array(16); for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) { var s = 0; for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; c[i * 4 + j] = s; } return c; }
       function persp(fov, asp, nr, fr) { var f = 1 / Math.tan(fov / 2); return new Float32Array([f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (fr + nr) / (nr - fr), -1, 0, 0, (2 * fr * nr) / (nr - fr), 0]); }
@@ -1799,17 +1804,21 @@
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
-        // Passe 1 : monture (opaque).
+        // Passe 1 : monture + tranche du verre (opaques). La tranche (biseau) est rendue en
+        // matériau plein, plus soutenu que les faces, pour bien la distinguer de la face avant
+        // et de la face arrière quand on tourne le modèle.
+        gl.disable(gl.BLEND); gl.depthMask(true);
         if (showFrame) {
-          gl.disable(gl.BLEND); gl.depthMask(true);
           gl.uniform3f(colLoc, 0.17, 0.18, 0.21); gl.uniform1f(glassLoc, 0.0);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.drawElements(gl.TRIANGLES, countF, idxTypeF, 0);
         }
-        // Passe 2 : verre (translucide, fresnel) ÉCRIVANT la profondeur (depthMask true) :
-        // on ne voit plus à travers le verre la tranche / le débordement situés derrière, ni le
-        // verre de l'autre œil — l'occlusion devient correcte (corrige aussi l'ordre des 2 verres).
+        gl.uniform3f(colLoc, 0.40, 0.54, 0.72); gl.uniform1f(glassLoc, 0.0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufEdge); gl.drawElements(gl.TRIANGLES, countEdge, idxTypeEdge, 0);
+        // Passe 2 : faces avant/arrière du verre (translucides, fresnel atténué) ÉCRIVANT la
+        // profondeur (depthMask true) : on ne voit plus à travers le verre la tranche / le
+        // débordement situés derrière, ni le verre de l'autre œil — l'occlusion reste correcte.
         gl.enable(gl.BLEND); gl.depthMask(true);
-        gl.uniform3f(colLoc, 0.80, 0.88, 1.0); gl.uniform1f(glassLoc, 1.0);
+        gl.uniform3f(colLoc, 0.55, 0.68, 0.86); gl.uniform1f(glassLoc, 1.0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufL); gl.drawElements(gl.TRIANGLES, countL, idxTypeL, 0);
         if (showOverhang) {
           // Le débordement coloré reprend les MÊMES triangles de biseau que le verre (coplanaires) :
@@ -1819,7 +1828,7 @@
           gl.uniform1f(glassLoc, 0.0);
           gl.uniform3f(colLoc, 0.85, 0.23, 0.23);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufFront); gl.drawElements(gl.TRIANGLES, countFront, idxTypeFront, 0);
-          gl.uniform3f(colLoc, 0.10, 0.38, 0.23);
+          gl.uniform3f(colLoc, 0.14, 0.55, 0.34);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufBack); gl.drawElements(gl.TRIANGLES, countBack, idxTypeBack, 0);
           gl.disable(gl.POLYGON_OFFSET_FILL);
         }
@@ -1831,15 +1840,17 @@
 
       renderer3d = {
         update: function (g) {
-          var idxL = g.indicesLens, idxF = g.indicesFrame, idxFront = g.indicesFront, idxBack = g.indicesBack;
+          var idxL = g.indicesLens, idxF = g.indicesFrame, idxFront = g.indicesFront, idxBack = g.indicesBack, idxEdge = g.indicesEdge;
           if (idxL instanceof Uint32Array && !uintOK) { idxL = new Uint16Array(idxL); }
           if (idxF instanceof Uint32Array && !uintOK) { idxF = new Uint16Array(idxF); }
           if (idxFront instanceof Uint32Array && !uintOK) { idxFront = new Uint16Array(idxFront); }
           if (idxBack instanceof Uint32Array && !uintOK) { idxBack = new Uint16Array(idxBack); }
+          if (idxEdge instanceof Uint32Array && !uintOK) { idxEdge = new Uint16Array(idxEdge); }
           idxTypeL = (idxL instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           idxTypeF = (idxF instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           idxTypeFront = (idxFront instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           idxTypeBack = (idxBack instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+          idxTypeEdge = (idxEdge instanceof Uint32Array) ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
           positions = g.positions;   // copie de référence pour calculer le point le plus proche (Vue 1:1)
           gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.bufferData(gl.ARRAY_BUFFER, g.positions, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.bufferData(gl.ARRAY_BUFFER, g.normals, gl.STATIC_DRAW);
@@ -1847,7 +1858,8 @@
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufF); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxF, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufFront); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxFront, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufBack); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxBack, gl.STATIC_DRAW);
-          countL = idxL.length; countF = idxF.length; countFront = idxFront.length; countBack = idxBack.length;
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufEdge); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxEdge, gl.STATIC_DRAW);
+          countL = idxL.length; countF = idxF.length; countFront = idxFront.length; countBack = idxBack.length; countEdge = idxEdge.length;
           radius = g.radius; resize(); frame();
         },
         resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
