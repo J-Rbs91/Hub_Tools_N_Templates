@@ -321,18 +321,9 @@
 
           <div class="field">
             <label for="cambrure">Base du cercle — cambrure</label>
-            <select id="cambrure">
-              <option value="0">Plate</option>
-              <option value="2">B2</option>
-              <option value="3">B3</option>
-              <option value="3.5" selected>B3,5</option>
-              <option value="4">B4</option>
-              <option value="5">B5</option>
-              <option value="6">B6</option>
-              <option value="8">B8</option>
-            </select>
-            <div class="hint">Cambrure du cerclage, exprimée en base. Galbe horizontal uniquement
-              (visible en vue de dessus) — aucune cambrure verticale.</div>
+            <input type="text" inputmode="decimal" id="cambrure" value="3.5">
+            <div class="hint">Cambrure du cerclage, exprimée en base (0 = plate, ex. 3,5). Galbe horizontal
+              uniquement (visible en vue de dessus) — aucune cambrure verticale.</div>
           </div>
 
           <div class="field">
@@ -1041,7 +1032,7 @@
         baseMode: el('base-speciale').checked ? el('base').value : 'auto',
         montureEp: num('m-ep'),
         bevel: num('m-bevel'),
-        camb: parseFloat(el('cambrure').value) || 0,   // base de cambrure du cerclage (0 = plate)
+        camb: Math.max(0, num('cambrure')),   // base de cambrure du cerclage, champ libre (0 = plate)
         galbe: num('galbe')                            // angle de galbe (°), pivot au nez
       };
       var od = eyeResult({ sph: num('od-sph'), cyl: num('od-cyl'), axe: num('od-axe'), pd: num('od-pd'), h: num('od-h') }, common, 'od');
