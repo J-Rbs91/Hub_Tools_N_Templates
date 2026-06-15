@@ -10,6 +10,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/hub.css">
+  <style>
+    /* QA-05 — Focus clavier nettement visible sur le lien « Accéder à l'outil »,
+       cohérent avec les tokens (--blue). N'altère pas le confort souris. */
+    .tool-card__cta:focus-visible {
+      outline: 3px solid var(--blue, #1F6FB2);
+      outline-offset: 3px;
+      border-radius: var(--radius, 14px);
+    }
+
+    /* QA-04 — Message non bloquant sous le champ e-mail. */
+    .field__msg {
+      display: none;
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--blue-d, #1A5C95);
+    }
+    .field__msg.is-shown { display: block; }
+  </style>
 </head>
 <body>
 
@@ -233,7 +252,7 @@
         les outils. À renseigner une fois par poste.
       </p>
 
-      <form id="settings-form">
+      <form id="settings-form" novalidate>
         <label class="field">
           <span class="field__lbl">Nom du magasin <span class="field__req">obligatoire</span></span>
           <input type="text" id="f-nom" placeholder="Ex. : Optique du Centre" autocomplete="off" required>
@@ -251,7 +270,8 @@
 
         <label class="field">
           <span class="field__lbl">E-mail <span class="field__opt">facultatif</span></span>
-          <input type="email" id="f-mail" placeholder="contact@votremagasin.fr" autocomplete="off">
+          <input type="text" inputmode="email" id="f-mail" placeholder="contact@votremagasin.fr" autocomplete="off" aria-describedby="f-mail-msg">
+          <span class="field__msg" id="f-mail-msg" role="status"></span>
         </label>
 
         <div class="sync-section">
@@ -346,17 +366,73 @@
       document.getElementById('f-mail').value = p.mail || '';
     }
 
-    function openModal() {
+    var modalTrigger = null;   // QA-02 : mémorise le bouton ayant ouvert la modale
+
+    /* QA-02 — Liste des éléments focalisables actuellement visibles dans la modale. */
+    function modalFocusables() {
+      var modal = document.getElementById('settings-modal');
+      var sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
+                'select:not([disabled]), textarea:not([disabled])';
+      return Array.prototype.slice.call(modal.querySelectorAll(sel)).filter(function (el) {
+        return el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement;
+      });
+    }
+
+    function openModal(e) {
+      // QA-02 : retient le déclencheur pour lui rendre le focus à la fermeture.
+      modalTrigger = (e && e.currentTarget) || document.activeElement || null;
       fillForm(loadProfil());
       document.getElementById('f-sync').value = syncUrl();
       setStatus('');
       setBackupStatus('');
+      setMailMsg('');
       document.getElementById('settings-modal').hidden = false;
+      document.body.style.overflow = 'hidden';   // QA-03 : verrouille le scroll d'arrière-plan
       document.getElementById('f-nom').focus();
     }
 
     function closeModal() {
-      document.getElementById('settings-modal').hidden = true;
+      var modal = document.getElementById('settings-modal');
+      if (modal.hidden) { return; }
+      modal.hidden = true;
+      document.body.style.overflow = '';         // QA-03 : rétablit le scroll
+      // QA-02 : redonne le focus au bouton d'origine.
+      if (modalTrigger && typeof modalTrigger.focus === 'function') { modalTrigger.focus(); }
+      modalTrigger = null;
+    }
+
+    /* QA-02 — Confinement du focus (Tab / Maj+Tab cyclent dans la modale). */
+    function trapFocus(e) {
+      if (e.key !== 'Tab') { return; }
+      if (document.getElementById('settings-modal').hidden) { return; }
+      var foc = modalFocusables();
+      if (!foc.length) { return; }
+      var first = foc[0];
+      var last = foc[foc.length - 1];
+      var active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !document.getElementById('settings-modal').contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    /* QA-04 — Message non bloquant sous le champ e-mail. */
+    function setMailMsg(msg) {
+      var el = document.getElementById('f-mail-msg');
+      if (!el) { return; }
+      el.textContent = msg || '';
+      if (msg) { el.classList.add('is-shown'); }
+      else { el.classList.remove('is-shown'); }
+    }
+
+    /* QA-04 — Validation souple : vide = valide ; sinon contrôle minimal. */
+    function isPlausibleEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
     }
 
     /* ── Synchronisation Google Drive via Apps Script (JSONP, sans CORS) ── */
@@ -424,11 +500,17 @@
       e.preventDefault();
       var nomEl = document.getElementById('f-nom');
       if (!nomEl.value.trim()) { nomEl.focus(); return; }
+      // QA-04 : l'e-mail douteux n'empêche jamais l'enregistrement du profil.
+      // On le sauvegarde tel quel et on affiche un simple avertissement.
+      var mail = document.getElementById('f-mail').value.trim();
+      setMailMsg(mail && !isPlausibleEmail(mail)
+        ? 'Adresse e-mail inhabituelle — enregistrée telle quelle. Vérifiez-la si besoin.'
+        : '');
       var profil = {
         nom: nomEl.value.trim(),
         adresse: document.getElementById('f-adresse').value.trim(),
         tel: document.getElementById('f-tel').value.trim(),
-        mail: document.getElementById('f-mail').value.trim()
+        mail: mail
       };
       localStorage.setItem(LS_PROFIL, JSON.stringify(profil));
       localStorage.setItem(LS_SYNC, document.getElementById('f-sync').value.trim());
@@ -449,7 +531,8 @@
       if (e.target === this) { closeModal(); }
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { closeModal(); }
+      if (e.key === 'Escape') { closeModal(); return; }
+      trapFocus(e);   // QA-02 : confine le focus tant que la modale est ouverte
     });
 
     /* ── Sauvegarde / Restauration de tout le magasin (un seul fichier) ──
@@ -611,22 +694,38 @@
 
       // Apparition en cascade lorsque les cartes entrent dans le viewport.
       grid.classList.add('reveal-ready');
+
+      // Révèle une carte (en cascade selon son index) sans la jouer deux fois.
+      function showCard(card) {
+        if (card.classList.contains('is-visible')) { return; }
+        var i = cards.indexOf(card);
+        setTimeout(function () {
+          if (card.classList.contains('is-visible')) { return; }
+          card.classList.add('is-visible');
+          // Joue l'icône thématique une fois à l'apparition (utile au tactile,
+          // sans survol). La classe est retirée pour ne pas boucler ensuite.
+          card.classList.add('icon-play');
+          setTimeout(function () { card.classList.remove('icon-play'); }, 2600);
+        }, Math.max(0, i) * 90);
+      }
+
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (!e.isIntersecting) { return; }
-          var i = cards.indexOf(e.target);
-          var card = e.target;
-          setTimeout(function () {
-            card.classList.add('is-visible');
-            // Joue l'icône thématique une fois à l'apparition (utile au tactile,
-            // sans survol). La classe est retirée pour ne pas boucler ensuite.
-            card.classList.add('icon-play');
-            setTimeout(function () { card.classList.remove('icon-play'); }, 2600);
-          }, Math.max(0, i) * 90);
-          io.unobserve(card);
+          showCard(e.target);
+          io.unobserve(e.target);
         });
       }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
       cards.forEach(function (c) { io.observe(c); });
+
+      // QA-09 — Filet de sécurité : si l'observer ne se déclenche pas (onglet en
+      // arrière-plan au chargement, navigateur capricieux…), on force la
+      // révélation des cartes restées invisibles. La cascade est préservée.
+      function revealAll() {
+        cards.forEach(function (c) { io.unobserve(c); showCard(c); });
+      }
+      window.addEventListener('load', function () { setTimeout(revealAll, 1200); });
+      setTimeout(revealAll, 2500);
     })();
   </script>
 
