@@ -1623,98 +1623,8 @@
       };
     }
 
-    /* ═══════════ RENDU THREE.JS ═══════════ */
-    function initThree(THREE) {
-      var vp = el('viewport');
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 4000);
-      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      vp.appendChild(renderer.domElement);
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-      var d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(1, 1.4, 1.6); scene.add(d1);
-      var d2 = new THREE.DirectionalLight(0x9fc4e6, 0.5); d2.position.set(-1.2, -0.6, -1); scene.add(d2);
-
-      var ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 4000);
-      // Environnement réfléchissant (dégradé) → reflets/fresnel sur le verre, sans dépendance externe.
-      try {
-        var ew = 8, eh = 32, edata = new Uint8Array(ew * eh * 4);
-        for (var ey = 0; ey < eh; ey++) {
-          var et = ey / (eh - 1);
-          var er = Math.round(196 * (1 - et) + 42 * et), eg = Math.round(214 * (1 - et) + 54 * et), eb = Math.round(238 * (1 - et) + 74 * et);
-          if (et < 0.18) { er = 245; eg = 250; eb = 255; }   // bande claire en haut (highlight)
-          for (var ex = 0; ex < ew; ex++) { var ei = (ey * ew + ex) * 4; edata[ei] = er; edata[ei + 1] = eg; edata[ei + 2] = eb; edata[ei + 3] = 255; }
-        }
-        var envTex = new THREE.DataTexture(edata, ew, eh, THREE.RGBAFormat); envTex.needsUpdate = true;
-        envTex.mapping = THREE.EquirectangularReflectionMapping;
-        scene.environment = envTex;
-      } catch (e) { /* env optionnel */ }
-
-      var glassMat = new THREE.MeshStandardMaterial({ color: 0xdbecfb, metalness: 0.0, roughness: 0.07, transparent: true, opacity: 0.52, envMapIntensity: 1.5, side: THREE.DoubleSide, depthWrite: false });
-      var frameMat = new THREE.MeshStandardMaterial({ color: 0x2a2e35, metalness: 0.35, roughness: 0.42, envMapIntensity: 0.85, side: THREE.DoubleSide });
-      var frontMat = new THREE.MeshStandardMaterial({ color: 0xd83a3a, roughness: 0.55, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
-      var backMat = new THREE.MeshStandardMaterial({ color: 0x238b57, roughness: 0.55, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
-      var lensMesh = null, frameMesh = null, frontMesh = null, backMesh = null, group = new THREE.Group(); scene.add(group);
-      var radius = 60;
-
-      function resize() {
-        var w = vp.clientWidth, hgt = vp.clientHeight;
-        renderer.setSize(w, hgt, false); camera.aspect = w / hgt; camera.updateProjectionMatrix();
-      }
-      function frame() {
-        group.rotation.x = view.rx; group.rotation.y = view.ry;
-        if (frameMesh) { frameMesh.visible = showFrame; }
-        if (frontMesh) { frontMesh.visible = showOverhang; }
-        if (backMesh) { backMesh.visible = showOverhang; }
-        var cam;
-        if (scale11) {
-          var wmm = vp.clientWidth / pxPerMM, hmm = vp.clientHeight / pxPerMM;
-          ortho.left = -wmm / 2; ortho.right = wmm / 2; ortho.top = hmm / 2; ortho.bottom = -hmm / 2;
-          ortho.position.set(0, 0, 1000); ortho.lookAt(0, 0, 0); ortho.updateProjectionMatrix();
-          cam = ortho;
-        } else {
-          camera.position.set(0, 0, radius * view.dist); camera.lookAt(0, 0, 0); cam = camera;
-        }
-        renderer.render(scene, cam);
-      }
-      window.addEventListener('resize', function () { resize(); frame(); });
-      attachControls(vp, function () { frame(); refreshComparison3D(); });
-
-      renderer3d = {
-        update: function (g) {
-          if (lensMesh) { group.remove(lensMesh); lensMesh.geometry.dispose(); }
-          if (frameMesh) { group.remove(frameMesh); frameMesh.geometry.dispose(); }
-          if (frontMesh) { group.remove(frontMesh); frontMesh.geometry.dispose(); }
-          if (backMesh) { group.remove(backMesh); backMesh.geometry.dispose(); }
-          var posA = new THREE.BufferAttribute(g.positions, 3), norA = new THREE.BufferAttribute(g.normals, 3);
-          var fg = new THREE.BufferGeometry();
-          fg.setAttribute('position', posA); fg.setAttribute('normal', norA); fg.setIndex(new THREE.BufferAttribute(g.indicesFrame, 1));
-          var lg = new THREE.BufferGeometry();
-          lg.setAttribute('position', posA); lg.setAttribute('normal', norA); lg.setIndex(new THREE.BufferAttribute(g.indicesLens, 1));
-          var frg = new THREE.BufferGeometry();
-          frg.setAttribute('position', posA); frg.setAttribute('normal', norA); frg.setIndex(new THREE.BufferAttribute(g.indicesFront, 1));
-          var brg = new THREE.BufferGeometry();
-          brg.setAttribute('position', posA); brg.setAttribute('normal', norA); brg.setIndex(new THREE.BufferAttribute(g.indicesBack, 1));
-          frameMesh = new THREE.Mesh(fg, frameMat); frameMesh.renderOrder = 1;
-          lensMesh = new THREE.Mesh(lg, glassMat); lensMesh.renderOrder = 2;
-          frontMesh = new THREE.Mesh(frg, frontMat); frontMesh.renderOrder = 3; frontMesh.visible = showOverhang;
-          backMesh = new THREE.Mesh(brg, backMat); backMesh.renderOrder = 3; backMesh.visible = showOverhang;
-          group.add(frameMesh); group.add(lensMesh); group.add(frontMesh); group.add(backMesh);
-          radius = g.radius; resize(); frame();
-        },
-        resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
-        profile: function () { view.rx = 0; view.ry = Math.PI / 2; frame(); },
-        refresh: function () { resize(); frame(); }
-      };
-      el('vp-overlay').style.display = 'none';
-      el('vp-engine').textContent = 'Three.js';
-      resize();
-      if (models) { renderer3d.update(buildScene(models)); }
-    }
-
-    /* ═══════════ RENDU WEBGL DE REPLI ═══════════ */
-    function initWebGLFallback() {
+    /* ═══════════ RENDU WEBGL (moteur maison, sans dépendance) ═══════════ */
+    function initWebGL() {
       var vp = el('viewport');
       var canvas = document.createElement('canvas');
       vp.insertBefore(canvas, vp.firstChild);
@@ -1809,22 +1719,14 @@
         refresh: function () { resize(); frame(); }
       };
       el('vp-overlay').style.display = 'none';
-      el('vp-engine').textContent = 'WebGL (repli)';
+      el('vp-engine').textContent = '3D · WebGL';
       resize();
       if (models) { renderer3d.update(buildScene(models)); }
     }
 
-    /* ═══════════ CHARGEMENT 3D : Three.js (CDN) puis repli WebGL ═══════════ */
+    /* ═══════════ CHARGEMENT 3D : rendu WebGL maison (aucune dépendance, aucun CDN) ═══════════ */
     function load3D() {
-      var done = false;
-      var fail = function () { if (!done) { done = true; try { initWebGLFallback(); } catch (e) { el('vp-overlay').textContent = '3D indisponible.'; } } };
-      var timer = setTimeout(fail, 6000);
-      import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js')
-        .then(function (THREE) {
-          if (done) { return; } done = true; clearTimeout(timer);
-          try { initThree(THREE); } catch (e) { initWebGLFallback(); }
-        })
-        .catch(function () { clearTimeout(timer); fail(); });
+      try { initWebGL(); } catch (e) { el('vp-overlay').textContent = '3D non disponible sur ce navigateur.'; }
     }
 
     /* ═══════════ SÉLECTEUR DE FORMES (aperçus SVG) ═══════════ */

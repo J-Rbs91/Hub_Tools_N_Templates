@@ -752,6 +752,16 @@
     var LS_FOND_CIBLE = 'cloture-fond-cible-v1';
     var HISTORY_DAYS = 15;   // historique plafonné à 15 jours glissants
 
+    /* ── BORNES (garde-fous anti-saisie aberrante) ──
+       Caisse de magasin d'optique : on plafonne à des valeurs largement
+       supérieures à tout comptage réaliste, mais qui empêchent les totaux
+       délirants (ex. 99999999999 billets collés par erreur).
+       - quantités pièces/billets : au plus 9 999 unités par coupure
+         (9 999 billets de 200 € = ~2 M€, déjà bien au-delà du réel).
+       - montants électroniques : au plus 999 999,99 € par moyen de paiement. */
+    var MAX_QTY = 9999;
+    var MAX_AMOUNT = 999999.99;
+
     /* ── PROFIL MAGASIN (partagé via localStorage) ── */
     function profilMagasin() {
       try { return JSON.parse(localStorage.getItem('profil-magasin-v1') || '{}') || {}; }
@@ -778,6 +788,38 @@
       return Math.round(n * 100) / 100;
     }
 
+    /* ── NORMALISATION DES SAISIES ──
+       Quantités = entiers >= 0, plafonnés à MAX_QTY. Renvoie l'entier
+       réellement utilisé pour les calculs (et à réécrire dans le champ). */
+    function qtyValue(el) {
+      var qty = parseInt(el.value, 10) || 0;
+      if (qty < 0) { qty = 0; }
+      if (qty > MAX_QTY) { qty = MAX_QTY; }
+      return qty;
+    }
+    /* Réécrit le champ avec l'entier réellement compté si la saisie diffère
+       (décimale « 2,7 » → 2, négative → 0, dépassement → MAX_QTY). Laisse un
+       champ vide tel quel pour ne pas afficher « 0 » avant toute saisie. */
+    function normalizeQtyField(el) {
+      if (el.value === '') { return; }
+      var qty = qtyValue(el);
+      if (el.value !== String(qty)) { el.value = qty; }
+    }
+    /* Montants électroniques = nombres >= 0, plafonnés à MAX_AMOUNT. */
+    function amountValue(el) {
+      var v = parseFloat(el.value) || 0;
+      if (v < 0) { v = 0; }
+      if (v > MAX_AMOUNT) { v = MAX_AMOUNT; }
+      return r2(v);
+    }
+    function normalizeAmountField(el) {
+      if (el.value === '') { return; }
+      var v = parseFloat(el.value);
+      if (isNaN(v)) { return; }
+      var clamped = amountValue(el);
+      if (v < 0 || v > MAX_AMOUNT) { el.value = clamped; }
+    }
+
     /* ── CONSTRUCTION DES LIGNES ── */
     function buildCoins() {
       var tbody = document.getElementById('coins-tbody');
@@ -791,6 +833,7 @@
         inp.id = 'coin-qty-' + i;
         inp.placeholder = '0';
         inp.min = '0';
+        inp.max = String(MAX_QTY);
         inp.step = '1';
         tdQty.appendChild(inp);
         var tdLbl = document.createElement('td');
@@ -819,6 +862,7 @@
         inp.id = 'bill-qty-' + i;
         inp.placeholder = '0';
         inp.min = '0';
+        inp.max = String(MAX_QTY);
         inp.step = '1';
         tdQty.appendChild(inp);
         var tdLbl = document.createElement('td');
@@ -850,6 +894,7 @@
         inp.id = 'elec-' + i;
         inp.placeholder = '0,00';
         inp.min = '0';
+        inp.max = String(MAX_AMOUNT);
         inp.step = '0.01';
         tdAmt.appendChild(inp);
         tr.appendChild(tdLbl);
@@ -878,8 +923,7 @@
     function calculate() {
       var totalCoins = 0;
       COINS.forEach(function(coin, i) {
-        var qty = parseInt(document.getElementById('coin-qty-' + i).value, 10) || 0;
-        if (qty < 0) { qty = 0; }
+        var qty = qtyValue(document.getElementById('coin-qty-' + i));
         var line = r2(qty * coin.value);
         document.getElementById('coin-tot-' + i).textContent = fmt(line);
         totalCoins = r2(totalCoins + line);
@@ -889,8 +933,7 @@
 
       var totalBills = 0;
       BILLS.forEach(function(bill, i) {
-        var qty = parseInt(document.getElementById('bill-qty-' + i).value, 10) || 0;
-        if (qty < 0) { qty = 0; }
+        var qty = qtyValue(document.getElementById('bill-qty-' + i));
         var line = r2(qty * bill.value);
         document.getElementById('bill-tot-' + i).textContent = fmt(line);
         totalBills = r2(totalBills + line);
@@ -907,7 +950,7 @@
 
       var totalElec = 0;
       ELEC.forEach(function(_, i) {
-        var v = parseFloat(document.getElementById('elec-' + i).value) || 0;
+        var v = amountValue(document.getElementById('elec-' + i));
         totalElec = r2(totalElec + v);
       });
       document.getElementById('total-elec').textContent = fmt(totalElec);
@@ -1033,8 +1076,9 @@
       var coinQtys = [];
       var totalCoins = 0;
       COINS.forEach(function(coin, i) {
-        var qty = parseInt(document.getElementById('coin-qty-' + i).value, 10) || 0;
-        if (qty < 0) { qty = 0; }
+        var el = document.getElementById('coin-qty-' + i);
+        normalizeQtyField(el);   // reflète la valeur saine dans le champ avant enregistrement
+        var qty = qtyValue(el);
         coinQtys.push(qty);
         totalCoins = r2(totalCoins + r2(qty * coin.value));
       });
@@ -1042,8 +1086,9 @@
       var billQtys = [];
       var totalBills = 0;
       BILLS.forEach(function(bill, i) {
-        var qty = parseInt(document.getElementById('bill-qty-' + i).value, 10) || 0;
-        if (qty < 0) { qty = 0; }
+        var el = document.getElementById('bill-qty-' + i);
+        normalizeQtyField(el);
+        var qty = qtyValue(el);
         billQtys.push(qty);
         totalBills = r2(totalBills + r2(qty * bill.value));
       });
@@ -1156,6 +1201,24 @@
     document.getElementById('coins-tbody').addEventListener('input', calculate);
     document.getElementById('bills-tbody').addEventListener('input', calculate);
     document.getElementById('elec-tbody').addEventListener('input', calculate);
+
+    /* QA-06/QA-07 : à la validation d'un champ (change = blur/Entrée), réécrit
+       la valeur réellement utilisée (entier pour les quantités, montant borné),
+       pour que l'affiché corresponde au compté. */
+    function onQtyChange(event) {
+      if (event.target && event.target.classList.contains('qty-input')) {
+        normalizeQtyField(event.target);
+        calculate();
+      }
+    }
+    document.getElementById('coins-tbody').addEventListener('change', onQtyChange);
+    document.getElementById('bills-tbody').addEventListener('change', onQtyChange);
+    document.getElementById('elec-tbody').addEventListener('change', function (event) {
+      if (event.target && event.target.classList.contains('amt-input')) {
+        normalizeAmountField(event.target);
+        calculate();
+      }
+    });
     document.getElementById('reserve-monnaie').addEventListener('input', function () {
       var v = parseFloat(document.getElementById('reserve-monnaie').value);
       if (!isNaN(v)) { localStorage.setItem(LS_RESERVE, v); }
