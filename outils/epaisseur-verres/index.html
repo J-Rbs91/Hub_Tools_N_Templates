@@ -2044,6 +2044,23 @@
       el(id).addEventListener('change', function () { clampField(id); });
     });
 
+    /* ═══════════ NAVIGATION AU CLAVIER (Entrée → champ suivant) ═══════════
+       Entrée valide le champ courant (le blur déclenche clamp + recalcul) et passe au champ
+       suivant, dont le contenu est présélectionné : on écrase en tapant, ou on ré-appuie sur
+       Entrée pour conserver la valeur déjà présente et continuer. Boucle sur le premier champ. */
+    var ENTER_NAV = ['coteA', 'coteB', 'coteD', 'cambrure',
+      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
+      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h', 'm-ep'];
+    ENTER_NAV.forEach(function (id, i) {
+      el(id).addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.keyCode !== 13) { return; }
+        e.preventDefault();
+        var next = el(ENTER_NAV[(i + 1) % ENTER_NAV.length]);
+        next.focus();
+        if (next.select) { next.select(); }
+      });
+    });
+
     el('copy-od-og').addEventListener('click', function () {
       ['sph', 'cyl', 'axe', 'pd', 'h'].forEach(function (k) { el('og-' + k).value = el('od-' + k).value; });
       compute();
