@@ -2002,6 +2002,37 @@
       el(id).addEventListener('input', scheduleCompute);
       el(id).addEventListener('change', scheduleCompute);
     });
+
+    /* ═══════════ GARDE-FOU DE SAISIE (bornes opticien, montures enfant incluses) ═══════════
+       Plages volontairement larges : elles n'entravent jamais une saisie réelle (adulte
+       comme enfant/nourrisson) mais coupent le négatif, le zéro et les valeurs farfelues
+       qui produiraient des résultats absurdes (ex. Ø utile délirant). Le clamp n'agit qu'au
+       « change » (blur / Entrée) : une frappe transitoire n'est jamais gênée. Un champ vide
+       ou non numérique est laissé tel quel (le calcul retombe déjà sur ses valeurs par défaut). */
+    var BOUNDS = {
+      'od-sph': [-30, 30], 'og-sph': [-30, 30],   // sphère (D)
+      'od-cyl': [-12, 12], 'og-cyl': [-12, 12],    // cylindre (D)
+      'od-axe': [0, 180],  'og-axe': [0, 180],     // axe TABO (°)
+      'od-pd':  [10, 40],  'og-pd':  [10, 40],     // demi-écart pupillaire (mm) — enfant ~13
+      'od-h':   [6, 47],   'og-h':   [6, 47],      // hauteur de montage (mm)
+      'coteA':  [28, 70],                          // calibre œil (mm) — bébé ~34
+      'coteB':  [14, 60],                          // hauteur de cercle (mm)
+      'coteD':  [6, 30],                           // pont (mm) — enfant ~8
+      'm-ep':   [0, 15]                            // épaisseur monture (mm)
+    };
+    function clampField(id) {
+      var b = BOUNDS[id]; if (!b) { return; }
+      var raw = String(el(id).value).replace(',', '.').replace(/\s/g, '').trim();
+      if (raw === '') { return; }                  // vide : ne pas forcer
+      var v = parseFloat(raw);
+      if (isNaN(v)) { return; }                    // non numérique : laissé au calcul
+      var c = Math.min(b[1], Math.max(b[0], v));
+      if (c !== v) { el(id).value = Math.round(c * 100) / 100; }
+    }
+    Object.keys(BOUNDS).forEach(function (id) {
+      el(id).addEventListener('change', function () { clampField(id); });
+    });
+
     el('copy-od-og').addEventListener('click', function () {
       ['sph', 'cyl', 'axe', 'pd', 'h'].forEach(function (k) { el('og-' + k).value = el('od-' + k).value; });
       compute();
