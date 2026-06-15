@@ -151,7 +151,7 @@
     .vp-legend .sw-lens { background: #9ecbff; }
     .vp-legend .sw-frame { background: #4a4f57; }
     .vp-legend .sw-front { background: #D83A3A; }
-    .vp-legend .sw-back { background: #238B57; }
+    .vp-legend .sw-back { background: #1A613B; }
     .vp-legend-overhang[hidden] { display: none; }
 
     /* ── RÉSULTATS ── */
@@ -177,7 +177,7 @@
     .viewer-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
     .viewer-head h2 { margin: 0; }
     .viewer-badge { font-size: 10.5px; font-weight: 700; color: var(--grey); }
-    #viewport { position: relative; width: 100%; height: 480px; background: linear-gradient(160deg, #0E2233, #1B3A52); touch-action: none; cursor: grab; }
+    #viewport { position: relative; width: 100%; height: 480px; background: linear-gradient(160deg, #1E3D52, #33597A); touch-action: none; cursor: grab; }
     #viewport.dragging { cursor: grabbing; }
     #viewport canvas { display: block; width: 100%; height: 100%; }
     .vp-overlay {
@@ -261,7 +261,7 @@
     .compare-slot__head b { color: var(--blue-d); }
     .compare-slot p { margin: 0; font-size: 11px; color: var(--grey); line-height: 1.45; }
     .compare-remove { border: 0; background: transparent; color: var(--grey); cursor: pointer; font: inherit; font-size: 11px; text-decoration: underline; }
-    .compare-viewer { position: relative; height: 320px; background: linear-gradient(160deg, #0E2233, #1B3A52); border-radius: 8px; touch-action: none; cursor: grab; overflow: hidden; }
+    .compare-viewer { position: relative; height: 320px; background: linear-gradient(160deg, #1E3D52, #33597A); border-radius: 8px; touch-action: none; cursor: grab; overflow: hidden; }
     .compare-viewer.dragging { cursor: grabbing; }
     .compare-viewer canvas { display: block; width: 100%; height: 100%; }
     .compare-viewer-label { position: absolute; left: 10px; top: 9px; z-index: 2; color: #fff; font-size: 11px; font-weight: 800; pointer-events: none; }
@@ -1725,7 +1725,7 @@
           // on le tire légèrement vers la caméra (polygonOffset) pour qu'il gagne proprement, sans z-fighting.
           gl.disable(gl.BLEND);
           gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-1.5, -2.0);
-          draw(buffers[2], [0.85, 0.23, 0.23], 0); draw(buffers[3], [0.14, 0.55, 0.34], 0);
+          draw(buffers[2], [0.85, 0.23, 0.23], 0); draw(buffers[3], [0.10, 0.38, 0.23], 0);
           gl.disable(gl.POLYGON_OFFSET_FILL);
         }
       }
@@ -1819,7 +1819,7 @@
           gl.uniform1f(glassLoc, 0.0);
           gl.uniform3f(colLoc, 0.85, 0.23, 0.23);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufFront); gl.drawElements(gl.TRIANGLES, countFront, idxTypeFront, 0);
-          gl.uniform3f(colLoc, 0.14, 0.55, 0.34);
+          gl.uniform3f(colLoc, 0.10, 0.38, 0.23);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufBack); gl.drawElements(gl.TRIANGLES, countBack, idxTypeBack, 0);
           gl.disable(gl.POLYGON_OFFSET_FILL);
         }
