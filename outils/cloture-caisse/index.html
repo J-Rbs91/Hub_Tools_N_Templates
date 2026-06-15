@@ -903,19 +903,46 @@
       });
     }
 
-    /* ── NAVIGATION RAPIDE AU CLAVIER ── */
+    /* ── NAVIGATION RAPIDE AU CLAVIER ──
+       Entrée passe au champ suivant. Quand on arrive ainsi sur un champ déjà
+       rempli, il est « armé » : taper un chiffre écrase l'ancienne valeur, alors
+       qu'appuyer de nouveau sur Entrée conserve la valeur présente et avance.
+       (On n'utilise pas seulement select(), qui est ignoré par Chrome/Safari sur
+       les <input type="number">.) */
     function initEnterNavigation() {
-      var fields = Array.prototype.slice.call(document.querySelectorAll(
-        '.qty-input, .fond-input, .amt-input, .ref-input'
-      ));
+      var FIELD_SELECTOR = '.qty-input, .fond-input, .amt-input, .ref-input';
+      var fields = Array.prototype.slice.call(document.querySelectorAll(FIELD_SELECTOR));
+
+      function isOverwriteKey(event) {
+        return event.key && event.key.length === 1 &&
+          !event.ctrlKey && !event.metaKey && !event.altKey;
+      }
+
+      function focusField(field) {
+        field.focus();
+        if (field.matches && field.matches(FIELD_SELECTOR)) {
+          field.dataset.armed = '1';
+        }
+        try { if (typeof field.select === 'function') { field.select(); } } catch (e) {}
+      }
+
       fields.forEach(function(field, index) {
         field.addEventListener('keydown', function(event) {
-          if (event.key !== 'Enter') { return; }
-          event.preventDefault();
-          var next = fields[index + 1] || document.getElementById('btn-save');
-          next.focus();
-          if (typeof next.select === 'function') { next.select(); }
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            focusField(fields[index + 1] || document.getElementById('btn-save'));
+            return;
+          }
+          // Premier caractère tapé sur un champ « armé » : on efface l'ancienne
+          // valeur pour que la nouvelle saisie la remplace au lieu de s'y ajouter.
+          if (field.dataset.armed === '1') {
+            if (isOverwriteKey(event)) { field.value = ''; }
+            field.dataset.armed = '';
+          }
         });
+        // Toute autre interaction (clic, édition) désarme le champ.
+        field.addEventListener('mousedown', function() { field.dataset.armed = ''; });
+        field.addEventListener('input', function() { field.dataset.armed = ''; });
       });
     }
 
