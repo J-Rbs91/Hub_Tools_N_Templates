@@ -874,6 +874,20 @@
       var front = 0, back = 0;
       [mdl.od, mdl.og].forEach(function (m) {
         var samples = [], j;
+        // Plan de référence du drageoir = profondeur moyenne de la tranche du verre. Le cerclage est
+        // indépendant du verre : sa courbure vient de la base du cercle (cambZ), pas de la base optique.
+        var meanMid = 0;
+        for (j = 0; j < SEG; j++) {
+          var phi0 = 2 * Math.PI * j / SEG;
+          var rc0 = frameRadius(m.cfg, phi0, m.ax, m.by);
+          var X0 = rc0 * Math.cos(phi0), Y0 = rc0 * Math.sin(phi0);
+          var r0 = Math.hypot(X0 - m.decX, Y0 - m.decY);
+          var P0 = powerAt(Math.atan2(Y0 - m.decY, X0 - m.decX), m.sph, m.cyl, m.axeRad);
+          var zf0 = -surfSag(m.F1, r0, m.n), zb0 = -m.CT - surfSag(P0 - m.F1, r0, m.n);
+          if (zb0 > zf0) { zb0 = zf0; }
+          meanMid += (zf0 + zb0) / 2;
+        }
+        meanMid /= SEG;
         for (j = 0; j < SEG; j++) {
           var phi = 2 * Math.PI * j / SEG;
           var rc = frameRadius(m.cfg, phi, m.ax, m.by);
@@ -884,7 +898,7 @@
           var zf = -surfSag(m.F1, r, m.n);
           var zb = -m.CT - surfSag(P - m.F1, r, m.n);
           if (zb > zf) { zb = zf; }   // tranche au fil : pas d'épaisseur négative
-          var mid = (zf + zb) / 2 + bevel;
+          var mid = meanMid + cambZ(m, X) + bevel;   // centre du drageoir (cerclage indépendant)
           var radialLength = Math.hypot(X, Y) || 1;
           var apex = [X + X / radialLength * 0.35, Y + Y / radialLength * 0.35, mid];
           samples.push({
@@ -1038,9 +1052,8 @@
       var dx = X - m.decX, dy = Y - m.decY;
       var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-      var c = cambZ(m, X);
-      var zf = -surfSag(m.F1, r, m.n) + c;
-      var zb = -m.CT - surfSag(P - m.F1, r, m.n) + c;
+      var zf = -surfSag(m.F1, r, m.n);
+      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
       if (zb > zf) { zb = zf; }   // pas d'épaisseur négative : la tranche s'arrête au fil
       return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
@@ -1053,9 +1066,8 @@
       }
       var X = m.decX + last * cx, Y = m.decY + last * cy;
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-      var c = cambZ(m, X);
-      var zf = -surfSag(m.F1, last, m.n) + c;
-      var zb = -m.CT - surfSag(P - m.F1, last, m.n) + c;
+      var zf = -surfSag(m.F1, last, m.n);
+      var zb = -m.CT - surfSag(P - m.F1, last, m.n);
       if (zb > zf) { zb = zf; }   // pas d'épaisseur négative : la tranche s'arrête au fil
       return { X: X, Y: Y, theta: theta, zf: zf, zb: zb, thickness: zf - zb };
     }
@@ -1409,13 +1421,16 @@
         // Angle de galbe : chaque verre pivote autour de l'axe vertical passant par le milieu du nez
         // (x = 0). Les deux lignes frontales des cercles passent par ce pivot central et forment entre
         // elles l'angle d'ouverture de la monture = 180° − galbe (galbe 0 → 180° à plat, 35 → 145°).
-        // Chaque cercle tourne donc de la moitié du galbe ; ses bords temporaux reculent. La cambrure
-        // du cerclage (cambZ) ajoute un galbe horizontal propre à chaque cercle — les deux se cumulent.
+        // Chaque cercle tourne donc de la moitié du galbe ; ses bords temporaux reculent. Le galbe
+        // s'applique identiquement au verre et au cerclage (via place) ; la cambrure, elle, est portée
+        // par le seul cerclage.
         var alpha = (common.galbe || 0) / 2 * DEG;
         var beta = screenSign * alpha;
         var xp = 0;                                             // pivot au milieu du nez (axe central)
         var cb = Math.cos(beta), sb = Math.sin(beta);
-        function place(Xc, Yc, z) { var zc = z + cambZ(m, Xc), x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + zc * sb, Yc, -dx * sb + zc * cb]; }
+        // La cambrure (base du cercle) ne touche PAS le verre : le verre garde ici sa forme optique
+        // pure, indépendante de la base monture. Seul le cerclage portera la cambrure (voir plus bas).
+        function place(Xc, Yc, z) { var x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb]; }
         function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); var zf = -surfSag(m.F1, r, m.n), zb = -m.CT - surfSag(P - m.F1, r, m.n); if (zb > zf) { zb = zf; } return { zf: zf, zb: zb }; }
         function quad(T, a, b, c, d) { if (flip) { T.push(a, c, b, a, d, c); } else { T.push(a, b, c, a, c, d); } }
 
@@ -1440,21 +1455,34 @@
             quad(triL, base[i][j] + 1, base[i + 1][j] + 1, base[i + 1][jn] + 1, base[i][jn] + 1);
           }
         }
-        // Biseau (verre) + jonc profilé (monture) sur l'anneau externe.
-        var lc = place(0, 0, 0), apex = [], ring = [], frontLim = [], backLim = [], p;
+        // Plan de référence du cerclage : profondeur moyenne de la tranche du verre (en local),
+        // pour que le jonc s'aligne sur le bord du verre sans hériter de sa courbure optique.
+        var zRefLocal = 0;
         for (j = 0; j < SEG; j++) {
-          var Fw = verts[base[RINGS][j]], Bw = verts[base[RINGS][j] + 1];
-          var cx = (Fw[0] + Bw[0]) / 2, cy = (Fw[1] + Bw[1]) / 2;
-          var rdx = Fw[0] - lc[0], rdy = Fw[1] - lc[1];
-          var rl = Math.hypot(rdx, rdy) || 1; rdx /= rl; rdy /= rl;
-          // Le drageoir suit le bord du verre déjà galbé (milieu d'épaisseur) — pas de courbure
-          // supplémentaire : le galbe reste un wrap purement horizontal (visible de dessus seulement).
-          var fcz = (Fw[2] + Bw[2]) / 2 + bevelOff;
-          frontLim[j] = fcz + Tf * 0.5;
-          backLim[j] = fcz - Tf * 0.5;
-          apex[j] = pushV([cx + rdx * 0.35, cy + rdy * 0.35, fcz]);
+          var phiE = 2 * Math.PI * j / SEG;
+          var rcE = frameRadius(m.cfg, phiE, m.ax, m.by);
+          var XcE = rcE * Math.cos(phiE), YcE = rcE * Math.sin(phiE);
+          var zE = surf(Math.hypot(XcE - m.decX, YcE - m.decY), Math.atan2(YcE - m.decY, XcE - m.decX));
+          zRefLocal += (zE.zf + zE.zb) / 2;
+        }
+        zRefLocal /= SEG;
+
+        // Biseau (verre) + jonc profilé (monture) sur l'anneau externe.
+        // Le cerclage est INDÉPENDANT du verre : sa courbure = base du cercle (cambZ) seule, posée
+        // sur le plan de référence plat zRefLocal. « plate » → jonc plat ; le verre garde sa forme
+        // optique. Le galbe s'applique ensuite identiquement au verre et au cerclage via place().
+        var apex = [], ring = [], frontLim = [], backLim = [], p;
+        for (j = 0; j < SEG; j++) {
+          var phiJ = 2 * Math.PI * j / SEG;
+          var rcJ = frameRadius(m.cfg, phiJ, m.ax, m.by);
+          var Xc = rcJ * Math.cos(phiJ), Yc = rcJ * Math.sin(phiJ);
+          var rl = Math.hypot(Xc, Yc) || 1, rdx = Xc / rl, rdy = Yc / rl;
+          var zc = zRefLocal + cambZ(m, Xc) + bevelOff;
+          frontLim[j] = place(Xc, Yc, zc + Tf * 0.5)[2];
+          backLim[j] = place(Xc, Yc, zc - Tf * 0.5)[2];
+          apex[j] = pushV(place(Xc + rdx * 0.35, Yc + rdy * 0.35, zc));
           ring[j] = [];
-          for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV([cx + rdx * PROF[p][0], cy + rdy * PROF[p][0], fcz + PROF[p][1]]); }
+          for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV(place(Xc + rdx * PROF[p][0], Yc + rdy * PROF[p][0], zc + PROF[p][1])); }
         }
         for (j = 0; j < SEG; j++) {
           var jn2 = (j + 1) % SEG, fI = base[RINGS][j], fIn = base[RINGS][jn2];
