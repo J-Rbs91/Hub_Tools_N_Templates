@@ -898,20 +898,11 @@
       var front = 0, back = 0;
       [mdl.od, mdl.og].forEach(function (m) {
         var samples = [], j;
-        // Plan de référence du drageoir = profondeur moyenne de la tranche du verre. Le cerclage est
-        // indépendant du verre : sa courbure vient de la base du cercle (cambZ), pas de la base optique.
-        var meanMid = 0;
-        for (j = 0; j < SEG; j++) {
-          var phi0 = 2 * Math.PI * j / SEG;
-          var rc0 = frameRadius(m.cfg, phi0, m.ax, m.by);
-          var X0 = rc0 * Math.cos(phi0), Y0 = rc0 * Math.sin(phi0);
-          var r0 = Math.hypot(X0 - m.decX, Y0 - m.decY);
-          var P0 = powerAt(Math.atan2(Y0 - m.decY, X0 - m.decX), m.sph, m.cyl, m.axeRad);
-          var zf0 = -surfSag(m.F1, r0, m.n), zb0 = -m.CT - surfSag(P0 - m.F1, r0, m.n);
-          if (zb0 > zf0) { zb0 = zf0; }
-          meanMid += (zf0 + zb0) / 2;
-        }
-        meanMid /= SEG;
+        // Plan de référence du drageoir = best-fit de la tranche du verre, posé sur la rotule (centre
+        // géométrique). Le cerclage est RIGIDE et indépendant du verre : sa courbure vient de la base du
+        // cercle (cambZ) sur ce plan, pas de la base optique, et la bouche du drageoir ne se déforme pas
+        // pour suivre le verre — le débordement éventuel est mesuré par rapport à ce drageoir rigide.
+        var plane = refPlane(m);
         for (j = 0; j < SEG; j++) {
           var phi = 2 * Math.PI * j / SEG;
           var rc = frameRadius(m.cfg, phi, m.ax, m.by);
@@ -922,15 +913,16 @@
           var zf = -surfSag(m.F1, r, m.n);
           var zb = -m.CT - surfSag(P - m.F1, r, m.n);
           if (zb > zf) { zb = zf; }   // tranche au fil : pas d'épaisseur négative
-          // Apex du biseau : il suit la cambrure du cercle (cambZ + calage), mais reste INSCRIT dans la
-          // tranche du verre [zb, zf]. Là où le verre est plus mince (fort cylindre, base plate), l'apex se
-          // cale dans l'épaisseur disponible au lieu d'en sortir — comme un biseau tracé à l'atelier.
-          var mid = Math.max(zb, Math.min(zf, meanMid + cambZ(m, X, Y) + bevel));
+          // Fond du drageoir RIGIDE : cambrure du cercle (cambZ + calage) sur le plan best-fit, sans clamp.
+          var zRigid = planeZ(plane, X, Y) + cambZ(m, X, Y) + bevel;
+          // Apex du biseau du verre : il VISE ce fond rigide mais reste INSCRIT dans la tranche [zb, zf]
+          // (on ne taille que dans la matière). L'écart entre le fond rigide et la tranche = le débordement.
+          var mid = Math.max(zb, Math.min(zf, zRigid));
           var radialLength = Math.hypot(X, Y) || 1;
           var apex = [X + X / radialLength * 0.35, Y + Y / radialLength * 0.35, mid];
           samples.push({
             front: [X, Y, zf], back: [X, Y, zb], apex: apex,
-            frontLimit: mid + Tf / 2, backLimit: mid - Tf / 2
+            frontLimit: zRigid + Tf / 2, backLimit: zRigid - Tf / 2
           });
         }
         for (j = 0; j < SEG; j++) {
@@ -966,12 +958,14 @@
     }
 
     // Plage de calage IDÉAL pour un œil : translation (bevelOff) gardant la courbe de la base du cercle
-    // (zRef + cambZ) comprise dans l'épaisseur de la tranche (entre face arrière et avant) en TOUT point
-    // du contour → le biseau épouse pleinement le fond du drageoir partout, sans avoir à se caler dans
-    // l'épaisseur. Hors de cette plage, le montage reste possible : l'apex s'inscrit dans la tranche là
-    // où le verre est plus mince (voir le calage par point dans overhangAreas / buildScene).
+    // (plan best-fit + cambZ) comprise dans l'épaisseur de la tranche (entre face arrière et avant) en
+    // TOUT point du contour → le biseau épouse pleinement le fond du drageoir partout. La rotule (bascule
+    // du plan best-fit autour du centre géométrique) élargit cette plage : sur un verre torique, le plan
+    // s'incline pour suivre l'épaisseur variable au bord, là où une simple translation échouait. Hors de
+    // cette plage, le montage reste possible : l'apex s'inscrit dans la tranche là où le verre est mince
+    // (voir le calage par point dans overhangAreas / buildScene).
     function bevelRangeForEye(m) {
-      var zRef = 0, j, edges = [];
+      var plane = refPlane(m), j, edges = [];
       for (j = 0; j < SEG; j++) {
         var phi = 2 * Math.PI * j / SEG;
         var rc = frameRadius(m.cfg, phi, m.ax, m.by);
@@ -982,14 +976,12 @@
         var zb = -m.CT - surfSag(P - m.F1, r, m.n);
         if (zb > zf) { zb = zf; }
         edges.push({ Xc: Xc, Yc: Yc, zf: zf, zb: zb });
-        zRef += (zf + zb) / 2;
       }
-      zRef /= SEG;
       var bmin = -Infinity, bmax = Infinity;
       for (j = 0; j < SEG; j++) {
-        var e = edges[j], cz = cambZ(m, e.Xc, e.Yc);
-        var dBack = e.zb - zRef - cz;    // bevelOff ≥ dBack (sinon le fond passe derrière la tranche)
-        var dFront = e.zf - zRef - cz;   // bevelOff ≤ dFront (sinon le fond passe devant la tranche)
+        var e = edges[j], cz = cambZ(m, e.Xc, e.Yc), zp = planeZ(plane, e.Xc, e.Yc);
+        var dBack = e.zb - zp - cz;    // bevelOff ≥ dBack (sinon le fond passe derrière la tranche)
+        var dFront = e.zf - zp - cz;   // bevelOff ≤ dFront (sinon le fond passe devant la tranche)
         if (dBack > bmin) { bmin = dBack; }
         if (dFront < bmax) { bmax = dFront; }
       }
@@ -1147,6 +1139,41 @@
       }
       return z;
     }
+
+    // Plan de référence du drageoir = meilleur plan moyen (best-fit) de la tranche du verre,
+    // de la forme z = a + bX·X + bY·Y. Le cercle RIGIDE (jonc + drageoir + cambrure) est posé sur ce
+    // plan : bX/bY sont sa bascule libre autour du centre géométrique du verre — la « rotule ». Le cercle
+    // ne se déforme donc pas pour épouser le verre ; il pivote (comme le mode « suivi monture » d'une
+    // meuleuse) pour que sa cambrure rigide reste au mieux dans l'épaisseur de la tranche, y compris sur
+    // un verre torique dont l'épaisseur au bord varie fortement selon le méridien.
+    function refPlane(m) {
+      var j, X = [], Y = [], Z = [], sx = 0, sy = 0, sz = 0;
+      for (j = 0; j < SEG; j++) {
+        var phi = 2 * Math.PI * j / SEG;
+        var rc = frameRadius(m.cfg, phi, m.ax, m.by);
+        var Xc = rc * Math.cos(phi), Yc = rc * Math.sin(phi);
+        var r = Math.hypot(Xc - m.decX, Yc - m.decY);
+        var P = powerAt(Math.atan2(Yc - m.decY, Xc - m.decX), m.sph, m.cyl, m.axeRad);
+        var zf = -surfSag(m.F1, r, m.n);
+        var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+        if (zb > zf) { zb = zf; }
+        var mid = (zf + zb) / 2;
+        X[j] = Xc; Y[j] = Yc; Z[j] = mid; sx += Xc; sy += Yc; sz += mid;
+      }
+      var mx = sx / SEG, my = sy / SEG, mz = sz / SEG;   // centre géométrique (la rotule)
+      var Sxx = 0, Syy = 0, Sxy = 0, Sxz = 0, Syz = 0;
+      for (j = 0; j < SEG; j++) {
+        var dx = X[j] - mx, dy = Y[j] - my, dz = Z[j] - mz;
+        Sxx += dx * dx; Syy += dy * dy; Sxy += dx * dy; Sxz += dx * dz; Syz += dy * dz;
+      }
+      var det = Sxx * Syy - Sxy * Sxy, bX = 0, bY = 0;
+      if (Math.abs(det) > 1e-9) {       // sinon plan dégénéré → plan plat (bX = bY = 0)
+        bX = (Sxz * Syy - Syz * Sxy) / det;
+        bY = (Syz * Sxx - Sxz * Sxy) / det;
+      }
+      return { a: mz - bX * mx - bY * my, bX: bX, bY: bY };
+    }
+    function planeZ(pl, X, Y) { return pl.a + pl.bX * X + pl.bY * Y; }
 
     function surfacePoint(m, X, Y) {
       var dx = X - m.decX, dy = Y - m.decY;
@@ -1555,38 +1582,32 @@
             quad(triL, base[i][j] + 1, base[i + 1][j] + 1, base[i + 1][jn] + 1, base[i][jn] + 1);
           }
         }
-        // Plan de référence du cerclage : profondeur moyenne de la tranche du verre (en local),
-        // pour que le jonc s'aligne sur le bord du verre sans hériter de sa courbure optique.
-        var zRefLocal = 0;
-        for (j = 0; j < SEG; j++) {
-          var phiE = 2 * Math.PI * j / SEG;
-          var rcE = frameRadius(m.cfg, phiE, m.ax, m.by);
-          var XcE = rcE * Math.cos(phiE), YcE = rcE * Math.sin(phiE);
-          var zE = surf(Math.hypot(XcE - m.decX, YcE - m.decY), Math.atan2(YcE - m.decY, XcE - m.decX));
-          zRefLocal += (zE.zf + zE.zb) / 2;
-        }
-        zRefLocal /= SEG;
+        // Plan de référence du cerclage = best-fit de la tranche du verre, posé sur la rotule (centre
+        // géométrique). Le cercle rigide bascule sur ce plan au lieu de se déformer pour suivre le verre.
+        var plane = refPlane(m);
 
         // Biseau (verre) + jonc profilé (monture) sur l'anneau externe.
-        // Le cerclage est INDÉPENDANT du verre : sa courbure = base du cercle (cambZ) seule, posée
-        // sur le plan de référence plat zRefLocal. « plate » → jonc plat ; le verre garde sa forme
-        // optique. Le galbe s'applique ensuite identiquement au verre et au cerclage via place().
+        // Le cerclage est RIGIDE et INDÉPENDANT du verre : son fond de drageoir = cambrure de la base
+        // (cambZ + calage) posée sur le plan best-fit, SANS clamp sur la tranche du verre. Le galbe
+        // s'applique ensuite identiquement au verre et au cerclage via place(). Seul l'apex du BISEAU
+        // tracé sur le verre est borné à la tranche [zb, zf] (on ne taille que dans la matière) : là où le
+        // fond rigide sort de la tranche, c'est un débordement, pas une déformation du cercle.
         var apex = [], ring = [], frontLim = [], backLim = [], p;
         for (j = 0; j < SEG; j++) {
           var phiJ = 2 * Math.PI * j / SEG;
           var rcJ = frameRadius(m.cfg, phiJ, m.ax, m.by);
           var Xc = rcJ * Math.cos(phiJ), Yc = rcJ * Math.sin(phiJ);
           var rl = Math.hypot(Xc, Yc) || 1, rdx = Xc / rl, rdy = Yc / rl;
-          // Apex du biseau : cible = cambrure du cercle (cambZ + calage), calée dans la tranche [zb, zf]
-          // du verre en ce point. Le biseau suit donc la base du cercle, mais s'inscrit dans l'épaisseur
-          // disponible là où le verre est mince, au lieu de percer la face (montage réel à l'atelier).
+          // Fond du drageoir rigide (jonc + bouche du drageoir) : non borné → le cercle garde sa forme.
+          var zRigid = planeZ(plane, Xc, Yc) + cambZ(m, Xc, Yc) + bevelOff;
+          // Apex du biseau du verre : il vise zRigid mais reste inscrit dans la tranche [zb, zf] du verre.
           var sJ = surf(Math.hypot(Xc - m.decX, Yc - m.decY), Math.atan2(Yc - m.decY, Xc - m.decX));
-          var zc = Math.max(sJ.zb, Math.min(sJ.zf, zRefLocal + cambZ(m, Xc, Yc) + bevelOff));
-          frontLim[j] = place(Xc, Yc, zc + Tf * 0.5)[2];
-          backLim[j] = place(Xc, Yc, zc - Tf * 0.5)[2];
+          var zc = Math.max(sJ.zb, Math.min(sJ.zf, zRigid));
+          frontLim[j] = place(Xc, Yc, zRigid + Tf * 0.5)[2];
+          backLim[j] = place(Xc, Yc, zRigid - Tf * 0.5)[2];
           apex[j] = pushV(place(Xc + rdx * 0.35, Yc + rdy * 0.35, zc));
           ring[j] = [];
-          for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV(place(Xc + rdx * PROF[p][0], Yc + rdy * PROF[p][0], zc + PROF[p][1])); }
+          for (p = 0; p < PROF.length; p++) { ring[j][p] = pushV(place(Xc + rdx * PROF[p][0], Yc + rdy * PROF[p][0], zRigid + PROF[p][1])); }
         }
         for (j = 0; j < SEG; j++) {
           var jn2 = (j + 1) % SEG, fI = base[RINGS][j], fIn = base[RINGS][jn2];
