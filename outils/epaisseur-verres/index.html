@@ -801,7 +801,7 @@
       // delta(r,θ) = flèche_arrière − flèche_avant : variation d'épaisseur p/r au centre.
       // En parallèle, version « centrée » (rayon mesuré depuis le centre-boîte, OC supposé centré)
       // qui sert à fixer une épaisseur centre réaliste, indépendante du décentrement.
-      var dMin = Infinity, dMax = -Infinity, rMax = 0, dMinCen = Infinity;
+      var dMin = Infinity, dMax = -Infinity, rMax = 0;
       for (k = 0; k < SEG; k++) {
         var phi = 2 * Math.PI * k / SEG;
         var rc = frameRadius(cfg, phi, ax, by);
@@ -813,17 +813,18 @@
         var delta = surfSag(Pr - F1, r, n) - surfSag(F1, r, n);
         if (delta < dMin) { dMin = delta; }
         if (delta > dMax) { dMax = delta; }
-        var rCen = Math.hypot(X, Y);
-        var deltaCen = surfSag(powerAt(Math.atan2(Y, X), sph, cyl, axeRad) - F1, rCen, n) - surfSag(F1, rCen, n);
-        if (deltaCen < dMinCen) { dMinCen = deltaCen; }
       }
 
       var cMin = MYOPE_CENTER_MIN;
-      // CT (épaisseur au centre) = propriété du palet : on la fixe sur le verre centré et on NE la
-      // gonfle PAS pour compenser un décentrement marqué (on n'ajoute pas de matière au centre en
-      // taillant hors axe). La tranche du côté décentré peut donc s'amincir jusqu'au fil (couteau).
-      var CT = Math.max(cMin, common.etFloor - dMinCen);
-      var etMin = Math.max(0, CT + dMin);     // bord le plus fin (peut tomber au fil si très décentré)
+      // CT (épaisseur au centre) satisfait les DEUX planchers, sur le contour RÉEL du verre taillé
+      // (mesuré depuis le centre optique décentré, comme la carto et edgePoint) :
+      //   • centre ≥ MYOPE_CENTER_MIN — plancher du palet, gouverne les verres NÉGATIFS (centre fin) ;
+      //     comme etFloor − dMin y reste sous cMin, le centre n'est pas gonflé par le décentrement.
+      //   • bord mini ≥ etFloor — gouverne les verres CONVEXES (bord fin) : CT est relevé pour que le bord
+      //     le plus fin du verre taillé (côté décentré, dMin) atteigne bien etFloor. Utiliser le verre
+      //     centré ici sous-évaluait CT et laissait le bord descendre sous le plancher au montage.
+      var CT = Math.max(cMin, common.etFloor - dMin);
+      var etMin = Math.max(0, CT + dMin);     // bord le plus fin : = etFloor pour un convexe (sauf si cMin domine)
       var etMax = CT + dMax;                   // bord le plus épais
       var blank = 2 * rMax + BLANK_MARGIN;
       var type = pMin >= 0 ? 'pos' : (pMax <= 0 ? 'neg' : 'mix');
