@@ -326,7 +326,7 @@
           <div class="field frame-opt">
             <label for="cambrure">Base du cercle — cambrure horizontale (axe 0/180)</label>
             <input type="text" inputmode="decimal" id="cambrure" value="3.5">
-            <div class="hint">Cambrure horizontale du cerclage, exprimée en base (0 = plate, ex. 3,5).
+            <div class="hint">Cambrure horizontale du cercle, exprimée en base (0 = plate, ex. 3,5).
               Galbe dans le plan horizontal, visible en vue de dessus. Un léger galbe vertical
               fixe (axe 90/270, base 3,5) est appliqué en plus, visible en vue de profil.</div>
           </div>
@@ -343,7 +343,7 @@
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
           </div>
 
-          <label class="check"><input type="checkbox" id="show-frame" checked> Afficher la monture (cerclage)</label>
+          <label class="check"><input type="checkbox" id="show-frame" checked> Afficher la monture (cercle)</label>
         </section>
 
         <!-- ── VERRE ── -->
@@ -443,7 +443,7 @@
           <h2>Synthèse</h2>
           <table class="res-eyes">
             <thead>
-              <tr><th>Œil</th><th>Indice</th><th>Ép. max bord</th><th>Ép. mini bord</th><th>Ép. centre</th><th>Ø utile</th></tr>
+              <tr><th>Œil</th><th>Indice</th><th>Ép. maxi bord</th><th>Ép. mini bord</th><th>Ép. centre</th><th>Ø utile</th></tr>
             </thead>
             <tbody id="res-body"></tbody>
           </table>
@@ -468,28 +468,28 @@
         <div style="padding:12px 16px;">
           <div class="field frame-opt">
             <label class="check" for="m-bevel-auto">
-              <input type="checkbox" id="m-bevel-auto"> Montage optimisé (cacher l’épaisseur, ≤ 0,10 mm de verre devant)
+              <input type="checkbox" id="m-bevel-auto"> Montage optimisé (cacher l’épaisseur, ≤ 0,10 mm de verre à l’avant)
             </label>
             <div class="bevel-eye">
-              <label for="m-bevel-od">Calage du biseau OD <span id="bevel-val-od" class="hint" style="display:inline;">0,0 mm</span></label>
+              <label for="m-bevel-od">Positionnement du biseau OD <span id="bevel-val-od" class="hint" style="display:inline;">0,0 mm</span></label>
               <input type="range" id="m-bevel-od" class="bevel-range" min="-5" max="5" step="0.1" value="0">
               <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
               <div class="hint" id="bevel-bounds-od"></div>
             </div>
             <div class="bevel-eye">
-              <label for="m-bevel-og">Calage du biseau OG <span id="bevel-val-og" class="hint" style="display:inline;">0,0 mm</span></label>
+              <label for="m-bevel-og">Positionnement du biseau OG <span id="bevel-val-og" class="hint" style="display:inline;">0,0 mm</span></label>
               <input type="range" id="m-bevel-og" class="bevel-range" min="-5" max="5" step="0.1" value="0">
               <div class="slider-ends"><span>avant</span><span>milieu</span><span>arrière</span></div>
               <div class="hint" id="bevel-bounds-og"></div>
             </div>
-            <div class="hint" id="bevel-link-note" hidden>OD et OG liés : corrections identiques, les deux calages bougent ensemble.</div>
+            <div class="hint" id="bevel-link-note" hidden>OD et OG liés : corrections identiques, les deux positionnements bougent ensemble.</div>
             <label class="check" for="bevel-unlock">
               <input type="checkbox" id="bevel-unlock"> Déverrouiller les bornes (franchir le contact au fond du drageoir)
             </label>
             <div class="bevel-warn" id="bevel-warn" hidden>
               Le biseau épouse la cambrure du cercle (base) et s'inscrit dans la tranche du verre : là où le
               verre est plus mince (fort cylindre ou base plate), l'apex se cale au plus près sans dépasser,
-              comme au tracé à l'atelier. Le montage reste réalisable ; ajustez le calage selon le rendu voulu.
+              comme au tracé à l'atelier. Le montage reste réalisable ; ajustez le positionnement selon le rendu voulu.
             </div>
             <div class="hint" id="bevel-auto-state"></div>
           </div>
@@ -527,11 +527,11 @@
         </div>
         <div class="profiles-carousel" id="profiles-carousel" aria-label="Vues 2D des verres">
           <article class="profiles-slide is-active" data-profile-title="Vue de face">
-            <h3>Cartographie des épaisseurs — vue de face</h3>
+            <h3>Vue de face — cartographie des épaisseurs</h3>
             <div class="profiles-grid" id="profile-face"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue côté temporal">
-            <h3>Vue de profil côté temporal — coupe verticale au centre optique</h3>
+            <h3>Vue côté temporal — coupe verticale au centre optique</h3>
             <div class="profiles-grid" id="profile-temporal"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessus">
@@ -974,7 +974,7 @@
       var front = Math.max(od.front, og.front);
       var head = front <= FRONT_MAX + 1e-6
         ? 'Verre affleurant à l’avant (≤ ' + f1(FRONT_MAX) + ' mm)'
-        : 'Bord trop épais pour le cerclage : ' + f1(front) + ' mm de verre devant (cible ≤ ' + f1(FRONT_MAX) + ' mm)';
+        : 'Bord trop épais pour le cercle : ' + f1(front) + ' mm de verre à l’avant (cible ≤ ' + f1(FRONT_MAX) + ' mm)';
       return head + ' · épaisseur renvoyée à l’arrière : OD ' + f1(od.back) + ' mm · OG ' + f1(og.back) + ' mm';
     }
 
@@ -1164,7 +1164,7 @@
       // Notes métier (agrégées).
       var notes = [];
       var od = models.od, og = models.og;
-      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentrement temporal (½-écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
+      if (od.nasal < -0.5 || og.nasal < -0.5) { notes.push('Décentrement temporal (½ écart > demi-largeur monture) : le centre optique tombe vers le temporal.'); }
 
       var nEl = el('notes');
       nEl.innerHTML = notes.length ? '<ul>' + notes.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>' : '';
@@ -1297,7 +1297,7 @@
         backPath += 'L' + sx(pts[i].zb).toFixed(1) + ' ' + sy(pts[i].Y).toFixed(1);
       }
       var f2 = function (v) { return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Coupe verticale au centre optique vue depuis la tempe, face avant a gauche, epaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Coupe verticale au centre optique vue depuis la tempe, face avant à gauche, épaisseur minimum ' + f2(minPt.thickness) + ' mm, maximum ' + f2(maxPt.thickness) + ' mm">';
       s += '<path class="sec-glass" d="' + frontPath + backPath + 'Z"/>';
       s += '<circle class="sec-mark" cx="' + sx((minPt.zf + minPt.zb) / 2).toFixed(1) + '" cy="' + sy(minPt.Y).toFixed(1) + '" r="3"/>';
       s += '<circle class="sec-mark" cx="' + sx((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" cy="' + sy(maxPt.Y).toFixed(1) + '" r="3"/>';
@@ -1405,14 +1405,14 @@
 
     function profileEyeHTML(name, m, view) {
       var res = profileSVG(m, view);
-      return '<div class="profile-eye"><div class="profile-eye__hd"><b>' + name + '</b><span>mini ' +
-        fmt(res.min) + ' · maxi ' + fmt(res.max) + '</span></div>' + res.svg + '</div>';
+      return '<div class="profile-eye"><div class="profile-eye__hd"><b>' + name + '</b><span>maxi ' +
+        fmt(res.max) + ' · mini ' + fmt(res.min) + '</span></div>' + res.svg + '</div>';
     }
 
     function faceEyeHTML(name, m, side) {
       var res = faceMapSVG(m, side);
-      return '<div class="profile-eye"><div class="profile-eye__hd"><b>' + name + '</b><span>mini ' +
-        fmt(m.etMin) + ' · maxi ' + fmt(m.etMax) + '</span></div>' + res.svg +
+      return '<div class="profile-eye"><div class="profile-eye__hd"><b>' + name + '</b><span>maxi ' +
+        fmt(m.etMax) + ' · mini ' + fmt(m.etMin) + '</span></div>' + res.svg +
         '<div class="profile-axis-summary">' + res.summary + '</div></div>';
     }
 
