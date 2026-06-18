@@ -143,6 +143,8 @@
     .bevel-range:disabled::-moz-range-thumb { background: #EDF2F6; border-color: var(--grey); }
     .bevel-warn { margin-top: 8px; padding: 9px 11px; background: #EBF2FA; border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 8px; font-size: 12px; color: var(--blue-d); line-height: 1.45; }
     .bevel-warn[hidden] { display: none; }
+    /* réglages liés à l'affichage de la monture : masqués quand le cerclage n'est pas affiché */
+    .frame-opt[hidden] { display: none; }
     .bevel-eye { margin-top: 8px; }
     .bevel-eye + .bevel-eye { margin-top: 10px; }
     .check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px; cursor: pointer; }
@@ -321,7 +323,7 @@
             </div>
           </div>
 
-          <div class="field">
+          <div class="field frame-opt">
             <label for="cambrure">Base du cercle — cambrure horizontale (axe 0/180)</label>
             <input type="text" inputmode="decimal" id="cambrure" value="3.5">
             <div class="hint">Cambrure horizontale du cerclage, exprimée en base (0 = plate, ex. 3,5).
@@ -329,14 +331,14 @@
               fixe (axe 90/270, base 3,5) est appliqué en plus, visible en vue de profil.</div>
           </div>
 
-          <div class="field">
+          <div class="field frame-opt">
             <label for="galbe">Angle de galbe <span id="galbe-val" class="hint" style="display:inline;">10°</span></label>
             <input type="range" id="galbe" min="0" max="35" step="1" value="10">
             <div class="slider-ends"><span>plat</span><span>galbé</span></div>
             <div class="hint">Angle entre les deux verres, pivot au milieu du nez (axe central).</div>
           </div>
 
-          <div class="field">
+          <div class="field frame-opt">
             <label for="m-ep">Épaisseur monture (mm)</label>
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
           </div>
@@ -464,7 +466,7 @@
           <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer</div>
         </div>
         <div style="padding:12px 16px;">
-          <div class="field">
+          <div class="field frame-opt">
             <label class="check" for="m-bevel-auto">
               <input type="checkbox" id="m-bevel-auto"> Montage optimisé (cacher l’épaisseur, ≤ 0,10 mm de verre devant)
             </label>
@@ -507,8 +509,10 @@
             <div class="cal-state" id="cal-state"></div>
           </div>
 
-          <div class="subhead">Affichage</div>
-          <label class="check"><input type="checkbox" id="show-overhang"> Colorer les dépassements du verre</label>
+          <div class="frame-opt">
+            <div class="subhead">Affichage</div>
+            <label class="check"><input type="checkbox" id="show-overhang"> Colorer les dépassements du verre</label>
+          </div>
         </div>
       </section>
 
@@ -2045,11 +2049,20 @@
     el('cal-reset').addEventListener('click', function () {
       pxPerMM = DEFAULT_PPMM; saveCal(); applyScale();
     });
+    // Affiche/masque les réglages liés à la monture (cambrure, galbe, épaisseur, calage du
+    // biseau, coloration des dépassements) selon que le cerclage est affiché ou non.
+    function applyFrameOptVisibility() {
+      var on = el('show-frame').checked;
+      var nodes = document.querySelectorAll('.frame-opt');
+      for (var i = 0; i < nodes.length; i++) { nodes[i].hidden = !on; }
+    }
     el('show-frame').addEventListener('change', function () {
       showFrame = this.checked;
+      applyFrameOptVisibility();
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
       refreshComparison3D();
     });
+    applyFrameOptVisibility();
     el('show-overhang').addEventListener('change', function () {
       showOverhang = this.checked;
       el('overhang-legend').hidden = !showOverhang;
