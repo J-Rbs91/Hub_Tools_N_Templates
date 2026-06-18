@@ -441,7 +441,7 @@
           <h2>Synthèse</h2>
           <table class="res-eyes">
             <thead>
-              <tr><th>Œil</th><th>Indice</th><th>Ép. mini</th><th>Ép. max</th><th>Ø utile</th></tr>
+              <tr><th>Œil</th><th>Indice</th><th>Ép. max bord</th><th>Ép. mini bord</th><th>Ép. centre</th><th>Ø utile</th></tr>
             </thead>
             <tbody id="res-body"></tbody>
           </table>
@@ -1112,8 +1112,6 @@
 
       [['OD', models.od], ['OG', models.og]].forEach(function (pair) {
         var name = pair[0], m = pair[1];
-        var epMini = Math.min(m.CT, m.etMin);    // point le plus fin (centre ou bord)
-        var epMax = Math.max(m.CT, m.etMax);     // point le plus épais
         var diamUtile = m.blank - BLANK_MARGIN;  // Ø utile = 2 × rayon maxi, sans marge de taillage
         var tr = document.createElement('tr');
 
@@ -1128,11 +1126,14 @@
         tdN.textContent = m.n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         tr.appendChild(tdN);
 
-        var tdMin = document.createElement('td');
-        tdMin.className = 'big'; tdMin.textContent = fmt(epMini); tr.appendChild(tdMin);
+        var tdEdgeMax = document.createElement('td');
+        tdEdgeMax.className = 'big'; tdEdgeMax.textContent = fmt(m.etMax); tr.appendChild(tdEdgeMax);
 
-        var tdMax = document.createElement('td');
-        tdMax.className = 'big'; tdMax.textContent = fmt(epMax); tr.appendChild(tdMax);
+        var tdEdgeMin = document.createElement('td');
+        tdEdgeMin.className = 'big'; tdEdgeMin.textContent = fmt(m.etMin); tr.appendChild(tdEdgeMin);
+
+        var tdCenter = document.createElement('td');
+        tdCenter.className = 'big'; tdCenter.textContent = fmt(m.CT); tr.appendChild(tdCenter);
 
         var tdD = document.createElement('td');
         tdD.innerHTML = '<span class="big">' + fmt0(diamUtile) + '</span>'; tr.appendChild(tdD);
