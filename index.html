@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -334,6 +335,13 @@
       catch (e) { return {}; }
     }
 
+    /* Sécurité : ne conserver que des champs chaîne connus du profil (anti-injection à l'import). */
+    function sanitizeProfil(p) {
+      if (!p || typeof p !== 'object') { return {}; }
+      function s(v) { return typeof v === 'string' ? v : (v == null ? '' : String(v)); }
+      return { nom: s(p.nom), adresse: s(p.adresse), tel: s(p.tel), mail: s(p.mail) };
+    }
+
     function isConfigured(p) {
       return !!((p.nom || '').trim());
     }
@@ -354,7 +362,11 @@
       var metaParts = [];
       if ((p.adresse || '').trim()) { metaParts.push(p.adresse.trim()); }
       if ((p.tel || '').trim()) { metaParts.push('Tél : ' + p.tel.trim()); }
-      metaEl.innerHTML = metaParts.join('<br>');
+      metaEl.textContent = '';
+      metaParts.forEach(function (part, i) {
+        if (i) { metaEl.appendChild(document.createElement('br')); }
+        metaEl.appendChild(document.createTextNode(part));
+      });
 
       notice.hidden = isConfigured(p);
     }
@@ -442,6 +454,11 @@
       el.className = 'sync-status' + (ok === true ? ' ok' : ok === false ? ' err' : '');
     }
 
+    /* Sécurité : n'autoriser que les endpoints Apps Script HTTPS officiels pour la synchro JSONP. */
+    function isValidSyncUrl(u) {
+      return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec(?:[?#].*)?$/.test(u || '');
+    }
+
     function jsonp(base, params, cb) {
       var name = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
       var s = document.createElement('script');
@@ -466,6 +483,7 @@
     function syncPush(profil) {
       var url = syncUrl();
       if (!url) { return; }
+      if (!isValidSyncUrl(url)) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); return; }
       setStatus('Envoi vers le Drive…');
       jsonp(url, { action: 'save', data: JSON.stringify(profil) }, function (res) {
         if (res && res.ok) { setStatus('Enregistré sur le Drive ✓', true); }
@@ -476,11 +494,13 @@
     function syncPull(silent) {
       var url = syncUrl();
       if (!url) { if (!silent) { setStatus('Renseignez d’abord l’URL de synchronisation.', false); } return; }
+      if (!isValidSyncUrl(url)) { if (!silent) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); } return; }
       if (!silent) { setStatus('Récupération depuis le Drive…'); }
       jsonp(url, { action: 'load' }, function (res) {
         if (res && res.ok && res.data) {
           try {
             var p = JSON.parse(res.data);
+            p = sanitizeProfil(p);
             localStorage.setItem(LS_PROFIL, JSON.stringify(p));
             fillForm(p);
             renderHeader();
@@ -513,14 +533,24 @@
         mail: mail
       };
       localStorage.setItem(LS_PROFIL, JSON.stringify(profil));
-      localStorage.setItem(LS_SYNC, document.getElementById('f-sync').value.trim());
+      var syncVal = document.getElementById('f-sync').value.trim();
+      if (syncVal && !isValidSyncUrl(syncVal)) {
+        setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
+      } else {
+        localStorage.setItem(LS_SYNC, syncVal);
+      }
       renderHeader();
       syncPush(profil);
       closeModal();
     });
 
     document.getElementById('pull-sync').addEventListener('click', function () {
-      localStorage.setItem(LS_SYNC, document.getElementById('f-sync').value.trim());
+      var syncVal = document.getElementById('f-sync').value.trim();
+      if (syncVal && !isValidSyncUrl(syncVal)) {
+        setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
+      } else {
+        localStorage.setItem(LS_SYNC, syncVal);
+      }
       syncPull(false);
     });
 
@@ -603,8 +633,9 @@
           return;
         }
         if (bundle.profil && typeof bundle.profil === 'object') {
-          localStorage.setItem(LS_PROFIL, JSON.stringify(bundle.profil));
-          fillForm(bundle.profil);
+          var cleanProfil = sanitizeProfil(bundle.profil);
+          localStorage.setItem(LS_PROFIL, JSON.stringify(cleanProfil));
+          fillForm(cleanProfil);
           renderHeader();
         }
         var reserve = typeof bundle.reserve === 'number' ? bundle.reserve : bundle.fond;

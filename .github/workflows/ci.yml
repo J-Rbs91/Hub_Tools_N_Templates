@@ -22,8 +22,11 @@ jobs:
       - name: actionlint
         run: |
           set -euo pipefail
-          # Télécharge le binaire depuis les releases GitHub (évite le rate-limit Docker Hub)
-          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
+          # Version épinglée d'actionlint (évite l'exécution d'un script de la branche mobile main).
+          ACTIONLINT_VERSION=1.7.7
+          curl -sSfL -o download-actionlint.bash \
+            "https://raw.githubusercontent.com/rhysd/actionlint/v${ACTIONLINT_VERSION}/scripts/download-actionlint.bash"
+          bash download-actionlint.bash "${ACTIONLINT_VERSION}"
           ./actionlint -color
 
   hygiene:
@@ -84,7 +87,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: lychee
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
         with:
           args: >-
             --no-progress
