@@ -884,22 +884,25 @@
     // sans jamais laisser dépasser plus de FRONT_MAX (0,10 mm) de verre en face AVANT du cerclage.
     // Le seul levier autorisé est la rotule : translation + bascule 2 axes du plan de référence.
     //
-    // Principe (comme le mode « suivi monture » d'une meuleuse) : le fond du drageoir (zRigid = plan +
-    // cambrure) doit rester INSCRIT dans la tranche du verre [zb, zf] en tout point pour que le biseau
-    // touche le fond partout (seating). Pour chaque point on borne la valeur de plan p :
-    //   • haute : p ≤ zf − cz       → le fond ne perce pas la face AVANT (sinon le biseau ne seate plus) ;
+    // Repère du jonc : le drageoir s'étend de zRigid − Tf/2 (face ARRIÈRE) à zRigid + Tf/2 (face AVANT
+    // du cercle = bord avant extrême de la monture), le fond du drageoir étant à zRigid (= plan + cambrure).
+    // La cible n'est PAS le fond du drageoir mais la FACE AVANT du jonc : la tranche du verre doit dépasser
+    // de FRONT_MAX (0,10 mm) la face avant du cercle, soit zf − (zRigid + Tf/2) = 0,10 au bord limitant.
+    //
+    // Principe (comme le mode « suivi monture » d'une meuleuse) : le fond du drageoir doit rester INSCRIT
+    // dans la tranche du verre [zb, zf] en tout point pour que le biseau seate. Pour chaque point on borne p :
+    //   • haute : p ≤ zf − cz       → le fond ne perce pas la face AVANT du verre (sinon le biseau ne seate plus) ;
     //   • basse : p ≥ zb − cz       → ni la face arrière ;
-    //   • basse : p ≥ zf − Tf/2 − 0,10 − cz → pas plus de 0,10 mm de verre devant le cercle.
+    //   • basse : p ≥ zf − Tf/2 − 0,10 − cz → pas plus de 0,10 mm de verre devant la FACE AVANT du jonc.
     // 1) On cale la rotule (bascule 2 axes) sur la MÉDIANE de ces bandes : best-fit qui enfile toutes les
     //    fenêtres [arrière, avant], la plus étroite (= le bord le plus FIN) servant de référence — « on
     //    s'aligne d'abord sur le bord le plus fin, le reste suit ».
-    // 2) On AVANCE ensuite le cercle au plus près de la face avant sans la percer nulle part (cale sur le
-    //    plafond p ≤ zf − cz, limité par le bord le plus fin). Le verre devient affleurant à l'avant ; la
-    //    bascule pousse le bord ÉPAIS assez en avant pour ne rien laisser dépasser devant, et tout le
-    //    surplus d'épaisseur part à l'ARRIÈRE, hors de vue.
+    // 2) On DESCEND ensuite le cercle jusqu'au plancher (cale sur p ≥ zf − Tf/2 − 0,10 − cz, limité par le
+    //    bord le plus ÉPAIS) : la tranche dépasse alors de 0,10 mm la face avant du jonc (et non le fond du
+    //    drageoir). Le verre devient affleurant à l'avant et tout le surplus d'épaisseur part à l'ARRIÈRE.
     function optimalMountPlane(m, common) {
       var Tf = Math.max(0.5, (common && common.montureEp) || 3.0);
-      var j, X = [], Y = [], M = [], U = [], sx = 0, sy = 0, sm = 0;
+      var j, X = [], Y = [], M = [], L = [], sx = 0, sy = 0, sm = 0;
       for (j = 0; j < SEG; j++) {
         var phi = 2 * Math.PI * j / SEG;
         var rc = frameRadius(m.cfg, phi, m.ax, m.by);
@@ -913,7 +916,7 @@
         var lo = Math.max(zb, zf - Tf / 2 - FRONT_MAX) - cz;  // borne basse : seating arrière OU cap avant
         var up = zf - cz;                                      // borne haute : ne pas percer la face avant
         var mid = (lo + up) / 2;
-        X[j] = Xc; Y[j] = Yc; M[j] = mid; U[j] = up; sx += Xc; sy += Yc; sm += mid;
+        X[j] = Xc; Y[j] = Yc; M[j] = mid; L[j] = lo; sx += Xc; sy += Yc; sm += mid;
       }
       // 1) bascule 2 axes = best-fit de la rotule sur la médiane des bandes admissibles.
       var mx = sx / SEG, my = sy / SEG, mm = sm / SEG;
@@ -928,10 +931,12 @@
         bY = (Sym * Sxx - Sxm * Sxy) / det;
       }
       var a = mm - bX * mx - bY * my;
-      // 2) avance le cercle jusqu'au plafond (face avant) sans le percer : le bord le plus fin limite.
-      var roomUp = Infinity;
-      for (j = 0; j < SEG; j++) { var d = U[j] - (a + bX * X[j] + bY * Y[j]); if (d < roomUp) { roomUp = d; } }
-      a += roomUp;
+      // 2) descend le cercle jusqu'au plancher : la tranche du verre dépasse alors d'au plus FRONT_MAX
+      //    (0,10 mm) la FACE AVANT du jonc (zRigid + Tf/2), et non le fond du drageoir. Le bord le plus
+      //    ÉPAIS limite la descente ; tout le surplus d'épaisseur part à l'arrière, hors de vue.
+      var roomDown = Infinity;
+      for (j = 0; j < SEG; j++) { var d = (a + bX * X[j] + bY * Y[j]) - L[j]; if (d < roomDown) { roomDown = d; } }
+      a -= roomDown;
       return { a: a, bX: bX, bY: bY };
     }
 
