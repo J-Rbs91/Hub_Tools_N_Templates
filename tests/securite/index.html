@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tests de non-régression sécurité</title>
+  <style>
+    :root {
+      --blue: #1F6FB2;
+      --ink: #1b2733;
+      --bg: #f4f7fa;
+      --border: #d8e0e8;
+      --green: #1f9d55;
+      --red: #c0392b;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    .intro { margin: 0 0 20px; color: #51606e; }
+    #summary {
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: #fff;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    #summary.ok { border-color: var(--green); color: var(--green); }
+    #summary.ko { border-color: var(--red); color: var(--red); }
+    ul#results { list-style: none; padding: 0; margin: 0; }
+    ul#results li {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      font-size: .95rem;
+    }
+    .tag {
+      display: inline-block;
+      min-width: 52px;
+      text-align: center;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-right: 10px;
+      font-size: .85rem;
+    }
+    .tag.pass { background: #e3f5ea; color: var(--green); }
+    .tag.fail { background: #fbe4e1; color: var(--red); }
+    .hidden-host { position: absolute; left: -9999px; top: -9999px; }
+    @media (max-width: 640px) {
+      body { padding: 16px 12px; }
+      h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back-link" href="../../">&larr; Retour</a>
+    <h1>Tests de non-régression sécurité</h1>
+    <p class="intro">
+      Cette page exécute en navigateur des assertions sur les correctifs de sécurité
+      (VULN-001, VULN-003, VULN-005). Chaque test affiche PASS ou FAIL.
+    </p>
+    <div id="summary">Exécution des tests…</div>
+    <ul id="results"></ul>
+  </div>
+
+  <!-- Conteneur isolé pour les tests de rendu DOM (hors écran). -->
+  <div class="hidden-host" id="host" aria-hidden="true"></div>
+
+  <script>
+    (function () {
+      var results = document.getElementById('results');
+      var passed = 0;
+      var total = 0;
+
+      function assert(label, cond) {
+        total += 1;
+        if (cond) { passed += 1; }
+        var li = document.createElement('li');
+        var tag = document.createElement('span');
+        tag.className = 'tag ' + (cond ? 'pass' : 'fail');
+        tag.textContent = cond ? 'PASS' : 'FAIL';
+        li.appendChild(tag);
+        li.appendChild(document.createTextNode(label));
+        results.appendChild(li);
+      }
+
+      /* ── Correctif VULN-001 : rendu identique à renderHeader (textContent + <br> DOM). ── */
+      function renderMeta(target, p) {
+        var metaParts = [];
+        if ((p.adresse || '').trim()) { metaParts.push(p.adresse.trim()); }
+        if ((p.tel || '').trim()) { metaParts.push('Tél : ' + p.tel.trim()); }
+        target.textContent = '';
+        metaParts.forEach(function (part, i) {
+          if (i) { target.appendChild(document.createElement('br')); }
+          target.appendChild(document.createTextNode(part));
+        });
+      }
+
+      /* ── Correctif VULN-003 : copie exacte de isValidSyncUrl. ── */
+      function isValidSyncUrl(u) {
+        return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec(?:[?#].*)?$/.test(u || '');
+      }
+
+      /* ── Correctif VULN-005 : copie exacte de sanitizeProfil. ── */
+      function sanitizeProfil(p) {
+        if (!p || typeof p !== 'object') { return {}; }
+        function s(v) { return typeof v === 'string' ? v : (v == null ? '' : String(v)); }
+        return { nom: s(p.nom), adresse: s(p.adresse), tel: s(p.tel), mail: s(p.mail) };
+      }
+
+      /* ════════ (a) VULN-001 / 005 : pas d'exécution de script au rendu ════════ */
+      var host = document.getElementById('host');
+      var payload = '<img src=x onerror="window.__xss=1">';
+      renderMeta(host, { adresse: payload, tel: '04.00.00.00.00' });
+
+      assert('VULN-001 — aucun script exécuté (window.__xss reste undefined)',
+        typeof window.__xss === 'undefined');
+      assert('VULN-001 — aucun élément <img> créé dans le conteneur',
+        host.getElementsByTagName('img').length === 0);
+      assert('VULN-001 — la charge est affichée comme texte littéral',
+        host.textContent.indexOf(payload) !== -1);
+
+      /* ════════ (b) VULN-003 : validation de l'URL de synchronisation ════════ */
+      assert("VULN-003 — '…/AKfycbABC123/exec' accepté",
+        isValidSyncUrl('https://script.google.com/macros/s/AKfycbABC123/exec') === true);
+      assert("VULN-003 — '…/exec?x=1' accepté",
+        isValidSyncUrl('https://script.google.com/macros/s/AKfycbABC123/exec?x=1') === true);
+      assert("VULN-003 — 'http://…/exec' rejeté",
+        isValidSyncUrl('http://script.google.com/macros/s/x/exec') === false);
+      assert("VULN-003 — hôte étranger rejeté",
+        isValidSyncUrl('https://evil.example/macros/s/x/exec') === false);
+      assert("VULN-003 — 'javascript:alert(1)' rejeté",
+        isValidSyncUrl('javascript:alert(1)') === false);
+      assert("VULN-003 — chaîne vide rejetée",
+        isValidSyncUrl('') === false);
+
+      /* ════════ (c) VULN-005 : assainissement du profil importé ════════ */
+      var clean = sanitizeProfil({ nom: 'A', adresse: 123, tel: null, mail: undefined, evil: 'x' });
+      var keys = Object.keys(clean).sort().join(',');
+
+      assert('VULN-005 — clés exactement nom/adresse/tel/mail (pas de clé « evil »)',
+        keys === 'adresse,mail,nom,tel');
+      assert('VULN-005 — toutes les valeurs sont des chaînes',
+        typeof clean.nom === 'string' && typeof clean.adresse === 'string' &&
+        typeof clean.tel === 'string' && typeof clean.mail === 'string');
+      assert("VULN-005 — coercition correcte (adresse '123', tel '', mail '', nom 'A')",
+        clean.nom === 'A' && clean.adresse === '123' && clean.tel === '' && clean.mail === '');
+
+      /* ── Récapitulatif ── */
+      var summary = document.getElementById('summary');
+      summary.textContent = passed + '/' + total + ' tests réussis';
+      summary.className = (passed === total) ? 'ok' : 'ko';
+    })();
+  </script>
+</body>
+</html>
