@@ -11,6 +11,27 @@
   --green-d:  #246B44;
   --radius:   8px;
   --shadow:   0 2px 8px rgba(26,42,58,.10);
+
+  /* ─ Échelle typographique unifiée — Manrope obligatoire ─
+     Mêmes variables et mêmes valeurs (px) répliquées dans chaque outil pour une
+     cohérence de la police et des tailles d'un bout à l'autre du hub. */
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-display: 24px; /* plus grand titre */
+  --fs-hero:    22px; /* titre de marque / page */
+  --fs-2xl:     20px;
+  --fs-xl:      18px;
+  --fs-lg:      16px; /* grandes valeurs, gros chiffres */
+  --fs-h3:      14px; /* sous-titre, corps emphase */
+  --fs-base:    14px; /* corps de texte, champs */
+  --fs-sm:      13px; /* texte secondaire, cellules */
+  --fs-label:   12px; /* libellés, titres de section (MAJ) */
+  --fs-hint:    11px; /* aides, légendes */
+  --fs-micro:   10px; /* en-têtes de tableau, badges */
+  --fs-nano:     9px; /* règle, mini-légendes */
+  --fw-medium:    500;
+  --fw-semibold:  600;
+  --fw-bold:      700;
+  --fw-black:     800;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,7 +45,7 @@
 @view-transition { navigation: auto; }
 
 body {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font);
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
@@ -160,7 +181,7 @@ body::before {
 .store-settings-btn {
   flex-shrink: 0;
   font-family: inherit;
-  font-size: .85rem;
+  font-size: var(--fs-base);
   font-weight: 700;
   color: #fff;
   background: rgba(255,255,255,.14);
@@ -175,14 +196,14 @@ body::before {
 .store-settings-btn:hover { background: rgba(255,255,255,.26); }
 
 .site-header .store-name {
-  font-size: 1.35rem;
+  font-size: var(--fs-hero);
   font-weight: 800;
   letter-spacing: .02em;
   line-height: 1.2;
 }
 
 .site-header .store-meta {
-  font-size: .82rem;
+  font-size: var(--fs-sm);
   opacity: .85;
   margin-top: 4px;
   line-height: 1.5;
@@ -196,7 +217,7 @@ body::before {
 }
 
 .section-title {
-  font-size: 1rem;
+  font-size: var(--fs-lg);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -219,14 +240,14 @@ body::before {
 }
 
 .welcome__greet {
-  font-size: 1.25rem;
+  font-size: var(--fs-2xl);
   font-weight: 800;
   color: var(--ink);
   line-height: 1.2;
 }
 
 .welcome__sub {
-  font-size: .88rem;
+  font-size: var(--fs-base);
   color: var(--text-muted);
   margin-top: 3px;
   line-height: 1.45;
@@ -271,7 +292,7 @@ body::before {
 }
 
 .ephemeris__wd {
-  font-size: .56rem;
+  font-size: var(--fs-nano);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .06em;
@@ -280,14 +301,14 @@ body::before {
 }
 
 .ephemeris__day {
-  font-size: 1.5rem;
+  font-size: var(--fs-display);
   font-weight: 800;
   color: var(--ink);
   line-height: 1;
 }
 
 .ephemeris__mo {
-  font-size: .54rem;
+  font-size: var(--fs-nano);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
@@ -317,7 +338,7 @@ body::before {
   border-radius: var(--radius);
   padding: 16px 18px;
   margin-bottom: 28px;
-  font-size: .9rem;
+  font-size: var(--fs-base);
   line-height: 1.5;
   color: #7A5500;
   display: flex;
@@ -352,13 +373,13 @@ body::before {
 }
 
 .modal__title {
-  font-size: 1.2rem;
+  font-size: var(--fs-2xl);
   font-weight: 800;
   color: var(--ink);
 }
 
 .modal__hint {
-  font-size: .82rem;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   line-height: 1.5;
   margin: 8px 0 18px;
@@ -368,7 +389,7 @@ body::before {
 
 .field__lbl {
   display: block;
-  font-size: .8rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 5px;
@@ -376,7 +397,7 @@ body::before {
 
 .field__req,
 .field__opt {
-  font-size: .68rem;
+  font-size: var(--fs-hint);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -393,7 +414,7 @@ body::before {
 .field input {
   width: 100%;
   font-family: inherit;
-  font-size: .95rem;
+  font-size: var(--fs-lg);
   color: var(--ink);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
@@ -441,14 +462,14 @@ body::before {
 }
 
 .sync-title {
-  font-size: .9rem;
+  font-size: var(--fs-base);
   font-weight: 800;
   color: var(--ink);
   margin-bottom: 4px;
 }
 
 .sync-desc {
-  font-size: .8rem;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   line-height: 1.5;
   margin-bottom: 12px;
@@ -464,7 +485,7 @@ body::before {
 }
 
 .sync-status {
-  font-size: .8rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text-muted);
 }
@@ -661,14 +682,14 @@ body::before {
 }
 
 .tool-card__title {
-  font-size: 1.05rem;
+  font-size: var(--fs-lg);
   font-weight: 700;
   color: var(--ink);
   line-height: 1.3;
 }
 
 .badge {
-  font-size: .72rem;
+  font-size: var(--fs-hint);
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 20px;
@@ -687,7 +708,7 @@ body::before {
 }
 
 .tool-card__desc {
-  font-size: .88rem;
+  font-size: var(--fs-base);
   color: var(--text-muted);
   line-height: 1.55;
   flex: 1;
@@ -700,7 +721,7 @@ body::before {
   padding: 10px 20px;
   border-radius: var(--radius);
   font-family: inherit;
-  font-size: .9rem;
+  font-size: var(--fs-base);
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -754,7 +775,7 @@ body::before {
 .site-footer {
   text-align: center;
   padding: 20px;
-  font-size: .78rem;
+  font-size: var(--fs-label);
   color: var(--text-muted);
 }
 
@@ -767,7 +788,7 @@ body::before {
     gap: 8px;
   }
 
-  .site-header .store-name { font-size: 1.1rem; }
+  .site-header .store-name { font-size: var(--fs-xl); }
 
   .main { padding: 28px 16px 48px; }
 
