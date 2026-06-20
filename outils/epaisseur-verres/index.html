@@ -324,18 +324,14 @@
           </div>
 
           <div class="field frame-opt">
-            <label for="cambrure">Base du cercle — cambrure horizontale (axe 0/180)</label>
+            <label for="cambrure">Base du cercle</label>
             <input type="text" inputmode="decimal" id="cambrure" value="3.5">
-            <div class="hint">Cambrure horizontale du cercle, exprimée en base (0 = plate, ex. 3,5).
-              Galbe dans le plan horizontal, visible en vue de dessus. Un léger galbe vertical
-              fixe (axe 90/270, base 3,5) est appliqué en plus, visible en vue de profil.</div>
           </div>
 
           <div class="field frame-opt">
-            <label for="galbe">Angle de galbe <span id="galbe-val" class="hint" style="display:inline;">10°</span></label>
+            <label for="galbe">Galbe monture <span id="galbe-val" class="hint" style="display:inline;">10°</span></label>
             <input type="range" id="galbe" min="0" max="35" step="1" value="10">
             <div class="slider-ends"><span>plat</span><span>galbé</span></div>
-            <div class="hint">Angle entre les deux verres, pivot au milieu du nez (axe central).</div>
           </div>
 
           <div class="field frame-opt">
@@ -1310,6 +1306,12 @@
       s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W - 72) + '" y="' + (H / 2).toFixed(1) + '">face arri&#232;re</text>';
       s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W / 2).toFixed(1) + '" y="18">haut</text>';
       s += '<text class="sec-txt mut" text-anchor="middle" x="' + (W / 2).toFixed(1) + '" y="' + (H - 8) + '">bas</text>';
+      // Épaisseurs : bord haut, centre optique, bord bas (mm), le long du bord arrière de la coupe.
+      var cPt = surfacePoint(m, m.decX, m.decY);
+      var eBas = pts[0], eHaut = pts[pts.length - 1];
+      s += '<text class="sec-txt" text-anchor="start" x="' + (sx(eHaut.zb) + 8).toFixed(1) + '" y="' + (sy(eHaut.Y) + 4).toFixed(1) + '">' + f2(eHaut.thickness) + ' mm</text>';
+      s += '<text class="sec-txt" text-anchor="start" x="' + (sx(cPt.zb) + 8).toFixed(1) + '" y="' + (sy(m.decY) + 4).toFixed(1) + '">' + f2(cPt.thickness) + ' mm</text>';
+      s += '<text class="sec-txt" text-anchor="start" x="' + (sx(eBas.zb) + 8).toFixed(1) + '" y="' + (sy(eBas.Y) + 4).toFixed(1) + '">' + f2(eBas.thickness) + ' mm</text>';
       s += '</svg>';
       return { svg: s, min: minPt.thickness, max: maxPt.thickness };
     }
@@ -1345,10 +1347,14 @@
       s += '<path class="sec-glass" d="' + front + back + 'Z"/>';
       s += '<circle class="sec-mark" cx="' + sx(minPt.X).toFixed(1) + '" cy="' + sy((minPt.zf + minPt.zb) / 2).toFixed(1) + '" r="3"/>';
       s += '<circle class="sec-mark" cx="' + sx(maxPt.X).toFixed(1) + '" cy="' + sy((maxPt.zf + maxPt.zb) / 2).toFixed(1) + '" r="3"/>';
-      s += '<text class="sec-txt mut" x="5" y="18">' + (flip ? 'arrière' : 'avant') + '</text>';
-      s += '<text class="sec-txt mut" x="5" y="' + (H - 12) + '">' + (flip ? 'avant' : 'arrière') + '</text>';
       s += '<text class="sec-txt mut" text-anchor="start" x="' + padX + '" y="' + (H - 8) + '">nasal</text>';
       s += '<text class="sec-txt mut" text-anchor="end" x="' + (W - padX) + '" y="' + (H - 8) + '">temporal</text>';
+      // Épaisseurs : bord nasal, centre optique, bord temporal (mm).
+      var cPt = surfacePoint(m, m.decX, m.decY);
+      var eN = pts[0], eT = pts[pts.length - 1];
+      s += '<text class="sec-txt" text-anchor="start" x="' + sx(eN.X).toFixed(1) + '" y="16">' + f2(eN.thickness) + ' mm</text>';
+      s += '<text class="sec-txt" text-anchor="middle" x="' + sx(m.decX).toFixed(1) + '" y="16">' + f2(cPt.thickness) + ' mm</text>';
+      s += '<text class="sec-txt" text-anchor="end" x="' + sx(eT.X).toFixed(1) + '" y="16">' + f2(eT.thickness) + ' mm</text>';
       s += '</svg>';
       return { svg: s, min: minPt.thickness, max: maxPt.thickness };
     }
