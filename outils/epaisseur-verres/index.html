@@ -367,7 +367,6 @@
                 <option value="6">B6</option>
                 <option value="8">B8</option>
               </select>
-              <div class="hint">Active une base face avant imposée. Sinon, la base est calculée automatiquement.</div>
             </div>
             <div class="field">
               <label for="cerclage">Épaisseur au bord (mm)</label>
@@ -459,7 +458,7 @@
           <div class="vp-sides"><span>OD</span><span>OG</span></div>
           <div class="vp-overlay" id="vp-overlay">Chargement de la 3D…</div>
           <div class="ruler" id="ruler" hidden></div>
-          <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer</div>
+          <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer · clic droit, Maj+glisser ou deux doigts pour déplacer le centre de rotation</div>
         </div>
         <div style="padding:12px 16px;">
           <div class="field frame-opt">
@@ -1747,19 +1746,66 @@
       };
     }
 
-    /* ═══════════ CONTRÔLES (rotation / zoom) partagés ═══════════ */
-    var view = { rx: -0.5, ry: 0.0, dist: 1.8 };
+    /* ═══════════ CONTRÔLES (rotation / zoom / déplacement du pivot) partagés ═══════════ */
+    // tx/ty/tz = point de pivot (centre de rotation) en coordonnées modèle. Par défaut au centre
+    // de la scène (origine), il peut être DÉPLACÉ par « pan » (glisser à deux doigts, clic droit ou
+    // Maj+glisser) et reste BORNÉ à la boîte englobante de la monture (sceneBox).
+    var view = { rx: -0.5, ry: 0.0, dist: 1.8, tx: 0, ty: 0, tz: 0 };
+    var sceneBox = null;        // { minX,maxX,minY,maxY,minZ,maxZ } de la géométrie principale
+    var sceneRadius3D = 60;     // rayon de la scène principale (échelle du pan)
+    function clampPivot() {
+      if (!sceneBox) { return; }
+      view.tx = Math.max(sceneBox.minX, Math.min(sceneBox.maxX, view.tx));
+      view.ty = Math.max(sceneBox.minY, Math.min(sceneBox.maxY, view.ty));
+      view.tz = Math.max(sceneBox.minZ, Math.min(sceneBox.maxZ, view.tz));
+    }
     function attachControls(vp, onChange, allowScale11) {
-      var dragging = false, lx = 0, ly = 0;
-      vp.addEventListener('pointerdown', function (e) { dragging = true; lx = e.clientX; ly = e.clientY; vp.classList.add('dragging'); vp.setPointerCapture(e.pointerId); });
-      vp.addEventListener('pointermove', function (e) {
-        if (!dragging) { return; }
-        view.ry += (e.clientX - lx) * 0.01; view.rx += (e.clientY - ly) * 0.01;
-        view.rx = Math.max(-1.5, Math.min(1.5, view.rx));
-        lx = e.clientX; ly = e.clientY; onChange();
+      var pts = [], mode = null, lastMid = null, lastDist = 0;
+      function findPt(id) { for (var i = 0; i < pts.length; i++) { if (pts[i].id === id) { return pts[i]; } } return null; }
+      function midOf() { return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }; }
+      function distOf() { return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y); }
+      // Déplace le pivot dans le plan de l'écran (axes caméra droite/haut), puis le borne à la boîte.
+      function panBy(dx, dy) {
+        var cx = Math.cos(view.rx), sx = Math.sin(view.rx), cy = Math.cos(view.ry), sy = Math.sin(view.ry);
+        var worldH = 2 * (sceneRadius3D * view.dist) * Math.tan(FOV3D * DEG / 2);
+        var s = worldH / Math.max(1, vp.clientHeight);   // mm modèle par pixel à la distance du pivot
+        // axe droite caméra = (cy, sy·sx, sy·cx) ; axe haut caméra = (0, cx, −sx)
+        view.tx += (-dx * s) * cy;
+        view.ty += (-dx * s) * (sy * sx) + (dy * s) * cx;
+        view.tz += (-dx * s) * (sy * cx) + (dy * s) * (-sx);
+        clampPivot();
+      }
+      vp.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+      vp.addEventListener('pointerdown', function (e) {
+        pts.push({ id: e.pointerId, x: e.clientX, y: e.clientY });
+        vp.setPointerCapture(e.pointerId); vp.classList.add('dragging');
+        if (pts.length === 2) { mode = 'pinch'; lastMid = midOf(); lastDist = distOf(); }
+        else { mode = (e.button === 2 || e.shiftKey) ? 'pan' : 'rotate'; }
       });
-      var stop = function () { dragging = false; vp.classList.remove('dragging'); };
-      vp.addEventListener('pointerup', stop); vp.addEventListener('pointercancel', stop);
+      vp.addEventListener('pointermove', function (e) {
+        var p = findPt(e.pointerId);
+        if (!p) { return; }
+        var dx = e.clientX - p.x, dy = e.clientY - p.y;
+        p.x = e.clientX; p.y = e.clientY;
+        if (mode === 'pinch' && pts.length >= 2) {
+          var mid = midOf(), dist = distOf();
+          panBy(mid.x - lastMid.x, mid.y - lastMid.y);   // glisser à deux doigts = déplacer le pivot
+          if (lastDist > 0) { view.dist *= lastDist / dist; view.dist = Math.max(1.0, Math.min(6, view.dist)); }
+          lastMid = mid; lastDist = dist; onChange();
+        } else if (mode === 'pan') {
+          panBy(dx, dy); onChange();
+        } else if (mode === 'rotate') {
+          view.ry += dx * 0.01; view.rx += dy * 0.01;
+          view.rx = Math.max(-1.5, Math.min(1.5, view.rx));
+          onChange();
+        }
+      });
+      var drop = function (e) {
+        for (var i = 0; i < pts.length; i++) { if (pts[i].id === e.pointerId) { pts.splice(i, 1); break; } }
+        if (pts.length === 0) { mode = null; vp.classList.remove('dragging'); }
+        else if (pts.length === 1) { mode = 'rotate'; }   // un doigt restant → reprise de la rotation
+      };
+      vp.addEventListener('pointerup', drop); vp.addEventListener('pointercancel', drop);
       vp.addEventListener('wheel', function (e) {
         e.preventDefault();
         if (scale11 && allowScale11 !== false) {
@@ -1809,6 +1855,7 @@
       function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]); }
       function rotY(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]); }
       function trans(z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, z, 1]); }
+      function trans3(x, y, z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]); }
       function resize() {
         var dpr = Math.min(window.devicePixelRatio, 2), w = vp.clientWidth, h = vp.clientHeight;
         canvas.width = w * dpr; canvas.height = h * dpr; gl.viewport(0, 0, canvas.width, canvas.height);
@@ -1821,7 +1868,8 @@
         resize();
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         var M = mul(rotY(view.ry), rotX(view.rx));
-        var MVP = mul(persp(FOV3D * DEG, canvas.width / canvas.height, 0.1, 8000), mul(trans(-geometry.radius * view.dist), M));
+        var Mt = mul(M, trans3(-view.tx, -view.ty, -view.tz));   // rotation autour du pivot partagé
+        var MVP = mul(persp(FOV3D * DEG, canvas.width / canvas.height, 0.1, 8000), mul(trans(-geometry.radius * view.dist), Mt));
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf); gl.enableVertexAttribArray(nLoc); gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0);
@@ -1881,6 +1929,7 @@
       function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]); }
       function rotY(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]); }
       function trans(z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, z, 1]); }
+      function trans3(x, y, z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]); }
 
       function resize() { var w = vp.clientWidth, hh = vp.clientHeight, dpr = Math.min(window.devicePixelRatio, 2); canvas.width = w * dpr; canvas.height = hh * dpr; gl.viewport(0, 0, canvas.width, canvas.height); }
       function frame() {
@@ -1888,6 +1937,9 @@
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         var asp = canvas.width / canvas.height;
         var M = mul(rotY(view.ry), rotX(view.rx));
+        // Mt = rotation autour du PIVOT : on amène le pivot à l'origine (trans3(−t)) avant de tourner,
+        // puis la caméra recule. M (rotation seule) reste l'uniforme uM pour l'éclairage des normales.
+        var Mt = mul(M, trans3(-view.tx, -view.ty, -view.tz));
         var MVP;
         if (scale11) {
           // Vue 1:1 réaliste : perspective (focale FOV3D ≈ œil humain) calée pour que le PLAN
@@ -1900,14 +1952,14 @@
           var zNear = -Infinity;                            // z (repère caméra) du point le plus proche
           if (positions) {
             for (var vi = 0; vi < positions.length; vi += 3) {
-              var zc = M[2] * positions[vi] + M[6] * positions[vi + 1] + M[10] * positions[vi + 2];
+              var zc = Mt[2] * positions[vi] + Mt[6] * positions[vi + 1] + Mt[10] * positions[vi + 2] + Mt[14];
               if (zc > zNear) { zNear = zc; }
             }
           }
           if (zNear === -Infinity) { zNear = 0; }
-          MVP = mul(persp(FOV3D * DEG, asp, 1, 8000), mul(trans(-d0 - zNear), M));
+          MVP = mul(persp(FOV3D * DEG, asp, 1, 8000), mul(trans(-d0 - zNear), Mt));
         } else {
-          MVP = mul(persp(FOV3D * DEG, asp, 0.1, 8000), mul(trans(-radius * view.dist), M));
+          MVP = mul(persp(FOV3D * DEG, asp, 0.1, 8000), mul(trans(-radius * view.dist), Mt));
         }
         gl.uniformMatrix4fv(mvpLoc, false, MVP); gl.uniformMatrix4fv(mLoc, false, M);
         gl.bindBuffer(gl.ARRAY_BUFFER, pBuf); gl.enableVertexAttribArray(pLoc); gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
@@ -1968,9 +2020,19 @@
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufBack); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxBack, gl.STATIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBufEdge); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxEdge, gl.STATIC_DRAW);
           countL = idxL.length; countF = idxF.length; countFront = idxFront.length; countBack = idxBack.length; countEdge = idxEdge.length;
-          radius = g.radius; resize(); frame();
+          radius = g.radius; sceneRadius3D = g.radius;
+          // Boîte englobante de la monture → borne du pivot (point de rotation déplaçable).
+          var P = g.positions, minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+          for (var bi = 0; bi < P.length; bi += 3) {
+            if (P[bi] < minX) { minX = P[bi]; } if (P[bi] > maxX) { maxX = P[bi]; }
+            if (P[bi + 1] < minY) { minY = P[bi + 1]; } if (P[bi + 1] > maxY) { maxY = P[bi + 1]; }
+            if (P[bi + 2] < minZ) { minZ = P[bi + 2]; } if (P[bi + 2] > maxZ) { maxZ = P[bi + 2]; }
+          }
+          sceneBox = { minX: minX, maxX: maxX, minY: minY, maxY: maxY, minZ: minZ, maxZ: maxZ };
+          clampPivot();   // garde le pivot dans la nouvelle boîte après un recalcul
+          resize(); frame();
         },
-        resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; frame(); },
+        resetView: function () { view.rx = -0.5; view.ry = 0.0; view.dist = 1.8; view.tx = 0; view.ty = 0; view.tz = 0; frame(); },
         profile: function () { view.rx = 0; view.ry = Math.PI / 2; frame(); },
         refresh: function () { resize(); frame(); }
       };
