@@ -36,8 +36,8 @@ jobs:
         uses: actions/configure-pages@v6
 
       # Risque résiduel documenté (VULN-007) : `path: .` embarque l'intégralité du dépôt
-      # dans l'artefact Pages public (CLAUDE.md, SECURITY_AUDIT_REPORT.md, etc.). Aucun
-      # secret n'y figure ; on conserve `path: .` pour ne pas risquer de casser le déploiement.
+      # dans l'artefact Pages public (CLAUDE.md, CONTRIBUTING.md, etc.). Aucun secret
+      # n'y figure ; on conserve `path: .` pour ne pas risquer de casser le déploiement.
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v5
         with:
