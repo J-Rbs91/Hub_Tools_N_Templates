@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# Économie de minutes Actions : un nouveau push sur la même réf annule le run en cours.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   actionlint:
     name: Lint des workflows
