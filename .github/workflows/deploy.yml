@@ -10,6 +10,14 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
+    # Économie de minutes Actions : ne redéployer que si un fichier réellement
+    # publié change (pas pour un README, la config CI, les tests, etc.).
+    paths:
+      - 'index.html'
+      - 'assets/**'
+      - 'outils/**'
+      - 'docs/**'
+      - '.nojekyll'
   workflow_dispatch:
 
 permissions:
