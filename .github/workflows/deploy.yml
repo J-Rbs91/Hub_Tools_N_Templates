@@ -35,13 +35,19 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v6
 
-      # Risque résiduel documenté (VULN-007) : `path: .` embarque l'intégralité du dépôt
-      # dans l'artefact Pages public (CLAUDE.md, CONTRIBUTING.md, etc.). Aucun secret
-      # n'y figure ; on conserve `path: .` pour ne pas risquer de casser le déploiement.
-      - name: Upload site artifact
+      # VULN-007 : on ne publie que les fichiers du site dans un dossier dédié (_site),
+      # au lieu de tout le dépôt. Exclut les docs internes, la config CI, les tests, etc.
+      - name: Préparer le contenu du site
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          cp -R index.html assets outils docs .nojekyll _site/
+
+      - name: Empaqueter le contenu du site
         uses: actions/upload-pages-artifact@v5
         with:
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
