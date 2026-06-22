@@ -342,6 +342,24 @@
           <input type="text" id="c-objet" placeholder="Ex. : suggestion pour la clôture de caisse" autocomplete="off">
         </label>
 
+        <div class="c-group">
+          <span class="field__lbl" id="c-tools-lbl">Outil concerné <span class="field__opt">facultatif · choix multiple</span></span>
+          <div class="cd" id="c-tools">
+            <button type="button" class="cd-toggle" id="c-tools-toggle"
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-controls="c-tools-panel" aria-labelledby="c-tools-lbl c-tools-summary">
+              <span class="cd-toggle__txt is-placeholder" id="c-tools-summary">Indiquer le ou les outils…</span>
+              <span class="cd-toggle__chev" aria-hidden="true">&#9662;</span>
+            </button>
+            <div class="cd-panel" id="c-tools-panel" role="group" aria-labelledby="c-tools-lbl" hidden>
+              <label class="cd-opt"><input type="checkbox" value="Hub d'accueil"> Hub d'accueil</label>
+              <label class="cd-opt"><input type="checkbox" value="Demande / Ordonnance"> Demande / Ordonnance</label>
+              <label class="cd-opt"><input type="checkbox" value="Clôture de Caisse"> Clôture de Caisse</label>
+              <label class="cd-opt"><input type="checkbox" value="Épaisseur des verres"> Épaisseur des verres</label>
+            </div>
+          </div>
+        </div>
+
         <label class="field">
           <span class="field__lbl">Votre message <span class="field__req">obligatoire</span></span>
           <textarea id="c-message" rows="5" placeholder="Décrivez votre remarque, votre idée ou le problème rencontré…" aria-describedby="c-msg" required></textarea>
@@ -747,6 +765,35 @@
       var noteEl    = document.getElementById('c-msg');
       var trigger   = null;   // bouton ayant ouvert la modale (focus rendu à la fermeture)
 
+      // ── Menu déroulant « Outil concerné » (choix multiple) ──
+      var cdRoot    = document.getElementById('c-tools');
+      var cdToggle  = document.getElementById('c-tools-toggle');
+      var cdPanel   = document.getElementById('c-tools-panel');
+      var cdSummary = document.getElementById('c-tools-summary');
+      var PLACEHOLDER = 'Indiquer le ou les outils…';
+
+      function cdChecks() {
+        return cdPanel ? Array.prototype.slice.call(cdPanel.querySelectorAll('input[type="checkbox"]')) : [];
+      }
+
+      function cdSelected() {
+        return cdChecks().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+      }
+
+      function cdRefresh() {
+        var sel = cdSelected();
+        cdSummary.textContent = sel.length ? sel.join(', ') : PLACEHOLDER;
+        cdSummary.classList.toggle('is-placeholder', sel.length === 0);
+      }
+
+      function cdOpen(o) {
+        if (!cdPanel) { return; }
+        cdPanel.hidden = !o;
+        cdToggle.setAttribute('aria-expanded', o ? 'true' : 'false');
+      }
+
+      function cdIsOpen() { return cdPanel && !cdPanel.hidden; }
+
       function focusables() {
         var sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
                   'textarea:not([disabled])';
@@ -764,6 +811,9 @@
 
       function open(e) {
         trigger = (e && e.currentTarget) || document.activeElement || null;
+        form.reset();          // repart d'un formulaire vierge à chaque ouverture
+        cdOpen(false);
+        cdRefresh();
         setNote('');
         overlay.hidden = false;
         document.body.style.overflow = 'hidden';
@@ -772,6 +822,7 @@
 
       function close() {
         if (overlay.hidden) { return; }
+        cdOpen(false);
         overlay.hidden = true;
         document.body.style.overflow = '';
         if (trigger && typeof trigger.focus === 'function') { trigger.focus(); }
@@ -787,11 +838,13 @@
           return;
         }
         var objet = (objetEl.value || '').trim() || 'Retour sur les outils internes';
+        var outils = cdSelected();
         // Contexte utile : nom du magasin s'il est renseigné (jamais de donnée patient).
         var nomMag = '';
         try { nomMag = (JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}).nom || ''; }
         catch (err) { nomMag = ''; }
-        var corps = message + '\n\n— — —\nEnvoyé depuis les outils internes' +
+        var corps = (outils.length ? 'Outil(s) concerné(s) : ' + outils.join(', ') + '\n\n' : '') +
+                    message + '\n\n— — —\nEnvoyé depuis les outils internes' +
                     (nomMag ? ' (' + nomMag + ')' : '') + '.';
         var href = 'mailto:' + DEST +
                    '?subject=' + encodeURIComponent(objet) +
@@ -804,10 +857,25 @@
       if (cancelBtn) { cancelBtn.addEventListener('click', close); }
       overlay.addEventListener('click', function (e) { if (e.target === overlay) { close(); } });
 
-      // Échap ferme ; Tab / Maj+Tab confinent le focus dans la modale ouverte.
+      // Déclencheur du menu : ouvre/ferme le panneau de cases à cocher.
+      if (cdToggle) {
+        cdToggle.addEventListener('click', function () { cdOpen(!cdIsOpen()); });
+      }
+      // Mise à jour du résumé à chaque (dé)cochage.
+      cdChecks().forEach(function (c) { c.addEventListener('change', cdRefresh); });
+      // Un clic dans la modale, hors du menu, referme le panneau.
+      overlay.addEventListener('click', function (e) {
+        if (cdIsOpen() && cdRoot && !cdRoot.contains(e.target)) { cdOpen(false); }
+      });
+
+      // Échap : referme d'abord le menu s'il est ouvert, sinon la modale.
+      // Tab / Maj+Tab confinent le focus dans la modale ouverte.
       document.addEventListener('keydown', function (e) {
         if (overlay.hidden) { return; }
-        if (e.key === 'Escape') { close(); return; }
+        if (e.key === 'Escape') {
+          if (cdIsOpen()) { cdOpen(false); cdToggle.focus(); } else { close(); }
+          return;
+        }
         if (e.key !== 'Tab') { return; }
         var foc = focusables();
         if (!foc.length) { return; }
