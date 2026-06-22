@@ -463,6 +463,86 @@ body::before {
 
 .field:focus-within::after { transform: scaleX(1); }
 
+/* ── MENU DÉROULANT À CHOIX MULTIPLE (outil concerné, modale contact) ──
+   Maison, sans dépendance : un bouton-déclencheur façon champ + un panneau de
+   cases à cocher qui se déploie en flux (pas d'absolu = jamais rogné par le
+   défilement de la modale, et confortable au doigt sur mobile). */
+.c-group { margin-bottom: 14px; }
+
+.cd { position: relative; }
+
+.cd-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: inherit;
+  font-size: var(--fs-lg);
+  color: var(--ink);
+  text-align: left;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .18s ease, box-shadow .25s ease;
+}
+
+.cd-toggle:focus-visible {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(31,111,178,.14);
+}
+
+.cd-toggle__txt {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cd-toggle__txt.is-placeholder { color: var(--text-muted); }
+
+.cd-toggle__chev {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform .2s ease;
+}
+
+.cd-toggle[aria-expanded="true"] .cd-toggle__chev { transform: rotate(180deg); }
+
+.cd-panel {
+  margin-top: 6px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 6px;
+}
+
+.cd-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: var(--fs-base);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.cd-opt:hover { background: var(--bg); }
+
+.cd-opt input {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
 /* ── SECTION SYNCHRO ── */
 .sync-section {
   margin-top: 18px;
