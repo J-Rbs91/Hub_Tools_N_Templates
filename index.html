@@ -241,7 +241,11 @@
   </main>
 
   <footer class="site-footer">
-    Usage interne &nbsp;·&nbsp; Aucune donnée transmise au serveur
+    <p>Usage interne &nbsp;·&nbsp; Aucune donnée transmise au serveur</p>
+    <p class="site-footer__feedback">
+      Une remarque, une idée, un souci&nbsp;?
+      <button type="button" class="footer-link" id="open-contact">Faites-le moi savoir</button>
+    </p>
   </footer>
 
   <!-- ── MODALE : MON MAGASIN ── -->
@@ -317,6 +321,36 @@
         <div class="modal__actions">
           <button type="button" class="btn btn--ghost" id="cancel-settings">Annuler</button>
           <button type="submit" class="btn btn--primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── MODALE : CONTACT / RETOUR ── -->
+  <div class="modal-overlay" id="contact-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <h2 class="modal__title" id="contact-title">Un retour à me faire&nbsp;?</h2>
+      <p class="modal__hint">
+        Remarque, suggestion, bug… tout est utile. Au clic sur «&nbsp;Préparer l'e-mail&nbsp;»,
+        votre messagerie s'ouvre avec le message déjà rédigé&nbsp;: rien n'est envoyé sans
+        votre validation et aucune donnée ne transite par ce site.
+      </p>
+
+      <form id="contact-form" novalidate>
+        <label class="field">
+          <span class="field__lbl">Objet <span class="field__opt">facultatif</span></span>
+          <input type="text" id="c-objet" placeholder="Ex. : suggestion pour la clôture de caisse" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span class="field__lbl">Votre message <span class="field__req">obligatoire</span></span>
+          <textarea id="c-message" rows="5" placeholder="Décrivez votre remarque, votre idée ou le problème rencontré…" aria-describedby="c-msg" required></textarea>
+          <span class="field__msg" id="c-msg" role="status"></span>
+        </label>
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="cancel-contact">Annuler</button>
+          <button type="submit" class="btn btn--primary">Préparer l'e-mail</button>
         </div>
       </form>
     </div>
@@ -693,6 +727,98 @@
     renderHeader();
     renderWelcome();
     if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
+  </script>
+
+  <!-- ── MODALE CONTACT : prépare un e-mail via mailto, sans rien envoyer en ligne ──
+       100 % local : « Préparer l'e-mail » ouvre la messagerie de l'utilisateur avec
+       l'objet et le corps pré-remplis. Aucune donnée ne transite par le site, ce qui
+       respecte la contrainte de confidentialité du hub (pas d'appel réseau, pas de
+       service tiers, CSP inchangée). -->
+  <script>
+    (function contactModal() {
+      var DEST = 'ribesjeremy@gmail.com';
+      var overlay = document.getElementById('contact-modal');
+      var form    = document.getElementById('contact-form');
+      if (!overlay || !form) { return; }
+      var openBtn   = document.getElementById('open-contact');
+      var cancelBtn = document.getElementById('cancel-contact');
+      var objetEl   = document.getElementById('c-objet');
+      var msgEl     = document.getElementById('c-message');
+      var noteEl    = document.getElementById('c-msg');
+      var trigger   = null;   // bouton ayant ouvert la modale (focus rendu à la fermeture)
+
+      function focusables() {
+        var sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
+                  'textarea:not([disabled])';
+        return Array.prototype.slice.call(overlay.querySelectorAll(sel)).filter(function (el) {
+          return el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement;
+        });
+      }
+
+      function setNote(msg) {
+        if (!noteEl) { return; }
+        noteEl.textContent = msg || '';
+        if (msg) { noteEl.classList.add('is-shown'); }
+        else { noteEl.classList.remove('is-shown'); }
+      }
+
+      function open(e) {
+        trigger = (e && e.currentTarget) || document.activeElement || null;
+        setNote('');
+        overlay.hidden = false;
+        document.body.style.overflow = 'hidden';
+        (objetEl || msgEl).focus();
+      }
+
+      function close() {
+        if (overlay.hidden) { return; }
+        overlay.hidden = true;
+        document.body.style.overflow = '';
+        if (trigger && typeof trigger.focus === 'function') { trigger.focus(); }
+        trigger = null;
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var message = (msgEl.value || '').trim();
+        if (!message) {
+          setNote('Saisissez d’abord un message.');
+          msgEl.focus();
+          return;
+        }
+        var objet = (objetEl.value || '').trim() || 'Retour sur les outils internes';
+        // Contexte utile : nom du magasin s'il est renseigné (jamais de donnée patient).
+        var nomMag = '';
+        try { nomMag = (JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}).nom || ''; }
+        catch (err) { nomMag = ''; }
+        var corps = message + '\n\n— — —\nEnvoyé depuis les outils internes' +
+                    (nomMag ? ' (' + nomMag + ')' : '') + '.';
+        var href = 'mailto:' + DEST +
+                   '?subject=' + encodeURIComponent(objet) +
+                   '&body=' + encodeURIComponent(corps);
+        window.location.href = href;
+        setNote('Votre messagerie devrait s’ouvrir. Si rien ne se passe, écrivez-moi à ' + DEST + '.');
+      });
+
+      if (openBtn)   { openBtn.addEventListener('click', open); }
+      if (cancelBtn) { cancelBtn.addEventListener('click', close); }
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) { close(); } });
+
+      // Échap ferme ; Tab / Maj+Tab confinent le focus dans la modale ouverte.
+      document.addEventListener('keydown', function (e) {
+        if (overlay.hidden) { return; }
+        if (e.key === 'Escape') { close(); return; }
+        if (e.key !== 'Tab') { return; }
+        var foc = focusables();
+        if (!foc.length) { return; }
+        var first = foc[0];
+        var last = foc[foc.length - 1];
+        var active = document.activeElement;
+        if (e.shiftKey) {
+          if (active === first || !overlay.contains(active)) { e.preventDefault(); last.focus(); }
+        } else if (active === last) { e.preventDefault(); first.focus(); }
+      });
+    })();
   </script>
 
   <!-- ── Apparition en cascade des cartes ──
