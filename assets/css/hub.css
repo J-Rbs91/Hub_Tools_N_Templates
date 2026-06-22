@@ -411,7 +411,8 @@ body::before {
 
 .field { position: relative; }
 
-.field input {
+.field input,
+.field textarea {
   width: 100%;
   font-family: inherit;
   font-size: var(--fs-lg);
@@ -423,8 +424,16 @@ body::before {
   transition: border-color .18s ease, box-shadow .25s ease, transform .18s ease;
 }
 
+/* Zone de message du formulaire de contact : redimensionnable verticalement. */
+.field textarea {
+  resize: vertical;
+  min-height: 104px;
+  line-height: 1.5;
+}
+
 /* Au focus : halo bleu doux + très léger soulèvement (micro-interaction). */
-.field input:focus {
+.field input:focus,
+.field textarea:focus {
   outline: none;
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(31,111,178,.14);
@@ -777,6 +786,32 @@ body::before {
   padding: 20px;
   font-size: var(--fs-label);
   color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Invitation à faire remonter ses remarques (ouvre la modale de contact). */
+.site-footer__feedback { margin-top: 4px; }
+
+.footer-link {
+  font-family: inherit;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--blue);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color .15s ease;
+}
+
+.footer-link:hover { color: var(--blue-d); }
+
+.footer-link:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 /* ── RESPONSIVE ── */
