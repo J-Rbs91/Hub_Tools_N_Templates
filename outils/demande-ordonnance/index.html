@@ -97,6 +97,7 @@
   input[type=text]:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
   select.p-civ{font-family:inherit;font-size:var(--fs-base);color:var(--ink);border:none;border-bottom:1.4px solid var(--line);background:#FBFDFE;padding:4px 6px;border-radius:4px 4px 0 0}
   select.p-civ:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
+  input[type=text].warn-step{border-bottom-color:#D97706;background:#FFFBEB}
   input[type=text].inp-sm{width:80px}
   input[type=text].inp-xs{width:48px}
   input[type=text].inp-md{width:140px}
@@ -409,6 +410,31 @@
   function chk(k){const e=document.querySelector('[data-k="'+k+'"]');return e?e.checked:false;}
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+  /* ---------- contrôle « pas de 0,25 » sur les corrections ----------
+     Les corrections (sphère, cylindre, addition) s'écrivent par pas de 0,25.
+     L'axe (degrés) et les acuités sont volontairement exclus. */
+  var STEP_FIELDS=['i_od_sph','i_od_cyl','i_od_add','i_og_sph','i_og_cyl','i_og_add',
+                   'm_od_sph','m_od_cyl','m_od_add','m_og_sph','m_og_cyl','m_og_add'];
+  function parseDiopter(raw){
+    if(!raw) return null;
+    var s=raw.trim().replace(',','.').replace(/^\+/,'');
+    if(s==='') return null;
+    var n=parseFloat(s);
+    return isFinite(n)?n:NaN;           // NaN = saisie non numérique (ex. « plan »)
+  }
+  function isOffStep(raw){
+    var n=parseDiopter(raw);
+    if(n===null||isNaN(n)) return false;   // vide ou non numérique : pas de signalement de pas
+    return (Math.round(n*100)%25)!==0;
+  }
+  function fieldLabel(k){
+    var m=k.match(/^([im])_(od|og)_(sph|cyl|axe|add)$/);
+    if(!m) return k;
+    var phase=m[1]==='i'?'prescription initiale':'modification demandée';
+    var part={sph:'sphère',cyl:'cylindre',axe:'axe',add:'addition'}[m[3]];
+    return m[2].toUpperCase()+' '+part+' ('+phase+')';
+  }
+
   function toast(msg, ok){
     const t=document.getElementById('toast');
     t.textContent=msg;
@@ -679,7 +705,34 @@
     return l.join('\n');
   }
 
+  /* Points à relire avant copie : valeurs hors pas de 0,25 + champs clés vides.
+     Non bloquant — l'utilisateur peut copier malgré tout après relecture. */
+  function preCopyIssues(){
+    var issues=[];
+    STEP_FIELDS.forEach(function(k){
+      if(isOffStep(val(k))) issues.push('• '+fieldLabel(k)+' = ' + val(k) + ' (pas un multiple de 0,25)');
+    });
+    if(!val('medecin')) issues.push('• Nom du médecin non renseigné');
+    if(!val('p_nom'))   issues.push('• Nom du patient non renseigné');
+    [['i_od','OD (prescription initiale)'],['i_og','OG (prescription initiale)'],
+     ['m_od','OD (modification demandée)'],['m_og','OG (modification demandée)']].forEach(function(pair){
+      var p=pair[0], lbl=pair[1];
+      var sph=val(p+'_sph'), cyl=val(p+'_cyl'), axe=val(p+'_axe'), add=val(p+'_add');
+      if(!(sph||cyl||axe||add)) return;          // ligne non utilisée : on ne signale rien
+      if(!sph)        issues.push('• '+lbl+' : sphère non renseignée');
+      if(cyl && !axe) issues.push('• '+lbl+' : axe non renseigné (cylindre saisi)');
+      if(axe && !cyl) issues.push('• '+lbl+' : cylindre non renseigné (axe saisi)');
+    });
+    return issues;
+  }
+
   async function copyForGmail(){
+    var issues=preCopyIssues();
+    if(issues.length){
+      var msg='Avant de copier, quelques points méritent une relecture :\n\n'+issues.join('\n')+
+              '\n\nRappel non bloquant : vous pouvez copier malgré tout.\n\nCopier quand même ?';
+      if(!window.confirm(msg)) return;   // l'utilisateur préfère se relire : on n'écrase pas le presse-papiers
+    }
     const html=buildEmailHTML();
     const text=plainFallback();
     try{
@@ -711,6 +764,7 @@
     document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
     document.querySelectorAll('textarea').forEach(t=>t.value='');
     document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+    document.querySelectorAll('.warn-step').forEach(el=>{el.classList.remove('warn-step');el.removeAttribute('title');});
     introDirty=false;
     refreshIntro();
   }
@@ -733,6 +787,20 @@
         if(e){ const ev = (e.tagName==='SELECT' || e.type==='checkbox') ? 'change' : 'input'; e.addEventListener(ev, refreshIntro); }
       });
     refreshIntro();
+
+    // Signalement visuel « pas de 0,25 » sur les corrections (sphère/cylindre/addition).
+    STEP_FIELDS.forEach(function(k){
+      var el=document.querySelector('[data-k="'+k+'"]');
+      if(!el) return;
+      var flag=function(){
+        var bad=isOffStep(el.value);
+        el.classList.toggle('warn-step', bad);
+        if(bad){ el.title='Valeur inhabituelle : les corrections vont par pas de 0,25 (ex. 0,25 · 0,50 · 0,75 · 1,00).'; }
+        else { el.removeAttribute('title'); }
+      };
+      el.addEventListener('input', flag);
+      el.addEventListener('change', flag);
+    });
   });
 
   /* ---------- « Entrée » passe au champ suivant ----------
