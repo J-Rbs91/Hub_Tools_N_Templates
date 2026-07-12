@@ -97,7 +97,7 @@
   input[type=text]:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
   select.p-civ{font-family:inherit;font-size:var(--fs-base);color:var(--ink);border:none;border-bottom:1.4px solid var(--line);background:#FBFDFE;padding:4px 6px;border-radius:4px 4px 0 0}
   select.p-civ:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
-  input[type=text].warn-step{border-bottom-color:#D97706;background:#FFFBEB}
+  input[type=text].warn-step{color:#C0271A;font-weight:700;border-bottom-color:#C0271A}
   input[type=text].inp-sm{width:80px}
   input[type=text].inp-xs{width:48px}
   input[type=text].inp-md{width:140px}
@@ -709,9 +709,8 @@
      Non bloquant — l'utilisateur peut copier malgré tout après relecture. */
   function preCopyIssues(){
     var issues=[];
-    STEP_FIELDS.forEach(function(k){
-      if(isOffStep(val(k))) issues.push('• '+fieldLabel(k)+' = ' + val(k) + ' (pas un multiple de 0,25)');
-    });
+    // Les valeurs hors pas de 0,25 sont signalées visuellement (rouge/gras) et n'entrent
+    // volontairement PAS dans cette popup.
     if(!val('medecin')) issues.push('• Nom du médecin non renseigné');
     if(!val('p_nom'))   issues.push('• Nom du patient non renseigné');
     [['i_od','OD (prescription initiale)'],['i_og','OG (prescription initiale)'],
