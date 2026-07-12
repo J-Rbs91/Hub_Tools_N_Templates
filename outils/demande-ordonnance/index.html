@@ -95,6 +95,8 @@
     transition:border-color .15s, background .15s;width:100%;
   }
   input[type=text]:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
+  select.p-civ{font-family:inherit;font-size:var(--fs-base);color:var(--ink);border:none;border-bottom:1.4px solid var(--line);background:#FBFDFE;padding:4px 6px;border-radius:4px 4px 0 0}
+  select.p-civ:focus{outline:none;border-bottom-color:var(--blue);background:#fff}
   input[type=text].inp-sm{width:80px}
   input[type=text].inp-xs{width:48px}
   input[type=text].inp-md{width:140px}
@@ -289,7 +291,7 @@
       <tr class="sect"><td colspan="2">Patient</td></tr>
       <tr><td colspan="2" style="padding:0">
         <div class="pgrid">
-          <div class="pf"><span class="plab">Nom / Prénom</span><input type="text" data-k="p_nom" aria-label="Nom et prénom du patient"></div>
+          <div class="pf"><span class="plab">Nom / Prénom</span><select data-k="p_civ" class="p-civ" aria-label="Civilité du patient"><option value="">—</option><option value="M.">M.</option><option value="Mme">Mme</option></select><input type="text" data-k="p_nom" aria-label="Nom et prénom du patient"></div>
           <div class="pf"><span class="plab">Né(e) le</span><input type="text" inputmode="numeric" class="inp-md" data-k="p_ne" placeholder="jj/mm/aaaa" aria-label="Date de naissance du patient (jj/mm/aaaa)"></div>
         </div>
       </td></tr>
@@ -431,7 +433,11 @@
 
     // corps selon objet coché (priorité au premier coché)
     let corps;
-    if(chk('o_nouvelle'))   corps="Je me permets de vous adresser cette demande concernant"+pat+" Après essai en magasin et analyse détaillée de ses habitudes et besoins visuels, il apparaît que la correction que vous avez récemment prescrite gagnerait, dans son intérêt, à être adaptée différemment. Jusqu'en mai 2025, il m'était possible de procéder moi-même à cette adaptation ; depuis la décision du Conseil d'État du 2 mai 2025 (art. L.4362-10 du Code de la santé publique), l'opticien ne peut plus y procéder sans votre accord écrit préalable. Respecter la prescription en l'état ne servirait pas au mieux les intérêts de votre patient(e) : aussi me permets-je de solliciter respectueusement, sous réserve de votre appréciation, l'établissement d'une nouvelle ordonnance intégrant l'adaptation détaillée ci-dessous.";
+    if(chk('o_nouvelle')){
+      const civ=val('p_civ');
+      const patRef=((civ?civ+' ':'')+nom).trim() || 'votre patient(e)';
+      corps="Après essai en magasin et analyse détaillée des habitudes et besoins visuels de "+patRef+", il semblerait qu'appliquer la prescription en l'état ne suffirait pas à servir au mieux ses intérêts. Depuis la décision du Conseil d'État du 2 mai 2025 (art. L.4362-10 du Code de la santé publique), nous ne pouvons plus procéder à cette modification sans votre accord écrit préalable. C'est pourquoi je me permets de solliciter, si aucune contre-indication médicale n'existe et sous réserve de votre appréciation, l'établissement d'une nouvelle ordonnance intégrant l'adaptation détaillée ci-dessous.";
+    }
     else if(chk('o_modif')) corps='Je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, et sous réserve de votre appréciation, je sollicite respectueusement votre autorisation pour la modification de la prescription détaillée ci-dessous.';
     else if(chk('o_lentilles')) corps="Je vous transmets ce compte rendu d'adaptation de lentilles de contact concernant"+pat;
     else if(chk('o_controle'))  corps='Je vous transmets ce compte rendu de contrôle de vision concernant'+pat;
@@ -704,6 +710,7 @@
     document.querySelectorAll('input[type=text]').forEach(i=>i.value='');
     document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
     document.querySelectorAll('textarea').forEach(t=>t.value='');
+    document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
     introDirty=false;
     refreshIntro();
   }
@@ -720,10 +727,10 @@
       ta.addEventListener('input', ()=>{ introDirty=true; });
     }
     // régénère l'intro quand les champs clés changent (si non édité manuellement)
-    ['medecin','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle']
+    ['medecin','p_civ','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle']
       .forEach(k=>{
         const e=document.querySelector('[data-k="'+k+'"]');
-        if(e){ const ev = e.type==='checkbox'?'change':'input'; e.addEventListener(ev, refreshIntro); }
+        if(e){ const ev = (e.tagName==='SELECT' || e.type==='checkbox') ? 'change' : 'input'; e.addEventListener(ev, refreshIntro); }
       });
     refreshIntro();
   });
@@ -735,11 +742,12 @@
   document.addEventListener('keydown', function(e){
     if(e.key!=='Enter' || e.isComposing) return;
     var el=e.target;
-    if(!el || el.tagName!=='INPUT') return;                 // textarea, boutons… : comportement natif
-    if(el.type!=='text' && el.type!=='checkbox') return;
+    if(!el) return;
+    var isField = el.tagName==='SELECT' || (el.tagName==='INPUT' && (el.type==='text' || el.type==='checkbox'));
+    if(!isField) return;                                    // textarea, boutons… : comportement natif
     e.preventDefault();                                     // évite toute soumission implicite
     var fields=Array.prototype.slice.call(
-      document.querySelectorAll('input[type="text"], input[type="checkbox"]'))
+      document.querySelectorAll('input[type="text"], input[type="checkbox"], select'))
       .filter(function(f){ return !f.disabled && f.offsetParent!==null; });
     var i=fields.indexOf(el);
     if(i>-1 && i+1<fields.length){ fields[i+1].focus(); }
