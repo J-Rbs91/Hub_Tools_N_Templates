@@ -447,8 +447,8 @@
 
     // corps selon objet coché (priorité au premier coché)
     let corps;
-    if(chk('o_nouvelle'))   corps='Je me permets de vous adresser cette demande concernant'+pat+" Après contrôle, la correction requise dépasse le cadre de l'adaptation et du renouvellement que je suis habilité à réaliser. Je sollicite donc l'établissement d'une nouvelle ordonnance de votre part"+(motifPresent()?', pour le motif précisé ci-dessous.':'.');
-    else if(chk('o_modif')) corps='Je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, je sollicite votre autorisation pour la modification de la prescription détaillée ci-dessous.';
+    if(chk('o_nouvelle'))   corps='Je me permets de vous adresser cette demande concernant'+pat+" Après contrôle, et sous réserve de votre appréciation, la correction qui paraît nécessaire semble dépasser le cadre de l'adaptation et du renouvellement que je suis habilité à réaliser. Aussi me permets-je de solliciter, si vous le jugez opportun, l'établissement d'une nouvelle ordonnance"+(motifPresent()?', pour le motif précisé ci-dessous.':'.');
+    else if(chk('o_modif')) corps='Je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, et sous réserve de votre appréciation, je sollicite respectueusement votre autorisation pour la modification de la prescription détaillée ci-dessous.';
     else if(chk('o_lentilles')) corps="Je vous transmets ce compte rendu d'adaptation de lentilles de contact concernant"+pat;
     else if(chk('o_controle'))  corps='Je vous transmets ce compte rendu de contrôle de vision concernant'+pat;
     else if(chk('o_adapt'))     corps="Je vous transmets ce compte rendu d'adaptation de prescription (art. L4362-10 CSP) concernant"+pat;
@@ -504,6 +504,9 @@
   ];
   // Base légale (motif « mo_loi ») — formulation prudente, conforme au droit en vigueur.
   var LEGAL_TEXT="Ordonnance non encore délivrée : son adaptation par l'opticien est subordonnée à votre accord écrit préalable (art. L.4362-10 du Code de la santé publique ; l'accord tacite ayant été supprimé par la décision du Conseil d'État du 2 mai 2025). Une nouvelle ordonnance de votre part lèverait toute ambiguïté.";
+  // Clôture (toujours présente) : déférence + proposition systématique de revoir le patient + politesse.
+  var CLOSING_1="Cette démarche reste entièrement soumise à votre appréciation ; je me conformerai bien entendu à votre décision. Si vous jugez préférable de revoir votre patient(e) en consultation, je vous remercie de bien vouloir me l'indiquer.";
+  var CLOSING_2="Je vous remercie de votre bienveillante attention et vous prie d'agréer, Docteur, l'expression de mes salutations respectueuses.";
   function motifList(){ return checkedList(MOTIFS); }
   function motifPresent(){ return MOTIFS.some(function(m){ return chk(m[0]); }) || chk('mo_loi') || !!val('mo_precis'); }
   function suiteList(){
@@ -597,9 +600,8 @@
 
     h+='</table>';
 
-    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:16px 2px 0;line-height:1.55;">'
-      +"Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir, cher docteur, l'expression de mes respectueuses salutations."
-      +'</p>';
+    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:16px 2px 0;line-height:1.55;">'+esc(CLOSING_1)+'</p>';
+    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:8px 2px 0;line-height:1.55;">'+esc(CLOSING_2)+'</p>';
     h+='<p style="font-size:13px;font-weight:700;color:#1A2A3A;margin:10px 2px 0;">'+esc(storeName())+'</p>';
     h+='</div>';
     return h;
@@ -709,8 +711,10 @@
     const suite=suiteListTxt();
     if(suite){ l.push('SUITE À DONNER'); l.push('Suite à donner : '+suite); l.push(''); }
 
-    // formule de politesse + signature
-    l.push("Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir, cher docteur, l'expression de mes respectueuses salutations.");
+    // clôture (déférence + proposition de revoir le patient) + politesse + signature
+    l.push(CLOSING_1);
+    l.push('');
+    l.push(CLOSING_2);
     l.push('');
     l.push(storeName());
     return l.join('\n');
