@@ -174,6 +174,13 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  .ov{position:fixed;inset:0;background:rgba(20,30,40,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
+  .ov[hidden]{display:none}
+  .ov-box{background:#fff;border-radius:12px;max-width:430px;width:100%;padding:22px 22px 18px;box-shadow:0 14px 44px rgba(26,42,58,.28)}
+  .ov-title{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 6px}
+  .ov-sub{font-size:var(--fs-sm);color:var(--grey);margin:0 0 18px;line-height:1.5}
+  .ov-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
   .help{max-width:820px;margin:0 auto 14px;font-size:var(--fs-label);color:var(--grey)}
   .help summary{cursor:pointer;font-weight:700;color:var(--blue);padding:8px 0}
   .help ol{margin:4px 0 8px 20px;line-height:1.6}
@@ -388,6 +395,18 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Popup non bloquante : champs vides. Les deux boutons ferment la popup ET copient. -->
+<div class="ov" id="blank-modal" hidden>
+  <div class="ov-box" role="alertdialog" aria-modal="true" aria-labelledby="blank-title" aria-describedby="blank-sub">
+    <p class="ov-title" id="blank-title">Attention, certains champs sont vides.</p>
+    <p class="ov-sub" id="blank-sub">Le mail est copié dans les deux cas. «&nbsp;Compléter&nbsp;» vous ramène au premier champ à vérifier&nbsp;; «&nbsp;Valider&nbsp;» copie tel quel.</p>
+    <div class="ov-actions">
+      <button type="button" class="action btn-ghost" id="blank-complete">Compléter</button>
+      <button type="button" class="action btn-primary" id="blank-valider">Valider</button>
+    </div>
+  </div>
+</div>
 
 <script>
   /* ---------- profil magasin (partagé via localStorage) ---------- */
@@ -705,33 +724,25 @@
     return l.join('\n');
   }
 
-  /* Points à relire avant copie : valeurs hors pas de 0,25 + champs clés vides.
-     Non bloquant — l'utilisateur peut copier malgré tout après relecture. */
-  function preCopyIssues(){
-    var issues=[];
-    // Les valeurs hors pas de 0,25 sont signalées visuellement (rouge/gras) et n'entrent
-    // volontairement PAS dans cette popup.
-    if(!val('medecin')) issues.push('• Nom du médecin non renseigné');
-    if(!val('p_nom'))   issues.push('• Nom du patient non renseigné');
-    [['i_od','OD (prescription initiale)'],['i_og','OG (prescription initiale)'],
-     ['m_od','OD (modification demandée)'],['m_og','OG (modification demandée)']].forEach(function(pair){
-      var p=pair[0], lbl=pair[1];
-      var sph=val(p+'_sph'), cyl=val(p+'_cyl'), axe=val(p+'_axe'), add=val(p+'_add');
-      if(!(sph||cyl||axe||add)) return;          // ligne non utilisée : on ne signale rien
-      if(!sph)        issues.push('• '+lbl+' : sphère non renseignée');
-      if(cyl && !axe) issues.push('• '+lbl+' : axe non renseigné (cylindre saisi)');
-      if(axe && !cyl) issues.push('• '+lbl+' : cylindre non renseigné (axe saisi)');
-    });
-    return issues;
-  }
-
-  async function copyForGmail(){
-    var issues=preCopyIssues();
-    if(issues.length){
-      var msg='Avant de copier, quelques points méritent une relecture :\n\n'+issues.join('\n')+
-              '\n\nRappel non bloquant : vous pouvez copier malgré tout.\n\nCopier quand même ?';
-      if(!window.confirm(msg)) return;   // l'utilisateur préfère se relire : on n'écrase pas le presse-papiers
+  /* Détecte des champs clés vides : nom du médecin, nom du patient, ou une ligne de
+     correction incomplète (sphère absente, cylindre sans axe, axe sans cylindre). */
+  function firstBlankField(){
+    if(!val('medecin')) return document.querySelector('[data-k="medecin"]');
+    if(!val('p_nom'))   return document.querySelector('[data-k="p_nom"]');
+    var lignes=['i_od','i_og','m_od','m_og'];
+    for(var i=0;i<lignes.length;i++){
+      var p=lignes[i], sph=val(p+'_sph'), cyl=val(p+'_cyl'), axe=val(p+'_axe'), add=val(p+'_add');
+      if(!(sph||cyl||axe||add)) continue;      // ligne non utilisée
+      if(!sph)        return document.querySelector('[data-k="'+p+'_sph"]');
+      if(cyl && !axe) return document.querySelector('[data-k="'+p+'_axe"]');
+      if(axe && !cyl) return document.querySelector('[data-k="'+p+'_cyl"]');
     }
+    return null;
+  }
+  function hasBlankFields(){ return firstBlankField()!==null; }
+
+  /* Copie effective (HTML + texte brut), avec repli execCommand. */
+  async function doCopy(){
     const html=buildEmailHTML();
     const text=plainFallback();
     try{
@@ -755,6 +766,26 @@
         toast('Copie impossible sur ce navigateur. Utilisez le bouton PDF.', false);
       }
     }
+  }
+
+  /* Copier pour Gmail : si des champs clés sont vides, on prévient d'abord (popup
+     non bloquante) ; sinon on copie directement. Dans tous les cas le mail est copié. */
+  function copyForGmail(){
+    if(hasBlankFields()){ document.getElementById('blank-modal').hidden=false; return; }
+    doCopy();
+  }
+  function closeBlankModal(){
+    var m=document.getElementById('blank-modal');
+    if(m.hidden) return false;
+    m.hidden=true;
+    return true;
+  }
+  function blankValidate(){ if(closeBlankModal()) doCopy(); }          // Valider : ferme + copie
+  function blankComplete(){                                            // Compléter : ferme + copie + revient au 1er champ
+    if(!closeBlankModal()) return;
+    doCopy();
+    var f=firstBlankField();
+    if(f){ f.focus(); if(f.scrollIntoView) f.scrollIntoView({block:'center'}); }
   }
 
   function resetForm(){
@@ -799,6 +830,15 @@
       };
       el.addEventListener('input', flag);
       el.addEventListener('change', flag);
+    });
+
+    // Popup « champs vides » : les deux boutons ferment ET copient.
+    var blankModal=document.getElementById('blank-modal');
+    document.getElementById('blank-valider').addEventListener('click', blankValidate);
+    document.getElementById('blank-complete').addEventListener('click', blankComplete);
+    blankModal.addEventListener('click', function(e){ if(e.target===blankModal) blankValidate(); });
+    document.addEventListener('keydown', function(e){
+      if(e.key==='Escape' && !blankModal.hidden) blankValidate();
     });
   });
 
