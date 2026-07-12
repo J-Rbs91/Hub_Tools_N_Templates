@@ -24,13 +24,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: actionlint
         run: |
           set -euo pipefail
-          # Version épinglée d'actionlint (évite l'exécution d'un script de la branche mobile main).
+          # Version d'actionlint : binaire téléchargé puis vérifié par checksum par le script officiel.
           ACTIONLINT_VERSION=1.7.7
+          # Script de bootstrap épinglé par SHA de commit (immuable) — un tag git reste mobile
+          # et pourrait être re-pointé vers un script malveillant en cas de compromission amont.
+          ACTIONLINT_SCRIPT_SHA=03d0035246f3e81f36aed592ffb4bebf33a03106
           curl -sSfL -o download-actionlint.bash \
-            "https://raw.githubusercontent.com/rhysd/actionlint/v${ACTIONLINT_VERSION}/scripts/download-actionlint.bash"
+            "https://raw.githubusercontent.com/rhysd/actionlint/${ACTIONLINT_SCRIPT_SHA}/scripts/download-actionlint.bash"
           bash download-actionlint.bash "${ACTIONLINT_VERSION}"
           ./actionlint -color
 
@@ -82,8 +87,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: html-validate
-        run: npx --yes html-validate "**/*.html"
+        # Version épinglée : npx sans version exécuterait la dernière publication npm au moment du run.
+        run: npx --yes html-validate@11.5.6 "**/*.html"
 
   links:
     name: Vérification des liens
