@@ -291,8 +291,8 @@
         <div class="opt"><input type="checkbox" data-k="o_modif" aria-label="Demande d'autorisation de modification de prescription"><span class="txt">Demande d'autorisation de modification de prescription</span></div>
         <div class="opt"><input type="checkbox" data-k="o_lentilles" aria-label="Compte rendu d'adaptation lentilles de contact"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></div>
         <div class="opt"><input type="checkbox" data-k="o_controle" aria-label="Compte rendu de contrôle de vision"><span class="txt">Compte rendu de contrôle de vision</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_adapt" aria-label="Compte rendu d'adaptation de prescription (article L4362-10 du code de santé publique)"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon l'article L4362-10 du code de santé publique</span></span></div>
-        <div class="opt"><input type="checkbox" data-k="o_renouv" aria-label="Compte rendu de renouvellement exceptionnel (article D.4362-13 du code de santé publique)"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon l'article D.4362-13 du code de santé publique — JO du 12/10/2016</span></span></div>
+        <div class="opt"><input type="checkbox" data-k="o_adapt" aria-label="Compte rendu d'adaptation de prescription (art. L.4362-10 du Code de la santé publique)"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></div>
+        <div class="opt"><input type="checkbox" data-k="o_renouv" aria-label="Compte rendu de renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon art. D.4362-13 du Code de la santé publique — JO du 12/10/2016</span></span></div>
         <div class="opt"><input type="checkbox" data-k="o_nouvelle" aria-label="Demande d'établissement d'une nouvelle ordonnance par le médecin"><span class="txt">Demande d'établissement d'une nouvelle ordonnance<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></div>
       </td></tr>
 
@@ -486,8 +486,8 @@
     else if(chk('o_modif')) corps='Je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, et sous réserve de votre appréciation, je sollicite respectueusement votre autorisation pour la modification de la prescription détaillée ci-dessous.';
     else if(chk('o_lentilles')) corps="Je vous transmets ce compte rendu d'adaptation de lentilles de contact concernant"+pat;
     else if(chk('o_controle'))  corps='Je vous transmets ce compte rendu de contrôle de vision concernant'+pat;
-    else if(chk('o_adapt'))     corps="Je vous transmets ce compte rendu d'adaptation de prescription (art. L4362-10 CSP) concernant"+pat;
-    else if(chk('o_renouv'))    corps='Je vous transmets ce compte rendu de renouvellement exceptionnel (art. D.4362-13 CSP) concernant'+pat;
+    else if(chk('o_adapt'))     corps="Je vous transmets ce compte rendu d'adaptation de prescription (art. L.4362-10 du Code de la santé publique) concernant"+pat;
+    else if(chk('o_renouv'))    corps='Je vous transmets ce compte rendu de renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique) concernant'+pat;
     else                        corps='Je me permets de vous adresser ce document concernant'+pat;
 
     return tete+'\n'+corps;
@@ -524,8 +524,8 @@
       ['o_modif',"Demande d'autorisation de modification de prescription"],
       ['o_lentilles',"Adaptation lentilles de contact"],
       ['o_controle',"Contrôle de vision"],
-      ['o_adapt',"Adaptation de prescription (art. L4362-10 CSP)"],
-      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 CSP)"],
+      ['o_adapt',"Adaptation de prescription (art. L.4362-10 du Code de la santé publique)"],
+      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"],
       ['o_nouvelle',"Demande d'établissement d'une nouvelle ordonnance"],
     ]);
   }
@@ -632,8 +632,8 @@
       ['o_modif',"Demande d'autorisation de modification de prescription"],
       ['o_lentilles',"Adaptation lentilles de contact"],
       ['o_controle',"Contrôle de vision"],
-      ['o_adapt',"Adaptation de prescription (art. L4362-10 CSP)"],
-      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 CSP)"],
+      ['o_adapt',"Adaptation de prescription (art. L.4362-10 du Code de la santé publique)"],
+      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"],
       ['o_nouvelle',"Demande d'établissement d'une nouvelle ordonnance"],
     ]);
   }
