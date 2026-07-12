@@ -286,22 +286,6 @@
         <div class="opt"><input type="checkbox" data-k="o_nouvelle" aria-label="Demande d'établissement d'une nouvelle ordonnance par le médecin"><span class="txt">Demande d'établissement d'une nouvelle ordonnance<span class="sub">lorsqu'une simple modification ne suffit pas et qu'une prescription médicale est nécessaire</span></span></div>
       </td></tr>
 
-      <!-- Motif : renseigné surtout pour la « Demande d'établissement d'une nouvelle ordonnance ».
-           N'apparaît dans le courrier que si au moins un motif est coché ou précisé. -->
-      <tr class="sect"><td colspan="2">Motif de la demande de nouvelle ordonnance</td></tr>
-      <tr><td class="obj">Motif</td><td>
-        <div class="opt"><input type="checkbox" data-k="mo_loi" aria-label="Motif : ordonnance non encore délivrée, adaptation soumise à l'accord écrit du prescripteur (article L.4362-10 du code de la santé publique, décision du Conseil d'État du 2 mai 2025)"><span class="txt">Ordonnance non encore délivrée — adaptation soumise à l'accord écrit du prescripteur<span class="sub">art. L.4362-10 CSP · fin de l'accord tacite (décision du Conseil d'État du 2 mai 2025)</span></span></div>
-        <div class="opt"><input type="checkbox" data-k="mo_evol" aria-label="Motif : évolution de la correction au-delà du cadre de l'adaptation ou du renouvellement"><span class="txt">Évolution de la correction au-delà du cadre de l'adaptation / du renouvellement</span></div>
-        <div class="opt"><input type="checkbox" data-k="mo_ordo" aria-label="Motif : ordonnance absente, illisible ou expirée"><span class="txt">Ordonnance absente, illisible ou expirée</span></div>
-        <div class="opt"><input type="checkbox" data-k="mo_signes" aria-label="Motif : signes d'appel évoquant une pathologie, examen médical requis"><span class="txt">Signes d'appel évoquant une pathologie — examen médical requis</span></div>
-        <div class="opt"><input type="checkbox" data-k="mo_acuite" aria-label="Motif : acuité insuffisante ou mauvaise tolérance malgré adaptation"><span class="txt">Acuité insuffisante / mauvaise tolérance malgré adaptation</span></div>
-        <div class="opt"><input type="checkbox" data-k="mo_cadre" aria-label="Motif : patient hors conditions d'âge ou de délai pour un renouvellement par l'opticien"><span class="txt">Patient hors conditions d'âge ou de délai pour un renouvellement par l'opticien</span></div>
-        <div class="opt"><input type="checkbox" data-k="mo_autre" aria-label="Motif : autre, à préciser"><span class="txt">Autre (préciser ci-dessous)</span></div>
-      </td></tr>
-      <tr><td class="obj">Précisions</td><td>
-        <textarea data-k="mo_precis" placeholder="Précisez le motif si besoin (contexte, symptômes, dernière ordonnance…)" style="min-height:70px" aria-label="Précisions sur le motif de la demande de nouvelle ordonnance"></textarea>
-      </td></tr>
-
       <tr class="sect"><td colspan="2">Patient</td></tr>
       <tr><td colspan="2" style="padding:0">
         <div class="pgrid">
@@ -447,7 +431,7 @@
 
     // corps selon objet coché (priorité au premier coché)
     let corps;
-    if(chk('o_nouvelle'))   corps='Je me permets de vous adresser cette demande concernant'+pat+" Après contrôle, et sous réserve de votre appréciation, la correction qui paraît nécessaire semble dépasser le cadre de l'adaptation et du renouvellement que je suis habilité à réaliser. Aussi me permets-je de solliciter, si vous le jugez opportun, l'établissement d'une nouvelle ordonnance"+(motifPresent()?', pour le motif précisé ci-dessous.':'.');
+    if(chk('o_nouvelle'))   corps="Je me permets de vous adresser cette demande concernant"+pat+" S'agissant d'une prescription non encore délivrée, l'opticien n'est plus autorisé à en adapter directement la correction depuis la décision du Conseil d'État du 2 mai 2025 (art. L.4362-10 du Code de la santé publique, qui subordonne toute adaptation à l'accord écrit préalable du prescripteur). Une simple demande d'autorisation de modification ne suffit donc pas dans ce cas : aussi me permets-je de solliciter respectueusement, sous réserve de votre appréciation, l'établissement d'une nouvelle ordonnance. Les éléments qui motivent cette demande sont précisés ci-dessous.";
     else if(chk('o_modif')) corps='Je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, et sous réserve de votre appréciation, je sollicite respectueusement votre autorisation pour la modification de la prescription détaillée ci-dessous.';
     else if(chk('o_lentilles')) corps="Je vous transmets ce compte rendu d'adaptation de lentilles de contact concernant"+pat;
     else if(chk('o_controle'))  corps='Je vous transmets ce compte rendu de contrôle de vision concernant'+pat;
@@ -494,21 +478,9 @@
       ['o_nouvelle',"Demande d'établissement d'une nouvelle ordonnance"],
     ]);
   }
-  var MOTIFS=[
-    ['mo_evol',"Évolution de la correction au-delà du cadre de l'adaptation / du renouvellement"],
-    ['mo_ordo',"Ordonnance absente, illisible ou expirée"],
-    ['mo_signes',"Signes d'appel évoquant une pathologie — examen médical requis"],
-    ['mo_acuite',"Acuité insuffisante / mauvaise tolérance malgré adaptation"],
-    ['mo_cadre',"Patient hors conditions d'âge ou de délai pour un renouvellement par l'opticien"],
-    ['mo_autre',"Autre"],
-  ];
-  // Base légale (motif « mo_loi ») — formulation prudente, conforme au droit en vigueur.
-  var LEGAL_TEXT="Ordonnance non encore délivrée : son adaptation par l'opticien est subordonnée à votre accord écrit préalable (art. L.4362-10 du Code de la santé publique ; l'accord tacite ayant été supprimé par la décision du Conseil d'État du 2 mai 2025). Une nouvelle ordonnance de votre part lèverait toute ambiguïté.";
   // Clôture (toujours présente) : déférence + proposition systématique de revoir le patient + politesse.
   var CLOSING_1="Cette démarche reste entièrement soumise à votre appréciation ; je me conformerai bien entendu à votre décision. Si vous jugez préférable de revoir votre patient(e) en consultation, je vous remercie de bien vouloir me l'indiquer.";
   var CLOSING_2="Je vous remercie de votre bienveillante attention et vous prie d'agréer, Docteur, l'expression de mes salutations respectueuses.";
-  function motifList(){ return checkedList(MOTIFS); }
-  function motifPresent(){ return MOTIFS.some(function(m){ return chk(m[0]); }) || chk('mo_loi') || !!val('mo_precis'); }
   function suiteList(){
     return checkedList([
       ['s_equip',"Équipement délivré / en cours"],
@@ -577,14 +549,6 @@
 
     const obj=objetList(); if(obj){ h+=sect('Objet'); h+=row('Objet de la demande', obj); }
 
-    const motif=motifList(); const motifPrecis=val('mo_precis'); const loi=chk('mo_loi');
-    if(motif || motifPrecis || loi){
-      h+=sect('Motif de la demande');
-      if(loi) h+=row('Base légale', esc(LEGAL_TEXT));
-      if(motif) h+=row('Motif', motif);
-      if(motifPrecis) h+=row('Précisions', esc(motifPrecis).replace(/\n/g,'<br>'));
-    }
-
     const patRows=[];
     if(val('p_nom')) patRows.push(row('Nom / Prénom', esc(val('p_nom'))));
     if(val('p_ne'))  patRows.push(row('Né(e) le', esc(val('p_ne'))));
@@ -622,7 +586,6 @@
       ['o_nouvelle',"Demande d'établissement d'une nouvelle ordonnance"],
     ]);
   }
-  function motifListTxt(){ return checkedListTxt(MOTIFS); }
   function suiteListTxt(){
     return checkedListTxt([
       ['s_equip',"Équipement délivré / en cours"],
@@ -680,16 +643,6 @@
     // objet(s)
     const obj=objetListTxt();
     if(obj){ l.push('OBJET'); l.push('Objet de la demande : '+obj); l.push(''); }
-
-    // motif (surtout pour la demande de nouvelle ordonnance) — masqué si vide
-    const motif=motifListTxt(); const motifPrecis=val('mo_precis'); const loi=chk('mo_loi');
-    if(motif || motifPrecis || loi){
-      l.push('MOTIF DE LA DEMANDE');
-      if(loi) l.push('Base légale : '+LEGAL_TEXT);
-      if(motif) l.push('Motif : '+motif);
-      if(motifPrecis) l.push('Précisions : '+motifPrecis);
-      l.push('');
-    }
 
     // patient
     if(val('p_nom')||val('p_ne')){
@@ -767,8 +720,7 @@
       ta.addEventListener('input', ()=>{ introDirty=true; });
     }
     // régénère l'intro quand les champs clés changent (si non édité manuellement)
-    ['medecin','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle',
-     'mo_loi','mo_evol','mo_ordo','mo_signes','mo_acuite','mo_cadre','mo_autre','mo_precis']
+    ['medecin','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle']
       .forEach(k=>{
         const e=document.querySelector('[data-k="'+k+'"]');
         if(e){ const ev = e.type==='checkbox'?'change':'input'; e.addEventListener(ev, refreshIntro); }
