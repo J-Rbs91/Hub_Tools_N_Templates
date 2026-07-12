@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -270,13 +270,19 @@
 
         <label class="field">
           <span class="field__lbl">Téléphone <span class="field__opt">facultatif</span></span>
-          <input type="text" id="f-tel" placeholder="04.00.00.00.00" autocomplete="off">
+          <input type="text" inputmode="tel" id="f-tel" placeholder="04.00.00.00.00" autocomplete="off">
         </label>
 
         <label class="field">
           <span class="field__lbl">E-mail <span class="field__opt">facultatif</span></span>
           <input type="text" inputmode="email" id="f-mail" placeholder="contact@votremagasin.fr" autocomplete="off" aria-describedby="f-mail-msg">
           <span class="field__msg" id="f-mail-msg" role="status"></span>
+        </label>
+
+        <label class="field">
+          <span class="field__lbl">Fond de caisse <span class="field__opt">facultatif</span></span>
+          <input type="text" inputmode="decimal" id="f-fond" placeholder="Ex. : 53,80" autocomplete="off" aria-describedby="f-fond-hint">
+          <span class="field__msg is-shown" id="f-fond-hint">Réserve laissée en caisse en fin de journée. Sert de valeur par défaut dans la Clôture de caisse.</span>
         </label>
 
         <div class="sync-section">
@@ -290,7 +296,7 @@
           <p class="sync-desc">
             Relie tous les ordinateurs connectés au compte Google du magasin : vous paramétrez
             <strong>une seule fois</strong> et le profil se retrouve automatiquement sur chaque poste.
-            <a href="docs/sync-drive/" target="_blank" rel="noopener">Procédure et transparence</a>.
+            <a href="docs/sync-drive/" target="_blank" rel="noopener noreferrer">Procédure et transparence</a>.
           </p>
           <label class="field">
             <span class="field__lbl">URL de synchronisation</span>
@@ -308,7 +314,7 @@
             Sans compte Google. Le paramétrage est <strong>propre à chaque poste</strong> : vous
             l'enregistrez dans un fichier que vous conservez (clé USB ou sur l'ordinateur) et que
             vous restaurez où vous voulez.
-            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener">Procédure et transparence</a>.
+            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener noreferrer">Procédure et transparence</a>.
           </p>
           <div class="sync-actions">
             <button type="button" class="btn btn--ghost" id="backup-save">Sauvegarder dans un fichier</button>
@@ -377,6 +383,7 @@
   <script>
     var LS_PROFIL = 'profil-magasin-v1';
     var LS_SYNC   = 'sync-url-v1';
+    var LS_SYNC_PENDING = 'sync-pending-v1';   // marque un envoi Drive échoué (profil local plus récent non synchronisé)
     var LS_RESERVE = 'cloture-fond-v1';
     var LS_FOND_CIBLE = 'cloture-fond-cible-v1';
     var LS_CAISSE = 'cloture-caisse-v1';
@@ -387,11 +394,16 @@
       catch (e) { return {}; }
     }
 
-    /* Sécurité : ne conserver que des champs chaîne connus du profil (anti-injection à l'import). */
+    /* Sécurité : ne conserver que des champs connus du profil (anti-injection à l'import).
+       nom/adresse/tel/mail = chaînes ; fond = nombre >= 0 (réserve de caisse par défaut), sinon omis. */
     function sanitizeProfil(p) {
       if (!p || typeof p !== 'object') { return {}; }
       function s(v) { return typeof v === 'string' ? v : (v == null ? '' : String(v)); }
-      return { nom: s(p.nom), adresse: s(p.adresse), tel: s(p.tel), mail: s(p.mail) };
+      var out = { nom: s(p.nom), adresse: s(p.adresse), tel: s(p.tel), mail: s(p.mail) };
+      var f = (typeof p.fond === 'number') ? p.fond
+            : parseFloat(String(p.fond == null ? '' : p.fond).replace(',', '.'));
+      if (typeof f === 'number' && isFinite(f) && f >= 0) { out.fond = f; }
+      return out;
     }
 
     function isConfigured(p) {
@@ -428,6 +440,7 @@
       document.getElementById('f-adresse').value = p.adresse || '';
       document.getElementById('f-tel').value = p.tel || '';
       document.getElementById('f-mail').value = p.mail || '';
+      document.getElementById('f-fond').value = (typeof p.fond === 'number') ? String(p.fond).replace('.', ',') : '';
     }
 
     var modalTrigger = null;   // QA-02 : mémorise le bouton ayant ouvert la modale
@@ -532,14 +545,24 @@
       document.body.appendChild(s);
     }
 
-    function syncPush(profil) {
+    function syncPush(profil, onDone) {
+      function done(ok) { if (typeof onDone === 'function') { onDone(ok); } }
       var url = syncUrl();
-      if (!url) { return; }
-      if (!isValidSyncUrl(url)) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); return; }
+      if (!url) { done(true); return; }
+      if (!isValidSyncUrl(url)) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); done(false); return; }
+      // Marque l'envoi comme « en attente » : tant qu'il n'a pas réussi, le profil local est plus récent
+      // que le Drive et ne doit pas être écrasé par un syncPull silencieux (cf. syncPull).
+      localStorage.setItem(LS_SYNC_PENDING, '1');
       setStatus('Envoi vers le Drive…');
       jsonp(url, { action: 'save', data: JSON.stringify(profil) }, function (res) {
-        if (res && res.ok) { setStatus('Enregistré sur le Drive ✓', true); }
-        else { setStatus('Échec de l’envoi vers le Drive.', false); }
+        if (res && res.ok) {
+          localStorage.removeItem(LS_SYNC_PENDING);
+          setStatus('Enregistré sur le Drive ✓', true);
+          done(true);
+        } else {
+          setStatus('Échec de l’envoi vers le Drive. Vos informations restent enregistrées sur cet appareil ; réessayez plus tard.', false);
+          done(false);
+        }
       });
     }
 
@@ -547,6 +570,9 @@
       var url = syncUrl();
       if (!url) { if (!silent) { setStatus('Renseignez d’abord l’URL de synchronisation.', false); } return; }
       if (!isValidSyncUrl(url)) { if (!silent) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); } return; }
+      // Ne pas écraser silencieusement au chargement un profil local non encore synchronisé
+      // (un envoi précédent a échoué) : cela ferait perdre les dernières modifications.
+      if (silent && localStorage.getItem(LS_SYNC_PENDING)) { return; }
       if (!silent) { setStatus('Récupération depuis le Drive…'); }
       jsonp(url, { action: 'load' }, function (res) {
         if (res && res.ok && res.data) {
@@ -572,37 +598,56 @@
       e.preventDefault();
       var nomEl = document.getElementById('f-nom');
       if (!nomEl.value.trim()) { nomEl.focus(); return; }
+
+      // Une URL de synchro saisie mais invalide bloque l'enregistrement : on garde la modale
+      // ouverte, on affiche l'erreur et on focalise le champ — sans jamais pousser vers une
+      // ancienne URL ni fermer la modale (l'erreur ne serait alors plus visible).
+      var syncEl = document.getElementById('f-sync');
+      var syncVal = syncEl.value.trim();
+      if (syncVal && !isValidSyncUrl(syncVal)) {
+        setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
+        syncEl.focus();
+        return;
+      }
+
       // QA-04 : l'e-mail douteux n'empêche jamais l'enregistrement du profil.
       // On le sauvegarde tel quel et on affiche un simple avertissement.
       var mail = document.getElementById('f-mail').value.trim();
       setMailMsg(mail && !isPlausibleEmail(mail)
         ? 'Adresse e-mail inhabituelle — enregistrée telle quelle. Vérifiez-la si besoin.'
         : '');
+      var fondRaw = document.getElementById('f-fond').value.trim();
+      var fond = fondRaw === '' ? null : parseFloat(fondRaw.replace(',', '.'));
       var profil = {
         nom: nomEl.value.trim(),
         adresse: document.getElementById('f-adresse').value.trim(),
         tel: document.getElementById('f-tel').value.trim(),
         mail: mail
       };
+      if (fond !== null && isFinite(fond) && fond >= 0) { profil.fond = fond; }
       localStorage.setItem(LS_PROFIL, JSON.stringify(profil));
-      var syncVal = document.getElementById('f-sync').value.trim();
-      if (syncVal && !isValidSyncUrl(syncVal)) {
-        setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
-      } else {
-        localStorage.setItem(LS_SYNC, syncVal);
-      }
+      localStorage.setItem(LS_SYNC, syncVal);
       renderHeader();
-      syncPush(profil);
-      closeModal();
+
+      if (syncVal) {
+        // Synchro configurée : ne fermer la modale qu'une fois le résultat connu, pour que
+        // l'échec éventuel de l'envoi reste visible (#sync-status est dans la modale).
+        syncPush(profil, function (ok) { if (ok) { closeModal(); } });
+      } else {
+        closeModal();
+      }
     });
 
     document.getElementById('pull-sync').addEventListener('click', function () {
-      var syncVal = document.getElementById('f-sync').value.trim();
+      var syncEl = document.getElementById('f-sync');
+      var syncVal = syncEl.value.trim();
+      // URL invalide : ne pas interroger l'ancienne URL, afficher l'erreur et focaliser le champ.
       if (syncVal && !isValidSyncUrl(syncVal)) {
         setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
-      } else {
-        localStorage.setItem(LS_SYNC, syncVal);
+        syncEl.focus();
+        return;
       }
+      localStorage.setItem(LS_SYNC, syncVal);
       syncPull(false);
     });
 
@@ -630,7 +675,10 @@
       if (!Array.isArray(data)) { return []; }
       var byDate = {};
       data.forEach(function (e) {
-        if (!e || !e.date) { return; }
+        // Rejette les entrées mal formées (fichier de sauvegarde forgé ou corrompu) : sans un
+        // « comptage » numérique, l'affichage de l'historique planterait dans la Clôture de caisse.
+        if (!e || typeof e.date !== 'string' || !e.date ||
+            typeof e.comptage !== 'number' || !isFinite(e.comptage)) { return; }
         var prev = byDate[e.date];
         if (!prev || (e.ts || 0) >= (prev.ts || 0)) { byDate[e.date] = e; }
       });

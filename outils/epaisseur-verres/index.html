@@ -778,6 +778,12 @@
       return (r >= R) ? R : R - Math.sqrt(R * R - r * r);
     }
 
+    /* Flèche SIGNÉE de la face arrière : convexe (P-F1 > 0) => la flèche s'ajoute
+       vers l'arrière (réduit l'épaisseur au bord) ; concave (P-F1 <= 0) => inchangé. */
+    function backSag(pBack, r, n) {
+      return (pBack <= 0 ? 1 : -1) * surfSag(pBack, r, n);
+    }
+
     // Puissance dans le méridien d'angle théta (rad) pour une Rx sphéro-cylindrique.
     function powerAt(theta, sph, cyl, axeRad) {
       var d = Math.sin(theta - axeRad);
@@ -836,7 +842,7 @@
         var r = Math.hypot(dx, dy);
         if (r > rMax) { rMax = r; }
         var Pr = powerAt(Math.atan2(dy, dx), sph, cyl, axeRad);
-        var delta = surfSag(Pr - F1, r, n) - surfSag(F1, r, n);
+        var delta = backSag(Pr - F1, r, n) - surfSag(F1, r, n);
         if (delta < dMin) { dMin = delta; }
         if (delta > dMax) { dMax = delta; }
       }
@@ -876,7 +882,7 @@
         if (inContour(m.cfg, m.decX + t * cx, m.decY + t * cy, m.ax, m.by)) { last = t; } else { break; }
       }
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
-      return m.CT + surfSag(P - m.F1, last, m.n) - surfSag(m.F1, last, m.n);
+      return m.CT + backSag(P - m.F1, last, m.n) - surfSag(m.F1, last, m.n);
     }
     // Bords des deux méridiens principaux du tore (axe et axe+90), chacun à ses deux extrémités.
     function toricMeridians(m) {
@@ -918,7 +924,7 @@
         var r = Math.hypot(Xc - m.decX, Yc - m.decY);
         var P = powerAt(Math.atan2(Yc - m.decY, Xc - m.decX), m.sph, m.cyl, m.axeRad);
         var zf = -surfSag(m.F1, r, m.n);
-        var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+        var zb = -m.CT - backSag(P - m.F1, r, m.n);
         if (zb > zf) { zb = zf; }
         var cz = cambZ(m, Xc, Yc);
         var lo = Math.max(zb, zf - Tf / 2 - FRONT_MAX) - cz;  // borne basse : seating arrière OU cap avant
@@ -969,7 +975,7 @@
         var r = Math.hypot(Xc - m.decX, Yc - m.decY);
         var P = powerAt(Math.atan2(Yc - m.decY, Xc - m.decX), m.sph, m.cyl, m.axeRad);
         var zf = -surfSag(m.F1, r, m.n);
-        var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+        var zb = -m.CT - backSag(P - m.F1, r, m.n);
         if (zb > zf) { zb = zf; }
         var zRigid = planeZ(plane, Xc, Yc) + cambZ(m, Xc, Yc);
         var f = zf - (zRigid + Tf / 2);   // verre en avant du cercle
@@ -1008,7 +1014,7 @@
         var r = Math.hypot(Xc - m.decX, Yc - m.decY);
         var P = powerAt(Math.atan2(Yc - m.decY, Xc - m.decX), m.sph, m.cyl, m.axeRad);
         var zf = -surfSag(m.F1, r, m.n);
-        var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+        var zb = -m.CT - backSag(P - m.F1, r, m.n);
         if (zb > zf) { zb = zf; }
         edges.push({ Xc: Xc, Yc: Yc, zf: zf, zb: zb });
       }
@@ -1223,7 +1229,7 @@
         var r = Math.hypot(Xc - m.decX, Yc - m.decY);
         var P = powerAt(Math.atan2(Yc - m.decY, Xc - m.decX), m.sph, m.cyl, m.axeRad);
         var zf = -surfSag(m.F1, r, m.n);
-        var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+        var zb = -m.CT - backSag(P - m.F1, r, m.n);
         if (zb > zf) { zb = zf; }
         var mid = (zf + zb) / 2;
         X[j] = Xc; Y[j] = Yc; Z[j] = mid; sx += Xc; sy += Yc; sz += mid;
@@ -1248,7 +1254,7 @@
       var r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx);
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
       var zf = -surfSag(m.F1, r, m.n);
-      var zb = -m.CT - surfSag(P - m.F1, r, m.n);
+      var zb = -m.CT - backSag(P - m.F1, r, m.n);
       if (zb > zf) { zb = zf; }   // pas d'épaisseur négative : la tranche s'arrête au fil
       return { X: X, Y: Y, zf: zf, zb: zb, thickness: zf - zb };
     }
@@ -1262,7 +1268,7 @@
       var X = m.decX + last * cx, Y = m.decY + last * cy;
       var P = powerAt(theta, m.sph, m.cyl, m.axeRad);
       var zf = -surfSag(m.F1, last, m.n);
-      var zb = -m.CT - surfSag(P - m.F1, last, m.n);
+      var zb = -m.CT - backSag(P - m.F1, last, m.n);
       if (zb > zf) { zb = zf; }   // pas d'épaisseur négative : la tranche s'arrête au fil
       return { X: X, Y: Y, theta: theta, zf: zf, zb: zb, thickness: zf - zb };
     }
@@ -1635,7 +1641,7 @@
         // La cambrure (base du cercle) ne touche PAS le verre : le verre garde ici sa forme optique
         // pure, indépendante de la base monture. Seul le cerclage portera la cambrure (voir plus bas).
         function place(Xc, Yc, z) { var x = screenSign * Xc + boxCenterX, dx = x - xp; return [xp + dx * cb + z * sb, Yc, -dx * sb + z * cb]; }
-        function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); var zf = -surfSag(m.F1, r, m.n), zb = -m.CT - surfSag(P - m.F1, r, m.n); if (zb > zf) { zb = zf; } return { zf: zf, zb: zb }; }
+        function surf(r, theta) { var P = powerAt(theta, m.sph, m.cyl, m.axeRad); var zf = -surfSag(m.F1, r, m.n), zb = -m.CT - backSag(P - m.F1, r, m.n); if (zb > zf) { zb = zf; } return { zf: zf, zb: zb }; }
         function quad(T, a, b, c, d) { if (flip) { T.push(a, c, b, a, d, c); } else { T.push(a, b, c, a, c, d); } }
 
         var base = [], i, j;
@@ -2206,7 +2212,7 @@
       'coteA':  [28, 70],                          // calibre œil (mm) — bébé ~34
       'coteB':  [14, 60],                          // hauteur de cercle (mm)
       'coteD':  [6, 30],                           // pont (mm) — enfant ~8
-      'm-ep':   [0, 15]                            // épaisseur monture (mm)
+      'm-ep':   [0.5, 15]                          // épaisseur monture (mm)
     };
     function clampField(id) {
       var b = BOUNDS[id]; if (!b) { return; }

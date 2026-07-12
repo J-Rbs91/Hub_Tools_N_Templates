@@ -402,6 +402,17 @@
       margin-bottom: 14px;
     }
 
+    /* Masqué visuellement mais lu par les lecteurs d'écran (libellés de colonnes sans texte visible). */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     /* ── BANDEAU REPORT DE LA VEILLE ── */
     .prefill-banner {
       display: flex;
@@ -551,7 +562,7 @@
   <main>
 
     <!-- ── BANDEAU REPORT DE LA VEILLE ── -->
-    <div class="prefill-banner" id="prefill-banner" style="display:none"></div>
+    <div class="prefill-banner" id="prefill-banner" role="status" aria-live="polite" style="display:none"></div>
 
     <!-- ── TOP ROW : 3 blocs ── -->
     <div class="grid-top">
@@ -604,7 +615,7 @@
         </table>
         <div class="fond-row">
           <label for="reserve-monnaie">R&#233;serve de monnaie</label>
-          <input class="fond-input" type="number" id="reserve-monnaie" value="53.80" min="0" step="0.01">
+          <input class="fond-input" type="number" inputmode="decimal" id="reserve-monnaie" min="0" step="0.01">
           <span class="fond-eur">&#8364;</span>
         </div>
       </section>
@@ -691,7 +702,7 @@
             <strong class="er-val zero" id="ecart-value">&#8212;</strong>
           </div>
 
-          <div class="remise-alert" id="remise-alert" style="display:none"></div>
+          <div class="remise-alert" id="remise-alert" role="status" aria-live="polite" style="display:none"></div>
 
           <button class="btn-save" id="btn-save" type="button">Enregistrer le comptage</button>
 
@@ -717,7 +728,7 @@
               <th class="h-r">Sortie</th>
               <th class="h-r">Logiciel métier</th>
               <th class="h-r">&#201;cart</th>
-              <th></th>
+              <th><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody id="history-tbody">
@@ -739,7 +750,7 @@
     Usage interne &#160;&#183;&#160; Donn&#233;es stock&#233;es localement dans le navigateur
   </footer>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
     /* ── CONSTANTES ── */
@@ -787,8 +798,13 @@
       catch (e) { return {}; }
     }
     function reserveDefaut() {
+      // 1) réserve déjà choisie dans cet outil ; 2) sinon le « Fond de caisse » du profil magasin
+      // (renseigné une fois dans « Mon magasin ») ; 3) sinon 0 — jamais de montant codé en dur
+      // propre à un magasin d'origine.
       var f = parseFloat(localStorage.getItem(LS_RESERVE));
-      return isNaN(f) ? 53.80 : f;
+      if (!isNaN(f)) { return f; }
+      var fond = profilMagasin().fond;
+      return (typeof fond === 'number' && isFinite(fond)) ? fond : 0;
     }
     function fondCibleDefaut() {
       var f = parseFloat(localStorage.getItem(LS_FOND_CIBLE));
@@ -800,6 +816,9 @@
 
     /* ── FORMATAGE ── */
     function fmt(n) {
+      // Défense en profondeur : un historique corrompu (valeur non numérique) ne doit jamais
+      // faire planter l'affichage et rendre l'outil inerte.
+      if (typeof n !== 'number' || !isFinite(n)) { n = 0; }
       return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
     }
 
@@ -849,7 +868,9 @@
         var inp = document.createElement('input');
         inp.className = 'qty-input';
         inp.type = 'number';
+        inp.inputMode = 'numeric';
         inp.id = 'coin-qty-' + i;
+        inp.setAttribute('aria-label', 'Quantité de ' + coin.label);
         inp.placeholder = '0';
         inp.min = '0';
         inp.max = String(MAX_QTY);
@@ -878,7 +899,9 @@
         var inp = document.createElement('input');
         inp.className = 'qty-input';
         inp.type = 'number';
+        inp.inputMode = 'numeric';
         inp.id = 'bill-qty-' + i;
+        inp.setAttribute('aria-label', 'Quantité de ' + bill.label);
         inp.placeholder = '0';
         inp.min = '0';
         inp.max = String(MAX_QTY);
@@ -910,7 +933,9 @@
         var inp = document.createElement('input');
         inp.className = 'amt-input';
         inp.type = 'number';
+        inp.inputMode = 'decimal';
         inp.id = 'elec-' + i;
+        inp.setAttribute('aria-label', 'Montant ' + type);
         inp.placeholder = '0,00';
         inp.min = '0';
         inp.max = String(MAX_AMOUNT);
@@ -1006,6 +1031,7 @@
       var ecartEl = document.getElementById('ecart-value');
       if (ref > 0 || document.getElementById('ref').value !== '') {
         var ecart = r2(totalCaisse - ref);
+        if (Math.abs(ecart) < 0.005) { ecart = 0; }   // évite un « +-0,00 » (zéro négatif après arrondi)
         ecartEl.textContent = (ecart >= 0 ? '+' : '') + fmt(ecart);
         ecartEl.className = 'er-val ' + (ecart > 0.005 ? 'pos' : ecart < -0.005 ? 'neg' : 'zero');
       } else {
@@ -1043,7 +1069,10 @@
       if (!Array.isArray(data)) { return []; }
       var byDate = {};
       data.forEach(function (e) {
-        if (!e || !e.date) { return; }
+        // Rejette les entrées mal formées (sauvegarde forgée/corrompue restaurée via le hub) :
+        // sans un « comptage » numérique, renderHistory planterait et rendrait l'outil inerte.
+        if (!e || typeof e.date !== 'string' || !e.date ||
+            typeof e.comptage !== 'number' || !isFinite(e.comptage)) { return; }
         var prev = byDate[e.date];
         if (!prev || (e.ts || 0) >= (prev.ts || 0)) { byDate[e.date] = e; }
       });
@@ -1076,8 +1105,11 @@
 
       data.forEach(function(entry, i) {
         var tr = document.createElement('tr');
-        var ecartCls = entry.ecart > 0.005 ? 'ht-pos' : entry.ecart < -0.005 ? 'ht-neg' : 'ht-zero';
-        var ecartSign = entry.ecart > 0.005 ? '+' : '';
+        // L'écart n'a de sens qu'avec un « Montant logiciel métier » saisi : sinon on affiche « — »
+        // (comme l'affichage vivant) plutôt qu'un écart trompeur égal au total de la caisse.
+        var hasEcart = typeof entry.ecart === 'number' && isFinite(entry.ecart);
+        var ecartCls = !hasEcart ? 'ht-zero' : entry.ecart > 0.005 ? 'ht-pos' : entry.ecart < -0.005 ? 'ht-neg' : 'ht-zero';
+        var ecartSign = hasEcart && entry.ecart > 0.005 ? '+' : '';
 
         var cells = [
           { cls: '', text: entry.date },
@@ -1086,7 +1118,7 @@
           { cls: 'h-r', text: typeof entry.fondCible === 'number' ? fmt(entry.fondCible) : '—' },
           { cls: 'h-r', text: typeof entry.sortie === 'number' ? fmt(entry.sortie) : '—' },
           { cls: 'h-r', text: entry.ref > 0 ? fmt(entry.ref) : '—' },
-          { cls: 'h-r ' + ecartCls, text: ecartSign + fmt(entry.ecart) }
+          { cls: 'h-r ' + ecartCls, text: hasEcart ? ecartSign + fmt(entry.ecart) : '—' }
         ];
 
         cells.forEach(function(c) {
@@ -1144,8 +1176,13 @@
       var fondCible = r2(parseFloat(document.getElementById('fond-cible').value) || 0);
       var totalCaisse = r2(totalEspeces + reserve);
       var sortie = r2(Math.max(0, totalCaisse - fondCible));
-      var ref = r2(parseFloat(document.getElementById('ref').value) || 0);
-      var ecart = r2(totalCaisse - ref);
+      // Sans « Montant logiciel métier » saisi, l'écart n'est pas calculable : on stocke null
+      // (affiché « — »), au lieu d'un écart faux égal au total de la caisse.
+      var refRaw = document.getElementById('ref').value.trim();
+      var hasRef = refRaw !== '';
+      var ref = hasRef ? r2(parseFloat(refRaw) || 0) : null;
+      var ecart = hasRef ? r2(totalCaisse - ref) : null;
+      if (ecart !== null && Math.abs(ecart) < 0.005) { ecart = 0; }   // évite un « -0,00 » après arrondi
 
       var now = new Date();
       var dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });

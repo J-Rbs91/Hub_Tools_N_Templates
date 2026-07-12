@@ -263,7 +263,7 @@
 
   <div class="body">
     <table>
-      <tr><td class="obj">À l'attention du Dr</td><td><input type="text" data-k="medecin" placeholder="Nom du médecin"></td></tr>
+      <tr><td class="obj">À l'attention du Dr</td><td><input type="text" data-k="medecin" placeholder="Nom du médecin" aria-label="Nom du médecin"></td></tr>
 
       <!-- Paragraphe d'intro éditable (auto-généré, masqué au PDF) -->
       <tr class="sect-act"><td colspan="2">
@@ -273,28 +273,28 @@
         </div>
       </td></tr>
       <tr id="introRow"><td colspan="2" style="padding:10px 12px">
-        <textarea data-k="intro" placeholder="Le paragraphe se génère automatiquement à partir des champs. Vous pouvez le modifier librement."></textarea>
+        <textarea data-k="intro" placeholder="Le paragraphe se génère automatiquement à partir des champs. Vous pouvez le modifier librement." aria-label="Texte d'introduction"></textarea>
       </td></tr>
 
       <tr class="sect"><td colspan="2">Objet</td></tr>
       <tr><td class="obj">Objet de la demande</td><td>
-        <div class="opt"><input type="checkbox" data-k="o_modif"><span class="txt">Demande d'autorisation de modification de prescription</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_lentilles"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_controle"><span class="txt">Compte rendu de contrôle de vision</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_adapt"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon l'article L4362-10 du code de santé publique</span></span></div>
-        <div class="opt"><input type="checkbox" data-k="o_renouv"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon l'article D.4362-13 du code de santé publique — JO du 12/10/2016</span></span></div>
+        <div class="opt"><input type="checkbox" data-k="o_modif" aria-label="Demande d'autorisation de modification de prescription"><span class="txt">Demande d'autorisation de modification de prescription</span></div>
+        <div class="opt"><input type="checkbox" data-k="o_lentilles" aria-label="Compte rendu d'adaptation lentilles de contact"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></div>
+        <div class="opt"><input type="checkbox" data-k="o_controle" aria-label="Compte rendu de contrôle de vision"><span class="txt">Compte rendu de contrôle de vision</span></div>
+        <div class="opt"><input type="checkbox" data-k="o_adapt" aria-label="Compte rendu d'adaptation de prescription (article L4362-10 du code de santé publique)"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon l'article L4362-10 du code de santé publique</span></span></div>
+        <div class="opt"><input type="checkbox" data-k="o_renouv" aria-label="Compte rendu de renouvellement exceptionnel (article D.4362-13 du code de santé publique)"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon l'article D.4362-13 du code de santé publique — JO du 12/10/2016</span></span></div>
       </td></tr>
 
       <tr class="sect"><td colspan="2">Patient</td></tr>
       <tr><td colspan="2" style="padding:0">
         <div class="pgrid">
-          <div class="pf"><span class="plab">Nom / Prénom</span><input type="text" data-k="p_nom"></div>
-          <div class="pf"><span class="plab">Né(e) le</span><input type="text" class="inp-md" data-k="p_ne" placeholder="jj/mm/aaaa"></div>
+          <div class="pf"><span class="plab">Nom / Prénom</span><input type="text" data-k="p_nom" aria-label="Nom et prénom du patient"></div>
+          <div class="pf"><span class="plab">Né(e) le</span><input type="text" inputmode="numeric" class="inp-md" data-k="p_ne" placeholder="jj/mm/aaaa" aria-label="Date de naissance du patient (jj/mm/aaaa)"></div>
         </div>
       </td></tr>
 
       <tr class="sect"><td colspan="2">Prescription initiale</td></tr>
-      <tr><td class="obj">En date du</td><td><input type="text" class="inp-md" data-k="i_date" placeholder="jj/mm/aaaa"></td></tr>
+      <tr><td class="obj">En date du</td><td><input type="text" inputmode="numeric" class="inp-md" data-k="i_date" placeholder="jj/mm/aaaa" aria-label="Date de la prescription initiale (jj/mm/aaaa)"></td></tr>
       <tr><td class="obj">Type d'équipement</td><td>
         <label class="pick"><input type="checkbox" data-k="i_lunettes"> Lunettes</label>
         <label class="pick"><input type="checkbox" data-k="i_lentilles"> Lentilles</label>
@@ -307,22 +307,22 @@
         <label class="pick"><input type="checkbox" data-k="i_vpc"> Vp prof. de champ</label>
       </td></tr>
       <tr><td class="obj sub">OD</td><td><div class="eye">
-        <span class="grp"><input type="text" class="inp-sm" data-k="i_od_sph"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="i_od_cyl"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" class="inp-xs" data-k="i_od_axe"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="i_od_add"></span>
+        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_sph" aria-label="OD sphère prescription initiale"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_cyl" aria-label="OD cylindre prescription initiale"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="i_od_axe" aria-label="OD axe prescription initiale"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_add" aria-label="OD addition prescription initiale"></span>
       </div></td></tr>
       <tr><td class="obj sub">OG</td><td><div class="eye">
-        <span class="grp"><input type="text" class="inp-sm" data-k="i_og_sph"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="i_og_cyl"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" class="inp-xs" data-k="i_og_axe"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="i_og_add"></span>
+        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_sph" aria-label="OG sphère prescription initiale"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_cyl" aria-label="OG cylindre prescription initiale"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="i_og_axe" aria-label="OG axe prescription initiale"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_add" aria-label="OG addition prescription initiale"></span>
       </div></td></tr>
       <tr><td class="obj">Acuités</td><td><div class="eye">
-        <span class="grp"><span class="sep">OD</span><input type="text" class="inp-xs" data-k="i_ac_od"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">OG</span><input type="text" class="inp-xs" data-k="i_ac_og"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">ODG</span><input type="text" class="inp-xs" data-k="i_ac_odg"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" class="inp-sm" data-k="i_ac_p"><span class="sep">lu à 40 cm</span></span>
+        <span class="grp"><span class="sep">OD</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_od" aria-label="OD acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">OG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_og" aria-label="OG acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">ODG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_odg" aria-label="ODG acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_ac_p" aria-label="Acuité de près initiale (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
       </div></td></tr>
 
       <tr class="sect"><td colspan="2">Modifications demandées</td></tr>
@@ -338,34 +338,34 @@
         <label class="pick"><input type="checkbox" data-k="m_vpc"> Vp prof. de champ</label>
       </td></tr>
       <tr><td class="obj sub">OD</td><td><div class="eye">
-        <span class="grp"><input type="text" class="inp-sm" data-k="m_od_sph"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="m_od_cyl"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" class="inp-xs" data-k="m_od_axe"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="m_od_add"></span>
+        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_sph" aria-label="OD sphère modification demandée"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_cyl" aria-label="OD cylindre modification demandée"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="m_od_axe" aria-label="OD axe modification demandée"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_add" aria-label="OD addition modification demandée"></span>
       </div></td></tr>
       <tr><td class="obj sub">OG</td><td><div class="eye">
-        <span class="grp"><input type="text" class="inp-sm" data-k="m_og_sph"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" class="inp-sm" data-k="m_og_cyl"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" class="inp-xs" data-k="m_og_axe"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" class="inp-sm" data-k="m_og_add"></span>
+        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_sph" aria-label="OG sphère modification demandée"></span>
+        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_cyl" aria-label="OG cylindre modification demandée"><span class="sep">)</span></span>
+        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="m_og_axe" aria-label="OG axe modification demandée"><span class="sep">&#176;</span></span>
+        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_add" aria-label="OG addition modification demandée"></span>
       </div></td></tr>
       <tr><td class="obj">Acuités</td><td><div class="eye">
-        <span class="grp"><span class="sep">OD</span><input type="text" class="inp-xs" data-k="m_ac_od"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">OG</span><input type="text" class="inp-xs" data-k="m_ac_og"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">ODG</span><input type="text" class="inp-xs" data-k="m_ac_odg"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" class="inp-sm" data-k="m_ac_p"><span class="sep">lu à 40 cm</span></span>
+        <span class="grp"><span class="sep">OD</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_od" aria-label="OD acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">OG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_og" aria-label="OG acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">ODG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_odg" aria-label="ODG acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_ac_p" aria-label="Acuité de près modification demandée (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
       </div></td></tr>
 
       <tr class="sect"><td colspan="2">Commentaire</td></tr>
       <tr><td class="obj">Commentaire</td><td>
-        <textarea data-k="commentaire" placeholder="Saisie libre…" style="min-height:96px"></textarea>
+        <textarea data-k="commentaire" placeholder="Saisie libre…" style="min-height:96px" aria-label="Commentaire libre"></textarea>
       </td></tr>
 
       <tr class="sect"><td colspan="2">Suite à donner</td></tr>
       <tr><td class="obj">Suite à donner</td><td>
-        <div class="opt"><input type="checkbox" data-k="s_equip"><span class="txt">Équipement délivré / en cours</span></div>
-        <div class="opt"><input type="checkbox" data-k="s_attente"><span class="txt">Attente d'approbation du Dr</span></div>
-        <div class="opt"><input type="checkbox" data-k="s_rdv"><span class="txt">Demande de RDV</span></div>
+        <div class="opt"><input type="checkbox" data-k="s_equip" aria-label="Équipement délivré / en cours"><span class="txt">Équipement délivré / en cours</span></div>
+        <div class="opt"><input type="checkbox" data-k="s_attente" aria-label="Attente d'approbation du Dr"><span class="txt">Attente d'approbation du Dr</span></div>
+        <div class="opt"><input type="checkbox" data-k="s_rdv" aria-label="Demande de RDV"><span class="txt">Demande de RDV</span></div>
       </td></tr>
     </table>
 
@@ -383,7 +383,7 @@
   <button class="action btn-primary" onclick="copyForGmail()">📋 Copier pour Gmail</button>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
   /* ---------- profil magasin (partagé via localStorage) ---------- */
@@ -566,15 +566,101 @@
     return h;
   }
 
+  /* ---------- rendu texte brut (miroir de buildEmailHTML, sans entités ni balises) ---------- */
+  function checkedListTxt(items){ // [[clé,label],...] -> seulement les cochés, séparés par « · »
+    const on=items.filter(([k])=>chk(k)).map(([,l])=>l);
+    return on.length ? on.join(' · ') : '';
+  }
+  function objetListTxt(){
+    return checkedListTxt([
+      ['o_modif',"Demande d'autorisation de modification de prescription"],
+      ['o_lentilles',"Adaptation lentilles de contact"],
+      ['o_controle',"Contrôle de vision"],
+      ['o_adapt',"Adaptation de prescription (art. L4362-10 CSP)"],
+      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 CSP)"],
+    ]);
+  }
+  function suiteListTxt(){
+    return checkedListTxt([
+      ['s_equip',"Équipement délivré / en cours"],
+      ['s_attente',"Attente d'approbation du Dr"],
+      ['s_rdv',"Demande de RDV"],
+    ]);
+  }
+  function eyeLineTxt(p,eye){
+    const sph=val(p+eye+'_sph'), cyl=val(p+eye+'_cyl'), axe=val(p+eye+'_axe'), add=val(p+eye+'_add');
+    if(!sph&&!cyl&&!axe&&!add) return ''; // ligne vide -> masquée
+    let s='';
+    if(sph) s+=sph;
+    if(cyl) s+=' ('+cyl+')';
+    if(axe) s+=' '+axe+'°';
+    if(add) s+=' Add '+add;
+    return s.trim();
+  }
+  function acuLineTxt(p){
+    const od=val(p+'ac_od'), og=val(p+'ac_og'), odg=val(p+'ac_odg'), pp=val(p+'ac_p');
+    if(!od&&!og&&!odg&&!pp) return '';
+    const parts=[];
+    if(od) parts.push('OD '+od+'/10');
+    if(og) parts.push('OG '+og+'/10');
+    if(odg) parts.push('ODG '+odg+'/10');
+    if(pp) parts.push('VP P = '+pp+' lu à 40 cm');
+    return parts.join(' / ');
+  }
+  // section prescription en texte : identiques conditions de masquage que blocPrescription
+  function blocPrescriptionTxt(titre, p){
+    const rows=[];
+    if(p==='i_'){ const d=val('i_date'); if(d) rows.push('En date du : '+d); }
+    const eq=checkedListTxt([[p+'lunettes','Lunettes'],[p+'lentilles','Lentilles']]); if(eq) rows.push("Type d'équipement : "+eq);
+    const vi=checkedListTxt([[p+'vl','VL'],[p+'vp','VP'],[p+'vi','Vi'],[p+'prog','Prog'],[p+'vpc','Vp prof. de champ']]); if(vi) rows.push('Type de vision : '+vi);
+    const od=eyeLineTxt(p,'od'); if(od) rows.push('OD : '+od);
+    const og=eyeLineTxt(p,'og'); if(og) rows.push('OG : '+og);
+    const ac=acuLineTxt(p); if(ac) rows.push('Acuités : '+ac);
+    if(!rows.length) return [];
+    return [titre.toUpperCase(), ...rows, ''];
+  }
+
   function plainFallback(){
-    let l=[];
+    const l=[];
+
+    // en-tête (nom du magasin + coordonnées du profil)
     l.push(storeName());
-    if(val('medecin')) l.push("À l'attention du Dr "+val('medecin'));
+    const meta=storeMeta(); if(meta) l.push(meta);
     l.push('');
+
+    // paragraphe d'intro (éditable)
     if(val('intro')){ l.push(val('intro')); l.push(''); }
-    if(val('p_nom')||val('p_ne')) l.push('PATIENT : '+(val('p_nom')||'')+(val('p_ne')?(' — Né(e) le '+val('p_ne')):''));
-    l.push('');
+
+    // destinataire
+    if(val('medecin')){ l.push("À l'attention du Dr "+val('medecin')); l.push(''); }
+
+    // objet(s)
+    const obj=objetListTxt();
+    if(obj){ l.push('OBJET'); l.push('Objet de la demande : '+obj); l.push(''); }
+
+    // patient
+    if(val('p_nom')||val('p_ne')){
+      l.push('PATIENT');
+      if(val('p_nom')) l.push('Nom / Prénom : '+val('p_nom'));
+      if(val('p_ne'))  l.push('Né(e) le : '+val('p_ne'));
+      l.push('');
+    }
+
+    // prescriptions (sections masquées si aucune ligne)
+    l.push(...blocPrescriptionTxt('Prescription initiale','i_'));
+    l.push(...blocPrescriptionTxt('Modifications demandées','m_'));
+
+    // commentaire
+    const com=val('commentaire');
+    if(com){ l.push('COMMENTAIRE'); l.push(com); l.push(''); }
+
+    // suite à donner
+    const suite=suiteListTxt();
+    if(suite){ l.push('SUITE À DONNER'); l.push('Suite à donner : '+suite); l.push(''); }
+
+    // formule de politesse + signature
     l.push("Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir, cher docteur, l'expression de mes respectueuses salutations.");
+    l.push('');
     l.push(storeName());
     return l.join('\n');
   }

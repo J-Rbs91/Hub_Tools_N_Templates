@@ -88,8 +88,8 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
 CI runs on every push to `main` and every PR; reproduce locally before pushing:
 
 ```sh
-# HTML validation (rules in .htmlvalidate.json)
-npx --yes html-validate "**/*.html"
+# HTML validation (rules in .htmlvalidate.json) — version pinned to match CI
+npx --yes html-validate@11.5.6 "**/*.html"
 
 # File hygiene — all must produce no output:
 git grep -nIP ' +$' -- ':!*.md'   # no trailing whitespace (Markdown exempt)
