@@ -290,6 +290,7 @@
            N'apparaît dans le courrier que si au moins un motif est coché ou précisé. -->
       <tr class="sect"><td colspan="2">Motif de la demande de nouvelle ordonnance</td></tr>
       <tr><td class="obj">Motif</td><td>
+        <div class="opt"><input type="checkbox" data-k="mo_loi" aria-label="Motif : ordonnance non encore délivrée, adaptation soumise à l'accord écrit du prescripteur (article L.4362-10 du code de la santé publique, décision du Conseil d'État du 2 mai 2025)"><span class="txt">Ordonnance non encore délivrée — adaptation soumise à l'accord écrit du prescripteur<span class="sub">art. L.4362-10 CSP · fin de l'accord tacite (décision du Conseil d'État du 2 mai 2025)</span></span></div>
         <div class="opt"><input type="checkbox" data-k="mo_evol" aria-label="Motif : évolution de la correction au-delà du cadre de l'adaptation ou du renouvellement"><span class="txt">Évolution de la correction au-delà du cadre de l'adaptation / du renouvellement</span></div>
         <div class="opt"><input type="checkbox" data-k="mo_ordo" aria-label="Motif : ordonnance absente, illisible ou expirée"><span class="txt">Ordonnance absente, illisible ou expirée</span></div>
         <div class="opt"><input type="checkbox" data-k="mo_signes" aria-label="Motif : signes d'appel évoquant une pathologie, examen médical requis"><span class="txt">Signes d'appel évoquant une pathologie — examen médical requis</span></div>
@@ -501,8 +502,10 @@
     ['mo_cadre',"Patient hors conditions d'âge ou de délai pour un renouvellement par l'opticien"],
     ['mo_autre',"Autre"],
   ];
+  // Base légale (motif « mo_loi ») — formulation prudente, conforme au droit en vigueur.
+  var LEGAL_TEXT="Ordonnance non encore délivrée : son adaptation par l'opticien est subordonnée à votre accord écrit préalable (art. L.4362-10 du Code de la santé publique ; l'accord tacite ayant été supprimé par la décision du Conseil d'État du 2 mai 2025). Une nouvelle ordonnance de votre part lèverait toute ambiguïté.";
   function motifList(){ return checkedList(MOTIFS); }
-  function motifPresent(){ return MOTIFS.some(function(m){ return chk(m[0]); }) || !!val('mo_precis'); }
+  function motifPresent(){ return MOTIFS.some(function(m){ return chk(m[0]); }) || chk('mo_loi') || !!val('mo_precis'); }
   function suiteList(){
     return checkedList([
       ['s_equip',"Équipement délivré / en cours"],
@@ -571,9 +574,10 @@
 
     const obj=objetList(); if(obj){ h+=sect('Objet'); h+=row('Objet de la demande', obj); }
 
-    const motif=motifList(); const motifPrecis=val('mo_precis');
-    if(motif || motifPrecis){
+    const motif=motifList(); const motifPrecis=val('mo_precis'); const loi=chk('mo_loi');
+    if(motif || motifPrecis || loi){
       h+=sect('Motif de la demande');
+      if(loi) h+=row('Base légale', esc(LEGAL_TEXT));
       if(motif) h+=row('Motif', motif);
       if(motifPrecis) h+=row('Précisions', esc(motifPrecis).replace(/\n/g,'<br>'));
     }
@@ -676,9 +680,10 @@
     if(obj){ l.push('OBJET'); l.push('Objet de la demande : '+obj); l.push(''); }
 
     // motif (surtout pour la demande de nouvelle ordonnance) — masqué si vide
-    const motif=motifListTxt(); const motifPrecis=val('mo_precis');
-    if(motif || motifPrecis){
+    const motif=motifListTxt(); const motifPrecis=val('mo_precis'); const loi=chk('mo_loi');
+    if(motif || motifPrecis || loi){
       l.push('MOTIF DE LA DEMANDE');
+      if(loi) l.push('Base légale : '+LEGAL_TEXT);
       if(motif) l.push('Motif : '+motif);
       if(motifPrecis) l.push('Précisions : '+motifPrecis);
       l.push('');
@@ -759,7 +764,7 @@
     }
     // régénère l'intro quand les champs clés changent (si non édité manuellement)
     ['medecin','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle',
-     'mo_evol','mo_ordo','mo_signes','mo_acuite','mo_cadre','mo_autre','mo_precis']
+     'mo_loi','mo_evol','mo_ordo','mo_signes','mo_acuite','mo_cadre','mo_autre','mo_precis']
       .forEach(k=>{
         const e=document.querySelector('[data-k="'+k+'"]');
         if(e){ const ev = e.type==='checkbox'?'change':'input'; e.addEventListener(ev, refreshIntro); }
