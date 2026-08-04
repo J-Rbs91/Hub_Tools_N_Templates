@@ -74,14 +74,55 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
 6. **Make it responsive** — tools must be usable on smartphones (the staff use them on
    mobile). Include `<meta name="viewport" content="width=device-width, initial-scale=1.0">`
    and `@media (max-width: 640px)` rules so layouts stack/shrink on small screens.
-7. **iOS floating back button** — iPhone/iPad (especially in "add to Home Screen" / standalone
-   mode) have no browser back button. Each tool ships a fixed floating `← Retour` link
-   (`.ios-back`, hidden by default) revealed only on iOS via a `body.is-ios` class. Detect with:
-   `if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' &&
-   navigator.maxTouchPoints > 1)) document.body.classList.add('is-ios');`
-   On iOS, hide the in-header `← Retour` to avoid duplication (`body.is-ios .back-link{display:none}`).
-   Use `env(safe-area-inset-*)` for notch/home-bar spacing, and place it where it won't clash
-   with the tool's own fixed bars (see `cloture-caisse` = bottom-left, `demande-ordonnance` = top-right).
+7. **Sticky `.app-bar` — the single navigation component.** Every tool opens with the same
+   header, copied verbatim (the "one tool = one self-contained file" rule forces duplication;
+   it does **not** licence divergence). It carries three things: the exit (`← Tous les outils`,
+   that exact wording everywhere), the tool name, and a `<details>` switcher listing the other
+   tools with `aria-current="page"` on the current one — so moving between two tools no longer
+   requires a round trip through the hub.
+
+   ```html
+   <header class="app-bar">
+     <a class="app-bar__back" href="../../">&#8592; Tous les outils</a>
+     <span class="app-bar__title">Nom de l'outil</span>
+     <details class="app-bar__switch" id="tool-switch">
+       <summary aria-label="Changer d'outil">Outils</summary>
+       <nav class="app-bar__menu" aria-label="Autres outils">
+         <span aria-current="page">Nom de l'outil</span>
+         <!-- les autres outils en liens relatifs ../<outil>/ -->
+       </nav>
+     </details>
+   </header>
+   ```
+
+   Rules that came out of the navigation audit and must not be undone:
+   - `position: sticky` — the exit stays on screen after scrolling, **on Android as well as
+     iOS**. This is what replaced the old floating pill.
+   - `@media (max-height: 480px) { .app-bar { position: static; } }` — a sticky header plus a
+     fixed action bar would eat the whole viewport in landscape or at 200% zoom.
+   - Navigation targets are `min-height: 48px`.
+   - Hide `.app-bar` in `@media print`.
+   - **Never sniff the user-agent to decide navigation.** The previous `/iPad|iPhone|iPod/`
+     test removed the header link on *any* Apple device, including iPhone Safari where the
+     browser back button exists — replacing a useful control with a pill that covered the
+     form. If a control must depend on standalone mode, test the *situation*:
+     `window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches`.
+   - The exit calls `history.back()` when `document.referrer` is the hub, so returning
+     restores the hub's scroll position instead of pushing a new entry. The `href` stays
+     valid for direct entry, no-JS, and open-in-new-tab.
+
+8. **Drafts: the exit must not destroy work.** Any tool with more than a couple of fields
+   persists to its own `brouillon-<outil>-v1` key on every input (debounced 400 ms), plus on
+   `visibilitychange`/`pagehide` — the only events iOS reliably fires before suspending. It
+   restores on load and *says so* via a visible note. No `beforeunload`: it is ignored in
+   standalone mode on iOS and covers neither sleep nor an incoming call. Existing keys
+   (`profil-magasin-v1`, `cloture-caisse-v1`, …) are never renamed or reused.
+
+9. **`env(safe-area-inset-*)` only means something with `viewport-fit=cover`.** Without it the
+   viewport defaults to `contain`: the layout is already inset inside the safe area and every
+   `env(safe-area-inset-*)` resolves to `0`. That is the current, safe state — do not add
+   `viewport-fit=cover` without then re-checking every fixed element in landscape on a notched
+   device, where `safe-area-inset-left` becomes non-zero.
 
 ## Local checks (mirror CI — there are no app tests)
 

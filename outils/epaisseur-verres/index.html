@@ -67,26 +67,51 @@
       background: var(--blue); color: #fff; padding: 13px 20px;
       display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
     }
-    .back-link {
-      color: rgba(255,255,255,.85); text-decoration: none; font-size: var(--fs-sm);
-      font-weight: 600; border: 1px solid rgba(255,255,255,.35);
-      padding: 5px 12px; border-radius: 6px; white-space: nowrap; transition: background .15s;
-    }
-    .back-link:hover { background: rgba(255,255,255,.15); }
     .hdr-title { font-size: var(--fs-lg); font-weight: 800; }
 
-    /* ── bouton retour flottant iOS ── */
-    .ios-back {
-      display: none; position: fixed;
-      left: calc(env(safe-area-inset-left, 0px) + 16px);
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-      z-index: 1000; align-items: center; gap: 6px;
-      background: var(--blue); color: #fff; text-decoration: none;
-      font-size: var(--fs-base); font-weight: 700; padding: 11px 17px; border-radius: 999px;
-      box-shadow: 0 4px 16px rgba(26,42,58,.32);
+    /* ── EN-TÊTE D'OUTIL UNIFIÉE (identique dans les trois outils et les pages docs) ──
+       Collante : sur une page de plus de 2 000 px, le retour reste atteignable sans
+       remonter, sur iOS comme sur Android. Remplace l'ancienne pastille flottante,
+       qui se posait en bas à gauche par-dessus la règle de calibrage et la zone 3D
+       manipulable, et n'apparaissait que sur les appareils Apple via une détection
+       par user-agent désormais supprimée. */
+    .app-bar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 14px;
+      background: var(--white); border-bottom: 1px solid var(--line);
     }
-    body.is-ios .ios-back { display: inline-flex; }
-    body.is-ios .back-link { display: none; }
+    .app-bar__back,
+    .app-bar__switch summary {
+      display: inline-flex; align-items: center; gap: 6px;
+      min-height: 48px; padding: 0 12px;
+      font-size: var(--fs-sm); font-weight: 700; color: var(--blue);
+      text-decoration: none; border-radius: 8px; cursor: pointer;
+    }
+    .app-bar__back:hover,
+    .app-bar__switch summary:hover { background: #EAF2FA; }
+    .app-bar__title {
+      margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; font-size: var(--fs-sm); font-weight: 700; color: var(--ink);
+    }
+    .app-bar__switch { position: relative; }
+    .app-bar__switch summary { list-style: none; }
+    .app-bar__switch summary::-webkit-details-marker { display: none; }
+    .app-bar__menu {
+      position: absolute; right: 0; top: calc(100% + 6px); min-width: 210px;
+      background: var(--white); border: 1px solid var(--line); border-radius: 10px;
+      padding: 6px; box-shadow: 0 12px 28px rgba(26,42,58,.16); z-index: 60;
+    }
+    .app-bar__menu a,
+    .app-bar__menu span {
+      display: flex; align-items: center; min-height: 48px; padding: 0 14px;
+      font-size: var(--fs-sm); font-weight: 600; color: var(--blue);
+      text-decoration: none; border-radius: 8px; white-space: nowrap;
+    }
+    .app-bar__menu a:hover { background: #EAF2FA; }
+    .app-bar__menu [aria-current="page"] { color: var(--grey); font-weight: 700; }
+    @media (max-height: 480px) { .app-bar { position: static; } }
+    @media print { .app-bar { display: none !important; } }
 
     main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 56px; }
     .layout { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
@@ -200,7 +225,28 @@
     .viewer-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
     .viewer-head h2 { margin: 0; }
     .viewer-badge { font-size: var(--fs-micro); font-weight: 700; color: var(--grey); }
-    #viewport { position: relative; width: 100%; height: 480px; background: linear-gradient(160deg, #1E3D52, #33597A); touch-action: none; cursor: grab; }
+    /* pan-y et non none : le défilement vertical de la page reste au navigateur, sinon
+       un doigt posé sur le viseur — jusqu'à 40 % de la hauteur visible en portrait —
+       ne fait rien défiler du tout. La rotation reste disponible au glisse horizontal,
+       les gestionnaires travaillant déjà par delta. Le bouton « Manipuler » ci-dessous
+       rend ponctuellement les deux axes et le pincement. */
+    #viewport { position: relative; width: 100%; height: 480px; background: linear-gradient(160deg, #1E3D52, #33597A); touch-action: pan-y; cursor: grab; }
+    #viewport.is-grabbing { touch-action: none; }
+
+    /* Bascule explicite : rendre les deux axes et le pincement est une décision de
+       l'utilisateur, pas un effet de bord de l'endroit où il a posé le doigt.
+       Masquée hors tactile — à la souris, rien n'a jamais été confisqué. */
+    .vp-touch { display: none; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 16px 0; margin: 0; }
+    @media (hover: none) { .vp-touch { display: flex; } }
+    .vp-touch__btn {
+      font-family: inherit; font-size: var(--fs-sm); font-weight: 700;
+      min-height: 44px; padding: 0 14px; cursor: pointer;
+      color: var(--blue); background: var(--white);
+      border: 1.5px solid var(--blue); border-radius: 8px;
+    }
+    .vp-touch__btn[aria-pressed="true"] { color: #fff; background: var(--blue); }
+    .vp-touch__hint { font-size: var(--fs-hint); color: var(--grey); line-height: 1.4; }
+    @media print { .vp-touch { display: none !important; } }
     #viewport.dragging { cursor: grabbing; }
     #viewport canvas { display: block; width: 100%; height: 100%; }
     .vp-overlay {
@@ -284,8 +330,12 @@
     .compare-slot__head b { color: var(--blue-d); }
     .compare-slot p { margin: 0; font-size: var(--fs-hint); color: var(--grey); line-height: 1.45; }
     .compare-remove { border: 0; background: transparent; color: var(--grey); cursor: pointer; font: inherit; font-size: var(--fs-hint); text-decoration: underline; }
-    .compare-viewer { position: relative; height: 320px; background: linear-gradient(160deg, #1E3D52, #33597A); border-radius: 8px; touch-action: none; cursor: grab; overflow: hidden; }
-    .compare-viewer.dragging { cursor: grabbing; }
+    /* Ces deux vues sont pilotées par le viseur principal (« Mouvement synchronisé ») :
+       createComparisonRenderer n'attache aucun écouteur. Le touch-action: none et le
+       cursor: grab qu'elles portaient ne protégeaient donc aucun geste — ils
+       annonçaient une manipulation inexistante et confisquaient 652 px de défilement
+       contigus, soit plus d'un écran d'iPhone SE. */
+    .compare-viewer { position: relative; height: 320px; background: linear-gradient(160deg, #1E3D52, #33597A); border-radius: 8px; overflow: hidden; }
     .compare-viewer canvas { display: block; width: 100%; height: 100%; }
     .compare-viewer-label { position: absolute; left: 10px; top: 9px; z-index: 2; color: #fff; font-size: var(--fs-hint); font-weight: 800; pointer-events: none; }
     .compare-viewer-hint { position: absolute; bottom: 8px; left: 0; right: 0; z-index: 2; text-align: center; color: rgba(255,255,255,.65); font-size: var(--fs-nano); pointer-events: none; }
@@ -296,6 +346,17 @@
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
       #viewport { height: 70vw; min-height: 300px; }
+    }
+    /* En paysage, 70vw donnait ~590 px de viseur pour ~344 px de hauteur visible :
+       un bloc de 1,7 écran. La hauteur est plafonnée par rapport à la fenêtre. */
+    @media (orientation: landscape) and (max-width: 900px) {
+      #viewport { height: 45vh; min-height: 200px; }
+      .compare-viewer { height: 40vh; min-height: 180px; }
+    }
+    @media (max-width: 640px) {
+      /* La paire de comparaison passe en colonne : sans réduction, les deux vues
+         empilées dépassent la hauteur d'un iPhone SE à elles seules. */
+      .compare-viewer { height: 220px; }
     }
     @media (max-width: 640px) {
       .profiles-grid { grid-template-columns: 1fr; }
@@ -310,10 +371,20 @@
 </head>
 <body>
 
-  <a class="ios-back" href="../../" aria-label="Retour à l'accueil">&#8592; Retour</a>
+  <header class="app-bar">
+    <a class="app-bar__back" href="../../">&#8592; Tous les outils</a>
+    <span class="app-bar__title">&#201;paisseur des verres</span>
+    <details class="app-bar__switch" id="tool-switch">
+      <summary aria-label="Changer d'outil">Outils</summary>
+      <nav class="app-bar__menu" aria-label="Autres outils">
+        <span aria-current="page">&#201;paisseur des verres</span>
+        <a href="../demande-ordonnance/">Demande / Ordonnance</a>
+        <a href="../cloture-caisse/">Cl&#244;ture de Caisse</a>
+      </nav>
+    </details>
+  </header>
 
   <header class="site-header">
-    <a class="back-link" href="../../">&#8592; Retour</a>
     <div class="hdr-title">Épaisseur des verres</div>
   </header>
 
@@ -479,6 +550,14 @@
           <div class="ruler" id="ruler" hidden></div>
           <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer · clic droit, Maj+glisser ou deux doigts pour déplacer le centre de rotation</div>
         </div>
+        <p class="vp-touch">
+          <button type="button" class="vp-touch__btn" id="vp-grab" aria-pressed="false">
+            Manipuler la 3D au doigt
+          </button>
+          <span class="vp-touch__hint" id="vp-grab-hint">
+            D&#233;sactiv&#233; : un glisser vertical fait d&#233;filer la page.
+          </span>
+        </p>
         <div style="padding:12px 16px;">
           <div class="field frame-opt">
             <label class="check" for="m-bevel-auto">
@@ -2285,10 +2364,54 @@
       refreshComparison3D();
     });
 
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-      document.body.classList.add('is-ios');
-    }
+    /* ── Bascule de manipulation tactile du viseur 3D ──
+       Au repos, #viewport est en touch-action: pan-y : le glisser vertical fait
+       défiler la page et la rotation horizontale reste disponible. La bascule passe
+       la zone en touch-action: none, ce qui rend la rotation sur les deux axes et le
+       pincement — au prix du défilement, mais cette fois parce que l'utilisateur l'a
+       demandé et avec une sortie visible. */
+    (function touchGrab() {
+      var btn = document.getElementById('vp-grab');
+      var hint = document.getElementById('vp-grab-hint');
+      var vp = document.getElementById('viewport');
+      if (!btn || !vp || !hint) { return; }
+      btn.addEventListener('click', function () {
+        var on = vp.classList.toggle('is-grabbing');
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.textContent = on ? 'Rendre le défilement à la page' : 'Manipuler la 3D au doigt';
+        hint.textContent = on
+          ? 'Activé : les deux axes et le pincement répondent, la page ne défile plus sur le viseur.'
+          : 'Désactivé : un glisser vertical fait défiler la page.';
+      });
+    })();
+
+    /* ── Le retour redevient un retour ──
+       Quand on arrive depuis le hub, dépiler l'historique plutôt qu'empiler une
+       navigation avant : le hub retrouve nativement sa position de défilement et la
+       pile cesse d'enfler à chaque aller-retour. Le href reste fonctionnel en entrée
+       directe, sans JS, et pour l'ouverture dans un nouvel onglet. */
+    (function backGoesBack() {
+      var hubUrl = new URL('../../', location.href).href;
+      Array.prototype.forEach.call(document.querySelectorAll('a[href="../../"]'), function (a) {
+        a.addEventListener('click', function (e) {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+          var ref = document.referrer.replace(/index\.html$/, '');
+          if (history.length > 1 && ref === hubUrl) { e.preventDefault(); history.back(); }
+        });
+      });
+    })();
+
+    /* Referme le sélecteur d'outils sur Échap ou sur un clic à l'extérieur. */
+    (function toolSwitch() {
+      var d = document.getElementById('tool-switch');
+      if (!d) { return; }
+      document.addEventListener('click', function (e) {
+        if (d.open && !d.contains(e.target)) { d.open = false; }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && d.open) { d.open = false; d.querySelector('summary').focus(); }
+      });
+    })();
 
     compute();
     load3D();

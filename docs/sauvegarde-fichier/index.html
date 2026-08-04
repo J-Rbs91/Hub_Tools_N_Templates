@@ -20,16 +20,30 @@
       font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink);
       line-height: 1.6; padding: 0 0 60px;
     }
+    /* Collante : ces pages sont longues et s'ouvrent dans un onglet neuf, ou le
+       bouton retour du navigateur ne ramene nulle part. Le lien doit rester a
+       l'ecran sans qu'il faille remonter toute la procedure. */
     .site-header {
+      position: sticky; top: 0; z-index: 50;
       background: var(--blue); color: #fff; padding: 16px 24px;
       display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
     }
     .back-link {
+      display: inline-flex; align-items: center; min-height: 44px;
       color: rgba(255,255,255,.9); text-decoration: none; font-size: .85rem;
       font-weight: 700; border: 1px solid rgba(255,255,255,.4);
-      padding: 6px 13px; border-radius: var(--radius); white-space: nowrap;
+      padding: 0 13px; border-radius: var(--radius); white-space: nowrap;
     }
     .back-link:hover { background: rgba(255,255,255,.16); }
+    /* En paysage ou a fort zoom, une en-tete collante mangerait une hauteur rare. */
+    @media (max-height: 480px) { .site-header { position: static; } }
+    /* Ces deux pages etaient les seules du site sans aucun point de rupture. */
+    @media (max-width: 640px) {
+      .site-header { padding: 10px 16px; gap: 10px; }
+      .site-header h1 { font-size: 1rem; }
+      main { padding: 20px 14px; }
+    }
+    @media print { .site-header { display: none; } }
     .site-header h1 { font-size: 1.1rem; font-weight: 800; }
     main { max-width: 760px; margin: 0 auto; padding: 28px 20px; }
     h2 { font-size: 1.05rem; margin: 28px 0 12px; }
@@ -98,7 +112,7 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="back-link" href="../../">&#8592; Retour</a>
+    <a class="back-link" href="../../">&#8592; Tous les outils</a>
     <h1>Sauvegarde dans un fichier — en toute transparence</h1>
   </header>
 
