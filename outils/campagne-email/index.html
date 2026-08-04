@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <!-- script.google.com / script.googleusercontent.com : uniquement pour le mode d'envoi
+       automatique (JSONP vers le script Apps Script déployé par le magasin lui-même).
+       Le mode assisté, actif par défaut, ne déclenche aucun appel réseau. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campagne e-mail</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#1F6FB2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Transition d'écran native + fond animé doux (cohérents avec le hub) ── */
+    @view-transition { navigation: auto; }
+    body { position: relative; isolation: isolate; }
+    body::before {
+      content: ""; position: fixed; inset: -25%; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(38% 42% at 16% 18%, rgba(31,111,178,.08), transparent 60%),
+        radial-gradient(34% 40% at 84% 16%, rgba(255,196,140,.10), transparent 62%),
+        radial-gradient(46% 52% at 78% 88%, rgba(46,139,87,.06), transparent 60%);
+      filter: blur(8px);
+      animation: bg-drift 38s ease-in-out infinite alternate;
+    }
+    @keyframes bg-drift {
+      0%   { transform: translate3d(-2%, -1.5%, 0) scale(1.04); }
+      50%  { transform: translate3d(1.5%, 2%, 0)  scale(1.09); }
+      100% { transform: translate3d(2.5%, -1%, 0) scale(1.05); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      @view-transition { navigation: none; }
+      body::before { animation: none; }
+    }
+
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --sky: #36B3F0;
+      --ink: #1A2A3A; --grey: #5A7080; --line: #D6E4F0; --light: #EEF4F9;
+      --bg: #F4F7FA; --white: #fff;
+      --green: #2E8B57; --green-d: #246B44;
+      --red: #B23A2E; --amber: #B86A00; --amber-bg: #FFF7E6;
+      --radius: 8px; --shadow: 0 2px 8px rgba(26,42,58,.10);
+
+      /* ─ Échelle typographique unifiée — Manrope obligatoire ─ */
+      --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --fs-display: 24px;
+      --fs-hero:    22px;
+      --fs-2xl:     20px;
+      --fs-xl:      18px;
+      --fs-lg:      16px;
+      --fs-h3:      14px;
+      --fs-base:    14px;
+      --fs-sm:      13px;
+      --fs-label:   12px;
+      --fs-hint:    11px;
+      --fs-micro:   10px;
+      --fs-nano:     9px;
+      --fw-medium:    500;
+      --fw-semibold:  600;
+      --fw-bold:      700;
+      --fw-black:     800;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      padding: 22px 16px 64px;
+    }
+
+    .wrap { max-width: 940px; margin: 0 auto; }
+
+    /* ── Retour ── */
+    .topbar { margin-bottom: 12px; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+      font-size: var(--fs-sm); font-weight: 700; color: var(--blue);
+      border: 1px solid var(--line); background: var(--white);
+      padding: 7px 14px; border-radius: var(--radius); transition: background .15s;
+    }
+    .back-link:hover { background: var(--light); }
+
+    .ios-back {
+      display: none; position: fixed; z-index: 1000; align-items: center; gap: 6px;
+      right: calc(env(safe-area-inset-right, 0px) + 14px);
+      top: calc(env(safe-area-inset-top, 0px) + 14px);
+      background: var(--blue); color: #fff; text-decoration: none;
+      font-size: var(--fs-base); font-weight: 700; padding: 10px 16px; border-radius: 999px;
+      box-shadow: 0 4px 16px rgba(26,42,58,.32);
+    }
+    body.is-ios .ios-back { display: inline-flex; }
+    body.is-ios .topbar { display: none; }
+
+    /* ── En-tête ── */
+    .app-hdr {
+      background: linear-gradient(135deg, var(--blue-d) 0%, var(--blue) 55%, #2A86CE 100%);
+      color: #fff; padding: 16px 24px; border-radius: 10px 10px 0 0;
+      box-shadow: 0 6px 22px rgba(26,42,58,.14);
+    }
+    .app-hdr h1 { font-size: var(--fs-xl); font-weight: 800; letter-spacing: .2px; }
+    .app-hdr .sub { font-size: var(--fs-label); opacity: .92; margin-top: 3px; }
+
+    /* ── Étapes ── */
+    .step {
+      background: var(--white); border: 1px solid var(--line); border-top: none;
+      padding: 20px 24px 22px;
+    }
+    .step:last-of-type { border-radius: 0 0 10px 10px; }
+    .step__hd { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+    .step__num {
+      flex: none; width: 28px; height: 28px; border-radius: 50%;
+      background: var(--blue); color: #fff; font-size: var(--fs-sm); font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step__ttl { font-size: var(--fs-lg); font-weight: 800; }
+    .step__lead { font-size: var(--fs-sm); color: var(--grey); margin: 0 0 16px 40px; }
+
+    @media (max-width: 640px) { .step__lead { margin-left: 0; } }
+
+    /* ── Bandeau d'état de l'outil ── */
+    .notice {
+      background: #FFF7E6; border: 1px solid #F0C36D; border-left: 5px solid #D9911A;
+      border-top: none; padding: 14px 24px; font-size: var(--fs-sm);
+      line-height: 1.6; color: #7A5500;
+    }
+    .notice__t { font-size: var(--fs-base); font-weight: 800; margin-bottom: 3px; }
+    .notice a { color: #7A5500; }
+
+    /* ── Panneaux ── */
+    .panel {
+      border-radius: var(--radius); padding: 13px 15px; margin-bottom: 16px;
+      font-size: var(--fs-sm); line-height: 1.6;
+    }
+    .panel--info { background: #EAF2FA; border: 1px solid var(--line); }
+    .panel--safe { background: #ECF7F0; border: 1px solid #BFE3CD; }
+    .panel--warn { background: var(--amber-bg); border: 1px solid #F0C36D; color: #7A5500; }
+    .panel--stop { background: #FDECEC; border: 1px solid #E6BDB7; }
+    .panel h3 { font-size: var(--fs-base); margin-bottom: 6px; }
+    .panel ul { margin: 6px 0 0 18px; }
+    .panel li { margin-bottom: 4px; }
+    .panel a { color: var(--blue-d); font-weight: 700; }
+
+    /* ── Boutons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      font-family: inherit; font-size: var(--fs-base); font-weight: 700;
+      border-radius: var(--radius); padding: 9px 18px; cursor: pointer;
+      border: 1.5px solid transparent; text-decoration: none;
+      transition: background .15s, border-color .15s, transform .1s, opacity .15s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; }
+    .btn--primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .btn--primary:hover:not([disabled]) { background: var(--blue-d); border-color: var(--blue-d); }
+    .btn--go { background: var(--green); border-color: var(--green); color: #fff; }
+    .btn--go:hover:not([disabled]) { background: var(--green-d); border-color: var(--green-d); }
+    .btn--ghost { background: var(--white); border-color: var(--line); color: var(--blue); }
+    .btn--ghost:hover:not([disabled]) { background: var(--light); }
+    .btn--danger { background: var(--white); border-color: #E6BDB7; color: var(--red); }
+    .btn--danger:hover:not([disabled]) { background: #FDECEC; }
+    .btn--sm { font-size: var(--fs-sm); padding: 6px 12px; }
+
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .row--end { justify-content: flex-end; }
+
+    /* ── Champs ── */
+    .fld { display: block; margin-bottom: 13px; }
+    .fld__lbl {
+      display: block; font-size: var(--fs-sm); font-weight: 700; margin-bottom: 5px;
+    }
+    .fld__opt {
+      font-size: var(--fs-hint); font-weight: 700; text-transform: uppercase;
+      letter-spacing: .04em; padding: 1px 7px; border-radius: 20px; margin-left: 4px;
+      background: #EEF2F7; color: var(--grey);
+    }
+    .fld__hint { display: block; font-size: var(--fs-hint); color: var(--grey); margin-top: 4px; line-height: 1.45; }
+    input[type="text"], input[type="url"], input[type="email"], input[type="number"], select, textarea {
+      width: 100%; font-family: inherit; font-size: var(--fs-base); color: var(--ink);
+      border: 1.5px solid var(--line); border-radius: var(--radius);
+      padding: 8px 10px; background: var(--white);
+      transition: border-color .18s, box-shadow .25s;
+    }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.55; }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(31,111,178,.14);
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 12px; }
+    @media (max-width: 640px) { .grid2, .grid4 { grid-template-columns: 1fr; } }
+
+    /* ── Zone d'import ── */
+    .drop {
+      border: 2px dashed var(--line); border-radius: 10px; background: #FBFDFF;
+      padding: 26px 18px; text-align: center; cursor: pointer;
+      transition: border-color .18s, background .18s;
+    }
+    .drop:hover, .drop.is-over { border-color: var(--blue); background: #F2F8FD; }
+    .drop__ttl { font-size: var(--fs-base); font-weight: 700; }
+    .drop__sub { font-size: var(--fs-sm); color: var(--grey); margin-top: 4px; }
+
+    /* ── Tableau des contacts ── */
+    .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+    table.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+    table.tbl th {
+      background: var(--light); text-align: left; font-size: var(--fs-hint);
+      text-transform: uppercase; letter-spacing: .05em; color: var(--grey);
+      padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap;
+    }
+    table.tbl td { padding: 7px 10px; border-bottom: 1px solid #EDF3F8; vertical-align: middle; }
+    table.tbl tr:last-child td { border-bottom: none; }
+    table.tbl td.mail { font-size: var(--fs-label); color: var(--grey); word-break: break-all; }
+    .tag {
+      display: inline-block; font-size: var(--fs-hint); font-weight: 700;
+      padding: 2px 9px; border-radius: 20px; white-space: nowrap;
+    }
+    .tag--wait  { background: #EEF2F7; color: var(--grey); }
+    .tag--sent  { background: #E6F4EE; color: var(--green); }
+    .tag--bad   { background: #FDECEC; color: var(--red); }
+    .tag--doubt { background: var(--amber-bg); color: var(--amber); }
+    .tag--stop  { background: #F0E7F7; color: #6B3FA0; }
+    .lnk {
+      font-family: inherit; font-size: var(--fs-hint); font-weight: 700; color: var(--blue);
+      background: none; border: none; padding: 2px 4px; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .lnk:hover { color: var(--blue-d); }
+    .lnk--danger { color: var(--red); }
+
+    /* ── Compteurs ── */
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .stat {
+      flex: 1 1 110px; background: #FBFDFF; border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 9px 12px;
+    }
+    .stat__n { font-size: var(--fs-2xl); font-weight: 800; line-height: 1.1; }
+    .stat__l { font-size: var(--fs-hint); text-transform: uppercase; letter-spacing: .05em; color: var(--grey); }
+    .stat--sent .stat__n { color: var(--green); }
+    .stat--bad  .stat__n { color: var(--red); }
+    .stat--doubt .stat__n { color: var(--amber); }
+
+    /* ── Aperçu ── */
+    .preview {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--light); padding: 0; overflow-x: auto; max-height: 620px; overflow-y: auto;
+    }
+    .preview-hd {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .preview-obj {
+      font-size: var(--fs-sm); background: #FBFDFF; border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 8px 11px; margin-bottom: 8px; word-break: break-word;
+    }
+    .preview-obj b { color: var(--grey); font-weight: 700; }
+
+    /* ── Envoi ── */
+    .modes { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .mode {
+      flex: 1 1 260px; border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 13px 15px; cursor: pointer; background: var(--white); transition: .18s;
+    }
+    .mode:hover { border-color: #BBD6EE; }
+    .mode.is-on { border-color: var(--blue); background: #F5FAFE; box-shadow: 0 0 0 3px rgba(31,111,178,.12); }
+    .mode__t { display: flex; align-items: center; gap: 8px; font-size: var(--fs-base); font-weight: 800; }
+    .mode__t input { width: 17px; height: 17px; accent-color: var(--blue); flex: none; }
+    .mode__d { font-size: var(--fs-sm); color: var(--grey); margin-top: 5px; line-height: 1.5; }
+
+    .cur {
+      border: 1.5px solid var(--line); border-radius: 10px; padding: 15px 17px;
+      background: #FBFDFF; margin-bottom: 14px;
+    }
+    .cur__pos { font-size: var(--fs-hint); text-transform: uppercase; letter-spacing: .05em; color: var(--grey); }
+    .cur__who { font-size: var(--fs-xl); font-weight: 800; margin-top: 2px; }
+    .cur__mail { font-size: var(--fs-sm); color: var(--grey); word-break: break-all; margin-bottom: 12px; }
+
+    .bar-out {
+      height: 10px; border-radius: 6px; background: #E4EDF5; overflow: hidden; margin: 10px 0 6px;
+    }
+    .bar-in { height: 100%; width: 0; background: var(--green); transition: width .3s ease; }
+    .bar-txt { font-size: var(--fs-sm); color: var(--grey); }
+
+    .status { font-size: var(--fs-sm); font-weight: 600; color: var(--grey); }
+    .status.ok  { color: var(--green); }
+    .status.err { color: var(--red); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 22px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink); color: #fff; padding: 11px 20px; border-radius: 9px;
+      font-size: var(--fs-sm); font-weight: 600; opacity: 0; pointer-events: none;
+      transition: .25s; z-index: 200; box-shadow: 0 6px 22px rgba(26,42,58,.25); max-width: 90%;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Aide dépliable ── */
+    details.help { border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); margin-bottom: 14px; }
+    details.help > summary { cursor: pointer; font-weight: 700; font-size: var(--fs-sm); color: var(--blue-d); padding: 10px 13px; }
+    details.help[open] > summary { border-bottom: 1px solid var(--line); }
+    .help__body { padding: 12px 13px; font-size: var(--fs-sm); line-height: 1.6; }
+    .help__body ol, .help__body ul { margin: 6px 0 0 18px; }
+    .help__body li { margin-bottom: 4px; }
+    code {
+      background: #EEF2F7; padding: 1px 6px; border-radius: 4px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px 10px 56px; }
+      .app-hdr { padding: 14px 16px; }
+      .step { padding: 16px 14px 18px; }
+      .btn { padding: 9px 14px; font-size: var(--fs-sm); }
+    }
+  </style>
+</head>
+<body>
+
+<a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
+
+<div class="wrap">
+
+  <div class="topbar"><a class="back-link" href="../../">&#8592; Retour aux outils</a></div>
+
+  <header class="app-hdr">
+    <h1>Campagne e-mail</h1>
+    <p class="sub" id="hdr-sub">Mon magasin</p>
+  </header>
+
+  <div class="notice">
+    <p class="notice__t">Outil non ouvert &#8212; ne pas utiliser sur une vraie liste de clients</p>
+    <p>
+      Cette page n'est pas encore proposée dans le hub&nbsp;: écrire à une liste de clients engage
+      le magasin, et les règles à respecter ne sont pas optionnelles.
+      <strong><a href="../../docs/rgpd-mailing/">Lire le rappel RGPD avant toute utilisation</a></strong>.
+    </p>
+  </div>
+
+  <!-- ─────────────────  ÉTAPE 1 — LA LISTE  ───────────────── -->
+  <section class="step">
+    <div class="step__hd"><span class="step__num">1</span><h2 class="step__ttl">La liste de contacts</h2></div>
+    <p class="step__lead">
+      Partez du modèle CSV fourni, remplissez-le avec vos adresses vérifiées, puis réimportez-le ici.
+      La liste reste sur cet appareil&nbsp;: elle n'est enregistrée nulle part ailleurs.
+    </p>
+
+    <div class="row" style="margin-bottom:14px;">
+      <button type="button" class="btn btn--ghost" id="dl-modele">&#11015; Télécharger le modèle CSV</button>
+      <button type="button" class="btn btn--ghost" id="pick-file">&#128193; Choisir un fichier…</button>
+      <input type="file" id="csv-file" accept=".csv,text/csv,text/plain" hidden>
+    </div>
+
+    <div class="drop" id="drop" role="button" tabindex="0" aria-label="Déposer un fichier CSV">
+      <p class="drop__ttl">Déposez votre fichier CSV ici</p>
+      <p class="drop__sub">…ou cliquez pour le choisir. Séparateur point-virgule, virgule ou tabulation&nbsp;: détecté automatiquement.</p>
+    </div>
+
+    <details class="help" style="margin-top:14px;">
+      <summary>Comment remplir le modèle&nbsp;?</summary>
+      <div class="help__body">
+        <ol>
+          <li>Ouvrez le fichier téléchargé dans Excel, LibreOffice ou Google Sheets.</li>
+          <li>Remplacez les deux lignes d'exemple par vos clients&nbsp;: une ligne par personne.</li>
+          <li><strong>Civilité</strong> accepte <code>M.</code> ou <code>Mme</code> — elle sert à la formule d'appel
+            («&nbsp;Cher&nbsp;» / «&nbsp;Chère&nbsp;»). Laissée vide, la formule reste neutre.</li>
+          <li>Une seule adresse par ligne, et <strong>uniquement des adresses vérifiées</strong>&nbsp;:
+            les adresses invalides sont écartées automatiquement, mais elles abîment votre réputation d'expéditeur.</li>
+          <li>Enregistrez au format <strong>CSV</strong> puis réimportez le fichier ci-dessus.</li>
+        </ol>
+        <p style="margin-top:8px;">
+          Vous pouvez aussi importer un export de votre logiciel métier&nbsp;: les colonnes sont
+          reconnues par leur nom, et vous pouvez les réassocier à la main si besoin.
+        </p>
+      </div>
+    </details>
+
+    <!-- Association des colonnes (affichée après un import) -->
+    <div id="map-box" hidden style="margin-top:16px;">
+      <div class="panel panel--info">
+        <h3>Association des colonnes</h3>
+        <p id="map-info">Fichier importé.</p>
+      </div>
+      <div class="grid4">
+        <label class="fld"><span class="fld__lbl">Civilité <span class="fld__opt">facultatif</span></span>
+          <select id="map-civ"></select></label>
+        <label class="fld"><span class="fld__lbl">Nom</span>
+          <select id="map-nom"></select></label>
+        <label class="fld"><span class="fld__lbl">Prénom</span>
+          <select id="map-pre"></select></label>
+        <label class="fld"><span class="fld__lbl">E-mail</span>
+          <select id="map-mail"></select></label>
+      </div>
+      <label class="fld" style="margin-bottom:10px;">
+        <span class="fld__lbl">
+          <input type="checkbox" id="map-header" style="width:auto;margin-right:6px;vertical-align:-2px;" checked>
+          La première ligne contient les intitulés de colonnes
+        </span>
+      </label>
+      <div class="row">
+        <button type="button" class="btn btn--primary" id="map-ok">Ajouter ces contacts</button>
+        <button type="button" class="btn btn--ghost" id="map-cancel">Annuler</button>
+        <span class="status" id="map-status"></span>
+      </div>
+    </div>
+
+    <!-- Liste courante -->
+    <div id="list-box" hidden style="margin-top:18px;">
+      <div class="stats">
+        <div class="stat"><div class="stat__n" id="n-total">0</div><div class="stat__l">Contacts</div></div>
+        <div class="stat"><div class="stat__n" id="n-wait">0</div><div class="stat__l">En attente</div></div>
+        <div class="stat stat--sent"><div class="stat__n" id="n-sent">0</div><div class="stat__l">Envoyés</div></div>
+        <div class="stat stat--bad"><div class="stat__n" id="n-bad">0</div><div class="stat__l">Invalides</div></div>
+        <div class="stat stat--doubt"><div class="stat__n" id="n-doubt">0</div><div class="stat__l">À vérifier</div></div>
+      </div>
+
+      <div class="row" style="margin-bottom:12px;">
+        <label class="fld" style="flex:1 1 220px;margin-bottom:0;">
+          <span class="fld__lbl">Rechercher</span>
+          <input type="text" id="q" placeholder="Nom, prénom ou adresse…" autocomplete="off">
+        </label>
+        <label class="fld" style="flex:0 1 200px;margin-bottom:0;">
+          <span class="fld__lbl">Afficher</span>
+          <select id="filtre">
+            <option value="">Tous</option>
+            <option value="attente">En attente</option>
+            <option value="envoye">Envoyés</option>
+            <option value="invalide">Adresses invalides</option>
+            <option value="erreur">À vérifier</option>
+            <option value="stop">Ne plus contacter</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Contact</th>
+              <th>Adresse</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+      <p class="fld__hint" id="tbl-more"></p>
+
+      <div class="row" style="margin-top:12px;">
+        <button type="button" class="btn btn--ghost btn--sm" id="exp-suivi">&#11015; Exporter le suivi (CSV)</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="reset-statuts">&#8635; Remettre tous les statuts à zéro</button>
+        <button type="button" class="btn btn--danger btn--sm" id="vider">&#128465; Vider la liste</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────  ÉTAPE 2 — LE MESSAGE  ───────────────── -->
+  <section class="step">
+    <div class="step__hd"><span class="step__num">2</span><h2 class="step__ttl">Le message</h2></div>
+    <p class="step__lead">
+      Choisissez un modèle puis adaptez-le. Les variables sont remplacées pour chaque destinataire&nbsp;:
+      <code>{{prenom}}</code>, <code>{{nom}}</code>, <code>{{civilite}}</code>, <code>{{magasin}}</code>,
+      <code>{{ville}}</code>, <code>{{tel}}</code>, <code>{{adresse}}</code>.
+    </p>
+
+    <label class="fld">
+      <span class="fld__lbl">Modèle de départ</span>
+      <select id="f-modele">
+        <option value="libre">Message libre (page blanche)</option>
+        <option value="controle">Contrôle de la vue offert</option>
+        <option value="renouvellement">Renouvellement de l'équipement</option>
+        <option value="lentilles">Renouvellement des lentilles</option>
+        <option value="solaire">Protection solaire</option>
+      </select>
+      <span class="fld__hint">Charger un modèle remplace le contenu ci-dessous. Vos modifications sont ensuite conservées.</span>
+    </label>
+
+    <label class="fld">
+      <span class="fld__lbl">Objet du message</span>
+      <input type="text" id="f-objet" placeholder="{{prenom}}, votre contrôle de la vue offert chez {{magasin}}" autocomplete="off">
+    </label>
+
+    <label class="fld">
+      <span class="fld__lbl">Accroche <span class="fld__opt">facultatif</span></span>
+      <input type="text" id="f-titre" placeholder="Le grand titre affiché en haut du message" autocomplete="off">
+    </label>
+
+    <label class="fld">
+      <span class="fld__lbl">Corps du message</span>
+      <textarea id="f-corps" rows="9" placeholder="Écrivez votre message. Une ligne vide sépare deux paragraphes.&#10;La formule d'appel (Cher / Chère + prénom) est ajoutée automatiquement."></textarea>
+      <span class="fld__hint">La formule d'appel est générée d'après la civilité&nbsp;: inutile de l'écrire.</span>
+    </label>
+
+    <div class="grid2">
+      <label class="fld">
+        <span class="fld__lbl">Libellé du bouton <span class="fld__opt">facultatif</span></span>
+        <input type="text" id="f-cta" placeholder="PRENDRE RENDEZ-VOUS" autocomplete="off">
+      </label>
+      <label class="fld">
+        <span class="fld__lbl">Lien du bouton <span class="fld__opt">facultatif</span></span>
+        <input type="url" id="f-cta-url" placeholder="https://…" autocomplete="off">
+        <span class="fld__hint">Sans lien, le bouton n'apparaît pas.</span>
+      </label>
+    </div>
+
+    <label class="fld">
+      <span class="fld__lbl">Encadré «&nbsp;bon à savoir&nbsp;» <span class="fld__opt">facultatif</span></span>
+      <textarea id="f-encart" rows="3" placeholder="Une information utile mise en avant dans un encadré."></textarea>
+    </label>
+
+    <div class="grid2">
+      <label class="fld">
+        <span class="fld__lbl">Ville affichée <span class="fld__opt">facultatif</span></span>
+        <input type="text" id="f-ville" placeholder="Déduite de votre adresse" autocomplete="off">
+      </label>
+      <label class="fld">
+        <span class="fld__lbl">Mention de désinscription</span>
+        <input type="text" id="f-pied" autocomplete="off">
+        <span class="fld__hint">Obligatoire en prospection commerciale&nbsp;: laissez toujours une porte de sortie.</span>
+      </label>
+    </div>
+
+    <div class="preview-hd">
+      <p class="fld__lbl" style="margin:0;">Aperçu</p>
+      <span class="fld__hint" id="prev-who"></span>
+    </div>
+    <div class="preview-obj"><b>Objet&nbsp;:</b> <span id="prev-objet"></span></div>
+    <div class="preview" id="preview"></div>
+  </section>
+
+  <!-- ─────────────────  ÉTAPE 3 — L'ENVOI  ───────────────── -->
+  <section class="step">
+    <div class="step__hd"><span class="step__num">3</span><h2 class="step__ttl">L'envoi</h2></div>
+    <p class="step__lead">Deux façons de procéder. La première ne demande aucune configuration.</p>
+
+    <div class="modes">
+      <label class="mode is-on" id="mode-manuel">
+        <span class="mode__t"><input type="radio" name="mode" value="manuel" checked> Assisté — sans configuration</span>
+        <span class="mode__d">
+          Le message est préparé contact par contact&nbsp;: vous le collez dans votre messagerie et vous envoyez.
+          Rien ne quitte cet appareil.
+        </span>
+      </label>
+      <label class="mode" id="mode-auto">
+        <span class="mode__t"><input type="radio" name="mode" value="auto"> Automatique — via le Gmail du magasin</span>
+        <span class="mode__d">
+          L'outil envoie la campagne en série depuis <em>votre</em> compte Google, via un petit programme
+          que vous déployez vous-même. Configuration&nbsp;: environ 5 minutes, une seule fois.
+        </span>
+      </label>
+    </div>
+
+    <!-- ── Mode assisté ── -->
+    <div id="pan-manuel">
+      <div class="cur" id="cur-box">
+        <p class="cur__pos" id="cur-pos">Aucun contact en attente</p>
+        <p class="cur__who" id="cur-who">—</p>
+        <p class="cur__mail" id="cur-mail"></p>
+        <div class="row">
+          <button type="button" class="btn btn--primary" id="m-copy">&#128203; Copier le message</button>
+          <button type="button" class="btn btn--ghost" id="m-mailto">&#9993; Ouvrir ma messagerie</button>
+          <button type="button" class="btn btn--go" id="m-done">&#10003; Marquer envoyé</button>
+          <button type="button" class="btn btn--ghost" id="m-skip">&#8677; Passer</button>
+        </div>
+      </div>
+      <details class="help">
+        <summary>Comment ça marche, concrètement&nbsp;?</summary>
+        <div class="help__body">
+          <ol>
+            <li><strong>Copier le message</strong> place la version mise en page dans le presse-papiers.</li>
+            <li><strong>Ouvrir ma messagerie</strong> ouvre un nouveau message avec le destinataire et l'objet déjà remplis.</li>
+            <li>Dans le corps du message, collez (Ctrl+V) — la mise en page est conservée dans Gmail et Outlook.</li>
+            <li>Envoyez, puis revenez ici et cliquez sur <strong>Marquer envoyé</strong>&nbsp;: l'outil passe au suivant.</li>
+          </ol>
+          <p style="margin-top:8px;">
+            Sur certaines messageries, la fenêtre s'ouvre sans le corps du message&nbsp;: c'est normal,
+            c'est le collage qui l'apporte.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ── Mode automatique ── -->
+    <div id="pan-auto" hidden>
+      <div class="panel panel--warn">
+        <h3>Ce qui se passe dans ce mode</h3>
+        <ul>
+          <li>Les adresses de vos clients sont transmises <strong>à votre propre compte Google</strong>,
+            via un programme que vous déployez et contrôlez. Aucun serveur de ce site n'intervient.</li>
+          <li>Les messages partent de <strong>votre boîte Gmail</strong> et se retrouvent dans vos «&nbsp;éléments envoyés&nbsp;».</li>
+          <li>Google limite les envois quotidiens (souvent 100&nbsp;par jour sur un compte Gmail
+            gratuit, 1&nbsp;500 sur un compte Workspace). L'outil s'arrête avant la limite et reprend le lendemain.</li>
+          <li><a href="../../docs/campagne-email/" target="_blank" rel="noopener noreferrer">Procédure d'installation et transparence sur le programme</a>.</li>
+        </ul>
+      </div>
+
+      <div class="grid2">
+        <label class="fld">
+          <span class="fld__lbl">URL du programme d'envoi</span>
+          <input type="url" id="ep-url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+        </label>
+        <label class="fld">
+          <span class="fld__lbl">Clé de sécurité</span>
+          <input type="text" id="ep-key" placeholder="Mot de passe choisi lors de l'installation" autocomplete="off">
+          <span class="fld__hint">
+            La même valeur que dans le programme. <button type="button" class="lnk" id="gen-key">Générer une clé</button>
+          </span>
+        </label>
+      </div>
+
+      <div class="grid2">
+        <label class="fld">
+          <span class="fld__lbl">Adresse pour les tests</span>
+          <input type="email" id="ep-test" placeholder="votre.adresse@exemple.fr" autocomplete="off">
+          <span class="fld__hint">Les tests utilisent un client fictif&nbsp;: aucune donnée réelle n'est employée.</span>
+        </label>
+        <label class="fld">
+          <span class="fld__lbl">Délai entre deux envois</span>
+          <select id="ep-delai">
+            <option value="800">Rapide (0,8 s)</option>
+            <option value="1500" selected>Normal (1,5 s)</option>
+            <option value="3000">Prudent (3 s)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row" style="margin-bottom:12px;">
+        <button type="button" class="btn btn--ghost" id="ep-check">Vérifier la connexion</button>
+        <button type="button" class="btn btn--ghost" id="ep-test-send">&#9993; Envoyer un test</button>
+        <span class="status" id="ep-status"></span>
+      </div>
+
+      <div class="row">
+        <button type="button" class="btn btn--go" id="run-start">&#128640; Lancer l'envoi</button>
+        <button type="button" class="btn btn--ghost" id="run-pause" hidden>&#9208; Pause</button>
+        <button type="button" class="btn btn--danger" id="run-stop" hidden>&#9209; Arrêter</button>
+      </div>
+
+      <div id="run-prog" hidden>
+        <div class="bar-out"><div class="bar-in" id="bar"></div></div>
+        <p class="bar-txt" id="bar-txt"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────  ÉTAPE 4 — RESPONSABILITÉS  ───────────────── -->
+  <section class="step">
+    <div class="step__hd"><span class="step__num">4</span><h2 class="step__ttl">Avant d'envoyer</h2></div>
+    <p class="step__lead">
+      Le résumé tient en trois points. La version complète — qui a le droit de recevoir quoi, ce que
+      le message doit contenir, ce qu'il ne doit jamais contenir, combien de temps garder une adresse —
+      est dans le <a href="../../docs/rgpd-mailing/"><strong>rappel RGPD</strong></a>.
+    </p>
+    <div class="panel panel--stop">
+      <h3>Le réflexe propre à l'optique</h3>
+      <p>
+        <strong>Aucune donnée de santé dans un message commercial</strong>&nbsp;: ni correction, ni
+        acuité, ni addition, ni pathologie, ni référence à une ordonnance ou à un ophtalmologiste.
+        Un mailing dit «&nbsp;votre équipement a deux ans&nbsp;»&nbsp;; il ne dit jamais
+        «&nbsp;votre vue a évolué depuis votre ordonnance du…&nbsp;».
+      </p>
+    </div>
+    <div class="panel panel--safe">
+      <h3>Consentement</h3>
+      <p>
+        N'écrivez qu'aux personnes qui vous ont laissé leur adresse en connaissance de cause.
+        En France, la prospection par e-mail vers des particuliers suppose leur accord préalable&nbsp;;
+        l'information d'un client existant sur un service analogue à celui qu'il a déjà acheté est
+        traitée différemment. En cas de doute, écartez l'adresse.
+      </p>
+    </div>
+    <div class="panel panel--info">
+      <h3>Désinscription</h3>
+      <p>
+        Chaque message porte une mention de sortie (étape 2). Quand un client la demande, marquez-le
+        <strong>«&nbsp;Ne plus contacter&nbsp;»</strong> dans le tableau&nbsp;: son adresse est mémorisée
+        et sera écartée de tous vos prochains imports.
+      </p>
+    </div>
+    <div class="panel panel--warn">
+      <h3>Où vivent ces données</h3>
+      <p>
+        La liste et les statuts sont enregistrés dans <strong>ce navigateur, sur cet appareil</strong>.
+        Vider les données du navigateur les efface définitivement&nbsp;: exportez le suivi si vous
+        souhaitez en garder trace. Cette liste n'est jamais incluse dans la sauvegarde du profil
+        magasin ni dans la synchronisation Google&nbsp;Drive.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  /* ============================================================
+     CAMPAGNE E-MAIL — CRM simplifié, 100 % côté navigateur
+
+     Deux modes d'envoi :
+       · assisté     — presse-papiers + mailto, aucun appel réseau ;
+       · automatique — JSONP vers un Apps Script déployé par le magasin
+                       (même mécanique que la synchro Drive du hub, qui
+                       contourne ainsi les limites CORS d'Apps Script).
+
+     Dans le mode automatique, la mise en page du message est construite
+     PAR LE SCRIPT et non transmise à chaque appel : seuls les champs de
+     la campagne circulent. L'URL JSONP reste ainsi courte (~2 Ko) là où
+     un HTML complet la ferait dépasser les limites de Google.
+     ⚠ La fonction emailHtml_() ci-dessous et son homologue dans
+     docs/campagne-email/ doivent rester identiques : c'est ce qui garantit
+     que l'aperçu correspond au message réellement envoyé.
+     ============================================================ */
+
+  var LS_DATA  = 'campagne-email-v1';    /* contacts + campagne */
+  var LS_EP    = 'campagne-endpoint-v1'; /* url + clé + adresse de test */
+  var LS_STOP  = 'campagne-exclusion-v1';/* adresses « ne plus contacter » */
+  var LS_PROFIL = 'profil-magasin-v1';
+
+  var MAX_ROWS = 300;      /* lignes affichées dans le tableau */
+  var MARGE_QUOTA = 5;     /* envois laissés disponibles avant arrêt */
+
+  /* ---------- profil magasin (partagé, lecture seule) ---------- */
+  function profil() {
+    try { return JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function storeName() { return (profil().nom || '').trim() || 'Mon magasin'; }
+  function storeVille() {
+    var adr = (profil().adresse || '').trim();
+    var m = adr.match(/\b\d{5}\s+(.+)$/);   /* « … 34000 Montpellier » */
+    return m ? m[1].trim() : '';
+  }
+  function storeSub() {
+    var p = profil(), parts = [];
+    if ((p.tel || '').trim())  { parts.push('Tél ' + p.tel.trim()); }
+    if ((p.mail || '').trim()) { parts.push(p.mail.trim()); }
+    return parts.length ? storeName() + ' · ' + parts.join(' · ') : storeName();
+  }
+  function magasinCtx() {
+    var p = profil();
+    return {
+      nom: storeName(),
+      ville: (etat.camp.ville || '').trim() || storeVille(),
+      adresse: (p.adresse || '').trim(),
+      tel: (p.tel || '').trim(),
+      mail: (p.mail || '').trim()
+    };
+  }
+
+  /* ---------- état ---------- */
+  var MODELES = {
+    libre: {
+      objet: '', titre: '', corps: '', cta: '', ctaUrl: '', encart: ''
+    },
+    controle: {
+      objet: '{{prenom}}, votre contrôle de la vue offert chez {{magasin}}',
+      titre: 'Votre vue peut évoluer. C’est notre rôle de la contrôler.',
+      corps: 'Vous portez vos lunettes depuis plusieurs années maintenant, et votre vue a peut-être évolué.\n\n'
+        + 'Un équipement bien adapté, c’est le plaisir de lire, de conduire, et un vrai confort devant les écrans.\n\n'
+        + 'C’est pourquoi nous sommes heureux de vous offrir un contrôle de la vue : moins de trente minutes, '
+        + 'réalisé par nos opticiens sur des appareils de mesure de haute précision.\n\n'
+        + 'À très bientôt,\nL’équipe {{magasin}}',
+      cta: 'PRENDRE RENDEZ-VOUS', ctaUrl: '',
+      encart: 'Votre opticien peut adapter votre ordonnance à votre nouvelle correction pendant 5 ans '
+        + 'si vous avez entre 16 et 42 ans, et pendant 3 ans au-delà de 42 ans.'
+    },
+    renouvellement: {
+      objet: '{{prenom}}, vos lunettes méritent peut-être une relève',
+      titre: 'Des verres fatigués, c’est une vision qui fatigue.',
+      corps: 'Vos lunettes vous accompagnent partout, et cela finit par se voir : rayures, traitements '
+        + 'usés, monture détendue.\n\n'
+        + 'Passez nous voir quand vous le souhaitez : nous vérifions l’état de votre équipement, '
+        + 'l’ajustage de votre monture et, si vous le souhaitez, votre correction.\n\n'
+        + 'Le diagnostic est gratuit et sans engagement.\n\n'
+        + 'À très bientôt,\nL’équipe {{magasin}}',
+      cta: 'PRENDRE RENDEZ-VOUS', ctaUrl: '',
+      encart: 'Pensez à vérifier vos droits : de nombreux contrats de complémentaire santé renouvellent '
+        + 'la prise en charge d’un équipement tous les deux ans.'
+    },
+    lentilles: {
+      objet: '{{prenom}}, pensez au renouvellement de vos lentilles',
+      titre: 'Vos lentilles arrivent bientôt à échéance.',
+      corps: 'Le renouvellement régulier de vos lentilles, c’est le confort au quotidien et la santé '
+        + 'de vos yeux sur la durée.\n\n'
+        + 'Nous tenons vos références à disposition : un mot de votre part suffit pour préparer votre '
+        + 'commande.\n\n'
+        + 'Nous en profiterons volontiers pour vérifier votre adaptation.\n\n'
+        + 'À très bientôt,\nL’équipe {{magasin}}',
+      cta: 'NOUS CONTACTER', ctaUrl: '',
+      encart: ''
+    },
+    solaire: {
+      objet: '{{prenom}}, protégez vos yeux du soleil',
+      titre: 'Le soleil ne prévient pas. Vos yeux, si.',
+      corps: 'Les rayons ultraviolets fatiguent les yeux et leurs effets s’accumulent avec les années.\n\n'
+        + 'Nous avons sélectionné pour vous des solaires à votre correction, de la teinte légère au '
+        + 'verre polarisant pour la route et l’eau.\n\n'
+        + 'Venez les essayer : nous vous conseillons selon vos usages.\n\n'
+        + 'À très bientôt,\nL’équipe {{magasin}}',
+      cta: 'DÉCOUVRIR EN MAGASIN', ctaUrl: '',
+      encart: ''
+    }
+  };
+
+  var PIED_DEFAUT = 'Pour ne plus recevoir nos messages, répondez simplement « STOP ».';
+
+  var etat = {
+    contacts: [],
+    camp: {
+      modele: 'libre', objet: '', titre: '', corps: '',
+      cta: '', ctaUrl: '', encart: '', ville: '', pied: PIED_DEFAUT
+    }
+  };
+  var pending = null;   /* import en attente de validation des colonnes */
+  var run = { on: false, paused: false, timer: null };
+
+  /* ---------- persistance ---------- */
+  function save() {
+    try { localStorage.setItem(LS_DATA, JSON.stringify(etat)); }
+    catch (e) { toast('Enregistrement impossible : espace du navigateur saturé.', false); }
+  }
+  function load() {
+    var raw;
+    try { raw = JSON.parse(localStorage.getItem(LS_DATA) || 'null'); }
+    catch (e) { raw = null; }
+    if (!raw || typeof raw !== 'object') { return; }
+    if (Array.isArray(raw.contacts)) {
+      etat.contacts = raw.contacts.filter(function (c) {
+        return c && typeof c === 'object';
+      }).map(function (c) {
+        return {
+          civ: String(c.civ || ''), nom: String(c.nom || ''), prenom: String(c.prenom || ''),
+          mail: String(c.mail || ''), statut: String(c.statut || ''),
+          info: String(c.info || ''), ts: String(c.ts || '')
+        };
+      });
+    }
+    if (raw.camp && typeof raw.camp === 'object') {
+      Object.keys(etat.camp).forEach(function (k) {
+        if (typeof raw.camp[k] === 'string') { etat.camp[k] = raw.camp[k]; }
+      });
+    }
+  }
+  function loadEp() {
+    try { return JSON.parse(localStorage.getItem(LS_EP) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function saveEp() {
+    localStorage.setItem(LS_EP, JSON.stringify({
+      url: v('ep-url'), cle: v('ep-key'), test: v('ep-test'), delai: v('ep-delai')
+    }));
+  }
+  function exclusions() {
+    try {
+      var a = JSON.parse(localStorage.getItem(LS_STOP) || '[]');
+      return Array.isArray(a) ? a.map(function (x) { return String(x).toLowerCase(); }) : [];
+    } catch (e) { return []; }
+  }
+  function addExclusion(mail) {
+    var l = exclusions(), m = String(mail || '').toLowerCase();
+    if (m && l.indexOf(m) < 0) { l.push(m); localStorage.setItem(LS_STOP, JSON.stringify(l)); }
+  }
+  function delExclusion(mail) {
+    var m = String(mail || '').toLowerCase();
+    localStorage.setItem(LS_STOP, JSON.stringify(exclusions().filter(function (x) { return x !== m; })));
+  }
+
+  /* ---------- utilitaires ---------- */
+  function $(id) { return document.getElementById(id); }
+  function v(id) { var e = $(id); return e ? String(e.value || '').trim() : ''; }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function mailOk(m) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(m || '').trim()); }
+  function urlOk(u) { return /^https?:\/\/[^\s]+$/i.test(String(u || '').trim()); }
+  function nowStamp() {
+    var d = new Date();
+    function p(n) { return ('0' + n).slice(-2); }
+    return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear()
+      + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  var toastTimer;
+  function toast(msg, ok) {
+    var el = $('toast');
+    el.textContent = msg;
+    el.style.background = ok === false ? '#B23A2E' : '#1A2A3A';
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 3400);
+  }
+
+  /* ---------- statuts ---------- */
+  function libelle(c) {
+    switch (c.statut) {
+      case 'envoye':   return 'Envoyé';
+      case 'invalide': return 'Adresse invalide';
+      case 'encours':  return 'En cours — à vérifier';
+      case 'erreur':   return 'À vérifier';
+      case 'passe':    return 'Passé';
+      case 'stop':     return 'Ne plus contacter';
+      default:         return 'En attente';
+    }
+  }
+  function tagClass(c) {
+    switch (c.statut) {
+      case 'envoye':   return 'tag tag--sent';
+      case 'invalide': return 'tag tag--bad';
+      case 'encours':
+      case 'erreur':   return 'tag tag--doubt';
+      case 'passe':    return 'tag tag--wait';
+      case 'stop':     return 'tag tag--stop';
+      default:         return 'tag tag--wait';
+    }
+  }
+  /* Un contact « en attente » est le seul qui puisse encore partir : tout statut
+     non vide bloque un nouvel envoi, y compris « en cours » — c'est exactement
+     ce qui évite le doublon après une interruption. */
+  function estEnAttente(c) { return !c.statut && mailOk(c.mail); }
+
+  /* ============================================================
+     ÉTAPE 1 — CSV
+     ============================================================ */
+
+  function modeleCsv() {
+    var lignes = [
+      ['Civilité', 'Nom', 'Prénom', 'Email'],
+      ['Mme', 'DUPONT', 'Alice', 'alice.dupont@exemple.fr'],
+      ['M.', 'MARTIN', 'Paul', 'paul.martin@exemple.fr']
+    ];
+    return '﻿' + lignes.map(function (l) { return l.join(';'); }).join('\r\n') + '\r\n';
+  }
+
+  function telecharger(nomFichier, contenu, type) {
+    var blob = new Blob([contenu], { type: type || 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = nomFichier;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* Séparateur : celui qui apparaît le plus souvent hors guillemets sur la 1re ligne. */
+  function detectSep(texte) {
+    var ligne = '', q = false, i;
+    for (i = 0; i < texte.length; i++) {
+      var c = texte.charAt(i);
+      if (c === '"') { q = !q; }
+      if (!q && c === '\n') { break; }
+      ligne += c;
+    }
+    var best = ';', bestN = 0;
+    [';', ',', '\t', '|'].forEach(function (d) {
+      var n = 0, inq = false, j;
+      for (j = 0; j < ligne.length; j++) {
+        var ch = ligne.charAt(j);
+        if (ch === '"') { inq = !inq; continue; }
+        if (!inq && ch === d) { n++; }
+      }
+      if (n > bestN) { bestN = n; best = d; }
+    });
+    return best;
+  }
+
+  /* Analyseur CSV complet : guillemets, guillemets doublés, sauts de ligne dans un champ. */
+  function parseCsv(texte) {
+    if (texte.charCodeAt(0) === 0xFEFF) { texte = texte.slice(1); }
+    var sep = detectSep(texte);
+    var lignes = [], ligne = [], champ = '', q = false, i = 0;
+    while (i < texte.length) {
+      var c = texte.charAt(i);
+      if (q) {
+        if (c === '"') {
+          if (texte.charAt(i + 1) === '"') { champ += '"'; i += 2; continue; }
+          q = false; i++; continue;
+        }
+        champ += c; i++; continue;
+      }
+      if (c === '"') { q = true; i++; continue; }
+      if (c === sep) { ligne.push(champ); champ = ''; i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { ligne.push(champ); lignes.push(ligne); ligne = []; champ = ''; i++; continue; }
+      champ += c; i++;
+    }
+    ligne.push(champ);
+    lignes.push(ligne);
+    return lignes.filter(function (l) {
+      return l.some(function (x) { return String(x).trim() !== ''; });
+    });
+  }
+
+  /* « Prénom » → « prenom » : minuscules, accents retirés, ponctuation ignorée. */
+  function normalise(s) {
+    var t = String(s || '').toLowerCase();
+    if (t.normalize) { t = t.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+    return t.replace(/[^a-z0-9]/g, '');
+  }
+
+  var ENTETES = {
+    civ:  ['civilite', 'civ', 'titre', 'genre', 'salutation'],
+    nom:  ['nom', 'nomclient', 'nomdefamille', 'lastname', 'name', 'patronyme'],
+    pre:  ['prenom', 'firstname', 'prenomclient'],
+    mail: ['email', 'mail', 'courriel', 'adressemail', 'adresseemail', 'emailaddress']
+  };
+
+  function deviner(entetes, colonnes) {
+    var res = { civ: -1, nom: -1, pre: -1, mail: -1 };
+    /* 1) par intitulé */
+    entetes.forEach(function (h, i) {
+      var n = normalise(h);
+      Object.keys(ENTETES).forEach(function (k) {
+        if (res[k] < 0 && ENTETES[k].indexOf(n) >= 0) { res[k] = i; }
+      });
+    });
+    /* 2) l'e-mail se reconnaît à son contenu, même sans intitulé */
+    if (res.mail < 0 && colonnes) {
+      var meilleur = -1, score = 0;
+      colonnes.forEach(function (vals, i) {
+        var n = vals.filter(mailOk).length;
+        if (n > score) { score = n; meilleur = i; }
+      });
+      if (score > 0) { res.mail = meilleur; }
+    }
+    return res;
+  }
+
+  function optionsColonnes(sel, entetes, choisi) {
+    sel.textContent = '';
+    var o0 = document.createElement('option');
+    o0.value = '-1';
+    o0.textContent = '(aucune)';
+    sel.appendChild(o0);
+    entetes.forEach(function (h, i) {
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = 'Colonne ' + (i + 1) + (h ? ' — ' + h : '');
+      sel.appendChild(o);
+    });
+    sel.value = String(typeof choisi === 'number' ? choisi : -1);
+  }
+
+  function importerFichier(file) {
+    if (!file) { return; }
+    if (file.size > 4 * 1024 * 1024) {
+      toast('Fichier trop volumineux (4 Mo maximum).', false);
+      return;
+    }
+    var lect = new FileReader();
+    lect.onload = function () { preparerImport(String(lect.result || '')); };
+    lect.onerror = function () { toast('Lecture du fichier impossible.', false); };
+    lect.readAsText(file, 'UTF-8');
+  }
+
+  function preparerImport(texte) {
+    var lignes = parseCsv(texte);
+    if (!lignes.length) { toast('Fichier vide ou illisible.', false); return; }
+
+    var nbCol = lignes.reduce(function (m, l) { return Math.max(m, l.length); }, 0);
+    var colonnes = [];
+    for (var i = 0; i < nbCol; i++) {
+      colonnes.push(lignes.slice(1).map(function (l) { return String(l[i] || '').trim(); }));
+    }
+    var entetes = [];
+    for (var j = 0; j < nbCol; j++) { entetes.push(String(lignes[0][j] || '').trim()); }
+
+    /* Une 1re ligne contenant une adresse valide est une donnée, pas un intitulé. */
+    var avecEntete = !entetes.some(mailOk);
+
+    pending = { lignes: lignes, entetes: entetes, avecEntete: avecEntete };
+    var map = deviner(avecEntete ? entetes : [], colonnes);
+
+    optionsColonnes($('map-civ'), entetes, map.civ);
+    optionsColonnes($('map-nom'), entetes, map.nom);
+    optionsColonnes($('map-pre'), entetes, map.pre);
+    optionsColonnes($('map-mail'), entetes, map.mail);
+    $('map-header').checked = avecEntete;
+    $('map-info').textContent = lignes.length + ' ligne(s) lue(s), ' + nbCol
+      + ' colonne(s). Vérifiez l’association ci-dessous, puis ajoutez les contacts.';
+    $('map-status').textContent = '';
+    $('map-box').hidden = false;
+    $('map-box').scrollIntoView({ block: 'nearest' });
+  }
+
+  function validerImport() {
+    if (!pending) { return; }
+    var iCiv = parseInt($('map-civ').value, 10);
+    var iNom = parseInt($('map-nom').value, 10);
+    var iPre = parseInt($('map-pre').value, 10);
+    var iMail = parseInt($('map-mail').value, 10);
+
+    if (iMail < 0) {
+      $('map-status').textContent = 'Indiquez la colonne contenant les adresses e-mail.';
+      $('map-status').className = 'status err';
+      return;
+    }
+
+    var depart = $('map-header').checked ? 1 : 0;
+    var exclus = exclusions();
+    var connus = {};
+    etat.contacts.forEach(function (c) { connus[c.mail.toLowerCase()] = true; });
+
+    function cell(l, k) { return k >= 0 ? String(l[k] || '').trim() : ''; }
+
+    var ajout = 0, doublons = 0, invalides = 0, bloques = 0;
+    for (var i = depart; i < pending.lignes.length; i++) {
+      var l = pending.lignes[i];
+      var mail = cell(l, iMail).toLowerCase();
+      if (!mail) { continue; }
+      if (connus[mail]) { doublons++; continue; }
+      var c = {
+        civ: cell(l, iCiv), nom: cell(l, iNom), prenom: cell(l, iPre),
+        mail: cell(l, iMail), statut: '', info: '', ts: ''
+      };
+      if (!mailOk(c.mail)) { c.statut = 'invalide'; c.info = 'Format d’adresse incorrect'; invalides++; }
+      else if (exclus.indexOf(mail) >= 0) { c.statut = 'stop'; c.info = 'Désinscrit'; bloques++; }
+      connus[mail] = true;
+      etat.contacts.push(c);
+      ajout++;
+    }
+
+    pending = null;
+    $('map-box').hidden = true;
+    save();
+    rendreListe();
+    rendreEnvoi();
+
+    var bilan = ajout + ' contact(s) ajouté(s).';
+    if (doublons)  { bilan += ' ' + doublons + ' doublon(s) écarté(s).'; }
+    if (invalides) { bilan += ' ' + invalides + ' adresse(s) invalide(s).'; }
+    if (bloques)   { bilan += ' ' + bloques + ' désinscrit(s).'; }
+    toast(bilan);
+  }
+
+  /* ---------- rendu de la liste ---------- */
+  function compte(pred) { return etat.contacts.filter(pred).length; }
+
+  function rendreListe() {
+    var n = etat.contacts.length;
+    $('list-box').hidden = n === 0;
+    if (!n) { return; }
+
+    $('n-total').textContent = n;
+    $('n-wait').textContent  = compte(function (c) { return !c.statut; });
+    $('n-sent').textContent  = compte(function (c) { return c.statut === 'envoye'; });
+    $('n-bad').textContent   = compte(function (c) { return c.statut === 'invalide'; });
+    $('n-doubt').textContent = compte(function (c) { return c.statut === 'erreur' || c.statut === 'encours'; });
+
+    var q = v('q').toLowerCase();
+    var f = v('filtre');
+    var vus = etat.contacts.filter(function (c) {
+      if (f === 'attente' && c.statut) { return false; }
+      if (f === 'envoye' && c.statut !== 'envoye') { return false; }
+      if (f === 'invalide' && c.statut !== 'invalide') { return false; }
+      if (f === 'erreur' && c.statut !== 'erreur' && c.statut !== 'encours') { return false; }
+      if (f === 'stop' && c.statut !== 'stop') { return false; }
+      if (!q) { return true; }
+      return (c.nom + ' ' + c.prenom + ' ' + c.mail).toLowerCase().indexOf(q) >= 0;
+    });
+
+    var tb = $('tbl-body');
+    tb.textContent = '';
+    vus.slice(0, MAX_ROWS).forEach(function (c) {
+      var idx = etat.contacts.indexOf(c);
+      var tr = document.createElement('tr');
+
+      var td1 = document.createElement('td');
+      td1.textContent = ((c.civ ? c.civ + ' ' : '') + (c.prenom ? c.prenom + ' ' : '') + c.nom).trim() || '—';
+      tr.appendChild(td1);
+
+      var td2 = document.createElement('td');
+      td2.className = 'mail';
+      td2.textContent = c.mail;
+      tr.appendChild(td2);
+
+      var td3 = document.createElement('td');
+      var sp = document.createElement('span');
+      sp.className = tagClass(c);
+      sp.textContent = libelle(c) + (c.ts ? ' · ' + c.ts : '');
+      td3.appendChild(sp);
+      if (c.info) {
+        var em = document.createElement('div');
+        em.style.fontSize = 'var(--fs-hint)';
+        em.style.color = 'var(--grey)';
+        em.style.marginTop = '2px';
+        em.textContent = c.info;
+        td3.appendChild(em);
+      }
+      tr.appendChild(td3);
+
+      var td4 = document.createElement('td');
+      td4.style.whiteSpace = 'nowrap';
+      if (c.statut) {
+        td4.appendChild(bouton('Remettre en attente', 'lnk', function () {
+          if (etat.contacts[idx].statut === 'stop') { delExclusion(etat.contacts[idx].mail); }
+          etat.contacts[idx].statut = '';
+          etat.contacts[idx].info = '';
+          etat.contacts[idx].ts = '';
+          save(); rendreListe(); rendreEnvoi();
+        }));
+      }
+      if (c.statut !== 'stop') {
+        td4.appendChild(bouton('Ne plus contacter', 'lnk lnk--danger', function () {
+          etat.contacts[idx].statut = 'stop';
+          etat.contacts[idx].info = 'Désinscrit le ' + nowStamp();
+          addExclusion(etat.contacts[idx].mail);
+          save(); rendreListe(); rendreEnvoi();
+        }));
+      }
+      tr.appendChild(td4);
+
+      tb.appendChild(tr);
+    });
+
+    $('tbl-more').textContent = vus.length > MAX_ROWS
+      ? 'Affichage des ' + MAX_ROWS + ' premiers résultats sur ' + vus.length + '.'
+      : (vus.length ? '' : 'Aucun contact ne correspond au filtre.');
+  }
+
+  function bouton(txt, cls, fn) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = cls;
+    b.textContent = txt;
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  function exporterSuivi() {
+    var l = [['Civilité', 'Nom', 'Prénom', 'Email', 'Statut', 'Détail', 'Date']];
+    etat.contacts.forEach(function (c) {
+      l.push([c.civ, c.nom, c.prenom, c.mail, libelle(c), c.info, c.ts]);
+    });
+    var csv = '﻿' + l.map(function (ligne) {
+      return ligne.map(function (x) {
+        var s = String(x == null ? '' : x);
+        /* La virgule est protégée elle aussi : le fichier reste lisible même
+           ouvert par un tableur configuré sur un autre séparateur. */
+        return /[";,\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(';');
+    }).join('\r\n') + '\r\n';
+    var d = new Date();
+    var stamp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    telecharger('campagne-suivi-' + stamp + '.csv', csv);
+    toast('Suivi exporté.');
+  }
+
+  /* ============================================================
+     ÉTAPE 2 — MESSAGE ET APERÇU
+     ============================================================ */
+
+  function appel(civ) {
+    var s = String(civ || '').trim().toLowerCase();
+    if (s === 'mme' || s === 'madame' || s === 'mlle' || s === 'mademoiselle') { return 'Chère'; }
+    if (s === 'm.' || s === 'm' || s === 'mr' || s === 'monsieur') { return 'Cher'; }
+    return 'Bonjour';
+  }
+
+  function merge(txt, c, m) {
+    return String(txt || '')
+      .replace(/\{\{prenom\}\}/g, c.prenom || '')
+      .replace(/\{\{nom\}\}/g, c.nom || '')
+      .replace(/\{\{civilite\}\}/g, c.civ || '')
+      .replace(/\{\{magasin\}\}/g, m.nom || '')
+      .replace(/\{\{ville\}\}/g, m.ville || '')
+      .replace(/\{\{tel\}\}/g, m.tel || '')
+      .replace(/\{\{adresse\}\}/g, m.adresse || '')
+      .replace(/\{\{mail\}\}/g, m.mail || '')
+      .replace(/[ \t]+\n/g, '\n')
+      .trim();
+  }
+
+  function salutation(c) {
+    var a = appel(c.civ);
+    var qui = [c.prenom, c.nom].filter(Boolean).join(' ');
+    if (a === 'Bonjour') { return qui ? 'Bonjour ' + qui + ',' : 'Bonjour,'; }
+    return qui ? a + ' ' + qui + ',' : a + ' client,';
+  }
+
+  /* ⚠ Doit rester identique à emailHtml_() du script Apps Script
+     (docs/campagne-email/) : c'est ce qui rend l'aperçu fidèle. */
+  function emailHtml_(k, m) {
+    var F = "Arial, Helvetica, sans-serif";
+    var h = '';
+
+    function p(txt) {
+      return '<p style="margin:0 0 16px;">' + esc(txt).replace(/\n/g, '<br>') + '</p>';
+    }
+
+    h += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"'
+      + ' style="border-collapse:collapse;background:#EEF4F9;"><tr><td align="center" style="padding:26px 12px;">';
+
+    h += '<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0"'
+      + ' style="width:560px;max-width:100%;border-collapse:collapse;background:#ffffff;border:1px solid #D6E4F0;">';
+
+    /* En-tête : nom du magasin + ville */
+    h += '<tr><td style="padding:18px 26px 14px;">'
+      + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'
+      + '<td style="font-family:' + F + ';font-size:19px;font-weight:bold;color:#1F6FB2;">' + esc(m.nom) + '</td>'
+      + (m.ville
+        ? '<td align="right" style="font-family:' + F + ';font-size:12px;font-weight:bold;color:#5A7080;">' + esc(m.ville) + '</td>'
+        : '')
+      + '</tr></table></td></tr>';
+
+    /* Bandeau bleu */
+    h += '<tr><td style="background:#1F6FB2;padding:9px 26px;font-family:' + F + ';font-size:12px;'
+      + 'font-weight:bold;color:#ffffff;letter-spacing:0.6px;">VOTRE OPTICIEN'
+      + (m.ville ? ' &#183; ' + esc(m.ville.toUpperCase()) : '') + '</td></tr>';
+
+    /* Accroche */
+    if (k.titre) {
+      h += '<tr><td style="padding:26px 26px 0;font-family:' + F + ';font-size:23px;line-height:1.25;'
+        + 'font-weight:bold;color:#1A2A3A;">' + esc(k.titre) + '</td></tr>';
+    }
+
+    /* Bouton d'action */
+    if (k.cta && k.ctaUrl) {
+      h += '<tr><td style="padding:18px 26px 6px;">'
+        + '<a href="' + esc(k.ctaUrl) + '" target="_blank" style="display:inline-block;background:#1F6FB2;'
+        + 'color:#ffffff;text-decoration:none;font-family:' + F + ';font-size:12px;font-weight:bold;'
+        + 'letter-spacing:0.8px;padding:12px 26px;border-radius:999px;">' + esc(k.cta) + '</a></td></tr>';
+    }
+
+    /* Corps */
+    h += '<tr><td style="background:#EFF6FC;padding:24px 26px;font-family:' + F + ';font-size:15px;'
+      + 'line-height:1.65;color:#3E4C5E;">';
+    h += p(k.salut);
+    String(k.corps || '').split(/\n{2,}/).forEach(function (bloc) {
+      if (bloc.trim()) { h += p(bloc.trim()); }
+    });
+    h += '</td></tr>';
+
+    /* Encadré « bon à savoir » */
+    if (k.encart) {
+      h += '<tr><td style="padding:24px 26px 0;">'
+        + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"'
+        + ' style="border-collapse:collapse;border:1.5px solid #1F6FB2;"><tr>'
+        + '<td style="padding:16px 18px;font-family:' + F + ';font-size:13.5px;line-height:1.55;color:#1A2A3A;">'
+        + '<span style="font-weight:bold;color:#1F6FB2;">Le saviez-vous&#160;?</span><br>'
+        + esc(k.encart).replace(/\n/g, '<br>')
+        + '</td></tr></table></td></tr>';
+    }
+
+    /* Coordonnées */
+    var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail].filter(Boolean).join(' &#183; ');
+    h += '<tr><td style="padding:24px 26px 22px;font-family:' + F + ';font-size:13px;color:#1A2A3A;">'
+      + '<span style="font-weight:bold;">' + esc(m.nom) + '</span>'
+      + (coord ? '<br><span style="color:#5A7080;font-size:12px;">' + coord + '</span>' : '')
+      + '</td></tr>';
+
+    h += '</table>';
+
+    /* Désinscription, hors carte */
+    if (k.pied) {
+      h += '<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0"'
+        + ' style="width:560px;max-width:100%;border-collapse:collapse;"><tr>'
+        + '<td align="center" style="padding:16px 24px 0;font-family:' + F + ';font-size:11px;'
+        + 'line-height:1.5;color:#8B929C;">' + esc(k.pied) + '</td></tr></table>';
+    }
+
+    h += '</td></tr></table>';
+    return h;
+  }
+
+  function emailTexte_(k, m) {
+    var l = [];
+    l.push(k.salut, '');
+    if (k.titre) { l.push(k.titre, ''); }
+    String(k.corps || '').split(/\n{2,}/).forEach(function (b) {
+      if (b.trim()) { l.push(b.trim(), ''); }
+    });
+    if (k.cta && k.ctaUrl) { l.push(k.cta + ' : ' + k.ctaUrl, ''); }
+    if (k.encart) { l.push('Le saviez-vous ? ' + k.encart, ''); }
+    l.push(m.nom);
+    var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail].filter(Boolean).join(' · ');
+    if (coord) { l.push(coord); }
+    if (k.pied) { l.push('', '--', k.pied); }
+    return l.join('\n');
+  }
+
+  /* Assemble les champs de campagne fusionnés pour un contact donné. */
+  function campagnePour(c) {
+    var m = magasinCtx();
+    return {
+      objet: merge(etat.camp.objet, c, m).replace(/[\r\n]+/g, ' ').slice(0, 200),
+      titre: merge(etat.camp.titre, c, m),
+      corps: merge(etat.camp.corps, c, m),
+      encart: merge(etat.camp.encart, c, m),
+      cta: etat.camp.cta.trim(),
+      ctaUrl: etat.camp.ctaUrl.trim(),
+      pied: merge(etat.camp.pied, c, m),
+      salut: salutation(c)
+    };
+  }
+
+  var CONTACT_DEMO = { civ: 'Mme', nom: 'DUPONT', prenom: 'Alice', mail: 'alice.dupont@exemple.fr' };
+
+  function contactApercu() {
+    var att = etat.contacts.filter(estEnAttente);
+    return att.length ? att[0] : (etat.contacts[0] || CONTACT_DEMO);
+  }
+
+  function rendreApercu() {
+    var c = contactApercu();
+    var k = campagnePour(c);
+    var m = magasinCtx();
+    $('prev-objet').textContent = k.objet || '(objet vide)';
+    $('preview').innerHTML = emailHtml_(k, m);
+    $('prev-who').textContent = 'Personnalisé pour ' + ((c.prenom || '') + ' ' + (c.nom || '')).trim()
+      + (c === CONTACT_DEMO ? ' (exemple)' : '');
+  }
+
+  function lireCampagne() {
+    etat.camp.objet  = $('f-objet').value;
+    etat.camp.titre  = $('f-titre').value;
+    etat.camp.corps  = $('f-corps').value;
+    etat.camp.cta    = $('f-cta').value;
+    etat.camp.ctaUrl = $('f-cta-url').value;
+    etat.camp.encart = $('f-encart').value;
+    etat.camp.ville  = $('f-ville').value;
+    etat.camp.pied   = $('f-pied').value;
+  }
+
+  function ecrireCampagne() {
+    $('f-modele').value  = etat.camp.modele || 'libre';
+    $('f-objet').value   = etat.camp.objet;
+    $('f-titre').value   = etat.camp.titre;
+    $('f-corps').value   = etat.camp.corps;
+    $('f-cta').value     = etat.camp.cta;
+    $('f-cta-url').value = etat.camp.ctaUrl;
+    $('f-encart').value  = etat.camp.encart;
+    $('f-ville').value   = etat.camp.ville;
+    $('f-pied').value    = etat.camp.pied || PIED_DEFAUT;
+  }
+
+  function chargerModele(id) {
+    var mo = MODELES[id];
+    if (!mo) { return; }
+    etat.camp.modele = id;
+    etat.camp.objet  = mo.objet;
+    etat.camp.titre  = mo.titre;
+    etat.camp.corps  = mo.corps;
+    etat.camp.cta    = mo.cta;
+    etat.camp.ctaUrl = mo.ctaUrl;
+    etat.camp.encart = mo.encart;
+    ecrireCampagne();
+    save();
+    rendreApercu();
+  }
+
+  /* ============================================================
+     ÉTAPE 3 — ENVOI
+     ============================================================ */
+
+  function modeActuel() {
+    var r = document.querySelector('input[name="mode"]:checked');
+    return r ? r.value : 'manuel';
+  }
+
+  function prochain() {
+    for (var i = 0; i < etat.contacts.length; i++) {
+      if (estEnAttente(etat.contacts[i])) { return i; }
+    }
+    return -1;
+  }
+
+  function rendreEnvoi() {
+    var i = prochain();
+    var reste = compte(estEnAttente);
+    var boutons = ['m-copy', 'm-mailto', 'm-done', 'm-skip'];
+
+    if (i < 0) {
+      $('cur-pos').textContent = etat.contacts.length
+        ? 'Aucun contact en attente'
+        : 'Importez d’abord une liste (étape 1)';
+      $('cur-who').textContent = '—';
+      $('cur-mail').textContent = '';
+      boutons.forEach(function (b) { $(b).disabled = true; });
+    } else {
+      var c = etat.contacts[i];
+      $('cur-pos').textContent = 'Contact suivant · ' + reste + ' en attente';
+      $('cur-who').textContent = ((c.civ ? c.civ + ' ' : '') + (c.prenom ? c.prenom + ' ' : '') + c.nom).trim() || '(sans nom)';
+      $('cur-mail').textContent = c.mail;
+      boutons.forEach(function (b) { $(b).disabled = false; });
+    }
+
+    $('run-start').disabled = i < 0 || run.on;
+    majBarre();
+    rendreApercu();
+  }
+
+  function majBarre() {
+    var total = compte(function (c) { return c.statut !== 'stop' && c.statut !== 'invalide'; });
+    var faits = compte(function (c) { return c.statut === 'envoye'; });
+    var pct = total ? Math.round(faits / total * 100) : 0;
+    $('bar').style.width = pct + '%';
+    $('bar-txt').textContent = faits + ' envoyé(s) sur ' + total + ' · ' + pct + ' %'
+      + (run.paused ? ' — en pause' : '');
+  }
+
+  /* ---------- mode assisté ---------- */
+  async function copierMessage() {
+    var i = prochain();
+    if (i < 0) { return; }
+    var c = etat.contacts[i];
+    var k = campagnePour(c);
+    var m = magasinCtx();
+    var html = emailHtml_(k, m);
+    var txt = emailTexte_(k, m);
+    try {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([txt], { type: 'text/plain' })
+      })]);
+      toast('✓ Message copié. Collez-le dans votre messagerie (Ctrl+V).');
+    } catch (e) {
+      try {
+        var tmp = document.createElement('div');
+        tmp.style.position = 'fixed';
+        tmp.style.left = '-9999px';
+        tmp.innerHTML = html;
+        document.body.appendChild(tmp);
+        var rg = document.createRange();
+        rg.selectNodeContents(tmp);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(rg);
+        var ok = document.execCommand('copy');
+        sel.removeAllRanges();
+        document.body.removeChild(tmp);
+        toast(ok ? '✓ Message copié.' : 'Copie impossible sur ce navigateur.', ok ? undefined : false);
+      } catch (e2) {
+        toast('Copie impossible sur ce navigateur.', false);
+      }
+    }
+  }
+
+  function ouvrirMessagerie() {
+    var i = prochain();
+    if (i < 0) { return; }
+    var c = etat.contacts[i];
+    var k = campagnePour(c);
+    var m = magasinCtx();
+    window.location.href = 'mailto:' + encodeURIComponent(c.mail)
+      + '?subject=' + encodeURIComponent(k.objet)
+      + '&body=' + encodeURIComponent(emailTexte_(k, m));
+  }
+
+  function marquer(statut, info) {
+    var i = prochain();
+    if (i < 0) { return; }
+    etat.contacts[i].statut = statut;
+    etat.contacts[i].info = info || '';
+    etat.contacts[i].ts = statut ? nowStamp() : '';
+    save();
+    rendreListe();
+    rendreEnvoi();
+  }
+
+  /* ---------- mode automatique (JSONP) ---------- */
+  function setEpStatus(msg, ok) {
+    var el = $('ep-status');
+    el.textContent = msg || '';
+    el.className = 'status' + (ok === true ? ' ok' : ok === false ? ' err' : '');
+  }
+
+  /* Seuls les points de terminaison Apps Script officiels sont acceptés. */
+  function endpointOk(u) {
+    return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec(?:[?#].*)?$/.test(u || '');
+  }
+
+  function jsonp(base, params, cb) {
+    var nom = 'cbm_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    var s = document.createElement('script');
+    var fini = false;
+    var timer = setTimeout(function () {
+      if (!fini) { terminer({ ok: false, error: 'délai dépassé' }); }
+    }, 25000);
+    function terminer(res) {
+      fini = true;
+      clearTimeout(timer);
+      try { delete window[nom]; } catch (e) { window[nom] = undefined; }
+      if (s.parentNode) { s.parentNode.removeChild(s); }
+      cb(res);
+    }
+    window[nom] = function (res) { terminer(res); };
+    s.onerror = function () { terminer({ ok: false, error: 'réseau' }); };
+    var q = [];
+    Object.keys(params).forEach(function (k) {
+      if (params[k] !== '' && params[k] != null) {
+        q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+      }
+    });
+    q.push('callback=' + nom);
+    s.src = base + (base.indexOf('?') >= 0 ? '&' : '?') + q.join('&');
+    document.body.appendChild(s);
+  }
+
+  /* Charge utile d'un envoi : uniquement les champs de la campagne.
+     La mise en page est reconstruite par le script — l'URL reste courte. */
+  function chargeUtile(c, action) {
+    var k = campagnePour(c);
+    var m = magasinCtx();
+    return {
+      a: action, cle: v('ep-key'),
+      to: c.mail, salut: k.salut, obj: k.objet,
+      tit: k.titre, cor: k.corps, enc: k.encart,
+      cta: k.cta, url: k.ctaUrl, pied: k.pied,
+      mag: m.nom, vil: m.ville, adr: m.adresse, tel: m.tel, mel: m.mail
+    };
+  }
+
+  function appelEndpoint(params, cb) {
+    var url = v('ep-url');
+    if (!endpointOk(url)) {
+      setEpStatus('URL invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
+      cb({ ok: false, error: 'url' });
+      return;
+    }
+    if (!v('ep-key')) {
+      setEpStatus('Renseignez la clé de sécurité définie dans le programme.', false);
+      cb({ ok: false, error: 'cle' });
+      return;
+    }
+    jsonp(url, params, cb);
+  }
+
+  function verifierConnexion() {
+    setEpStatus('Vérification…');
+    appelEndpoint({ a: 'quota', cle: v('ep-key') }, function (r) {
+      if (r && r.ok) {
+        setEpStatus('Connexion établie ✓ — ' + r.quota + ' envoi(s) encore possibles aujourd’hui.', true);
+      } else if (r && r.error === 'cle') {
+        setEpStatus('Clé de sécurité refusée par le programme.', false);
+      } else if (r && r.error && r.error !== 'url') {
+        setEpStatus('Échec : ' + r.error, false);
+      }
+    });
+  }
+
+  function envoyerTest() {
+    var dest = v('ep-test');
+    if (!mailOk(dest)) {
+      setEpStatus('Indiquez une adresse de test valide.', false);
+      return;
+    }
+    var faux = { civ: 'Mme', nom: 'DUPONT-TEST', prenom: 'Alice', mail: dest };
+    var p = chargeUtile(faux, 'send');
+    p.to = dest;
+    p.obj = '[TEST] ' + p.obj;
+    setEpStatus('Envoi du test…');
+    appelEndpoint(p, function (r) {
+      if (r && r.ok) { setEpStatus('Test envoyé à ' + dest + ' ✓', true); }
+      else if (r && r.error && r.error !== 'url' && r.error !== 'cle') { setEpStatus('Échec : ' + r.error, false); }
+    });
+  }
+
+  function demarrerRun() {
+    if (run.on) { return; }
+    if (prochain() < 0) { toast('Aucun contact en attente.', false); return; }
+    if (!v('ep-key')) { setEpStatus('Renseignez la clé de sécurité.', false); return; }
+    if (!endpointOk(v('ep-url'))) { setEpStatus('URL invalide.', false); return; }
+    if (!etat.camp.objet.trim() || !etat.camp.corps.trim()) {
+      toast('Renseignez au moins un objet et un corps de message (étape 2).', false);
+      return;
+    }
+    if (!confirm('Envoyer la campagne à ' + compte(estEnAttente) + ' contact(s) ?\n\n'
+      + 'Les messages partiront de votre boîte Gmail.')) { return; }
+
+    run.on = true;
+    run.paused = false;
+    $('run-start').hidden = true;
+    $('run-pause').hidden = false;
+    $('run-stop').hidden = false;
+    $('run-prog').hidden = false;
+    $('run-pause').textContent = '⏸ Pause';
+    setEpStatus('Envoi en cours…');
+    etape();
+  }
+
+  function arreterRun(msg, ok) {
+    run.on = false;
+    run.paused = false;
+    clearTimeout(run.timer);
+    $('run-start').hidden = false;
+    $('run-pause').hidden = true;
+    $('run-stop').hidden = true;
+    if (msg) { setEpStatus(msg, ok); }
+    rendreEnvoi();
+  }
+
+  function etape() {
+    if (!run.on || run.paused) { return; }
+
+    var i = prochain();
+    if (i < 0) {
+      arreterRun('Campagne terminée ✓ — ' + compte(function (c) { return c.statut === 'envoye'; })
+        + ' message(s) envoyé(s).', true);
+      return;
+    }
+
+    var c = etat.contacts[i];
+
+    /* PROTECTION CONTRE LE DOUBLON — le statut « en cours » est écrit et
+       persisté AVANT l'appel réseau. Si la page est fermée pendant l'envoi,
+       la ligne garde un statut non vide et ne repartira pas toute seule. */
+    c.statut = 'encours';
+    c.info = 'Envoi lancé le ' + nowStamp() + ' — vérifier les éléments envoyés avant de relancer';
+    c.ts = '';
+    save();
+    rendreListe();
+
+    appelEndpoint(chargeUtile(c, 'send'), function (r) {
+      if (r && r.ok) {
+        c.statut = 'envoye';
+        c.info = '';
+        c.ts = nowStamp();
+      } else if (r && r.error === 'quota') {
+        c.statut = '';
+        c.info = '';
+        save();
+        rendreListe();
+        arreterRun('Quota Google atteint. Relancez demain : les contacts déjà servis sont ignorés.', false);
+        return;
+      } else if (r && (r.error === 'url' || r.error === 'cle')) {
+        c.statut = '';
+        c.info = '';
+        save();
+        rendreListe();
+        arreterRun(null);
+        return;
+      } else {
+        /* Une erreur au moment de l'envoi ne dit pas si Gmail a accepté le
+           message : la ligne reste bloquée et demande un contrôle manuel. */
+        c.statut = 'erreur';
+        c.info = 'Envoi incertain : ' + String((r && r.error) || 'erreur inconnue').slice(0, 120);
+        c.ts = nowStamp();
+      }
+      save();
+      rendreListe();
+      majBarre();
+
+      if (r && typeof r.quota === 'number' && r.quota <= MARGE_QUOTA) {
+        arreterRun('Quota Google presque atteint (' + r.quota + ' restant). Reprise possible demain.', false);
+        return;
+      }
+
+      var delai = parseInt(v('ep-delai'), 10) || 1500;
+      run.timer = setTimeout(etape, delai);
+    });
+  }
+
+  /* ============================================================
+     INITIALISATION
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', function () {
+    $('hdr-sub').textContent = storeSub();
+
+    load();
+    if (!etat.camp.pied) { etat.camp.pied = PIED_DEFAUT; }
+    ecrireCampagne();
+
+    var ep = loadEp();
+    $('ep-url').value = ep.url || '';
+    $('ep-key').value = ep.cle || '';
+    $('ep-test').value = ep.test || profil().mail || '';
+    if (ep.delai) { $('ep-delai').value = ep.delai; }
+
+    rendreListe();
+    rendreEnvoi();
+
+    /* ── étape 1 ── */
+    $('dl-modele').addEventListener('click', function () {
+      telecharger('modele-liste-contacts.csv', modeleCsv());
+      toast('Modèle téléchargé. Remplissez-le puis réimportez-le ici.');
+    });
+    $('pick-file').addEventListener('click', function () { $('csv-file').click(); });
+    $('drop').addEventListener('click', function () { $('csv-file').click(); });
+    $('drop').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('csv-file').click(); }
+    });
+    $('csv-file').addEventListener('change', function () {
+      if (this.files && this.files[0]) { importerFichier(this.files[0]); }
+      this.value = '';
+    });
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      $('drop').addEventListener(ev, function (e) {
+        e.preventDefault();
+        this.classList.add('is-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (ev) {
+      $('drop').addEventListener(ev, function (e) {
+        e.preventDefault();
+        this.classList.remove('is-over');
+      });
+    });
+    $('drop').addEventListener('drop', function (e) {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        importerFichier(e.dataTransfer.files[0]);
+      }
+    });
+    $('map-ok').addEventListener('click', validerImport);
+    $('map-cancel').addEventListener('click', function () {
+      pending = null;
+      $('map-box').hidden = true;
+    });
+
+    $('q').addEventListener('input', rendreListe);
+    $('filtre').addEventListener('change', rendreListe);
+    $('exp-suivi').addEventListener('click', exporterSuivi);
+    $('reset-statuts').addEventListener('click', function () {
+      if (!confirm('Remettre tous les statuts à zéro ?\n\n'
+        + 'Les contacts déjà servis repartiront lors du prochain envoi. '
+        + 'Les désinscrits restent protégés.')) { return; }
+      etat.contacts.forEach(function (c) {
+        if (c.statut === 'stop') { return; }
+        c.statut = mailOk(c.mail) ? '' : 'invalide';
+        c.info = c.statut === 'invalide' ? 'Format d’adresse incorrect' : '';
+        c.ts = '';
+      });
+      save();
+      rendreListe();
+      rendreEnvoi();
+      toast('Statuts remis à zéro.');
+    });
+    $('vider').addEventListener('click', function () {
+      if (!confirm('Supprimer définitivement la liste et son suivi ?\n\n'
+        + 'La liste des désinscrits est conservée.')) { return; }
+      etat.contacts = [];
+      save();
+      rendreListe();
+      rendreEnvoi();
+      toast('Liste vidée.');
+    });
+
+    /* ── étape 2 ── */
+    $('f-modele').addEventListener('change', function () {
+      var id = this.value;
+      var vide = !etat.camp.objet.trim() && !etat.camp.corps.trim() && !etat.camp.titre.trim();
+      if (!vide && !confirm('Charger le modèle « ' + this.options[this.selectedIndex].text
+        + ' » ?\n\nLe contenu actuel sera remplacé.')) {
+        this.value = etat.camp.modele || 'libre';
+        return;
+      }
+      chargerModele(id);
+    });
+    ['f-objet', 'f-titre', 'f-corps', 'f-cta', 'f-cta-url', 'f-encart', 'f-ville', 'f-pied']
+      .forEach(function (id) {
+        $(id).addEventListener('input', function () {
+          lireCampagne();
+          save();
+          rendreApercu();
+        });
+      });
+
+    /* ── étape 3 ── */
+    document.querySelectorAll('input[name="mode"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        var auto = modeActuel() === 'auto';
+        $('pan-manuel').hidden = auto;
+        $('pan-auto').hidden = !auto;
+        $('mode-manuel').classList.toggle('is-on', !auto);
+        $('mode-auto').classList.toggle('is-on', auto);
+      });
+    });
+
+    $('m-copy').addEventListener('click', copierMessage);
+    $('m-mailto').addEventListener('click', ouvrirMessagerie);
+    $('m-done').addEventListener('click', function () { marquer('envoye', ''); });
+    $('m-skip').addEventListener('click', function () {
+      marquer('passe', 'Écarté manuellement');
+    });
+
+    ['ep-url', 'ep-key', 'ep-test', 'ep-delai'].forEach(function (id) {
+      $(id).addEventListener('change', saveEp);
+    });
+    $('gen-key').addEventListener('click', function () {
+      var abc = 'abcdefghijkmnpqrstuvwxyz23456789';
+      var cle = '', i;
+      if (window.crypto && window.crypto.getRandomValues) {
+        var buf = new Uint8Array(12);
+        window.crypto.getRandomValues(buf);
+        for (i = 0; i < buf.length; i++) { cle += abc.charAt(buf[i] % abc.length); }
+      } else {
+        for (i = 0; i < 12; i++) { cle += abc.charAt(Math.floor(Math.random() * abc.length)); }
+      }
+      $('ep-key').value = cle;
+      saveEp();
+      toast('Clé générée. Collez la même valeur dans le programme Apps Script.');
+    });
+    $('ep-check').addEventListener('click', verifierConnexion);
+    $('ep-test-send').addEventListener('click', envoyerTest);
+    $('run-start').addEventListener('click', demarrerRun);
+    $('run-pause').addEventListener('click', function () {
+      if (!run.on) { return; }
+      run.paused = !run.paused;
+      this.textContent = run.paused ? '▶ Reprendre' : '⏸ Pause';
+      setEpStatus(run.paused ? 'En pause.' : 'Envoi en cours…');
+      majBarre();
+      if (!run.paused) { etape(); }
+    });
+    $('run-stop').addEventListener('click', function () {
+      arreterRun('Envoi interrompu. Les contacts non servis restent en attente.');
+    });
+
+    /* Une fermeture d'onglet pendant un envoi laisserait une ligne « en cours ». */
+    window.addEventListener('beforeunload', function (e) {
+      if (run.on) { e.preventDefault(); e.returnValue = ''; }
+    });
+  });
+
+  /* Détection iOS : affiche le bouton retour flottant (iPhone/iPad n'ont pas
+     de bouton retour navigateur, notamment en mode plein écran). */
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    document.body.classList.add('is-ios');
+  }
+</script>
+</body>
+</html>

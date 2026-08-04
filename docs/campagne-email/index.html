@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Envoi automatique des campagnes — Procédure</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#1F6FB2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --ink: #1A2A3A; --bg: #F4F7FA;
+      --white: #fff; --border: #D6E4F0; --grey: #5A7080; --green: #2E8B57; --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink);
+      line-height: 1.6; padding: 0 0 60px;
+    }
+    .site-header {
+      background: var(--blue); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .back-link {
+      color: rgba(255,255,255,.9); text-decoration: none; font-size: .85rem;
+      font-weight: 700; border: 1px solid rgba(255,255,255,.4);
+      padding: 6px 13px; border-radius: var(--radius); white-space: nowrap;
+    }
+    .back-link:hover { background: rgba(255,255,255,.16); }
+    .site-header h1 { font-size: 1.1rem; font-weight: 800; }
+    main { max-width: 760px; margin: 0 auto; padding: 28px 20px; }
+    h2 { font-size: 1.05rem; margin: 28px 0 12px; }
+    p { margin-bottom: 12px; }
+    .lead { font-size: 1rem; }
+    .panel {
+      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 22px;
+      font-size: .92rem;
+    }
+    .panel--info { background: #EAF2FA; border: 1px solid var(--border); }
+    .panel--safe { background: #ECF7F0; border: 1px solid #BFE3CD; }
+    .panel--warn { background: #FFF7E6; border: 1px solid #F0C36D; }
+    .panel--stop { background: #FDECEC; border: 1px solid #E6BDB7; }
+    .panel h3 { font-size: .95rem; margin-bottom: 8px; }
+    .panel ul { margin: 6px 0 0 18px; }
+    .panel li { margin-bottom: 5px; }
+    .panel a { color: var(--blue-d); font-weight: 700; }
+    .time {
+      display: inline-block; font-size: .8rem; font-weight: 700; color: var(--blue-d);
+      background: #fff; border: 1px solid var(--border); border-radius: 20px;
+      padding: 2px 12px; margin-bottom: 14px;
+    }
+    ol.steps { list-style: none; counter-reset: step; margin-top: 6px; }
+    ol.steps > li {
+      counter-increment: step; position: relative;
+      padding: 0 0 24px 48px; margin: 0;
+    }
+    ol.steps > li::before {
+      content: counter(step); position: absolute; left: 0; top: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue); color: #fff; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem;
+    }
+    ol.steps > li:not(:last-child)::after {
+      content: ''; position: absolute; left: 15px; top: 36px; bottom: 2px;
+      width: 2px; background: var(--border);
+    }
+    .step-title { font-weight: 700; margin-bottom: 4px; }
+    .step-body { font-size: .92rem; }
+    .step-body ul { margin: 6px 0 0 18px; }
+    .why {
+      font-size: .85rem; color: var(--grey); background: #fff;
+      border-left: 3px solid var(--blue); padding: 6px 0 6px 12px; margin: 8px 0 0;
+    }
+    .why b { color: var(--ink); }
+    code {
+      background: #EEF2F7; padding: 1px 6px; border-radius: 4px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em;
+    }
+    .code-wrap { position: relative; margin: 10px 0 4px; }
+    pre {
+      background: #0E2233; color: #E6EEF6; border-radius: var(--radius);
+      padding: 16px; overflow-x: auto; font-size: .74rem; line-height: 1.5;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      max-height: 460px; overflow-y: auto;
+    }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px;
+      font-family: inherit; font-size: .72rem; font-weight: 700;
+      background: rgba(255,255,255,.14); color: #fff;
+      border: 1px solid rgba(255,255,255,.35); border-radius: 6px;
+      padding: 5px 10px; cursor: pointer;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.26); }
+    details { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+    summary { cursor: pointer; font-weight: 700; padding: 12px 14px; font-size: .9rem; color: var(--blue-d); }
+    details[open] summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 12px 14px; font-size: .9rem; }
+    table.q { width: 100%; border-collapse: collapse; font-size: .88rem; margin: 8px 0 0; }
+    table.q th, table.q td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+    table.q th { background: #EEF4F9; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--grey); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="back-link" href="../../">&#8592; Retour</a>
+    <h1>Envoyer vos campagnes automatiquement</h1>
+  </header>
+
+  <main>
+    <p class="lead">
+      L'outil <strong>Campagne e-mail</strong> fonctionne sans aucune installation&nbsp;: en mode
+      <em>assisté</em>, il prépare les messages un par un et vous les envoyez depuis votre messagerie
+      habituelle. Cette page décrit l'<strong>option facultative</strong> qui automatise l'envoi en
+      série&nbsp;: les messages partent alors <strong>de votre propre boîte Gmail</strong>, via un petit
+      programme que vous déployez et contrôlez. Aucun serveur de ce site n'intervient — il n'en existe pas.
+    </p>
+    <p><span class="time">Durée : environ 5 minutes, une seule fois</span></p>
+
+    <div class="panel panel--safe">
+      <h3>Avant de commencer : ce qui se passe exactement</h3>
+      <ul>
+        <li><strong>Les messages partent de chez vous.</strong> Ils sont envoyés par votre compte Google
+          et se retrouvent dans vos «&nbsp;éléments envoyés&nbsp;» Gmail, comme si vous les aviez écrits.</li>
+        <li><strong>Vous restez propriétaire et maître.</strong> Le programme est créé sous votre compte&nbsp;;
+          vous pouvez le supprimer ou révoquer son accès à tout moment.</li>
+        <li><strong>Rien n'est stocké par le programme.</strong> Il reçoit un message, l'envoie, répond
+          «&nbsp;fait&nbsp;». Il ne conserve ni liste, ni historique, ni adresse.</li>
+        <li><strong>La liste de contacts ne quitte votre navigateur que pour ce trajet-là</strong>&nbsp;:
+          une adresse à la fois, vers votre propre compte Google, au moment de l'envoi.</li>
+        <li><strong>Le code est court et lisible</strong> (vous le collez vous-même à l'étape 2).</li>
+      </ul>
+    </div>
+
+    <h2>Les étapes</h2>
+    <ol class="steps">
+      <li>
+        <div class="step-title">Ouvrir l'outil de script de Google</div>
+        <div class="step-body">
+          Sur l'ordinateur, connectez-vous au <strong>compte Google du magasin</strong> — celui dont
+          l'adresse doit apparaître comme expéditeur. Ouvrez un nouvel onglet, allez sur
+          <code>script.google.com</code> puis cliquez sur <strong>Nouveau projet</strong>.
+          <p class="why"><b>Pourquoi&nbsp;?</b> «&nbsp;Apps Script&nbsp;» est l'outil officiel de Google
+          qui permet à votre compte d'automatiser de petites tâches, ici l'envoi d'un e-mail.</p>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Coller le programme et choisir votre clé</div>
+        <div class="step-body">
+          Sélectionnez tout le texte déjà présent, supprimez-le, puis collez ce code
+          (bouton <strong>Copier</strong>). Enregistrez avec l'icône disquette.
+          <div class="code-wrap">
+            <button class="copy-btn" id="copy-code" type="button">Copier</button>
+            <pre id="code">Chargement…</pre>
+          </div>
+
+          <div class="panel panel--warn" style="margin-top:14px;">
+            <h3>Une seule ligne à modifier</h3>
+            <p style="margin-bottom:8px;">Tout en haut du code&nbsp;:</p>
+            <p style="margin-bottom:8px;"><code>var CLE = 'a-remplacer';</code></p>
+            <p style="margin-bottom:0;">
+              Remplacez <code>a-remplacer</code> par un mot de passe à vous — l'outil sait vous en
+              générer un&nbsp;: dans <strong>Campagne e-mail → mode automatique</strong>, cliquez sur
+              <em>Générer une clé</em>, puis collez la même valeur ici <strong>et</strong> dans le champ
+              «&nbsp;Clé de sécurité&nbsp;». Tant que la ligne n'est pas modifiée, le programme refuse
+              tout envoi.
+            </p>
+          </div>
+
+          <details>
+            <summary>Que fait ce programme, en clair&nbsp;?</summary>
+            <div class="details-body">
+              Il sait faire deux choses, et rien d'autre&nbsp;: <strong>«&nbsp;combien d'envois me
+              reste-t-il aujourd'hui&nbsp;?&nbsp;»</strong> et <strong>«&nbsp;envoie ce message à cette
+              adresse&nbsp;»</strong>. Chaque demande doit porter votre clé, sans quoi elle est refusée.
+              Il n'accède à aucun fichier, ne lit aucun message reçu, et n'écrit rien nulle part.
+              La mise en page du message est construite par le programme lui-même, à partir du texte
+              que vous avez saisi dans l'outil.
+            </div>
+          </details>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Publier en « application web »</div>
+        <div class="step-body">
+          En haut à droite&nbsp;: <strong>Déployer &#8594; Nouveau déploiement</strong>. Cliquez sur la
+          roue dentée et choisissez <strong>Application web</strong>. Réglez ensuite&nbsp;:
+          <ul>
+            <li><strong>Exécuter en tant que</strong>&nbsp;: <em>Moi</em></li>
+            <li><strong>Qui a accès</strong>&nbsp;: <em>Tout le monde</em></li>
+          </ul>
+          <p class="why"><b>Pourquoi ces réglages&nbsp;?</b> «&nbsp;Exécuter en tant que moi&nbsp;» fait
+          que les messages partent de <b>votre</b> boîte. «&nbsp;Tout le monde&nbsp;» signifie seulement
+          que l'outil peut joindre cette adresse&nbsp;; c'est votre <b>clé</b> qui protège réellement
+          l'accès.</p>
+
+          <div class="panel panel--warn" style="margin-top:14px;">
+            <h3>Le choix « Tout le monde » n'apparaît pas&nbsp;?</h3>
+            <p style="margin-bottom:0;">Certains comptes Google <strong>gérés par une entreprise</strong>
+              (comptes «&nbsp;Workspace&nbsp;») ne proposent que «&nbsp;Moi uniquement&nbsp;» ou
+              «&nbsp;Tous les utilisateurs du domaine&nbsp;». L'envoi automatique ne peut alors pas
+              fonctionner avec ce compte&nbsp;: utilisez le mode assisté de l'outil, qui ne demande
+              aucune installation.</p>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Autoriser votre propre programme</div>
+        <div class="step-body">
+          Google demande d'autoriser l'envoi d'e-mails en votre nom&nbsp;: acceptez avec le compte du magasin.
+          <p class="why"><b>Un écran «&nbsp;Application non vérifiée&nbsp;» va apparaître — c'est normal
+          et sans danger ici.</b> Google l'affiche pour tout script personnel qu'il n'a pas audité&nbsp;;
+          comme c'est <b>vous</b> qui venez de le créer, vous pouvez continuer.</p>
+          <p style="margin-bottom:0;">Les deux écrans concernés sont reproduits et commentés en détail
+            sur la page <a href="../sync-drive/">Synchronisation Google&nbsp;Drive</a> (étape&nbsp;4)&nbsp;:
+            la marche à suivre est exactement la même. Seule différence&nbsp;: l'autorisation demandée
+            ici porte sur l'<strong>envoi d'e-mails en votre nom</strong>, et non sur le Drive.</p>
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Copier l'adresse obtenue</div>
+        <div class="step-body">
+          À la fin, Google affiche la fenêtre <strong>«&nbsp;Nouveau déploiement&nbsp;»</strong> contenant
+          l'<strong>URL d'application web</strong> (elle se termine par <code>/exec</code>). Cliquez sur
+          <strong>Copier</strong> sous cette URL. L'«&nbsp;ID de déploiement&nbsp;» ne sert pas.
+        </div>
+      </li>
+
+      <li>
+        <div class="step-title">Renseigner l'outil et faire un test</div>
+        <div class="step-body">
+          Revenez dans <strong>Campagne e-mail</strong>, étape&nbsp;3, choisissez le mode
+          <strong>Automatique</strong>, puis&nbsp;:
+          <ul>
+            <li>collez l'URL dans <em>URL du programme d'envoi</em>&nbsp;;</li>
+            <li>collez votre clé dans <em>Clé de sécurité</em>&nbsp;;</li>
+            <li>cliquez sur <strong>Vérifier la connexion</strong> — le nombre d'envois restants s'affiche&nbsp;;</li>
+            <li>saisissez votre adresse et cliquez sur <strong>Envoyer un test</strong>.</li>
+          </ul>
+          <p class="why"><b>Le test n'utilise aucune donnée réelle&nbsp;:</b> il emploie un client fictif
+          («&nbsp;Alice DUPONT-TEST&nbsp;») et n'écrit qu'à l'adresse que vous indiquez. Vérifiez la mise
+          en page, puis lancez la campagne.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h2>Combien de messages par jour&nbsp;?</h2>
+    <p>
+      Google plafonne les envois automatisés. Le programme renvoie le compteur restant à chaque message,
+      et l'outil s'arrête tout seul avant la limite&nbsp;: les contacts non servis restent
+      «&nbsp;en attente&nbsp;» et repartent au prochain lancement, sans doublon.
+    </p>
+    <table class="q">
+      <thead>
+        <tr><th>Type de compte</th><th>Limite indicative par jour</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Compte Gmail gratuit</td><td>environ 100 destinataires</td></tr>
+        <tr><td>Compte Google Workspace</td><td>environ 1&nbsp;500 destinataires</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.85rem;color:var(--grey);margin-top:8px;">
+      Ces valeurs sont fixées par Google et peuvent évoluer&nbsp;: la valeur qui fait foi est celle que
+      renvoie le bouton <em>Vérifier la connexion</em>. Le compteur se réinitialise 24&nbsp;heures après
+      le premier envoi.
+    </p>
+
+    <div class="panel panel--stop">
+      <h3>À savoir avant de lancer une vraie campagne</h3>
+      <ul>
+        <li><strong>Qui possède l'URL <em>et</em> la clé peut envoyer des messages depuis votre boîte.</strong>
+          Gardez les deux en interne. En cas de doute, changez la clé dans le programme et redéployez.</li>
+        <li><strong>Envoyez d'abord un test.</strong> Un message parti ne se rattrape pas.</li>
+        <li><strong>N'écrivez qu'à des personnes qui vous ont laissé leur adresse en connaissance de cause</strong>,
+          et laissez toujours une possibilité de désinscription dans le message. Les règles applicables
+          sont détaillées dans le <a href="../rgpd-mailing/">rappel RGPD</a>&nbsp;: à lire avant la
+          première campagne.</li>
+        <li><strong>Une adresse invalide abîme votre réputation d'expéditeur.</strong> Nettoyez la liste
+          avant l'envoi&nbsp;: l'outil écarte les adresses manifestement fausses, pas celles qui n'existent plus.</li>
+      </ul>
+    </div>
+
+    <div class="panel panel--info">
+      <h3>Comment tout arrêter</h3>
+      <p style="margin-bottom:0;">
+        Supprimez le projet sur <code>script.google.com</code>, ou videz simplement le champ URL dans
+        l'outil. Vous pouvez aussi retirer l'autorisation depuis
+        <code>myaccount.google.com</code> &#8594; <em>Sécurité</em> &#8594; <em>Applications tierces</em>.
+        L'outil continue de fonctionner en mode assisté.
+      </p>
+    </div>
+
+    <div class="panel panel--info">
+      Un doute ou un blocage à une étape&nbsp;? Notez le numéro de l'étape et le message affiché&nbsp;:
+      c'est suffisant pour être dépanné rapidement.
+    </div>
+  </main>
+
+  <!-- Le programme est stocké dans un script non exécutable (type="text/plain") plutôt
+       qu'écrit directement dans le <pre> : son contenu comporte des balises HTML, qui
+       devraient sinon être échappées une par une — source d'erreurs à la moindre
+       retouche. Il est recopié tel quel dans le <pre> au chargement. -->
+  <script type="text/plain" id="gs-src">/************************************************************
+ * ENVOI DE CAMPAGNE E-MAIL — programme du magasin
+ *
+ * Déployé par le magasin, sous son propre compte Google.
+ * Il sait faire deux choses :
+ *   · dire combien d'envois restent disponibles aujourd'hui ;
+ *   · envoyer UN message à UNE adresse.
+ *
+ * Il ne conserve aucune donnée : ni liste, ni historique,
+ * ni adresse. Rien n'est écrit sur le Drive.
+ *
+ * MODE D'EMPLOI
+ *   1. Coller ce code dans script.google.com (Nouveau projet).
+ *   2. Remplacer la valeur de CLE ci-dessous par un mot de
+ *      passe à vous, puis enregistrer.
+ *   3. Déployer -> Nouveau déploiement -> Application web
+ *      · Exécuter en tant que : Moi
+ *      · Qui a accès          : Tout le monde
+ *   4. Coller l'URL obtenue (…/exec) et la même clé dans
+ *      l'outil « Campagne e-mail ».
+ ************************************************************/
+
+/* À REMPLACER par votre propre mot de passe. Tant que cette
+   ligne n'est pas modifiée, le programme refuse tout envoi. */
+var CLE = 'a-remplacer';
+
+/* Envois laissés disponibles : le programme s'arrête avant
+   d'épuiser complètement le quota Google du compte. */
+var MARGE_QUOTA = 5;
+
+
+/* ---------------------------------------------------------- */
+/* POINT D'ENTRÉE                                              */
+/* ---------------------------------------------------------- */
+
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+
+  /* Sécurité : nom de callback JSONP valide uniquement. */
+  var cb = p.callback;
+  if (cb && !/^[A-Za-z_$][0-9A-Za-z_$.]*$/.test(cb)) { cb = null; }
+
+  var res;
+  try {
+    if (CLE === 'a-remplacer' || String(p.cle || '') !== CLE) {
+      res = { ok: false, error: 'cle' };
+    } else if (p.a === 'quota') {
+      res = { ok: true, quota: MailApp.getRemainingDailyQuota() };
+    } else if (p.a === 'send') {
+      res = envoyer_(p);
+    } else {
+      res = { ok: false, error: 'action inconnue' };
+    }
+  } catch (err) {
+    res = { ok: false, error: court_(err) };
+  }
+
+  return sortie_(res, cb);
+}
+
+
+function sortie_(res, cb) {
+  var json = JSON.stringify(res);
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+/* ---------------------------------------------------------- */
+/* ENVOI                                                       */
+/* ---------------------------------------------------------- */
+
+function envoyer_(p) {
+  var to = String(p.to || '').trim();
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) {
+    return { ok: false, error: 'adresse invalide' };
+  }
+
+  var quota = MailApp.getRemainingDailyQuota();
+  if (quota <= MARGE_QUOTA) {
+    return { ok: false, error: 'quota', quota: quota };
+  }
+
+  /* Contenu de la campagne, tel que saisi dans l'outil. */
+  var k = {
+    objet:  String(p.obj || ''),
+    salut:  String(p.salut || ''),
+    titre:  String(p.tit || ''),
+    corps:  String(p.cor || ''),
+    encart: String(p.enc || ''),
+    cta:    String(p.cta || ''),
+    ctaUrl: String(p.url || ''),
+    pied:   String(p.pied || '')
+  };
+
+  /* Identité du magasin, tirée du profil enregistré dans le navigateur. */
+  var m = {
+    nom:     String(p.mag || ''),
+    ville:   String(p.vil || ''),
+    adresse: String(p.adr || ''),
+    tel:     String(p.tel || ''),
+    mail:    String(p.mel || '')
+  };
+
+  /* Seuls les liens http(s) sont acceptés : un lien « javascript: »
+     glissé dans le bouton n'a rien à faire dans un e-mail. */
+  if (k.ctaUrl && !/^https?:\/\//i.test(k.ctaUrl)) { k.ctaUrl = ''; }
+
+  var options = {
+    htmlBody: emailHtml_(k, m),
+    name: m.nom || 'Votre opticien'
+  };
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m.mail)) { options.replyTo = m.mail; }
+
+  GmailApp.sendEmail(to, entete_(k.objet), emailTexte_(k, m), options);
+
+  return { ok: true, quota: MailApp.getRemainingDailyQuota() };
+}
+
+
+/* ---------------------------------------------------------- */
+/* OUTILS                                                      */
+/* ---------------------------------------------------------- */
+
+/* Un objet d'e-mail ne contient jamais de retour à la ligne. */
+function entete_(valeur) {
+  return String(valeur || '(sans objet)')
+    .replace(/[\r\n]+/g, ' ')
+    .trim()
+    .slice(0, 200) || '(sans objet)';
+}
+
+function court_(erreur) {
+  var message = (erreur && erreur.message) ? erreur.message : erreur;
+  return String(message || 'erreur inconnue')
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+    .slice(0, 200);
+}
+
+function esc_(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+
+/* ---------------------------------------------------------- */
+/* MISE EN PAGE DU MESSAGE                                     */
+/*                                                             */
+/* ⚠ emailHtml_() et emailTexte_() sont la copie exacte des    */
+/* fonctions du même nom dans outils/campagne-email/ : c'est   */
+/* ce qui garantit que l'aperçu affiché dans l'outil est bien  */
+/* le message reçu par le client. Toute retouche ici doit être */
+/* reportée là-bas, et réciproquement.                         */
+/* ---------------------------------------------------------- */
+
+function emailHtml_(k, m) {
+  var F = "Arial, Helvetica, sans-serif";
+  var h = '';
+
+  function p(txt) {
+    return '<p style="margin:0 0 16px;">' + esc_(txt).replace(/\n/g, '<br>') + '</p>';
+  }
+
+  h += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"'
+    + ' style="border-collapse:collapse;background:#EEF4F9;"><tr><td align="center" style="padding:26px 12px;">';
+
+  h += '<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0"'
+    + ' style="width:560px;max-width:100%;border-collapse:collapse;background:#ffffff;border:1px solid #D6E4F0;">';
+
+  /* En-tête : nom du magasin + ville */
+  h += '<tr><td style="padding:18px 26px 14px;">'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'
+    + '<td style="font-family:' + F + ';font-size:19px;font-weight:bold;color:#1F6FB2;">' + esc_(m.nom) + '</td>'
+    + (m.ville
+      ? '<td align="right" style="font-family:' + F + ';font-size:12px;font-weight:bold;color:#5A7080;">' + esc_(m.ville) + '</td>'
+      : '')
+    + '</tr></table></td></tr>';
+
+  /* Bandeau bleu */
+  h += '<tr><td style="background:#1F6FB2;padding:9px 26px;font-family:' + F + ';font-size:12px;'
+    + 'font-weight:bold;color:#ffffff;letter-spacing:0.6px;">VOTRE OPTICIEN'
+    + (m.ville ? ' &#183; ' + esc_(m.ville.toUpperCase()) : '') + '</td></tr>';
+
+  /* Accroche */
+  if (k.titre) {
+    h += '<tr><td style="padding:26px 26px 0;font-family:' + F + ';font-size:23px;line-height:1.25;'
+      + 'font-weight:bold;color:#1A2A3A;">' + esc_(k.titre) + '</td></tr>';
+  }
+
+  /* Bouton d'action */
+  if (k.cta && k.ctaUrl) {
+    h += '<tr><td style="padding:18px 26px 6px;">'
+      + '<a href="' + esc_(k.ctaUrl) + '" target="_blank" style="display:inline-block;background:#1F6FB2;'
+      + 'color:#ffffff;text-decoration:none;font-family:' + F + ';font-size:12px;font-weight:bold;'
+      + 'letter-spacing:0.8px;padding:12px 26px;border-radius:999px;">' + esc_(k.cta) + '</a></td></tr>';
+  }
+
+  /* Corps */
+  h += '<tr><td style="background:#EFF6FC;padding:24px 26px;font-family:' + F + ';font-size:15px;'
+    + 'line-height:1.65;color:#3E4C5E;">';
+  h += p(k.salut);
+  String(k.corps || '').split(/\n{2,}/).forEach(function (bloc) {
+    if (bloc.trim()) { h += p(bloc.trim()); }
+  });
+  h += '</td></tr>';
+
+  /* Encadré « bon à savoir » */
+  if (k.encart) {
+    h += '<tr><td style="padding:24px 26px 0;">'
+      + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"'
+      + ' style="border-collapse:collapse;border:1.5px solid #1F6FB2;"><tr>'
+      + '<td style="padding:16px 18px;font-family:' + F + ';font-size:13.5px;line-height:1.55;color:#1A2A3A;">'
+      + '<span style="font-weight:bold;color:#1F6FB2;">Le saviez-vous&#160;?</span><br>'
+      + esc_(k.encart).replace(/\n/g, '<br>')
+      + '</td></tr></table></td></tr>';
+  }
+
+  /* Coordonnées */
+  var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail].filter(Boolean).join(' &#183; ');
+  h += '<tr><td style="padding:24px 26px 22px;font-family:' + F + ';font-size:13px;color:#1A2A3A;">'
+    + '<span style="font-weight:bold;">' + esc_(m.nom) + '</span>'
+    + (coord ? '<br><span style="color:#5A7080;font-size:12px;">' + coord + '</span>' : '')
+    + '</td></tr>';
+
+  h += '</table>';
+
+  /* Désinscription, hors carte */
+  if (k.pied) {
+    h += '<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0"'
+      + ' style="width:560px;max-width:100%;border-collapse:collapse;"><tr>'
+      + '<td align="center" style="padding:16px 24px 0;font-family:' + F + ';font-size:11px;'
+      + 'line-height:1.5;color:#8B929C;">' + esc_(k.pied) + '</td></tr></table>';
+  }
+
+  h += '</td></tr></table>';
+  return h;
+}
+
+
+function emailTexte_(k, m) {
+  var l = [];
+  l.push(k.salut, '');
+  if (k.titre) { l.push(k.titre, ''); }
+  String(k.corps || '').split(/\n{2,}/).forEach(function (b) {
+    if (b.trim()) { l.push(b.trim(), ''); }
+  });
+  if (k.cta && k.ctaUrl) { l.push(k.cta + ' : ' + k.ctaUrl, ''); }
+  if (k.encart) { l.push('Le saviez-vous ? ' + k.encart, ''); }
+  l.push(m.nom);
+  var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail].filter(Boolean).join(' · ');
+  if (coord) { l.push(coord); }
+  if (k.pied) { l.push('', '--', k.pied); }
+  return l.join('\n');
+}
+</script>
+
+  <script>
+    (function () {
+      var src = document.getElementById('gs-src');
+      var pre = document.getElementById('code');
+      if (src && pre) { pre.textContent = src.textContent.replace(/^\n/, ''); }
+
+      document.getElementById('copy-code').addEventListener('click', function () {
+        var btn = this;
+        navigator.clipboard.writeText(pre.textContent).then(function () {
+          btn.textContent = 'Copié ✓';
+          setTimeout(function () { btn.textContent = 'Copier'; }, 2000);
+        }, function () {
+          btn.textContent = 'Échec';
+          setTimeout(function () { btn.textContent = 'Copier'; }, 2000);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
