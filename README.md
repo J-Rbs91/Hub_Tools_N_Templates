@@ -16,6 +16,16 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 | [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
 | [Clôture de Caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
 | [Épaisseur des verres](outils/epaisseur-verres/) | Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi, Ø mini du palet) selon la correction, l'indice et la forme de monture (côtes A / B / D), décentrement OD / OG et visualisation 3D manipulable | Disponible |
+| [Campagne e-mail](outils/campagne-email/) | CRM simplifié : modèle CSV fourni, import de la liste d'adresses vérifiées, rédaction du message avec variables de personnalisation, suivi des envois contact par contact, liste d'exclusion persistante | **Bientôt** — annoncé mais non ouvert |
+
+> **Campagne e-mail — pourquoi l'outil n'est pas ouvert.** Il est terminé et testé, mais écrire à une
+> liste de clients engage la responsabilité du magasin (consentement, désinscription, durée de
+> conservation, et surtout **aucune donnée de santé dans un message commercial**). La carte du hub
+> l'annonce en état « Bientôt » sans lien d'accès ; la page reste joignable par son URL directe pour
+> évaluation, et affiche un bandeau qui le rappelle. Les règles sont réunies dans
+> [`docs/rgpd-mailing/`](docs/rgpd-mailing/), accessible depuis le pied de page du hub. Pour ouvrir
+> l'outil : rétablir sur la carte le lien `.tool-card__cta` et le badge « Disponible », retirer la
+> classe `tool-card--soon` et le bandeau de la page de l'outil.
 
 > **Profil magasin** — un profil partagé (clé `localStorage` `profil-magasin-v1`, contenant nom,
 > adresse, téléphone et e-mail) renseigné une fois sur le hub pré-remplit l'en-tête de la
@@ -53,6 +63,11 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
 - Les exports (PDF, copie Gmail) sont générés entièrement côté client.
 - La synchronisation Drive (facultative) ne transmet que le profil du magasin, vers le Drive du
   magasin, et jamais de donnée patient.
+- La liste de contacts de **Campagne e-mail** reste dans le navigateur du poste : elle n'est jamais
+  incluse dans la sauvegarde du profil ni dans la synchronisation Drive. Le mode d'envoi *assisté*
+  ne déclenche aucun appel réseau ; le mode *automatique*, facultatif et à activer explicitement,
+  transmet une adresse à la fois vers le **compte Google du magasin lui-même**, via un script
+  déployé et contrôlé par le magasin ([`docs/campagne-email/`](docs/campagne-email/)).
 - La seule ressource externe chargée est la police Manrope via Google Fonts (aucune donnée patient transmise).
 
 ---
@@ -91,8 +106,12 @@ Le fichier `.nojekyll` à la racine désactive le traitement Jekyll et assure la
 ├── docs/
 │   ├── sync-drive/
 │   │   └── index.html           (procédure + script Apps Script de synchro Drive)
-│   └── sauvegarde-fichier/
-│       └── index.html           (procédure « fichier » + transparence sur les données)
+│   ├── sauvegarde-fichier/
+│   │   └── index.html           (procédure « fichier » + transparence sur les données)
+│   ├── campagne-email/
+│   │   └── index.html           (procédure + script Apps Script d'envoi des campagnes)
+│   └── rgpd-mailing/
+│       └── index.html           (rappel RGPD : écrire à ses clients par e-mail)
 ├── .github/
 │   ├── dependabot.yml           (maj auto des versions d'actions)
 │   ├── ISSUE_TEMPLATE/          (modèles de bug / amélioration)
@@ -106,7 +125,9 @@ Le fichier `.nojekyll` à la racine désactive le traitement Jekyll et assure la
     │   └── index.html           (outil autonome : HTML + CSS + JS inline)
     ├── cloture-caisse/
     │   └── index.html           (outil autonome : HTML + CSS + JS inline)
-    └── epaisseur-verres/
+    ├── epaisseur-verres/
+    │   └── index.html           (outil autonome : HTML + CSS + JS inline)
+    └── campagne-email/
         └── index.html           (outil autonome : HTML + CSS + JS inline)
 ```
 
