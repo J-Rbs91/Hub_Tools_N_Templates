@@ -721,6 +721,15 @@ body::before {
 .tool-card:hover .ti-keys rect:nth-child(9),
 .tool-card.icon-play .ti-keys rect:nth-child(9) { animation-delay: 1.2s; }
 
+/* Les traits de vitesse de l'enveloppe s'estompent en cascade (« ça part »). */
+.tool-card:hover .ti-send rect,
+.tool-card.icon-play .ti-send rect { animation: ti-send 1.9s ease-in-out infinite; }
+
+.tool-card:hover .ti-send rect:nth-child(2),
+.tool-card.icon-play .ti-send rect:nth-child(2) { animation-delay: .13s; }
+.tool-card:hover .ti-send rect:nth-child(3),
+.tool-card.icon-play .ti-send rect:nth-child(3) { animation-delay: .26s; }
+
 /* Le stylo descend en signant pendant que le paraphe se trace sous la plume. */
 @keyframes ti-write {
   0%        { stroke-dashoffset: 100; }
@@ -741,6 +750,11 @@ body::before {
 @keyframes ti-key {
   0%, 65%, 100% { fill: #fff; }
   18%           { fill: var(--sky); }
+}
+/* Chaque trait s'efface puis revient : lecture « envoi en cours ». */
+@keyframes ti-send {
+  0%, 100% { opacity: 1; }
+  45%      { opacity: .22; }
 }
 
 /* Léger reflet de surface, révélé en douceur au survol (purement décoratif). */
@@ -801,6 +815,39 @@ body::before {
   color: var(--text-muted);
   line-height: 1.55;
   flex: 1;
+}
+
+.tool-card__desc a { color: var(--blue); font-weight: 700; }
+.tool-card__desc a:hover { color: var(--blue-d); }
+
+/* ── CARTE ANNONCÉE, PAS ENCORE OUVERTE ──
+   L'outil existe mais n'est pas mis à disposition : la carte reste lisible (elle
+   annonce ce qui vient) tout en se retirant visuellement du lot. Elle ne porte
+   aucun lien « Accéder à l'outil », donc ni cible clavier ni relais du clic
+   global de la grille — l'atténuation ne fait que rendre l'état visible. */
+.tool-card--soon { cursor: default; }
+.tool-card--soon .tool-card__title,
+.tool-card--soon .tool-card__desc { opacity: .75; }
+.tool-card--soon .tool-card__icon {
+  filter: grayscale(1);
+  opacity: .6;
+  box-shadow: none;
+}
+
+/* Ni sur-élévation ni ombre portée au survol : rien n'invite au clic. */
+.tool-card--soon:hover,
+#tools-grid.reveal-ready .tool-card--soon.is-visible:hover {
+  transform: none;
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+.tool-card--soon:hover .tool-card__icon { transform: none; box-shadow: none; }
+
+.btn--disabled {
+  background: #EEF2F7;
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .btn {
@@ -872,6 +919,16 @@ body::before {
 /* Invitation à faire remonter ses remarques (ouvre la modale de contact). */
 .site-footer__feedback { margin-top: 4px; }
 
+/* Rappel réglementaire, joignable depuis n'importe quelle page du hub. */
+.site-footer__legal { margin-top: 4px; }
+.site-footer__legal a {
+  color: var(--blue);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.site-footer__legal a:hover { color: var(--blue-d); }
+
 .footer-link {
   font-family: inherit;
   font-size: var(--fs-label);
@@ -921,7 +978,7 @@ body::before {
   .main,
   .welcome,
   .ephemeris__page,
-  .ti-line, .ti-pen, .ti-jaw, .ti-keys rect,
+  .ti-line, .ti-pen, .ti-jaw, .ti-keys rect, .ti-send rect,
   .btn--primary::before { animation: none; }
   .ephemeris__page { opacity: 0; }       /* la page retournée reste escamotée */
   .ti-line { stroke-dashoffset: 0; }     /* le trait écrit s'affiche complet */

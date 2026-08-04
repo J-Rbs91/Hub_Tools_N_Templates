@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mailing clients — rappel RGPD</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#1F6FB2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --ink: #1A2A3A; --bg: #F4F7FA;
+      --white: #fff; --border: #D6E4F0; --grey: #5A7080; --green: #2E8B57;
+      --red: #B23A2E; --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink);
+      line-height: 1.6; padding: 0 0 60px;
+    }
+    .site-header {
+      background: var(--blue); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .back-link {
+      color: rgba(255,255,255,.9); text-decoration: none; font-size: .85rem;
+      font-weight: 700; border: 1px solid rgba(255,255,255,.4);
+      padding: 6px 13px; border-radius: var(--radius); white-space: nowrap;
+    }
+    .back-link:hover { background: rgba(255,255,255,.16); }
+    .site-header h1 { font-size: 1.1rem; font-weight: 800; }
+    main { max-width: 780px; margin: 0 auto; padding: 28px 20px; }
+    h2 {
+      font-size: 1.05rem; margin: 32px 0 12px; padding-bottom: 6px;
+      border-bottom: 2px solid var(--border);
+    }
+    h3 { font-size: .95rem; margin: 18px 0 6px; }
+    p { margin-bottom: 12px; }
+    ul, ol { margin: 6px 0 12px 20px; }
+    li { margin-bottom: 6px; }
+    .lead { font-size: 1rem; }
+    strong { color: var(--ink); }
+    a { color: var(--blue-d); font-weight: 700; }
+
+    .panel {
+      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 22px;
+      font-size: .92rem;
+    }
+    .panel--info { background: #EAF2FA; border: 1px solid var(--border); }
+    .panel--safe { background: #ECF7F0; border: 1px solid #BFE3CD; }
+    .panel--warn { background: #FFF7E6; border: 1px solid #F0C36D; }
+    .panel--stop { background: #FDECEC; border: 1px solid #E6BDB7; }
+    .panel h3 { font-size: .95rem; margin: 0 0 8px; }
+    .panel ul, .panel ol { margin: 6px 0 0 18px; }
+    .panel p:last-child, .panel ul:last-child { margin-bottom: 0; }
+
+    table.g { width: 100%; border-collapse: collapse; font-size: .89rem; margin: 10px 0 16px; }
+    table.g th, table.g td { border: 1px solid var(--border); padding: 9px 11px; text-align: left; vertical-align: top; }
+    table.g th {
+      background: #EEF4F9; font-size: .76rem; text-transform: uppercase;
+      letter-spacing: .04em; color: var(--grey);
+    }
+    table.g td:first-child { font-weight: 600; }
+    .verdict { font-weight: 800; white-space: nowrap; }
+    .verdict--yes { color: var(--green); }
+    .verdict--no  { color: var(--red); }
+    .verdict--care { color: #B86A00; }
+
+    .tw { overflow-x: auto; }
+    code {
+      background: #EEF2F7; padding: 1px 6px; border-radius: 4px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em;
+    }
+    .src { font-size: .8rem; color: var(--grey); font-style: italic; }
+    .toc {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px; margin-bottom: 24px; font-size: .9rem;
+    }
+    .toc p { font-weight: 800; margin-bottom: 6px; }
+    .toc ol { margin: 0 0 0 20px; }
+    .toc li { margin-bottom: 3px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="back-link" href="../../">&#8592; Retour</a>
+    <h1>Écrire à ses clients : ce que le RGPD impose</h1>
+  </header>
+
+  <main>
+    <p class="lead">
+      Envoyer un message commercial à une liste de clients n'est pas un geste anodin&nbsp;: c'est un
+      <strong>traitement de données personnelles</strong>, et le magasin en est le responsable. Cette
+      page rassemble les règles qui s'appliquent réellement à un magasin d'optique, et les quelques
+      réflexes qui évitent l'essentiel des ennuis.
+    </p>
+
+    <div class="panel panel--warn">
+      <h3>Ce que cette page est, et ce qu'elle n'est pas</h3>
+      <p>
+        C'est un <strong>rappel des principes</strong>, rédigé pour être utilisable au comptoir. Ce
+        n'est <strong>pas un conseil juridique</strong> et cela ne remplace ni la lecture des textes,
+        ni l'avis d'un professionnel du droit. Les règles évoluent&nbsp;; en cas de doute sur un cas
+        précis, la référence est la <strong>CNIL</strong> (<code>cnil.fr</code>), qui publie des fiches
+        pratiques gratuites et répond aux questions des professionnels.
+      </p>
+    </div>
+
+    <div class="toc">
+      <p>Sur cette page</p>
+      <ol>
+        <li>Ai-je le droit d'écrire à cette personne&nbsp;?</li>
+        <li>Ce que le message doit contenir</li>
+        <li>Ce qu'un message ne doit jamais contenir</li>
+        <li>Combien de temps garder une adresse</li>
+        <li>Ce qu'un client peut vous demander</li>
+        <li>Les obligations qui ne se voient pas</li>
+        <li>Ce que l'outil fait, et ce qu'il ne fait pas</li>
+        <li>Les dix minutes qui vous mettent en règle</li>
+      </ol>
+    </div>
+
+    <h2>1. Ai-je le droit d'écrire à cette personne&nbsp;?</h2>
+    <p>
+      Tout part de là. Pour la prospection par e-mail vers un particulier, le principe est le
+      <strong>consentement préalable</strong> — la personne doit avoir accepté, activement, de recevoir
+      vos messages. Une exception importante existe pour vos <strong>clients existants</strong>.
+    </p>
+
+    <div class="tw">
+      <table class="g">
+        <thead>
+          <tr><th>Situation</th><th>Verdict</th><th>À quelles conditions</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Client à qui vous avez déjà vendu un équipement, dont vous avez recueilli l'adresse à cette occasion</td>
+            <td class="verdict verdict--yes">Possible</td>
+            <td>Le message doit porter sur des <strong>produits ou services analogues</strong> (lunettes, lentilles, contrôle de la vue). La personne doit avoir pu s'y opposer <strong>au moment de la collecte</strong>, et pouvoir s'y opposer <strong>dans chaque message</strong>.</td>
+          </tr>
+          <tr>
+            <td>Personne qui a coché une case «&nbsp;je souhaite recevoir vos offres&nbsp;»</td>
+            <td class="verdict verdict--yes">Oui</td>
+            <td>Case <strong>non pré-cochée</strong>, distincte des conditions générales. Gardez une trace de la date et du support.</td>
+          </tr>
+          <tr>
+            <td>Personne qui a laissé son adresse pour un devis ou un rendez-vous, sans plus</td>
+            <td class="verdict verdict--care">Prudence</td>
+            <td>L'adresse a été donnée pour <em>cette</em> finalité. L'utiliser pour de la promotion suppose son accord, ou qu'elle soit devenue cliente.</td>
+          </tr>
+          <tr>
+            <td>Prospect qui n'a jamais rien acheté et n'a rien accepté</td>
+            <td class="verdict verdict--no">Non</td>
+            <td>Consentement préalable exprès obligatoire.</td>
+          </tr>
+          <tr>
+            <td>Adresse achetée, louée, ou récupérée sur un site, un annuaire, un réseau social</td>
+            <td class="verdict verdict--no">Non</td>
+            <td>Sans consentement recueilli pour <em>votre</em> magasin, c'est de la prospection illicite.</td>
+          </tr>
+          <tr>
+            <td>Personne qui s'est désinscrite, ou qui a répondu «&nbsp;STOP&nbsp;»</td>
+            <td class="verdict verdict--no">Jamais</td>
+            <td>L'opposition est définitive et sans condition. Elle doit être respectée sans délai.</td>
+          </tr>
+          <tr>
+            <td>Adresse professionnelle d'une entreprise (<code>contact@…</code>) pour une offre liée à son activité</td>
+            <td class="verdict verdict--care">Assoupli</td>
+            <td>Le régime est plus souple entre professionnels, mais l'information et le droit d'opposition restent dus.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="src">
+      Base&nbsp;: article L.34-5 du code des postes et des communications électroniques, règlement (UE)
+      2016/679 (RGPD) et doctrine de la CNIL sur la prospection commerciale.
+    </p>
+
+    <div class="panel panel--info">
+      <h3>La règle simple, si vous ne deviez en retenir qu'une</h3>
+      <p>
+        <strong>Écrivez à vos clients, sur vos métiers, avec une porte de sortie visible.</strong>
+        Tout ce qui s'éloigne de cette phrase — une liste qui n'est pas la vôtre, une offre étrangère à
+        l'optique, un message sans désinscription — demande une vérification préalable.
+      </p>
+    </div>
+
+    <h2>2. Ce que le message doit contenir</h2>
+    <ul>
+      <li><strong>Une identification claire de l'expéditeur</strong>&nbsp;: le nom du magasin, visible
+        dès l'en-tête. Pas d'adresse d'expédition anonyme ou trompeuse.</li>
+      <li><strong>Un objet qui ne trompe pas</strong> sur le contenu du message.</li>
+      <li><strong>Un moyen simple, gratuit et immédiat de ne plus être contacté</strong>, présent dans
+        <em>chaque</em> message&nbsp;: une mention «&nbsp;répondez STOP&nbsp;», un lien, une adresse à
+        laquelle écrire. Elle doit être lisible, pas dissimulée en gris clair sur blanc.</li>
+      <li><strong>De quoi savoir comment vous joindre</strong>&nbsp;: adresse postale, téléphone ou
+        e-mail du magasin.</li>
+      <li><strong>Une information sur l'usage des données</strong>, au moins par un renvoi&nbsp;:
+        qui traite les données, pourquoi, combien de temps, et quels sont les droits de la personne.</li>
+    </ul>
+
+    <div class="panel panel--safe">
+      <h3>Une demande de désinscription se traite tout de suite</h3>
+      <p>
+        Dès qu'un client demande à ne plus recevoir vos messages — par retour de mail, au téléphone ou
+        au comptoir — retirez-le de la liste. Le délai de rigueur est court&nbsp;; le délai raisonnable
+        est <strong>immédiat</strong>. Une réinscription «&nbsp;par erreur&nbsp;» lors d'un prochain
+        import est l'incident le plus courant, et le plus mal perçu.
+      </p>
+    </div>
+
+    <h2>3. Ce qu'un message ne doit jamais contenir</h2>
+
+    <div class="panel panel--stop">
+      <h3>Aucune donnée de santé. Aucune.</h3>
+      <p>
+        En optique, c'est <strong>le</strong> risque spécifique. Une correction, une acuité, une
+        addition, une pathologie, une ordonnance, le nom d'un ophtalmologiste, un motif de
+        rendez-vous&nbsp;: ce sont des <strong>données de santé</strong>, protégées par l'article 9 du
+        RGPD, dont le traitement est en principe interdit sauf cas très encadrés — et qui n'ont
+        strictement rien à faire dans un message promotionnel.
+      </p>
+      <p style="margin-top:10px;">
+        Un mailing dit «&nbsp;votre équipement a deux ans&nbsp;». Il ne dit jamais «&nbsp;votre myopie
+        a évolué&nbsp;», ni «&nbsp;suite à votre ordonnance du…&nbsp;».
+      </p>
+    </div>
+
+    <ul>
+      <li><strong>Pas de liste de destinataires en clair.</strong> Ne mettez jamais vingt clients en
+        copie visible d'un même message&nbsp;: c'est une divulgation d'adresses, et c'est l'une des
+        violations de données les plus fréquemment signalées à la CNIL. Un message&nbsp;= un
+        destinataire.</li>
+      <li><strong>Pas de fichier joint contenant la liste</strong>, ni de tableur de clients transmis
+        par e-mail.</li>
+      <li><strong>Pas d'affirmation médicale.</strong> Un opticien informe et propose un contrôle&nbsp;;
+        il ne diagnostique pas et ne promet pas de résultat de santé.</li>
+    </ul>
+
+    <h2>4. Combien de temps garder une adresse</h2>
+    <p>
+      Une donnée ne se garde pas «&nbsp;au cas où&nbsp;». La CNIL retient, pour la prospection
+      commerciale, une durée de <strong>trois ans à compter du dernier contact</strong> émanant de la
+      personne (un achat, un clic, une réponse, une visite). Passé ce délai, l'adresse est
+      <strong>supprimée</strong> ou anonymisée.
+    </p>
+    <p>
+      À distinguer des données liées à la vente elle-même (facturation, garantie, obligations
+      comptables), qui obéissent à leurs propres durées.
+    </p>
+
+    <h2>5. Ce qu'un client peut vous demander</h2>
+    <p>Sur simple demande, et sans avoir à se justifier&nbsp;:</p>
+    <ul>
+      <li><strong>Accéder</strong> aux données que vous détenez sur lui, et en obtenir une copie.</li>
+      <li><strong>Faire rectifier</strong> ce qui est inexact.</li>
+      <li><strong>Faire effacer</strong> ses données.</li>
+      <li><strong>S'opposer</strong> à la prospection — sans condition ni motif.</li>
+      <li><strong>Récupérer</strong> ses données dans un format lisible.</li>
+    </ul>
+    <p>
+      Vous devez répondre <strong>dans un délai d'un mois</strong>. Une demande orale au comptoir est
+      une demande valable&nbsp;: notez-la. Sachez qui, dans le magasin, traite ces demandes.
+    </p>
+
+    <h2>6. Les obligations qui ne se voient pas</h2>
+    <ul>
+      <li><strong>Informer au moment de la collecte.</strong> Quand vous notez l'adresse d'un client,
+        dites-lui à quoi elle servira et qu'il peut s'y opposer. Une phrase sur le formulaire papier ou
+        à l'écran suffit.</li>
+      <li><strong>Tenir un registre des traitements.</strong> Y compris pour une petite structure&nbsp;:
+        la CNIL fournit un modèle simplifié gratuit. Une ligne «&nbsp;prospection commerciale&nbsp;»
+        suffit à documenter cette activité.</li>
+      <li><strong>Garder la trace du consentement</strong> quand c'est sur lui que vous vous appuyez&nbsp;:
+        date, support, formulation employée.</li>
+      <li><strong>Protéger le fichier.</strong> Poste verrouillé, accès limité aux personnes qui en ont
+        besoin, pas de liste qui traîne sur une clé USB non chiffrée ni dans une boîte mail partagée.</li>
+      <li><strong>Signaler une fuite.</strong> Une liste envoyée au mauvais destinataire, un poste
+        compromis&nbsp;: la CNIL doit être informée sous 72&nbsp;heures si un risque existe pour les
+        personnes.</li>
+    </ul>
+
+    <h2>7. Ce que l'outil fait, et ce qu'il ne fait pas</h2>
+    <p>
+      L'outil <strong>Campagne e-mail</strong> de ce hub est conçu pour ne pas vous mettre en défaut
+      techniquement. Il ne vous dispense d'aucune des règles ci-dessus.
+    </p>
+
+    <div class="tw">
+      <table class="g">
+        <thead>
+          <tr><th>Ce dont l'outil s'occupe</th><th>Ce qui reste à votre charge</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Un message par destinataire&nbsp;: aucune adresse n'est visible des autres clients.</td>
+            <td>Vérifier que chaque personne de la liste a bien vocation à recevoir ce message.</td>
+          </tr>
+          <tr>
+            <td>La liste reste dans le navigateur du poste&nbsp;; elle n'est jamais envoyée sur un serveur du site, ni incluse dans la sauvegarde du profil, ni dans la synchronisation Drive.</td>
+            <td>Sécuriser le poste, et le fichier CSV que vous avez préparé — c'est lui, le vrai point faible.</td>
+          </tr>
+          <tr>
+            <td>Une mention de désinscription obligatoire dans chaque message, modifiable mais présente par défaut.</td>
+            <td>Traiter réellement les demandes reçues, y compris celles formulées au comptoir.</td>
+          </tr>
+          <tr>
+            <td>Une liste d'exclusion persistante&nbsp;: une personne marquée «&nbsp;ne plus contacter&nbsp;» est automatiquement écartée de tous les imports suivants.</td>
+            <td>Marquer effectivement les personnes qui se désinscrivent.</td>
+          </tr>
+          <tr>
+            <td>Aucun champ prévu pour une correction, une ordonnance ou une donnée de santé.</td>
+            <td>Ne pas en glisser dans le texte libre du message.</td>
+          </tr>
+          <tr>
+            <td>Aucun traceur, aucun pixel de suivi, aucune statistique d'ouverture.</td>
+            <td>Le registre, l'information à la collecte, la durée de conservation, les réponses aux demandes.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>8. Les dix minutes qui vous mettent en règle</h2>
+    <ol>
+      <li>Ajoutez une phrase d'information sur votre fiche client, papier ou logicielle.</li>
+      <li>Ouvrez le modèle de registre simplifié de la CNIL et remplissez la ligne
+        «&nbsp;prospection commerciale&nbsp;».</li>
+      <li>Décidez qui, dans le magasin, reçoit et traite les demandes de désinscription.</li>
+      <li>Nettoyez votre liste&nbsp;: retirez ce qui n'est ni client, ni consenti, ni récent.</li>
+      <li>Écrivez votre message, relisez-le en cherchant une seule chose&nbsp;: une donnée de santé
+        qui s'y serait glissée.</li>
+      <li>Envoyez-vous le message à vous-même avant de le diffuser.</li>
+    </ol>
+
+    <div class="panel panel--info">
+      <h3>Pour aller plus loin</h3>
+      <p>
+        La CNIL met à disposition, gratuitement, des fiches pratiques sur la prospection commerciale,
+        un modèle de registre simplifié destiné aux petites structures, et un guide de sécurité des
+        données&nbsp;: <code>cnil.fr</code>. Ces documents sont écrits pour des non-juristes et
+        répondent à la plupart des situations rencontrées en magasin.
+      </p>
+    </div>
+  </main>
+</body>
+</html>
