@@ -349,14 +349,21 @@ body::before {
 
 .setup-notice .btn { margin-left: auto; }
 
-/* ── MODALE ── */
+/* ── MODALE ──
+   align-items: center + un conteneur non défilable faisait déborder la modale
+   symétriquement, hors du seul élément qui sait défiler : sur iPhone en Safari,
+   où 100vh dépasse la zone réellement visible, « Enregistrer » sortait de l'écran
+   et le magasin ne pouvait plus être paramétré. L'overlay absorbe désormais le
+   dépassement et l'alignement part du haut. */
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(26,42,58,.55);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px;
   z-index: 100;
 }
@@ -369,8 +376,20 @@ body::before {
   max-width: 440px;
   max-height: calc(100vh - 40px);
   overflow-y: auto;
+  /* Réserve la place du clavier virtuel sous le champ amené par scrollIntoView. */
+  scroll-padding-bottom: 96px;
   padding: 26px 26px 22px;
+  margin: auto 0;
 }
+
+/* dvh suit la barre d'URL rétractable ; 100vh ne le fait pas. */
+@supports (height: 100dvh) {
+  .modal { max-height: calc(100dvh - 40px); }
+}
+
+.field,
+.c-group,
+.modal__actions { scroll-margin-bottom: 24px; }
 
 .modal__title {
   font-size: var(--fs-2xl);
@@ -582,11 +601,20 @@ body::before {
 .sync-status.ok  { color: var(--green); }
 .sync-status.err { color: #B23A2E; }
 
+/* Seule rangée d'actions du fichier sans flex-wrap : à 320 px, « Annuler » et
+   « Enregistrer » ne laissaient que quelques pixels de marge. */
 .modal__actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
+}
+
+/* Sous 380 px, l'empilement est plus sûr que le retour à la ligne : l'ordre du
+   DOM est conservé, donc « Enregistrer » reste la dernière cible atteinte. */
+@media (max-width: 380px) {
+  .modal__actions { flex-direction: column; align-items: stretch; }
 }
 
 .btn--ghost {
@@ -893,6 +921,21 @@ body::before {
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* Seconde porte vers « Mon magasin », en fin de page. Cible tactile pleine,
+   contrairement au lien de retour d'avis qui l'entoure dans une phrase. */
+.site-footer__settings { margin-bottom: 6px; }
+
+.site-footer__settings .footer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: var(--fs-base);
+  text-decoration: none;
+}
+
+.site-footer__settings .footer-link:hover { text-decoration: underline; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {

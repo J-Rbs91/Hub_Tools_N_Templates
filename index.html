@@ -241,6 +241,9 @@
   </main>
 
   <footer class="site-footer">
+    <p class="site-footer__settings">
+      <button type="button" class="footer-link" id="open-settings-footer">&#9881; Mon magasin</button>
+    </p>
     <p>Usage interne &nbsp;·&nbsp; Aucune donnée transmise au serveur</p>
     <p class="site-footer__feedback">
       Une remarque, une idée, un souci&nbsp;?
@@ -250,7 +253,7 @@
 
   <!-- ── MODALE : MON MAGASIN ── -->
   <div class="modal-overlay" id="settings-modal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
       <h2 class="modal__title" id="modal-title">Mon magasin</h2>
       <p class="modal__hint">
         Ces informations restent sur cet appareil (aucun envoi au serveur) et pré-remplissent
@@ -334,7 +337,7 @@
 
   <!-- ── MODALE : CONTACT / RETOUR ── -->
   <div class="modal-overlay" id="contact-modal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title" tabindex="-1">
       <h2 class="modal__title" id="contact-title">Un retour à me faire&nbsp;?</h2>
       <p class="modal__hint">
         Remarque, suggestion, bug… tout est utile. Au clic sur «&nbsp;Préparer l'e-mail&nbsp;»,
@@ -445,6 +448,44 @@
 
     var modalTrigger = null;   // QA-02 : mémorise le bouton ayant ouvert la modale
 
+    /* ── Verrou de défilement d'arrière-plan qui PRÉSERVE la position ──
+       overflow:hidden seul laisse le navigateur ramener la page en haut à la
+       fermeture sur mobile : on revenait systématiquement au-dessus de la grille
+       après avoir paramétré le magasin. On fige le corps à sa position courante
+       et on la restitue à la fermeture. Partagé par les deux modales. */
+    var scrollLockY = 0;
+    var scrollLockCount = 0;
+
+    function lockScroll() {
+      if (scrollLockCount++) { return; }
+      scrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = -scrollLockY + 'px';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+    }
+
+    function unlockScroll() {
+      if (!scrollLockCount || --scrollLockCount) { return; }
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      window.scrollTo(0, scrollLockY);
+    }
+
+    /* Au doigt, focaliser un champ à l'ouverture lève aussitôt le clavier virtuel,
+       qui recouvre la moitié de la modale avant même qu'on ait pu la lire. On ne
+       focalise le premier champ qu'au pointeur fin ; au tactile, on donne le focus
+       au conteneur pour que la modale reste annoncée aux lecteurs d'écran. */
+    function focusModalStart(fieldId, modalEl) {
+      if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) {
+        var f = document.getElementById(fieldId);
+        if (f) { f.focus(); return; }
+      }
+      if (modalEl && typeof modalEl.focus === 'function') { modalEl.focus(); }
+    }
+
     /* QA-02 — Liste des éléments focalisables actuellement visibles dans la modale. */
     function modalFocusables() {
       var modal = document.getElementById('settings-modal');
@@ -464,15 +505,15 @@
       setBackupStatus('');
       setMailMsg('');
       document.getElementById('settings-modal').hidden = false;
-      document.body.style.overflow = 'hidden';   // QA-03 : verrouille le scroll d'arrière-plan
-      document.getElementById('f-nom').focus();
+      lockScroll();                              // QA-03 : verrouille le scroll d'arrière-plan
+      focusModalStart('f-nom', document.querySelector('#settings-modal .modal'));
     }
 
     function closeModal() {
       var modal = document.getElementById('settings-modal');
       if (modal.hidden) { return; }
       modal.hidden = true;
-      document.body.style.overflow = '';         // QA-03 : rétablit le scroll
+      unlockScroll();                            // QA-03 : rétablit le scroll et la position
       // QA-02 : redonne le focus au bouton d'origine.
       if (modalTrigger && typeof modalTrigger.focus === 'function') { modalTrigger.focus(); }
       modalTrigger = null;
@@ -653,6 +694,11 @@
 
     document.getElementById('open-settings').addEventListener('click', openModal);
     document.getElementById('setup-notice-btn').addEventListener('click', openModal);
+    /* Seconde porte vers le paramétrage, en fin de page : l'en-tête défile et le
+       bouton « Mon magasin » devenait inatteignable sans remonter toute la grille.
+       L'en-tête n'est délibérément pas rendue collante — elle porte le nom et
+       l'adresse du magasin sur plusieurs lignes et mangerait la hauteur utile. */
+    document.getElementById('open-settings-footer').addEventListener('click', openModal);
     document.getElementById('cancel-settings').addEventListener('click', closeModal);
     document.getElementById('settings-modal').addEventListener('click', function (e) {
       if (e.target === this) { closeModal(); }
@@ -864,15 +910,15 @@
         cdRefresh();
         setNote('');
         overlay.hidden = false;
-        document.body.style.overflow = 'hidden';
-        (objetEl || msgEl).focus();
+        lockScroll();
+        focusModalStart((objetEl || msgEl).id, overlay.querySelector('.modal'));
       }
 
       function close() {
         if (overlay.hidden) { return; }
         cdOpen(false);
         overlay.hidden = true;
-        document.body.style.overflow = '';
+        unlockScroll();
         if (trigger && typeof trigger.focus === 'function') { trigger.focus(); }
         trigger = null;
       }
