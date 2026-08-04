@@ -155,6 +155,12 @@
     display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
     box-shadow:0 -4px 18px rgba(26,42,58,.06);z-index:10;
   }
+
+  /* La hauteur de la barre est MESURÉE, pas devinée : en flex-wrap elle passe à deux
+     ou trois lignes selon la largeur et le réglage de taille de police du système.
+     Une constante en dur laissait le dernier champ sous la barre. --bar-h est tenue
+     à jour en JS ; la valeur de repli couvre le cas où le script ne s'exécute pas. */
+  html{ scroll-padding-bottom:calc(var(--bar-h, 96px) + 16px); scroll-padding-top:72px; }
   button.action{
     font-family:inherit;font-size:var(--fs-base);font-weight:600;cursor:pointer;
     border-radius:8px;padding:10px 22px;border:1.5px solid var(--blue);transition:.15s;
@@ -167,7 +173,7 @@
   .btn-ghost:hover{background:var(--light)}
 
   .toast{
-    position:fixed;bottom:78px;left:50%;transform:translateX(-50%) translateY(20px);
+    position:fixed;bottom:calc(var(--bar-h, 96px) + 12px);left:50%;transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:#fff;padding:11px 20px;border-radius:9px;
     font-size:var(--fs-sm);font-weight:600;opacity:0;pointer-events:none;
     transition:.25s;z-index:20;box-shadow:0 6px 22px rgba(26,42,58,.25);max-width:90%;
@@ -181,35 +187,60 @@
   .ov-sub{font-size:var(--fs-sm);color:var(--grey);margin:0 0 18px;line-height:1.5}
   .ov-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 
+  .draft-note{
+    max-width:820px;margin:0 auto 12px;padding:10px 14px;
+    background:#FFF7E6;border:1px solid #F0C36D;border-radius:8px;
+    font-size:var(--fs-sm);color:#7A5500;line-height:1.45;
+  }
+
   .help{max-width:820px;margin:0 auto 14px;font-size:var(--fs-label);color:var(--grey)}
   .help summary{cursor:pointer;font-weight:700;color:var(--blue);padding:8px 0}
   .help ol{margin:4px 0 8px 20px;line-height:1.6}
 
-  /* retour aux outils (en haut, masqué au PDF) */
-  .topbar{max-width:820px;margin:0 auto 12px}
-  .back-link{
-    display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+  /* ── EN-TÊTE D'OUTIL UNIFIÉE (identique dans les trois outils et les pages docs) ──
+     Collante : le retour reste atteignable sans remonter la page, sur iOS comme sur
+     Android. Remplace l'ancienne pastille flottante, qui recouvrait le formulaire et
+     n'apparaissait que sur les appareils Apple (détection par user-agent, désormais
+     supprimée : elle retirait un retour utile sur iPhone en navigateur ordinaire). */
+  .app-bar{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;gap:10px;
+    padding:6px 14px;margin:0 0 12px;
+    background:var(--white);border-bottom:1px solid var(--line);
+  }
+  .app-bar__back,.app-bar__switch summary{
+    display:inline-flex;align-items:center;gap:6px;
+    min-height:48px;padding:0 12px;
     font-size:var(--fs-sm);font-weight:700;color:var(--blue);
-    border:1px solid var(--line);background:var(--white);
-    padding:7px 14px;border-radius:8px;transition:.15s;
+    text-decoration:none;border-radius:8px;cursor:pointer;
   }
-  .back-link:hover{background:var(--light)}
-
-  /* bouton retour flottant (iOS : pas de bouton retour navigateur) */
-  .ios-back{
-    display:none;position:fixed;z-index:1000;align-items:center;gap:6px;
-    right:calc(env(safe-area-inset-right,0px) + 14px);
-    top:calc(env(safe-area-inset-top,0px) + 14px);
-    background:var(--blue);color:#fff;text-decoration:none;
-    font-size:var(--fs-base);font-weight:700;padding:10px 16px;border-radius:999px;
-    box-shadow:0 4px 16px rgba(26,42,58,.32);
+  .app-bar__back:hover,.app-bar__switch summary:hover{background:var(--light)}
+  .app-bar__title{
+    margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;font-size:var(--fs-sm);font-weight:700;color:var(--ink);
   }
-  body.is-ios .ios-back{display:inline-flex}
-  body.is-ios .topbar{display:none}
+  .app-bar__switch{position:relative}
+  .app-bar__switch summary{list-style:none}
+  .app-bar__switch summary::-webkit-details-marker{display:none}
+  .app-bar__menu{
+    position:absolute;right:0;top:calc(100% + 6px);min-width:210px;
+    background:var(--white);border:1px solid var(--line);border-radius:10px;
+    padding:6px;box-shadow:0 12px 28px rgba(26,42,58,.16);z-index:60;
+  }
+  .app-bar__menu a,.app-bar__menu span{
+    display:flex;align-items:center;min-height:48px;padding:0 14px;
+    font-size:var(--fs-sm);font-weight:600;color:var(--blue);
+    text-decoration:none;border-radius:8px;white-space:nowrap;
+  }
+  .app-bar__menu a:hover{background:var(--light)}
+  .app-bar__menu [aria-current="page"]{color:var(--grey);font-weight:700}
+  /* Une en-tête collante + la barre d'actions fixe mangeraient toute la hauteur
+     en paysage ou à fort zoom : on la désolidarise sous 480 px de haut. */
+  @media (max-height:480px){ .app-bar{position:static} }
 
   /* responsive smartphone */
   @media (max-width:640px){
-    body{padding:14px 10px 96px}
+    body{padding:14px 10px calc(var(--bar-h, 96px) + 16px)}
     header{padding:12px 16px}
     header h1{font-size:var(--fs-lg)}
     .body{padding:14px 14px 20px}
@@ -244,16 +275,30 @@
     .closing{font-size:var(--fs-micro);margin:8px 0 0;line-height:1.45}
     .sign{font-size:var(--fs-hint);margin:6px 0 0}
     /* le paragraphe d'intro et tout l'interactif sont masqués au PDF */
-    #introRow,.bar,.help,.toast,.regen,.topbar,.ios-back{display:none!important}
+    #introRow,.bar,.help,.toast,.regen,.app-bar,.draft-note{display:none!important}
     tr,.pgrid,.pf,.sheet{break-inside:avoid}
   }
 </style>
 </head>
 <body>
 
-<a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
+<header class="app-bar">
+  <a class="app-bar__back" href="../../">&#8592; Tous les outils</a>
+  <span class="app-bar__title">Demande / Ordonnance</span>
+  <details class="app-bar__switch" id="tool-switch">
+    <summary aria-label="Changer d'outil">Outils</summary>
+    <nav class="app-bar__menu" aria-label="Autres outils">
+      <span aria-current="page">Demande / Ordonnance</span>
+      <a href="../cloture-caisse/">Cl&#244;ture de Caisse</a>
+      <a href="../epaisseur-verres/">&#201;paisseur des verres</a>
+    </nav>
+  </details>
+</header>
 
-<div class="topbar"><a class="back-link" href="../../">&#8592; Retour aux outils</a></div>
+<p class="draft-note" id="draft-note" role="status" hidden>
+  Brouillon repris tel que vous l&#39;aviez laiss&#233;. V&#233;rifiez avant d&#39;envoyer &#8212;
+  &#171;&#160;R&#233;initialiser&#160;&#187; efface tout.
+</p>
 
 <details class="help">
   <summary>Comment envoyer par mail sans pièce jointe ?</summary>
@@ -796,7 +841,58 @@
     document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
     document.querySelectorAll('.warn-step').forEach(el=>{el.classList.remove('warn-step');el.removeAttribute('title');});
     introDirty=false;
+    draftClear();
     refreshIntro();
+  }
+
+  /* ── Brouillon local ──────────────────────────────────────────────────────
+     La saisie survit désormais à ce qu'aucun code ne peut intercepter : appel
+     entrant, mise en veille, onglet recyclé par iOS, appui sur « Retour ». Elle
+     est réécrite à chaque frappe (différée de 400 ms) plutôt qu'au moment de
+     valider. Rien ne quitte le navigateur : c'est une clé localStorage de plus,
+     purgée au bout de 12 h et à la réinitialisation explicite. Elle n'est pas
+     purgée après une copie : on copie souvent puis on corrige.
+     Aucun beforeunload : il est ignoré en mode plein écran sur iOS et ne couvre
+     ni la veille ni l'appel entrant. La restauration, elle, couvre tous les cas. */
+  var DRAFT_KEY='brouillon-demande-ordonnance-v1';
+  var DRAFT_TTL=12*3600*1000;
+  var draftTimer=null;
+
+  function draftFields(){ return document.querySelectorAll('[data-k]'); }
+
+  function draftSave(){
+    try{
+      var v={};
+      draftFields().forEach(function(el){
+        v[el.getAttribute('data-k')]=(el.type==='checkbox')?el.checked:el.value;
+      });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ts:Date.now(), dirty:introDirty, v:v}));
+    }catch(e){ /* quota plein : ne jamais interrompre la saisie */ }
+  }
+
+  function draftSaveSoon(){
+    if(draftTimer) return;
+    draftTimer=setTimeout(function(){ draftTimer=null; draftSave(); }, 400);
+  }
+
+  function draftClear(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+
+  function draftRestore(){
+    var raw=null;
+    try{ raw=localStorage.getItem(DRAFT_KEY); }catch(e){ return false; }
+    if(!raw) return false;
+    var d=null;
+    try{ d=JSON.parse(raw); }catch(e){ draftClear(); return false; }
+    if(!d||!d.v||!d.ts||(Date.now()-d.ts)>DRAFT_TTL){ draftClear(); return false; }
+    var restored=false;
+    draftFields().forEach(function(el){
+      var k=el.getAttribute('data-k');
+      if(!(k in d.v)) return;
+      if(el.type==='checkbox'){ if(el.checked!==d.v[k]){ el.checked=d.v[k]; restored=true; } }
+      else if(el.value!==d.v[k]){ el.value=d.v[k]; restored=true; }
+    });
+    introDirty=!!d.dirty;
+    return restored;
   }
 
   /* ---------- init & écoute ---------- */
@@ -810,6 +906,21 @@
     if(ta){
       ta.addEventListener('input', ()=>{ introDirty=true; });
     }
+
+    /* Reprise du brouillon avant tout calcul d'intro, pour que refreshIntro()
+       voie les valeurs restaurées et respecte le drapeau introDirty repris. */
+    if(draftRestore()){
+      var note=document.getElementById('draft-note');
+      if(note){ note.hidden=false; }
+    }
+    /* Capture : certains champs sont créés ou modifiés par le script. */
+    document.addEventListener('input', draftSaveSoon, true);
+    document.addEventListener('change', draftSaveSoon, true);
+    /* Les deux seuls événements qu'iOS émet réellement avant de suspendre. */
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState==='hidden'){ draftSave(); }
+    });
+    window.addEventListener('pagehide', draftSave);
     // régénère l'intro quand les champs clés changent (si non édité manuellement)
     ['medecin','p_civ','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle']
       .forEach(k=>{
@@ -857,15 +968,57 @@
       document.querySelectorAll('input[type="text"], input[type="checkbox"], select'))
       .filter(function(f){ return !f.disabled && f.offsetParent!==null; });
     var i=fields.indexOf(el);
-    if(i>-1 && i+1<fields.length){ fields[i+1].focus(); }
+    if(i>-1 && i+1<fields.length){
+      var next=fields[i+1];
+      next.focus();
+      /* Sans cela, le champ suivant peut se retrouver sous la barre d'actions fixe :
+         il a le focus mais reste invisible. Même traitement qu'au retour de modale. */
+      if(next.scrollIntoView){ next.scrollIntoView({ block:'center' }); }
+    }
   });
 
-  /* Détection iOS : affiche le bouton retour flottant (iPhone/iPad n'ont
-     pas de bouton retour navigateur, notamment en mode plein écran) */
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
-    document.body.classList.add('is-ios');
-  }
+  /* Mesure la hauteur réelle de la barre d'actions et la publie dans --bar-h.
+     La barre est en flex-wrap : sa hauteur change avec la largeur, l'orientation
+     et la taille de police du système. */
+  (function measureBar(){
+    var bar=document.querySelector('.bar');
+    if(!bar){ return; }
+    function sync(){
+      document.documentElement.style.setProperty('--bar-h', bar.offsetHeight+'px');
+    }
+    if(window.ResizeObserver){ new ResizeObserver(sync).observe(bar); }
+    window.addEventListener('orientationchange', sync);
+    window.addEventListener('resize', sync);
+    sync();
+  })();
+
+  /* ── Le retour redevient un retour ──
+     Quand on arrive depuis le hub, dépiler l'historique plutôt qu'empiler une
+     navigation avant : le hub retrouve nativement sa position de défilement et la
+     pile cesse d'enfler à chaque aller-retour. Le href reste fonctionnel en entrée
+     directe, sans JS, et pour l'ouverture dans un nouvel onglet. */
+  (function backGoesBack(){
+    var hubUrl=new URL('../../',location.href).href;
+    Array.prototype.forEach.call(document.querySelectorAll('a[href="../../"]'),function(a){
+      a.addEventListener('click',function(e){
+        if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey){ return; }
+        var ref=document.referrer.replace(/index\.html$/,'');
+        if(history.length>1 && ref===hubUrl){ e.preventDefault(); history.back(); }
+      });
+    });
+  })();
+
+  /* Referme le sélecteur d'outils sur Échap ou sur un clic à l'extérieur. */
+  (function toolSwitch(){
+    var d=document.getElementById('tool-switch');
+    if(!d){ return; }
+    document.addEventListener('click',function(e){
+      if(d.open && !d.contains(e.target)){ d.open=false; }
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape' && d.open){ d.open=false; d.querySelector('summary').focus(); }
+    });
+  })();
 </script>
 </body>
 </html>

@@ -28,7 +28,12 @@
       50%  { transform: translate3d(1.5%, 2%, 0)  scale(1.09); }
       100% { transform: translate3d(2.5%, -1%, 0) scale(1.05); }
     }
-    @media print { body::before { display: none; } }
+    /* La navigation ne figure jamais sur une impression de comptage. Cette règle
+       manquait ici alors qu'elle existait dans les autres outils. */
+    @media print {
+      body::before { display: none; }
+      .app-bar, .draft-note, .toast { display: none !important; }
+    }
     @media (prefers-reduced-motion: reduce) {
       @view-transition { navigation: none; }
       body::before { animation: none; }
@@ -100,39 +105,55 @@
       gap: 14px;
       flex-wrap: wrap;
     }
-    .back-link {
-      color: rgba(255,255,255,.85);
-      text-decoration: none;
-      font-size: var(--fs-sm);
-      font-weight: 600;
-      border: 1px solid rgba(255,255,255,.35);
-      padding: 5px 12px;
-      border-radius: 6px;
-      white-space: nowrap;
-      transition: background .15s;
+    /* ── EN-TÊTE D'OUTIL UNIFIÉE (identique dans les trois outils et les pages docs) ──
+       Collante : le retour reste atteignable sans remonter une page longue, sur iOS
+       comme sur Android. Remplace l'ancienne pastille flottante, qui se posait en bas
+       à gauche — exactement sur la colonne des quantités — et n'apparaissait que sur
+       les appareils Apple, via une détection par user-agent désormais supprimée. */
+    .app-bar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 14px;
+      background: var(--white); border-bottom: 1px solid var(--line);
     }
-    .back-link:hover { background: rgba(255,255,255,.15); }
+    .app-bar__back,
+    .app-bar__switch summary {
+      display: inline-flex; align-items: center; gap: 6px;
+      min-height: 48px; padding: 0 12px;
+      font-size: var(--fs-sm); font-weight: 700; color: var(--blue);
+      text-decoration: none; border-radius: 8px; cursor: pointer;
+    }
+    .app-bar__back:hover,
+    .app-bar__switch summary:hover { background: var(--light); }
+    .app-bar__title {
+      margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; font-size: var(--fs-sm); font-weight: 700; color: var(--ink);
+    }
+    .app-bar__switch { position: relative; }
+    .app-bar__switch summary { list-style: none; }
+    .app-bar__switch summary::-webkit-details-marker { display: none; }
+    .app-bar__menu {
+      position: absolute; right: 0; top: calc(100% + 6px); min-width: 210px;
+      background: var(--white); border: 1px solid var(--line); border-radius: 10px;
+      padding: 6px; box-shadow: 0 12px 28px rgba(26,42,58,.16); z-index: 60;
+    }
+    .app-bar__menu a,
+    .app-bar__menu span {
+      display: flex; align-items: center; min-height: 48px; padding: 0 14px;
+      font-size: var(--fs-sm); font-weight: 600; color: var(--blue);
+      text-decoration: none; border-radius: 8px; white-space: nowrap;
+    }
+    .app-bar__menu a:hover { background: var(--light); }
+    .app-bar__menu [aria-current="page"] { color: var(--grey); font-weight: 700; }
+    /* En paysage ou à fort zoom, une en-tête collante mangerait une hauteur déjà rare. */
+    @media (max-height: 480px) { .app-bar { position: static; } }
 
-    /* ── BOUTON RETOUR FLOTTANT (iOS : pas de bouton retour navigateur) ── */
-    .ios-back {
-      display: none;
-      position: fixed;
-      left: calc(env(safe-area-inset-left, 0px) + 16px);
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-      z-index: 1000;
-      align-items: center;
-      gap: 6px;
-      background: #1F6FB2;
-      color: #fff;
-      text-decoration: none;
-      font-size: var(--fs-base);
-      font-weight: 700;
-      padding: 11px 17px;
-      border-radius: 999px;
-      box-shadow: 0 4px 16px rgba(26,42,58,.32);
+    /* Bandeau de reprise de brouillon. */
+    .draft-note {
+      margin: 0; padding: 10px 16px;
+      background: #FFF7E6; border-bottom: 1px solid #F0C36D;
+      font-size: var(--fs-sm); color: #7A5500; line-height: 1.45;
     }
-    body.is-ios .ios-back { display: inline-flex; }
-    body.is-ios .back-link { display: none; }
     .hdr-info { flex: 1; min-width: 0; }
     .hdr-title { font-size: var(--fs-lg); font-weight: 800; }
     .hdr-sub { font-size: var(--fs-label); opacity: .9; margin-top: 2px; }
@@ -548,10 +569,24 @@
 </head>
 <body>
 
-  <a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
+  <header class="app-bar">
+    <a class="app-bar__back" href="../../">&#8592; Tous les outils</a>
+    <span class="app-bar__title">Cl&#244;ture de Caisse</span>
+    <details class="app-bar__switch" id="tool-switch">
+      <summary aria-label="Changer d'outil">Outils</summary>
+      <nav class="app-bar__menu" aria-label="Autres outils">
+        <span aria-current="page">Cl&#244;ture de Caisse</span>
+        <a href="../demande-ordonnance/">Demande / Ordonnance</a>
+        <a href="../epaisseur-verres/">&#201;paisseur des verres</a>
+      </nav>
+    </details>
+  </header>
+
+  <p class="draft-note" id="draft-note" role="status" hidden>
+    Comptage en cours repris tel que vous l&#39;aviez laiss&#233;. V&#233;rifiez-le avant d&#39;enregistrer.
+  </p>
 
   <header class="site-header">
-    <a class="back-link" href="../../">&#8592; Retour</a>
     <div class="hdr-info">
       <div class="hdr-title">Cl&#244;ture de Caisse</div>
       <div class="hdr-sub" id="hdr-sub">Mon magasin</div>
@@ -1238,6 +1273,57 @@
       banner.style.display = 'flex';
     }
 
+    /* ── Brouillon local du comptage en cours ──────────────────────────────
+       Jusqu'ici, le comptage n'existait que dans le DOM : un appel entrant, une
+       mise en veille ou un appui sur « Retour » détruisait la totalité de la
+       saisie, et le pré-remplissage de la veille masquait ensuite la perte au
+       lieu de la signaler. Le brouillon est réécrit à chaque frappe (différé de
+       400 ms) et purgé à l'enregistrement, à la réinitialisation, et dès qu'il
+       date d'un autre jour — un comptage de la veille ne doit jamais se
+       présenter comme celui du jour.
+       Aucune donnée ne quitte le navigateur : une clé localStorage de plus.
+       L'historique, la réserve et le fond cible gardent leurs clés d'origine et
+       ne sont pas touchés. */
+    var DRAFT_KEY = 'brouillon-cloture-caisse-v1';
+    var draftTimer = null;
+
+    function draftFields() {
+      return document.querySelectorAll('.qty-input, .amt-input, #ref');
+    }
+
+    function draftSave() {
+      try {
+        var v = {};
+        Array.prototype.forEach.call(draftFields(), function(el) {
+          if (el.value !== '') { v[el.id] = el.value; }
+        });
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          jour: new Date().toDateString(), v: v
+        }));
+      } catch (e) { /* quota plein : ne jamais interrompre la saisie */ }
+    }
+
+    function draftSaveSoon() {
+      if (draftTimer) { return; }
+      draftTimer = setTimeout(function() { draftTimer = null; draftSave(); }, 400);
+    }
+
+    function draftClear() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+    function draftRestore() {
+      var raw = null;
+      try { raw = localStorage.getItem(DRAFT_KEY); } catch (e) { return false; }
+      if (!raw) { return false; }
+      var d = null;
+      try { d = JSON.parse(raw); } catch (e) { draftClear(); return false; }
+      if (!d || !d.v || d.jour !== new Date().toDateString()) { draftClear(); return false; }
+      var n = 0;
+      Array.prototype.forEach.call(draftFields(), function(el) {
+        if (Object.prototype.hasOwnProperty.call(d.v, el.id)) { el.value = d.v[el.id]; n++; }
+      });
+      return n > 0;
+    }
+
     /* ── TOAST ── */
     var toastTimer;
     function showToast(msg) {
@@ -1258,6 +1344,8 @@
       document.getElementById('reserve-monnaie').value = reserveDefaut().toFixed(2);
       document.getElementById('fond-cible').value = fondCibleDefaut() ? fondCibleDefaut().toFixed(2) : '';
       document.getElementById('prefill-banner').style.display = 'none';
+      document.getElementById('draft-note').hidden = true;
+      draftClear();
       calculate();
       showToast('Formulaire réinitialisé');
     }
@@ -1272,9 +1360,24 @@
     buildElec();
     initEnterNavigation();
     saveHistoryData(capHistory(loadHistory()));   // applique le plafond 15 jours à l'historique existant
-    prefillFromLast();
+    /* Un comptage du jour interrompu prime sur le report de la veille : sinon la
+       reprise afficherait les quantités d'hier sans que rien ne signale la perte. */
+    if (draftRestore()) {
+      document.getElementById('draft-note').hidden = false;
+    } else {
+      prefillFromLast();
+    }
     renderHistory();
     calculate();
+
+    /* Capture : les champs de comptage sont créés en JS après le chargement. */
+    document.addEventListener('input', draftSaveSoon, true);
+    document.addEventListener('change', draftSaveSoon, true);
+    /* Les deux seuls événements qu'iOS émet réellement avant de suspendre. */
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') { draftSave(); }
+    });
+    window.addEventListener('pagehide', draftSave);
 
     var nowDate = new Date();
     document.getElementById('js-date').textContent = nowDate.toLocaleDateString('fr-FR', {
@@ -1317,12 +1420,33 @@
     document.getElementById('btn-save').addEventListener('click', saveEntry);
     document.getElementById('btn-reset').addEventListener('click', resetForm);
 
-    /* ── Détection iOS : affiche le bouton retour flottant (iPhone/iPad
-       n'ont pas de bouton retour navigateur, notamment en mode plein écran) ── */
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-      document.body.classList.add('is-ios');
-    }
+    /* ── Le retour redevient un retour ──
+       Quand on arrive depuis le hub, dépiler l'historique plutôt qu'empiler une
+       navigation avant : le hub retrouve nativement sa position de défilement et
+       la pile cesse d'enfler à chaque aller-retour. Le href reste fonctionnel en
+       entrée directe, sans JS, et pour l'ouverture dans un nouvel onglet. */
+    (function backGoesBack() {
+      var hubUrl = new URL('../../', location.href).href;
+      Array.prototype.forEach.call(document.querySelectorAll('a[href="../../"]'), function(a) {
+        a.addEventListener('click', function(e) {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+          var ref = document.referrer.replace(/index\.html$/, '');
+          if (history.length > 1 && ref === hubUrl) { e.preventDefault(); history.back(); }
+        });
+      });
+    })();
+
+    /* Referme le sélecteur d'outils sur Échap ou sur un clic à l'extérieur. */
+    (function toolSwitch() {
+      var d = document.getElementById('tool-switch');
+      if (!d) { return; }
+      document.addEventListener('click', function(e) {
+        if (d.open && !d.contains(e.target)) { d.open = false; }
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && d.open) { d.open = false; d.querySelector('summary').focus(); }
+      });
+    })();
   </script>
 
 </body>
