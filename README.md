@@ -14,7 +14,7 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 | Outil | Description | Statut |
 |---|---|---|
 | [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
-| [Clôture de Caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
+| [Clôture de caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
 | [Épaisseur des verres](outils/epaisseur-verres/) | Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi, Ø mini du palet) selon la correction, l'indice et la forme de monture (côtes A / B / D), décentrement OD / OG et visualisation 3D manipulable | Disponible |
 | [Campagne e-mail](outils/campagne-email/) | CRM simplifié : modèle CSV fourni, import de la liste d'adresses vérifiées, rédaction du message avec variables de personnalisation, suivi des envois contact par contact, liste d'exclusion persistante | **Bientôt** — annoncé mais non ouvert |
 
@@ -23,14 +23,15 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 > conservation, et surtout **aucune donnée de santé dans un message commercial**). La carte du hub
 > l'annonce en état « Bientôt » sans lien d'accès ; la page reste joignable par son URL directe pour
 > évaluation, et affiche un bandeau qui le rappelle. Les règles sont réunies dans
-> [`docs/rgpd-mailing/`](docs/rgpd-mailing/), accessible depuis le pied de page du hub. Pour ouvrir
-> l'outil : rétablir sur la carte le lien `.tool-card__cta` et le badge « Disponible », retirer la
-> classe `tool-card--soon` et le bandeau de la page de l'outil.
+> [`docs/rgpd-mailing/`](docs/rgpd-mailing/), accessible depuis la section « Aide & documents » du
+> hub. Pour ouvrir l'outil : envelopper le titre de la carte dans un lien `.tool-card__link` vers
+> `outils/campagne-email/`, ajouter le chevron `.tool-card__go`, retirer le badge « Bientôt » et la
+> classe `tool-card--soon`, puis retirer le bandeau de la page de l'outil.
 
 > **Profil magasin** — un profil partagé (clé `localStorage` `profil-magasin-v1`, contenant nom,
 > adresse, téléphone et e-mail) renseigné une fois sur le hub pré-remplit l'en-tête de la
 > Demande/Ordonnance. La réserve de monnaie et le fond de caisse cible sont mémorisés séparément par
-> la Clôture de Caisse (clés `cloture-fond-v1` et `cloture-fond-cible-v1`). Comme `localStorage` est propre à chaque navigateur/poste, les données
+> la Clôture de caisse (clés `cloture-fond-v1` et `cloture-fond-cible-v1`). Comme `localStorage` est propre à chaque navigateur/poste, les données
 > d'un magasin ne se mélangent jamais avec celles d'un autre — mais elles ne se partagent pas non
 > plus entre deux postes d'un même magasin, sauf si la synchronisation Drive ci-dessous est activée.
 
@@ -168,8 +169,9 @@ git grep -lIP '\r$' -- .          # pas de CRLF (LF uniquement)
 
 1. Créer `outils/<nom-de-l-outil>/index.html` : un **fichier unique autonome** (HTML + CSS inline +
    JS inline), sans dépendance ni bibliothèque tierce.
-2. Dans `index.html` (hub, à la racine), ajouter une carte `<article class="tool-card">` dans
-   `<div id="tools-grid">`, en s'inspirant des cartes existantes.
+2. Dans `index.html` (hub, à la racine), ajouter une carte `<li class="tool-card">` dans
+   `<ul id="tools-grid">`, en s'inspirant des cartes existantes : une phrase de bénéfice dans
+   `.tool-card__pitch`, le détail complet replié dans `<details class="tool-card__more">`.
 3. Réutiliser les variables CSS définies dans `assets/css/hub.css` (`--blue`, `--blue-d`, `--ink`,
    `--bg`…) pour la cohérence visuelle.
 4. Ajouter en haut de l'outil un lien « ← Retour » pointant vers `../../` (chemin relatif), plus le

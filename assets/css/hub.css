@@ -1,33 +1,84 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   HUB — feuille de style de la page d'accueil uniquement.
+
+   Direction visuelle (refonte HF-020) : sobre, dense, bleu dominant.
+   Trois règles qui expliquent tous les choix ci-dessous :
+
+   1. Une seule couleur d'accent (--blue), dépensée sur l'action et le focus.
+      Aucun dégradé sur les surfaces, aucune couleur décorative.
+   2. Délimitation par l'espacement d'abord, la bordure ensuite ; l'élévation
+      est réservée à ce qui flotte réellement (barre collante, modale).
+   3. Le mouvement explique un changement d'état ou n'existe pas. Rien ne
+      s'anime en boucle : la page est ouverte plusieurs fois par jour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --blue:     #1F6FB2;
-  --blue-d:   #175A92;
-  --sky:      #36B3F0;
-  --ink:      #1A2A3A;
-  --bg:       #F4F7FA;
-  --card-bg:  #FFFFFF;
-  --border:   #D6E4F0;
-  --text-muted: #5A7080;
-  --green:    #2E8B57;
-  --green-d:  #246B44;
-  --radius:   8px;
-  --shadow:   0 2px 8px rgba(26,42,58,.10);
+  /* ─ Bleu : une seule teinte, déclinée par contraste ─ */
+  --blue-900: #0F3E63;
+  --blue-800: #14527F;
+  --blue-d:   #1A5C95;   /* survol de l'action principale */
+  --blue:     #1F6FB2;   /* accent unique */
+  --blue-300: #8FBEE2;
+  --blue-100: #DCEAF6;
+  --blue-50:  #EEF5FB;
+  --sky:      #36B3F0;   /* accent secondaire, iconographie */
+
+  /* ─ Neutres : quatre niveaux exploitables entre le fond et le texte ─ */
+  --ink:        #14202B;   /* titres */
+  --ink-2:      #33465A;   /* corps */
+  --text-muted: #5A7080;   /* secondaire */
+  --muted-2:    #7D919F;   /* tertiaire, gros texte uniquement */
+  --border:     #D8E5F0;   /* bordure d'élément manipulable */
+  --line:       #E9EFF5;   /* séparateur */
+  --bg:         #F4F7FA;
+  --card-bg:    #FFFFFF;
+
+  /* ─ Statuts ─ */
+  --green:   #2E8B57;
+  --green-d: #246B44;
+  --amber:   #9A5B00;
+  --amber-bg: #FFF4E2;
+  --red:     #B23A2E;
+  --red-bg:  #FDECEC;
+
+  /* ─ Rayons : trois valeurs, une par niveau ─ */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   18px;
+  --r-pill: 999px;
+  --radius: var(--r-sm);   /* alias conservé pour les règles héritées */
+
+  /* ─ Élévation : deux niveaux, chacun pour un empilement réel ─ */
+  --e-1: 0 1px 2px rgba(20,32,43,.06), 0 6px 18px rgba(20,32,43,.07);
+  --e-2: 0 18px 48px rgba(20,32,43,.22);
+  --shadow: var(--e-1);    /* alias conservé */
+
+  /* ─ Espacements : six valeurs, appliquées strictement ─ */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 40px;
 
   /* ─ Échelle typographique unifiée — Manrope obligatoire ─
      Mêmes variables et mêmes valeurs (px) répliquées dans chaque outil pour une
-     cohérence de la police et des tailles d'un bout à l'autre du hub. */
+     cohérence de la police et des tailles d'un bout à l'autre du hub. Le hub
+     n'en emploie que cinq : display, xl, lg, base, sm (plus label/hint pour les
+     libellés courts). Les autres restent définies pour les outils. */
   --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --fs-display: 24px; /* plus grand titre */
-  --fs-hero:    22px; /* titre de marque / page */
+  --fs-display: 24px;
+  --fs-hero:    22px;
   --fs-2xl:     20px;
   --fs-xl:      18px;
-  --fs-lg:      16px; /* grandes valeurs, gros chiffres */
-  --fs-h3:      14px; /* sous-titre, corps emphase */
-  --fs-base:    14px; /* corps de texte, champs */
-  --fs-sm:      13px; /* texte secondaire, cellules */
-  --fs-label:   12px; /* libellés, titres de section (MAJ) */
-  --fs-hint:    11px; /* aides, légendes */
-  --fs-micro:   10px; /* en-têtes de tableau, badges */
-  --fs-nano:     9px; /* règle, mini-légendes */
+  --fs-lg:      16px;
+  --fs-h3:      14px;
+  --fs-base:    14px;
+  --fs-sm:      13px;
+  --fs-label:   12px;
+  --fs-hint:    11px;
+  --fs-micro:   10px;
+  --fs-nano:     9px;
   --fw-medium:    500;
   --fw-semibold:  600;
   --fw-bold:      700;
@@ -44,231 +95,254 @@
    neutralisée plus bas si l'utilisateur préfère réduire le mouvement. */
 @view-transition { navigation: auto; }
 
+html { scroll-behavior: smooth; }
+
 body {
   font-family: var(--font);
   background: var(--bg);
-  color: var(--ink);
+  color: var(--ink-2);
   min-height: 100vh;
   position: relative;
   isolation: isolate;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* ── FOND ANIMÉ DOUX ──
-   Voile de lumière très léger qui dérive lentement derrière toute la page :
-   une touche bleue (identité) et une touche chaude (accueil chaleureux).
-   100 % CSS, transform/opacity uniquement, posé en fixed et non interactif. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: -25%;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(38% 42% at 16% 18%, rgba(31,111,178,.10), transparent 60%),
-    radial-gradient(34% 40% at 84% 16%, rgba(255,196,140,.12), transparent 62%),
-    radial-gradient(46% 52% at 78% 88%, rgba(46,139,87,.07), transparent 60%),
-    radial-gradient(40% 46% at 22% 86%, rgba(31,111,178,.07), transparent 62%);
-  filter: blur(8px);
-  animation: bg-drift 38s ease-in-out infinite alternate;
-}
-
-@keyframes bg-drift {
-  0%   { transform: translate3d(-2%, -1.5%, 0) scale(1.04); }
-  50%  { transform: translate3d(1.5%, 2%, 0)  scale(1.09); }
-  100% { transform: translate3d(2.5%, -1%, 0) scale(1.05); }
-}
-
-/* ── FOND OPTIQUE ──
-   Motifs « lunettes » très estompés, répartis sur 3 plans de profondeur qui
-   dérivent doucement avec la souris (parallaxe posée en JS). Flou décroissant
-   du lointain vers le proche = légère « mise au point » optique. Couche fixe en
-   z-index -1 : au-dessus du voile lumineux (-2), derrière tout le contenu. */
+/* ── FILIGRANE OPTIQUE ──
+   L'identité du métier reste posée derrière la page, mais immobile : ni
+   parallaxe au pointeur, ni respiration en boucle. Un motif statique ne coûte
+   rien à afficher, ne consomme pas de batterie et ne bouge pas derrière un
+   texte qu'on est en train de lire. */
 .optic {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  inset: 0 0 auto;
+  height: 620px;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
-.optic .layer {
+
+/* Voile bleu très léger en haut de page : donne de la profondeur sous la barre
+   sans dégradé sur les surfaces d'action. Statique. */
+.optic::before {
+  content: "";
   position: absolute;
   inset: 0;
-  will-change: transform;
-  transition: transform .25s cubic-bezier(.22,.61,.36,1);
+  background: linear-gradient(180deg, var(--blue-50) 0%, rgba(244,247,250,0) 100%);
 }
-.optic .far  { opacity: .055; filter: blur(1.1px); }
-.optic .mid  { opacity: .07;  filter: blur(.5px); }
-.optic .near { opacity: .085; filter: blur(.2px); }
 
 .optic .m {
   position: absolute;
-  width: var(--w, 160px);
-  transform: translate(-50%, -50%);
+  width: var(--w, 180px);
+  transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+  opacity: .5;
 }
+
 .optic .m svg {
   width: 100%;
   height: auto;
   display: block;
   fill: none;
-  stroke: var(--blue);
+  stroke: var(--blue-300);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transform-origin: 50% 50%;
-  animation: optic-float var(--dur, 22s) ease-in-out var(--del, 0s) infinite;
-}
-.optic .m.sky svg { stroke: var(--sky); }
-
-/* Respiration très lente, indépendante de la souris (vie au repos). */
-@keyframes optic-float {
-  0%, 100% { transform: translateY(0)     rotate(var(--r, 0deg)); }
-  50%      { transform: translateY(-10px) rotate(calc(var(--r, 0deg) + 2deg)); }
 }
 
-/* Entrée de page en fondu/glissé doux — agréable même sans View Transitions. */
-.main { animation: page-enter .55s cubic-bezier(.22,.61,.36,1) both; }
-
-@keyframes page-enter {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: none; }
+/* ── LIEN D'ÉVITEMENT ──
+   Première cible au clavier : saute la barre pour atteindre les outils. */
+.skip-link {
+  position: absolute;
+  left: var(--s-3);
+  top: -100px;
+  z-index: 200;
+  background: var(--card-bg);
+  color: var(--blue-800);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  box-shadow: var(--e-2);
+  transition: top .12s ease;
 }
 
-/* ── HEADER ── */
-.site-header {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(135deg, var(--blue-d) 0%, var(--blue) 55%, #2A86CE 100%);
+.skip-link:focus { top: var(--s-3); }
+
+/* ═══ BARRE SUPÉRIEURE ═══
+   Quatre destinations seulement : une barre horizontale suffit, une colonne
+   latérale coûterait de la largeur pour rien. Collante parce qu'elle porte
+   l'accès à « Mon magasin », utile depuis n'importe quel point de la page. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--blue);
   color: #fff;
-  padding: 20px 32px;
+  border-bottom: 1px solid var(--blue-800);
+}
+
+.topbar__inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--s-3) var(--s-5);
   display: flex;
   align-items: center;
-  gap: 24px;
-  box-shadow: 0 6px 22px rgba(26,42,58,.18);
+  gap: var(--s-4);
 }
 
-/* Lueur « aurora » qui dérive doucement derrière le titre — donne de la
-   profondeur premium sans image ni dépendance (transform/opacity uniquement). */
-.site-header::before {
-  content: "";
-  position: absolute;
-  inset: -45%;
-  z-index: -1;
-  background:
-    radial-gradient(40% 55% at 18% 22%, rgba(255,255,255,.20), transparent 60%),
-    radial-gradient(34% 50% at 85% 28%, rgba(120,200,255,.28), transparent 62%),
-    radial-gradient(46% 60% at 62% 92%, rgba(16,64,120,.42), transparent 60%);
-  filter: blur(6px);
-  animation: aurora 20s ease-in-out infinite alternate;
-}
-
-@keyframes aurora {
-  0%   { transform: translate3d(-3%, -2%, 0) scale(1.05); }
-  50%  { transform: translate3d(2%, 3%, 0)  scale(1.12); }
-  100% { transform: translate3d(3%, -1%, 0) scale(1.06); }
-}
-
-.site-header .logo-wrap,
-.site-header .store-settings-btn { position: relative; z-index: 1; }
-
-.site-header .logo-wrap {
+/* Marque : la pastille est le seul élément décoratif conservé de l'ancienne
+   version — c'est le détail récurrent qui porte l'identité. */
+.brand {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
   flex: 1;
   min-width: 0;
 }
 
+.brand__mark {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.28);
+}
+
+.brand__mark svg {
+  width: 22px;
+  height: auto;
+  display: block;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand__txt { min-width: 0; }
+
+.brand__name {
+  display: block;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-black);
+  letter-spacing: .01em;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand__meta {
+  display: block;
+  font-size: var(--fs-hint);
+  font-weight: var(--fw-medium);
+  color: rgba(255,255,255,.82);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+.topbar__link {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  color: rgba(255,255,255,.9);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  transition: background .12s ease, color .12s ease;
+}
+
+.topbar__link:hover { background: rgba(255,255,255,.14); color: #fff; }
+
 .store-settings-btn {
   flex-shrink: 0;
   font-family: inherit;
-  font-size: var(--fs-base);
-  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
   color: #fff;
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.4);
-  border-radius: var(--radius);
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.42);
+  border-radius: var(--r-sm);
   padding: 8px 14px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background .15s;
+  transition: background .12s ease;
 }
 
-.store-settings-btn:hover { background: rgba(255,255,255,.26); }
+.store-settings-btn:hover { background: rgba(255,255,255,.28); }
 
-.site-header .store-name {
-  font-size: var(--fs-hero);
-  font-weight: 800;
-  letter-spacing: .02em;
+/* Focus sur fond bleu : un halo blanc reste perceptible là où le bleu ne l'est
+   plus. Le contour est doublé d'un liseré sombre pour tenir sur toute surface. */
+.topbar a:focus-visible,
+.topbar button:focus-visible,
+.skip-link:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ═══ CONTENU ═══ */
+.main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-5) 56px;
+}
+
+/* ── ACCUEIL ──
+   Bandeau volontairement court : sur un portable de 13 pouces, la première
+   carte d'outil doit être visible sans défiler. */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  margin-bottom: var(--s-5);
+}
+
+.hero__txt { min-width: 0; }
+
+.hero__greet {
+  font-size: var(--fs-display);
+  font-weight: var(--fw-black);
+  color: var(--ink);
   line-height: 1.2;
+  letter-spacing: -.01em;
 }
 
-.site-header .store-meta {
-  font-size: var(--fs-sm);
-  opacity: .85;
-  margin-top: 4px;
+.hero__sub {
+  font-size: var(--fs-base);
+  color: var(--text-muted);
+  margin-top: var(--s-1);
   line-height: 1.5;
 }
 
-/* ── MAIN ── */
-.main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 40px 24px 64px;
-}
-
-.section-title {
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-}
-
-/* ── ACCUEIL CHALEUREUX (salutation + éphéméride du jour) ── */
-.welcome {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 28px;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FBFDFF 100%);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  animation: page-enter .6s .05s cubic-bezier(.22,.61,.36,1) both;
-}
-
-.welcome__greet {
-  font-size: var(--fs-2xl);
-  font-weight: 800;
-  color: var(--ink);
-  line-height: 1.2;
-}
-
-.welcome__sub {
-  font-size: var(--fs-base);
-  color: var(--text-muted);
-  margin-top: 3px;
-  line-height: 1.45;
-}
-
-/* Éphéméride : un bloc « calendrier » dont la page du jour se retourne. */
-.ephemeris {
+/* Éphéméride : bloc calendrier du jour. Il porte une information réelle (la
+   date), et son retournement ne se joue qu'au premier chargement d'une
+   nouvelle journée — c'est-à-dire quand la page a effectivement tourné.
+   Ouvrir le hub dix fois dans l'après-midi ne le rejoue pas. */
+.today {
   flex-shrink: 0;
-  width: 60px;
-  height: 64px;
+  width: 62px;
+  height: 66px;
   position: relative;
-  perspective: 320px;
-  filter: drop-shadow(0 4px 8px rgba(26,42,58,.14));
+  perspective: 340px;
 }
 
-.ephemeris__base,
-.ephemeris__page {
+.today__base,
+.today__prev {
   position: absolute;
-  inset: 8px 0 0;
-  border-radius: 9px;
-  background: #fff;
+  inset: 9px 0 0;
+  border-radius: 10px;
+  background: var(--card-bg);
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -277,139 +351,600 @@ body::before {
   overflow: hidden;
 }
 
-/* La reliure rouge en haut du bloc. */
-.ephemeris::before {
+/* La reliure en tête du bloc. */
+.today::before {
   content: "";
   position: absolute;
   top: 0;
-  left: 9px;
-  right: 9px;
+  left: 10px;
+  right: 10px;
   height: 12px;
   border-radius: 6px;
-  background: linear-gradient(180deg, #E0584B, #C5453A);
-  box-shadow: 0 1px 0 rgba(0,0,0,.08);
+  background: var(--blue-800);
   z-index: 3;
 }
 
-.ephemeris__wd {
+.today__wd {
   font-size: var(--fs-nano);
-  font-weight: 800;
+  font-weight: var(--fw-black);
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: .08em;
   color: var(--blue);
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
-.ephemeris__day {
+.today__day {
   font-size: var(--fs-display);
-  font-weight: 800;
+  font-weight: var(--fw-black);
   color: var(--ink);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
-.ephemeris__mo {
+.today__mo {
   font-size: var(--fs-nano);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
-  letter-spacing: .05em;
+  letter-spacing: .06em;
   color: var(--text-muted);
 }
 
-/* La page de surface se retourne une fois au chargement, révélant la base. */
-.ephemeris__page {
+/* La page de la veille reste escamotée par défaut ; le JS ne pose
+   « .today--turn » que le premier jour où la date change. */
+.today__prev {
   transform-origin: top center;
   backface-visibility: hidden;
   z-index: 2;
-  animation: page-flip 1.5s 1 cubic-bezier(.5,.05,.3,1) both;
+  opacity: 0;
+  transform: rotateX(-92deg);
 }
 
-@keyframes page-flip {
-  0%, 40% { transform: rotateX(0deg); opacity: 1; }
-  72%     { transform: rotateX(-92deg); opacity: 1; }
-  73%     { opacity: 0; }
-  100%    { transform: rotateX(-92deg); opacity: 0; }
+.today--turn .today__prev { animation: page-turn .6s cubic-bezier(.5,.05,.3,1) both; }
+
+@keyframes page-turn {
+  0%   { transform: rotateX(0deg);   opacity: 1; }
+  70%  { transform: rotateX(-92deg); opacity: 1; }
+  71%  { opacity: 0; }
+  100% { transform: rotateX(-92deg); opacity: 0; }
 }
 
-/* ── NOTICE DE CONFIGURATION ── */
-.setup-notice {
-  background: #FFF7E6;
-  border: 1px solid #F0C36D;
-  border-left: 4px solid #D9911A;
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  margin-bottom: 28px;
-  font-size: var(--fs-base);
-  line-height: 1.5;
-  color: #7A5500;
+/* ── AVIS ──
+   Deux natures distinctes, deux traitements. L'avis « à faire » n'apparaît que
+   quand il y a réellement quelque chose à faire : jamais de bloc vide. */
+.notice {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  margin-bottom: var(--s-4);
 }
 
-.setup-notice .btn { margin-left: auto; }
+.notice__txt { flex: 1; min-width: 220px; }
 
-/* ── MODALE ── */
+.notice__ico {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Paramétrage manquant : blocage doux, l'utilisateur peut quand même travailler. */
+.notice--setup {
+  background: var(--amber-bg);
+  border: 1px solid #F0D4A6;
+  color: #7A5500;
+}
+
+.notice--setup .notice__ico { stroke: var(--amber); }
+.notice--setup .btn { margin-left: auto; }
+
+/* Rappel de tâche : information, pas alerte. */
+.notice--todo {
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  color: var(--blue-800);
+}
+
+.notice--todo .notice__ico { stroke: var(--blue); }
+
+.notice--todo a {
+  margin-left: auto;
+  color: var(--blue-800);
+  font-weight: var(--fw-bold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.notice--todo a:hover { color: var(--blue-900); }
+
+/* ── TITRE DE SECTION ──
+   Le regroupement est nommé plutôt qu'encadré : pas de carte autour d'une
+   section, pas de bordure qui double un espacement déjà suffisant. */
+.sec {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin: var(--s-6) 0 var(--s-4);
+}
+
+.sec:first-of-type { margin-top: 0; }
+
+.sec__title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-black);
+  color: var(--ink);
+  letter-spacing: -.01em;
+  /* Cible d'ancre : le titre ne doit pas atterrir sous la barre collante. */
+  scroll-margin-top: 76px;
+}
+
+.sec__hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ═══ OUTILS ═══
+   Chaque outil est un élément indépendant de même niveau : la carte est ici
+   justifiée. Toute la carte est un lien — un seul lien, portant le nom de la
+   destination — au lieu d'un bouton « Accéder à l'outil » répété à l'identique
+   sur trois cibles différentes. */
+/* Deux colonnes au plus : à trois, les intitulés se coupent en deux lignes et
+   la quatrième carte reste seule sur sa rangée. Quatre outils tiennent en 2×2. */
+#tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--s-4);
+  list-style: none;
+}
+
+.tool-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "icon head  go"
+    "icon pitch go"
+    "more more  more";
+  grid-template-rows: auto auto 1fr;
+  align-items: start;
+  column-gap: var(--s-4);
+  row-gap: var(--s-1);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+/* Survol / focus : changement de bordure et élévation d'un cran. Pas de
+   déplacement — la carte est cliquée en série, un mouvement de 6 px répété
+   plusieurs fois par jour ne rend aucun changement d'état compréhensible. */
+.tool-card:hover,
+.tool-card:focus-within {
+  border-color: var(--blue-300);
+  box-shadow: var(--e-1);
+}
+
+.tool-card__title { grid-area: head; }
+
+.tool-card__link {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-black);
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -.01em;
+}
+
+/* Zone cliquable étendue à toute la carte, sans relais JS : le lien reste un
+   lien (clic droit, ouverture dans un onglet, tabulation, lecteur d'écran). */
+.tool-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Le contour de focus est posé sur la zone étendue : il encadre donc toute la
+   carte, et seulement quand c'est bien le lien qui a le focus — pas quand
+   l'utilisateur tabule jusqu'au dépliant « Ce que fait l'outil ». */
+.tool-card__link:focus-visible { outline: none; }
+
+.tool-card__link:focus-visible::after {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.tool-card__pitch {
+  grid-area: pitch;
+  font-size: var(--fs-base);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Chevron de destination : signale la nature « navigation » de la carte. */
+.tool-card__go {
+  grid-area: go;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: block;
+  fill: none;
+  stroke: var(--blue-300);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .15s ease, transform .15s ease;
+}
+
+.tool-card:hover .tool-card__go { stroke: var(--blue); transform: translateX(3px); }
+
+/* Détail replié : l'information longue n'est pas supprimée, elle est rangée.
+   Au-dessus de la zone cliquable (z-index) pour rester manipulable. */
+.tool-card__more {
+  grid-area: more;
+  align-self: end;      /* aligne le dépliant en bas, d'une carte à l'autre */
+  position: relative;
+  z-index: 2;
+  margin-top: var(--s-3);
+  border-top: 1px solid var(--line);
+  padding-top: var(--s-2);
+}
+
+.tool-card__more summary {
+  display: inline-flex;
+  align-items: flex-start;   /* le chevron reste calé sur la 1re ligne si le libellé passe à deux */
+  gap: 6px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  color: var(--blue);
+  cursor: pointer;
+  list-style: none;
+  padding: 2px 0;
+  border-radius: 4px;
+}
+
+.tool-card__more summary::-webkit-details-marker { display: none; }
+
+.tool-card__more summary::before {
+  content: "";
+  flex: 0 0 auto;
+  margin-top: 6px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform .15s ease;
+}
+
+.tool-card__more[open] summary::before { transform: rotate(90deg); }
+
+.tool-card__more summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.tool-card__more p {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding: var(--s-2) 0 var(--s-1);
+}
+
+.tool-card__more a {
+  color: var(--blue);
+  font-weight: var(--fw-bold);
+  text-underline-offset: 2px;
+}
+
+/* ── PASTILLE D'ICÔNE ──
+   Fond bleu clair au repos, bleu plein au survol : le changement de surface
+   double le signal « cette carte est actionnable » sans déplacer quoi que ce
+   soit. Les couleurs de trait passent par des variables pour que le SVG suive. */
+.tool-card__icon {
+  grid-area: icon;
+  --ic-line: var(--blue);
+  --ic-acc: var(--sky);
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  background: var(--blue-100);
+  transition: background .18s ease;
+}
+
+.tool-card:hover .tool-card__icon,
+.tool-card:focus-within .tool-card__icon {
+  --ic-line: #fff;
+  --ic-acc: #A9DDFF;
+  background: var(--blue);
+}
+
+.tool-card__icon svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ic-line);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .18s ease;
+}
+
+.tool-card__icon svg .fill { fill: var(--ic-line); stroke: none; transition: fill .18s ease; }
+.tool-card__icon svg .acc  { stroke: var(--ic-acc); transition: stroke .18s ease; }
+.tool-card__icon svg .accf { fill: var(--ic-acc); stroke: none; transition: fill .18s ease; }
+
+/* ── ANIMATIONS D'ICÔNE ──
+   Une par outil, déclenchée (survol, focus, ou une lecture unique à
+   l'ouverture posée par le JS via « .icon-play »), bornée à une itération de
+   moins d'une seconde. Aucune boucle infinie : ce qui tourne en permanence
+   derrière un texte est une taxe, pas une animation.
+
+   Chaque animation dit le bénéfice de l'outil, pas son objet :
+   · Ordonnance      → le paraphe se trace : le courrier part signé.
+   · Clôture         → les pièces s'empilent puis le total se tire.
+   · Épaisseur       → les mors se referment : la cote est prise.
+   · Campagne e-mail → les traits filent : l'envoi part. */
+
+/* 1 — Ordonnance : le paraphe s'écrit. */
+.ti-sign { stroke-dasharray: 100; stroke-dashoffset: 100; }
+
+.tool-card:hover .ti-sign,
+.tool-card:focus-within .ti-sign,
+.tool-card.icon-play .ti-sign { animation: sign-draw .75s ease-out forwards; }
+
+@keyframes sign-draw {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* 2 — Clôture de caisse : les pièces montent une à une, puis le trait de total. */
+.tool-card:hover .ti-coin,
+.tool-card:focus-within .ti-coin,
+.tool-card.icon-play .ti-coin { animation: coin-in .34s cubic-bezier(.22,.61,.36,1) both; }
+
+.tool-card:hover .ti-coin--2,
+.tool-card:focus-within .ti-coin--2,
+.tool-card.icon-play .ti-coin--2 { animation-delay: .11s; }
+
+.tool-card:hover .ti-coin--3,
+.tool-card:focus-within .ti-coin--3,
+.tool-card.icon-play .ti-coin--3 { animation-delay: .22s; }
+
+@keyframes coin-in {
+  from { transform: translateY(7px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+.ti-total { stroke-dasharray: 100; stroke-dashoffset: 100; }
+
+.tool-card:hover .ti-total,
+.tool-card:focus-within .ti-total,
+.tool-card.icon-play .ti-total { animation: sign-draw .3s .34s ease-out forwards; }
+
+/* 3 — Épaisseur : les mors du pied à coulisse se referment sur le verre. */
+.ti-jaw { transform-box: fill-box; transform-origin: 50% 50%; }
+
+.tool-card:hover .ti-jaw--l,
+.tool-card:focus-within .ti-jaw--l,
+.tool-card.icon-play .ti-jaw--l { animation: jaw-l .8s cubic-bezier(.4,0,.2,1) both; }
+
+.tool-card:hover .ti-jaw--r,
+.tool-card:focus-within .ti-jaw--r,
+.tool-card.icon-play .ti-jaw--r { animation: jaw-r .8s cubic-bezier(.4,0,.2,1) both; }
+
+@keyframes jaw-l {
+  0%, 100% { transform: translateX(0); }
+  45%, 65% { transform: translateX(4px); }
+}
+
+@keyframes jaw-r {
+  0%, 100% { transform: translateX(0); }
+  45%, 65% { transform: translateX(-4px); }
+}
+
+/* 4 — Campagne e-mail : les traits de vitesse filent une fois. */
+.tool-card:hover .ti-trail,
+.tool-card:focus-within .ti-trail,
+.tool-card.icon-play .ti-trail { animation: trail-go .6s ease-out both; }
+
+.tool-card:hover .ti-trail--2,
+.tool-card:focus-within .ti-trail--2,
+.tool-card.icon-play .ti-trail--2 { animation-delay: .08s; }
+
+.tool-card:hover .ti-trail--3,
+.tool-card:focus-within .ti-trail--3,
+.tool-card.icon-play .ti-trail--3 { animation-delay: .16s; }
+
+@keyframes trail-go {
+  0%   { opacity: 0; transform: translateX(-5px); }
+  55%  { opacity: 1; transform: none; }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ── OUTIL ANNONCÉ, PAS ENCORE OUVERT ──
+   La carte annonce ce qui vient sans y donner accès : aucun lien, donc aucune
+   cible clavier. L'atténuation reste au-dessus du seuil de contraste. */
+.tool-card--soon { background: transparent; border-style: dashed; }
+.tool-card--soon:hover { border-color: var(--border); box-shadow: none; }
+.tool-card--soon .tool-card__title { color: var(--ink-2); }
+
+.tool-card--soon .tool-card__icon {
+  --ic-line: var(--muted-2);
+  --ic-acc: var(--muted-2);
+  background: var(--line);
+}
+
+.badge {
+  display: inline-block;
+  font-size: var(--fs-hint);
+  font-weight: var(--fw-black);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+  vertical-align: 2px;
+  margin-left: var(--s-2);
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+/* ═══ BOUTONS ═══
+   Deux variantes seulement : principale et discrète. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  border-radius: var(--r-sm);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.btn--primary {
+  background: var(--blue);
+  color: #fff;
+}
+
+.btn--primary:hover { background: var(--blue-d); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: var(--border);
+}
+
+.btn--ghost:hover { background: var(--bg); border-color: var(--blue-300); }
+
+/* ═══ AIDE & DOCUMENTS ═══
+   Les trois notices n'étaient atteignables que depuis le pied de page ou
+   l'intérieur de la modale « Mon magasin ». Elles ont désormais un chemin
+   visible depuis l'accueil. */
+.docs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--s-3);
+  list-style: none;
+}
+
+.doc {
+  display: block;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card-bg);
+  text-decoration: none;
+  transition: border-color .15s ease;
+}
+
+.doc:hover { border-color: var(--blue-300); }
+
+.doc:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.doc__name {
+  display: block;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  color: var(--blue-800);
+}
+
+.doc__desc {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* ═══ MODALE ═══ */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(26,42,58,.55);
+  background: rgba(20,32,43,.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: var(--s-4);
   z-index: 100;
 }
 
 .modal {
   background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(26,42,58,.3);
+  border-radius: var(--r-lg);
+  box-shadow: var(--e-2);
   width: 100%;
-  max-width: 440px;
-  max-height: calc(100vh - 40px);
+  max-width: 460px;
+  max-height: calc(100vh - 32px);
   overflow-y: auto;
-  padding: 26px 26px 22px;
+  padding: var(--s-5) var(--s-5) var(--s-4);
 }
 
 .modal__title {
   font-size: var(--fs-2xl);
-  font-weight: 800;
+  font-weight: var(--fw-black);
   color: var(--ink);
+  letter-spacing: -.01em;
 }
 
 .modal__hint {
   font-size: var(--fs-sm);
   color: var(--text-muted);
-  line-height: 1.5;
-  margin: 8px 0 18px;
+  line-height: 1.55;
+  margin: var(--s-2) 0 var(--s-4);
 }
 
-.field { display: block; margin-bottom: 14px; }
+.field { display: block; position: relative; margin-bottom: var(--s-3); }
 
 .field__lbl {
   display: block;
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--ink);
   margin-bottom: 5px;
+  transition: color .15s ease;
 }
 
 .field__req,
 .field__opt {
   font-size: var(--fs-hint);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: .04em;
   padding: 1px 7px;
-  border-radius: 20px;
+  border-radius: var(--r-pill);
   margin-left: 4px;
 }
 
-.field__req { background: #FDECEC; color: #B23A2E; }
+.field__req { background: var(--red-bg); color: var(--red); }
 .field__opt { background: #EEF2F7; color: var(--text-muted); }
-
-.field { position: relative; }
 
 .field input,
 .field textarea {
@@ -418,56 +953,32 @@ body::before {
   font-size: var(--fs-lg);
   color: var(--ink);
   border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-sm);
   padding: 9px 11px;
   background: #fff;
-  transition: border-color .18s ease, box-shadow .25s ease, transform .18s ease;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
 
-/* Zone de message du formulaire de contact : redimensionnable verticalement. */
 .field textarea {
   resize: vertical;
   min-height: 104px;
   line-height: 1.5;
 }
 
-/* Au focus : halo bleu doux + très léger soulèvement (micro-interaction). */
 .field input:focus,
 .field textarea:focus {
   outline: none;
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(31,111,178,.14);
-  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(31,111,178,.18);
 }
 
-/* L'intitulé du champ s'allume en bleu pendant la saisie. */
 .field:focus-within .field__lbl { color: var(--blue); }
-
-/* Trait d'accent qui se dessine sous le champ actif, de gauche à droite. */
-.field__lbl { transition: color .18s ease; }
-
-.field::after {
-  content: "";
-  position: absolute;
-  left: 1px;
-  right: 1px;
-  bottom: 0;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--blue);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform .28s cubic-bezier(.22,.61,.36,1);
-  pointer-events: none;
-}
-
-.field:focus-within::after { transform: scaleX(1); }
 
 /* ── MENU DÉROULANT À CHOIX MULTIPLE (outil concerné, modale contact) ──
    Maison, sans dépendance : un bouton-déclencheur façon champ + un panneau de
    cases à cocher qui se déploie en flux (pas d'absolu = jamais rogné par le
    défilement de la modale, et confortable au doigt sur mobile). */
-.c-group { margin-bottom: 14px; }
+.c-group { margin-bottom: var(--s-3); }
 
 .cd { position: relative; }
 
@@ -482,17 +993,17 @@ body::before {
   color: var(--ink);
   text-align: left;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-sm);
   padding: 9px 11px;
   background: #fff;
   cursor: pointer;
-  transition: border-color .18s ease, box-shadow .25s ease;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .cd-toggle:focus-visible {
   outline: none;
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(31,111,178,.14);
+  box-shadow: 0 0 0 3px rgba(31,111,178,.18);
 }
 
 .cd-toggle__txt {
@@ -508,7 +1019,7 @@ body::before {
 .cd-toggle__chev {
   flex-shrink: 0;
   color: var(--text-muted);
-  transition: transform .2s ease;
+  transition: transform .15s ease;
 }
 
 .cd-toggle[aria-expanded="true"] .cd-toggle__chev { transform: rotate(180deg); }
@@ -517,8 +1028,7 @@ body::before {
   margin-top: 6px;
   background: #fff;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: var(--r-sm);
   padding: 6px;
 }
 
@@ -545,26 +1055,26 @@ body::before {
 
 /* ── SECTION SYNCHRO ── */
 .sync-section {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
 }
 
 .sync-title {
   font-size: var(--fs-base);
-  font-weight: 800;
+  font-weight: var(--fw-black);
   color: var(--ink);
-  margin-bottom: 4px;
+  margin-bottom: var(--s-1);
 }
 
 .sync-desc {
   font-size: var(--fs-sm);
   color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 12px;
+  line-height: 1.55;
+  margin-bottom: var(--s-3);
 }
 
-.sync-desc a { color: var(--blue); font-weight: 700; }
+.sync-desc a { color: var(--blue); font-weight: var(--fw-bold); }
 
 .sync-actions {
   display: flex;
@@ -575,372 +1085,44 @@ body::before {
 
 .sync-status {
   font-size: var(--fs-sm);
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   color: var(--text-muted);
 }
 
-.sync-status.ok  { color: var(--green); }
-.sync-status.err { color: #B23A2E; }
+.sync-status.ok  { color: var(--green-d); }
+.sync-status.err { color: var(--red); }
 
 .modal__actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: var(--s-4);
 }
 
-.btn--ghost {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1.5px solid var(--border);
-}
-
-.btn--ghost:hover { background: var(--bg); }
-
-/* ── TOOLS GRID ── */
-#tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.tool-card {
-  position: relative;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow: hidden;
-  transition: transform .35s cubic-bezier(.22,.61,.36,1),
-              box-shadow .35s ease,
-              border-color .35s ease,
-              opacity .6s ease;
-}
-
-/* Survol : la carte se sur-élève légèrement (sans inclinaison). Le sélecteur
-   composé bat en spécificité la règle d'apparition « .is-visible » pour que la
-   levée s'applique aussi aux cartes déjà révélées. */
-.tool-card:hover,
-#tools-grid.reveal-ready .tool-card.is-visible:hover {
-  transform: translateY(-6px);
-  border-color: #BBD6EE;
-  box-shadow: 0 18px 40px rgba(26,42,58,.18);
-}
-
-/* Contenu au-dessus du reflet (lisibilité garantie). */
-.tool-card__header,
-.tool-card__top,
-.tool-card__title,
-.tool-card__desc,
-.tool-card .btn { position: relative; z-index: 1; }
-
-/* ── CARTE ENTIÈREMENT CLIQUABLE ──
-   Le bouton « Accéder à l'outil » reste le lien réel (focusable au clavier,
-   clic-droit « ouvrir dans un nouvel onglet »). Pour rendre TOUTE la carte
-   cliquable sans imbriquer de liens ni rogner le reflet du bouton (qui exige
-   overflow:hidden), un clic ailleurs sur la carte est relayé vers ce lien en
-   JS. Le curseur « main » signale la zone cliquable. */
-.tool-card { cursor: pointer; }
-
-/* Ligne du haut : pastille d'icône thématique à gauche, badge d'état à droite. */
-.tool-card__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-/* Pastille d'icône — visuel éphémère propre à chaque outil. */
-.tool-card__icon {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  background: linear-gradient(150deg, #1A4C95 0%, #103A78 55%, #0C2C5E 100%);
-  border: 1px solid rgba(255,255,255,.14);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 2px 6px rgba(12,44,94,.30);
-  transition: transform .4s cubic-bezier(.22,.61,.36,1), box-shadow .4s ease;
-}
-
-.tool-card__icon svg { width: 34px; height: 34px; display: block; overflow: visible; }
-
-.tool-card:hover .tool-card__icon {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px rgba(16,58,120,.40);
-}
-
-/* Icônes « app » : pièces blanches et accents bleu ciel sur la pastille marine.
-   Couleurs posées par classe ; les pièces sans classe héritent du trait blanc. */
-.tool-card__icon svg          { stroke: #fff; fill: none; stroke-width: 2.2; stroke-linejoin: round; }
-.tool-card__icon svg .fill    { fill: #fff; stroke: none; }
-.tool-card__icon svg .accent  { fill: var(--sky); stroke: none; }
-.tool-card__icon svg .accent-s { stroke: var(--sky); }
-.tool-card__icon svg .ink     { stroke: var(--sky); }
-.tool-card__icon svg .ti-keys rect { fill: #fff; stroke: none; }
-
-/* La signature du stylo part « vide » et se trace (path normalisé sur 100). */
-.ti-line { stroke-dasharray: 100; stroke-dashoffset: 100; }
-
-/* Rotation/échelle calées sur le centre réel de la pièce. */
-.ti-pen { transform-box: fill-box; transform-origin: 50% 50%; }
-
-/* Animations jouées au survol (desktop) et une fois à l'apparition (mobile,
-   via la classe .icon-play posée puis retirée par le JS). */
-.tool-card:hover .ti-line,
-.tool-card.icon-play .ti-line { animation: ti-write 2.6s ease-in-out infinite; }
-
-.tool-card:hover .ti-pen,
-.tool-card.icon-play .ti-pen { animation: ti-pen 2.6s ease-in-out infinite; }
-
-.tool-card:hover .ti-jaw,
-.tool-card.icon-play .ti-jaw { animation: ti-measure 2.6s ease-in-out infinite; }
-
-.tool-card:hover .ti-keys rect,
-.tool-card.icon-play .ti-keys rect { animation: ti-key 2.2s ease-in-out infinite; }
-
-.tool-card:hover .ti-keys rect:nth-child(2),
-.tool-card.icon-play .ti-keys rect:nth-child(2) { animation-delay: .15s; }
-.tool-card:hover .ti-keys rect:nth-child(3),
-.tool-card.icon-play .ti-keys rect:nth-child(3) { animation-delay: .3s; }
-.tool-card:hover .ti-keys rect:nth-child(4),
-.tool-card.icon-play .ti-keys rect:nth-child(4) { animation-delay: .45s; }
-.tool-card:hover .ti-keys rect:nth-child(5),
-.tool-card.icon-play .ti-keys rect:nth-child(5) { animation-delay: .6s; }
-.tool-card:hover .ti-keys rect:nth-child(6),
-.tool-card.icon-play .ti-keys rect:nth-child(6) { animation-delay: .75s; }
-.tool-card:hover .ti-keys rect:nth-child(7),
-.tool-card.icon-play .ti-keys rect:nth-child(7) { animation-delay: .9s; }
-.tool-card:hover .ti-keys rect:nth-child(8),
-.tool-card.icon-play .ti-keys rect:nth-child(8) { animation-delay: 1.05s; }
-.tool-card:hover .ti-keys rect:nth-child(9),
-.tool-card.icon-play .ti-keys rect:nth-child(9) { animation-delay: 1.2s; }
-
-/* Les traits de vitesse de l'enveloppe s'estompent en cascade (« ça part »). */
-.tool-card:hover .ti-send rect,
-.tool-card.icon-play .ti-send rect { animation: ti-send 1.9s ease-in-out infinite; }
-
-.tool-card:hover .ti-send rect:nth-child(2),
-.tool-card.icon-play .ti-send rect:nth-child(2) { animation-delay: .13s; }
-.tool-card:hover .ti-send rect:nth-child(3),
-.tool-card.icon-play .ti-send rect:nth-child(3) { animation-delay: .26s; }
-
-/* Le stylo descend en signant pendant que le paraphe se trace sous la plume. */
-@keyframes ti-write {
-  0%        { stroke-dashoffset: 100; }
-  55%, 100% { stroke-dashoffset: 0; }
-}
-@keyframes ti-pen {
-  0%        { transform: translate(-3px, -1px) rotate(-2deg); }
-  55%       { transform: translate(12px, 1px) rotate(2deg); }
-  68%       { transform: translate(12px, 1px) rotate(2deg); }
-  100%      { transform: translate(-3px, -1px) rotate(-2deg); }
-}
-/* Le mors mobile du pied à coulisse vient mesurer le verre, puis revient. */
-@keyframes ti-measure {
-  0%, 100%  { transform: translateX(0); }
-  40%, 60%  { transform: translateX(-9px); }
-}
-/* Les touches de la calculatrice s'allument en cascade. */
-@keyframes ti-key {
-  0%, 65%, 100% { fill: #fff; }
-  18%           { fill: var(--sky); }
-}
-/* Chaque trait s'efface puis revient : lecture « envoi en cours ». */
-@keyframes ti-send {
-  0%, 100% { opacity: 1; }
-  45%      { opacity: .22; }
-}
-
-/* Léger reflet de surface, révélé en douceur au survol (purement décoratif). */
-.tool-card__glare {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .4s ease;
-  background: radial-gradient(120% 80% at 50% 0%,
-              rgba(255,255,255,.5), rgba(255,255,255,0) 55%);
-  mix-blend-mode: soft-light;
-}
-
-.tool-card:hover .tool-card__glare { opacity: 1; }
-
-/* Apparition en cascade (posée par IntersectionObserver, décalage en JS). */
-#tools-grid.reveal-ready .tool-card { opacity: 0; transform: translateY(28px) scale(.985); }
-#tools-grid.reveal-ready .tool-card.is-visible { opacity: 1; transform: none; }
-
-.tool-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.tool-card__title {
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.3;
-}
-
-.badge {
-  font-size: var(--fs-hint);
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.badge--available {
-  background: #E6F4EE;
-  color: var(--green);
-}
-
-.badge--soon {
-  background: #FFF3E0;
-  color: #B86A00;
-}
-
-.tool-card__desc {
-  font-size: var(--fs-base);
-  color: var(--text-muted);
-  line-height: 1.55;
-  flex: 1;
-}
-
-.tool-card__desc a { color: var(--blue); font-weight: 700; }
-.tool-card__desc a:hover { color: var(--blue-d); }
-
-/* ── CARTE ANNONCÉE, PAS ENCORE OUVERTE ──
-   L'outil existe mais n'est pas mis à disposition : la carte reste lisible (elle
-   annonce ce qui vient) tout en se retirant visuellement du lot. Elle ne porte
-   aucun lien « Accéder à l'outil », donc ni cible clavier ni relais du clic
-   global de la grille — l'atténuation ne fait que rendre l'état visible. */
-.tool-card--soon { cursor: default; }
-.tool-card--soon .tool-card__title,
-.tool-card--soon .tool-card__desc { opacity: .75; }
-.tool-card--soon .tool-card__icon {
-  filter: grayscale(1);
-  opacity: .6;
-  box-shadow: none;
-}
-
-/* Ni sur-élévation ni ombre portée au survol : rien n'invite au clic. */
-.tool-card--soon:hover,
-#tools-grid.reveal-ready .tool-card--soon.is-visible:hover {
-  transform: none;
-  border-color: var(--border);
-  box-shadow: var(--shadow);
-}
-.tool-card--soon:hover .tool-card__icon { transform: none; box-shadow: none; }
-
-.btn--disabled {
-  background: #EEF2F7;
-  color: var(--text-muted);
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border-radius: var(--radius);
-  font-family: inherit;
-  font-size: var(--fs-base);
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  transition: background .15s, transform .1s, box-shadow .2s;
-}
-
-.btn:active { transform: scale(.98); }
-
-.btn--primary {
-  position: relative;
-  overflow: hidden;
-  background: var(--blue);
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(31,111,178,.28);
-}
-
-.btn--primary:hover {
-  background: var(--blue-d);
-  box-shadow: 0 6px 16px rgba(31,111,178,.34);
-}
-
-/* Reflet qui balaie le bouton au survol — micro-interaction discrète. */
-.btn--primary::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -120%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
-  transform: skewX(-18deg);
-  pointer-events: none;
-}
-
-.tool-card:hover .btn--primary::before,
-.btn--primary:hover::before { animation: btn-shine .8s ease-out; }
-
-@keyframes btn-shine {
-  from { left: -120%; }
-  to   { left: 160%; }
-}
-
-/* Au survol de la carte, le bouton se met aussi en avant (cohérence du clic global). */
-.tool-card:hover .btn--primary {
-  background: var(--blue-d);
-  box-shadow: 0 6px 16px rgba(31,111,178,.34);
-}
-
-/* ── FOOTER ── */
+/* ═══ PIED DE PAGE ═══ */
 .site-footer {
+  border-top: 1px solid var(--line);
+  padding: var(--s-5);
   text-align: center;
-  padding: 20px;
-  font-size: var(--fs-label);
+  font-size: var(--fs-sm);
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
-/* Invitation à faire remonter ses remarques (ouvre la modale de contact). */
-.site-footer__feedback { margin-top: 4px; }
-
-/* Rappel réglementaire, joignable depuis n'importe quelle page du hub. */
-.site-footer__legal { margin-top: 4px; }
-.site-footer__legal a {
-  color: var(--blue);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.site-footer__legal a:hover { color: var(--blue-d); }
+.site-footer p + p { margin-top: 2px; }
 
 .footer-link {
   font-family: inherit;
-  font-size: var(--fs-label);
-  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
   color: var(--blue);
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color .15s ease;
+  text-underline-offset: 3px;
+  transition: color .12s ease;
 }
 
 .footer-link:hover { color: var(--blue-d); }
@@ -951,44 +1133,94 @@ body::before {
   border-radius: 4px;
 }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 640px) {
-  .site-header {
-    padding: 16px 20px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+/* ═══ RESPONSIVE ═══
+   Sous 720 px la structure change au lieu de rétrécir : la barre garde le nom
+   et l'accès magasin (les liens secondaires descendent en pied de page), la
+   grille passe en colonne unique, et le bloc d'accueil se compacte pour que la
+   première carte reste atteignable sans défiler longuement. */
+@media (max-width: 720px) {
+  /* Le filigrane est calé en unités de fenêtre : sur un écran étroit, les
+     motifs se retrouvent entre les cartes au lieu de rester en fond. On garde
+     le voile bleu, on retire les motifs. */
+  .optic .m { display: none; }
+
+  .sec__title { scroll-margin-top: 60px; }
+
+  .topbar__inner { padding: 10px var(--s-4); gap: var(--s-2); }
+  .topbar__link { display: none; }
+  .brand__meta { display: none; }
+  .brand__name { font-size: var(--fs-base); }
+
+  .main { padding: var(--s-5) var(--s-4) var(--s-6); }
+
+  .hero { gap: var(--s-3); }
+  .hero__greet { font-size: var(--fs-2xl); }
+  .today { width: 54px; height: 58px; }
+  .today__day { font-size: var(--fs-2xl); }
+
+  #tools-grid { grid-template-columns: 1fr; }
+
+  .tool-card {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "icon head"
+      "icon pitch"
+      "more more";
   }
 
-  .site-header .store-name { font-size: var(--fs-xl); }
+  .tool-card__go { display: none; }
+  .tool-card__icon { width: 46px; height: 46px; }
+  .tool-card__icon svg { width: 28px; height: 28px; }
 
-  .main { padding: 28px 16px 48px; }
+  .notice--setup .btn,
+  .notice--todo a { margin-left: 0; }
 
-  #tools-grid {
-    grid-template-columns: 1fr;
-  }
+  .modal { padding: var(--s-4); }
 }
 
-/* ── ACCESSIBILITÉ : on neutralise tout le mouvement si l'utilisateur
-   préfère réduire les animations (le JS reste aussi conditionné à ce réglage). */
+/* ═══ MOUVEMENT RÉDUIT ═══
+   Repli, pas suppression : chaque animation a un état final explicite, pour
+   qu'aucun élément ne reste invisible ou mal placé. */
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
-  .site-header::before,
-  body::before,
-  .main,
-  .welcome,
-  .ephemeris__page,
-  .ti-line, .ti-pen, .ti-jaw, .ti-keys rect, .ti-send rect,
-  .btn--primary::before { animation: none; }
-  .ephemeris__page { opacity: 0; }       /* la page retournée reste escamotée */
-  .ti-line { stroke-dashoffset: 0; }     /* le trait écrit s'affiche complet */
-  .tool-card { transition: none; }
-  #tools-grid.reveal-ready .tool-card { opacity: 1; transform: none; }
-  /* Pas de sur-élévation animée : on garde un retour visuel discret (ombre). */
-  .tool-card:hover,
-  #tools-grid.reveal-ready .tool-card.is-visible:hover { transform: none; }
-  .tool-card__glare { display: none; }
-  /* Fond optique figé : motifs présents mais immobiles. */
-  .optic .layer { transition: none; }
-  .optic .m svg { animation: none; }
+
+  html { scroll-behavior: auto; }
+
+  .today--turn .today__prev { animation: none; opacity: 0; }
+
+  .ti-sign,
+  .ti-total { stroke-dashoffset: 0; }
+
+  .tool-card:hover .ti-sign,
+  .tool-card:focus-within .ti-sign,
+  .tool-card.icon-play .ti-sign,
+  .tool-card:hover .ti-total,
+  .tool-card:focus-within .ti-total,
+  .tool-card.icon-play .ti-total,
+  .tool-card:hover .ti-coin,
+  .tool-card:focus-within .ti-coin,
+  .tool-card.icon-play .ti-coin,
+  .tool-card:hover .ti-jaw--l,
+  .tool-card:focus-within .ti-jaw--l,
+  .tool-card.icon-play .ti-jaw--l,
+  .tool-card:hover .ti-jaw--r,
+  .tool-card:focus-within .ti-jaw--r,
+  .tool-card.icon-play .ti-jaw--r,
+  .tool-card:hover .ti-trail,
+  .tool-card:focus-within .ti-trail,
+  .tool-card.icon-play .ti-trail {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .tool-card:hover .tool-card__go { transform: none; }
+
+  .tool-card,
+  .tool-card__icon,
+  .tool-card__go,
+  .btn,
+  .doc,
+  .field input,
+  .field textarea { transition: none; }
 }
