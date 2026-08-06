@@ -21,10 +21,21 @@ when adding or editing tools.
 
 ## Architecture
 
-- `index.html` (root) — the hub landing page. Each tool is one `<article class="tool-card">`
-  inside `<div id="tools-grid">`. Styled by `assets/css/hub.css`.
-- `assets/css/hub.css` — styles for the hub page **only**. Defines the design tokens
-  (`--blue #1F6FB2`, `--blue-d`, `--ink`, `--bg`, `--border`, `--green`, `--radius`, `--shadow`).
+- `index.html` (root) — the hub landing page. Each tool is one `<li class="tool-card">`
+  inside `<ul id="tools-grid">`. The whole card is a single stretched link
+  (`.tool-card__link::after { inset: 0 }`) — no JS click relay — and the long description lives
+  in a `<details class="tool-card__more">` so nothing is deleted, only folded away.
+  Styled by `assets/css/hub.css`.
+- `assets/css/hub.css` — styles for the hub page **only**. Defines the design tokens: one accent
+  (`--blue #1F6FB2`, plus `--blue-900/800/d/300/100/50` and `--sky`), a four-step neutral scale
+  (`--ink`, `--ink-2`, `--text-muted`, `--muted-2`, `--border`, `--line`, `--bg`), three radii
+  (`--r-sm/md/lg` + `--r-pill`), two elevations (`--e-1`, `--e-2`) and a six-value spacing scale
+  (`--s-1`…`--s-6`). `--radius` and `--shadow` are kept as aliases.
+  Visual rules that hold the page together: no gradient on any surface, one accent colour only,
+  delimit by spacing then border (elevation only for what really floats), and **no looping
+  animation** — motion is triggered (hover/focus), bounded to one iteration under a second, and
+  the two "once" moments (icon intro, calendar page-turn) are gated by `sessionStorage`
+  (`hub-intro-v1`) and `localStorage` (`hub-jour-v1`).
 - `outils/<tool-name>/index.html` — each tool is a **single self-contained file**: inline
   `<style>` and inline `<script>`, no shared JS/CSS imports, no third-party libraries. Tools
   re-declare the color variables locally in their own `:root` rather than importing hub.css.
@@ -69,7 +80,10 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
 ## Adding a new tool
 
 1. Create `outils/<tool-name>/index.html` (self-contained HTML + inline CSS + inline JS).
-2. Add a matching `<article class="tool-card">` to the grid in the root `index.html`.
+2. Add a matching `<li class="tool-card">` to `<ul id="tools-grid">` in the root `index.html`:
+   an icon tile, an `<h3>` holding the `.tool-card__link`, a one-sentence `.tool-card__pitch`
+   stating the **benefit** (not the feature list), the `.tool-card__go` chevron, and a
+   `<details class="tool-card__more">` for the full description.
 3. Reuse the existing color tokens for visual consistency.
 4. Add the `← Retour` link to `../../` at the top of the tool.
 5. Keep all data client-side (see privacy constraint above).
