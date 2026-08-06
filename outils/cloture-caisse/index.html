@@ -442,7 +442,13 @@
     .btn-save:hover { background: var(--ec-d); }
 
     /* ── HISTORY TABLE ── */
-    .history-body { overflow-x: auto; }
+    /* `overflow-x: auto` fait bien défiler le tableau dans sa boîte, mais son
+       débordement continue de gonfler la zone défilable du document : sur un
+       écran de 375 px, la page entière partait 410 px vers la droite. `contain`
+       borne ce débordement au conteneur — le tableau garde son défilement
+       propre, la page ne bouge plus. Ni `overflow-x: hidden` sur `body`, ni
+       `min-width: 0` sur un parent flex/grid ne corrigent le cas. */
+    .history-body { overflow-x: auto; contain: paint; }
     .history-table { width: 100%; border-collapse: collapse; }
     .history-table thead th {
       font-size: var(--fs-hint);
