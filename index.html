@@ -832,7 +832,10 @@
        service tiers, CSP inchangée). -->
   <script>
     (function contactModal() {
-      var DEST = 'ribesjeremy@gmail.com';
+      // Adresse assemblée à l'exécution plutôt qu'écrite en clair : le dépôt et la page
+      // publiée sont accessibles à tous, et une adresse littérale y est ramassée par les
+      // robots de collecte. Reconstituée seulement au moment de préparer l'e-mail.
+      var DEST = ['ribesjeremy', 'gmail.com'].join(String.fromCharCode(64));
       var overlay = document.getElementById('contact-modal');
       var form    = document.getElementById('contact-form');
       if (!overlay || !form) { return; }

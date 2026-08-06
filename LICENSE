@@ -11,6 +11,11 @@ ci-dessous sont réservés.
 documentation et les fichiers associés contenus dans ce dépôt, à l'exclusion
 des éléments appartenant à des tiers et identifiés comme tels.
 
+Sont notamment exclus du Projet, et donc du copyright ci-dessus comme de la
+présente licence, les fichiers du répertoire `.claude/` : il s'agit d'outillage
+de développement rédigé par des tiers, conservé dans le dépôt pour la commodité
+des contributeurs et soumis aux conditions de ses auteurs respectifs.
+
 « Le Déployeur » désigne toute personne physique ou morale qui installe,
 héberge ou utilise le Projet.
 
