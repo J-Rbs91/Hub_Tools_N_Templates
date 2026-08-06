@@ -34,8 +34,10 @@ Ces règles découlent des contraintes du projet (voir `CLAUDE.md`) :
 
 - **Confidentialité absolue** : aucune donnée saisie ne doit quitter le
   navigateur. Pas d'analytics, pas de cookies, pas de tracker, aucun appel
-  réseau avec des données utilisateur. La seule ressource externe tolérée est la
-  police Manrope via Google Fonts.
+  réseau avec des données utilisateur. **Aucune ressource externe n'est tolérée** :
+  ni police distante, ni CDN, ni image tierce. La typographie utilise la pile de
+  polices système déclarée dans `--font` ; n'ajoutez jamais de `<link>` vers un
+  service de polices et ne réintroduisez pas d'hôte distant dans la CSP.
 - **Outils autonomes** : chaque outil vit dans `outils/<nom>/index.html`, en un
   seul fichier (CSS et JS *inline*), sans bibliothèque tierce ni import partagé.
   Les outils redéclarent localement les variables de couleurs.
@@ -96,6 +98,16 @@ suivi d'une description courte en français, sur le modèle
 ```text
 HF-003 — outil Demande/Ordonnance : structure et styles
 ```
+
+## Licence des contributions
+
+En proposant une contribution (issue, pull request, correctif), vous acceptez
+qu'elle soit publiée sous la [licence du dépôt](LICENSE) et vous concédez au
+mainteneur le droit non exclusif, gratuit et irrévocable de l'utiliser, la
+modifier, la publier et la redistribuer dans le cadre du Projet. Vous garantissez
+détenir les droits nécessaires sur ce que vous proposez : n'intégrez jamais de
+code, de police, d'icône, de tracé de monture ou de contenu rédactionnel dont
+vous n'êtes pas l'auteur ou dont la licence n'autorise pas cette réutilisation.
 
 ## Pull requests
 

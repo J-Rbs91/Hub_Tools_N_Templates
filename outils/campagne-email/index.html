@@ -5,14 +5,11 @@
   <!-- script.google.com / script.googleusercontent.com : uniquement pour le mode d'envoi
        automatique (JSONP vers le script Apps Script déployé par le magasin lui-même).
        Le mode assisté, actif par défaut, ne déclenche aucun appel réseau. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Campagne e-mail</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#1F6FB2">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* ── Transition d'écran native + fond animé doux (cohérents avec le hub) ── */
     @view-transition { navigation: auto; }
@@ -44,8 +41,8 @@
       --red: #B23A2E; --amber: #B86A00; --amber-bg: #FFF7E6;
       --radius: 8px; --shadow: 0 2px 8px rgba(26,42,58,.10);
 
-      /* ─ Échelle typographique unifiée — Manrope obligatoire ─ */
-      --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      /* ─ Échelle typographique unifiée — pile système, aucune police distante ─ */
+      --font: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
       --fs-display: 24px;
       --fs-hero:    22px;
       --fs-2xl:     20px;
