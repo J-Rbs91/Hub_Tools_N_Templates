@@ -12,269 +12,298 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/hub.css">
   <style>
-    /* QA-05 — Focus clavier nettement visible sur le lien « Accéder à l'outil »,
-       cohérent avec les tokens (--blue). N'altère pas le confort souris. */
-    .tool-card__cta:focus-visible {
-      outline: 3px solid var(--blue, #1F6FB2);
-      outline-offset: 3px;
-      border-radius: var(--radius, 14px);
-    }
-
-    /* QA-04 — Message non bloquant sous le champ e-mail. */
+    /* QA-04 — Message non bloquant sous un champ de formulaire. */
     .field__msg {
       display: none;
       margin-top: 6px;
       font-size: var(--fs-sm);
-      line-height: 1.35;
-      color: var(--blue-d, #1A5C95);
+      line-height: 1.4;
+      color: var(--blue-800, #14527F);
     }
     .field__msg.is-shown { display: block; }
   </style>
 </head>
 <body>
 
-  <!-- ── FOND OPTIQUE (décoratif, non interactif) ──
-       Motifs « lunettes » très estompés sur 3 plans ; parallaxe ajoutée en JS. -->
+  <a class="skip-link" href="#outils">Aller aux outils</a>
+
+  <!-- ── FILIGRANE OPTIQUE (décoratif, non interactif) ──
+       Motifs « lunettes » très estompés et immobiles : l'identité du métier
+       reste posée derrière la page sans rien animer en permanence. -->
   <div class="optic" aria-hidden="true">
-    <div class="layer far" data-amp="22">
-      <div class="m" style="left:9vw; top:20vh; --w:230px; --r:-10deg; --dur:26s;">
-        <svg viewBox="-80 -42 160 84">
-          <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-          <path d="M-4 -3 Q0 -10 4 -3"/>
-          <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
-        </svg>
-      </div>
-      <div class="m" style="left:85vw; top:74vh; --w:240px; --r:6deg; --dur:30s; --del:-6s;">
-        <svg viewBox="-82 -34 164 68">
-          <rect x="-78" y="-26" width="64" height="52" rx="14"/>
-          <rect x="14" y="-26" width="64" height="52" rx="14"/>
-          <path d="M-14 -8 Q0 -18 14 -8"/>
-        </svg>
-      </div>
-      <div class="m sky" style="left:91vw; top:15vh; --w:150px; --r:4deg; --dur:24s; --del:-3s;">
-        <svg viewBox="-80 -42 160 84">
-          <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-          <path d="M-4 -3 Q0 -10 4 -3"/>
-          <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
-        </svg>
-      </div>
+    <div class="m" style="left:8vw; top:14vh; --w:210px; --r:-9deg;">
+      <svg viewBox="-80 -42 160 84">
+        <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
+        <path d="M-4 -3 Q0 -10 4 -3"/>
+        <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
+      </svg>
     </div>
-
-    <div class="layer mid" data-amp="44">
-      <div class="m" style="left:72vw; top:31vh; --w:200px; --r:8deg; --dur:21s; --del:-4s;">
-        <svg viewBox="-82 -34 164 68">
-          <rect x="-78" y="-26" width="64" height="52" rx="14"/>
-          <rect x="14" y="-26" width="64" height="52" rx="14"/>
-          <path d="M-14 -8 Q0 -18 14 -8"/>
-        </svg>
-      </div>
-      <div class="m" style="left:11vw; top:63vh; --w:165px; --r:-4deg; --dur:28s; --del:-2s;">
-        <svg viewBox="-80 -42 160 84">
-          <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-          <path d="M-4 -3 Q0 -10 4 -3"/>
-          <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
-        </svg>
-      </div>
-      <div class="m sky" style="left:49vw; top:90vh; --w:140px; --r:-6deg; --dur:23s; --del:-7s;">
-        <svg viewBox="-80 -42 160 84">
-          <circle cx="-34" cy="0" r="28"/><circle cx="34" cy="0" r="28"/>
-          <path d="M-6 -2 Q0 -9 6 -2"/>
-          <path d="M-62 -5 L-78 -11"/><path d="M62 -5 L78 -11"/>
-        </svg>
-      </div>
+    <div class="m" style="left:88vw; top:9vh; --w:190px; --r:7deg;">
+      <svg viewBox="-82 -34 164 68">
+        <rect x="-78" y="-26" width="64" height="52" rx="14"/>
+        <rect x="14" y="-26" width="64" height="52" rx="14"/>
+        <path d="M-14 -8 Q0 -18 14 -8"/>
+      </svg>
     </div>
-
-    <div class="layer near" data-amp="72">
-      <div class="m sky" style="left:24vw; top:81vh; --w:150px; --r:-6deg; --dur:20s; --del:-3s;">
-        <svg viewBox="-82 -34 164 68">
-          <rect x="-78" y="-26" width="64" height="52" rx="14"/>
-          <rect x="14" y="-26" width="64" height="52" rx="14"/>
-          <path d="M-14 -8 Q0 -18 14 -8"/>
-        </svg>
-      </div>
-      <div class="m" style="left:79vw; top:52vh; --w:135px; --r:5deg; --dur:19s; --del:-1s;">
-        <svg viewBox="-80 -42 160 84">
-          <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-          <path d="M-4 -3 Q0 -10 4 -3"/>
-          <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
-        </svg>
-      </div>
-      <div class="m" style="left:33vw; top:22vh; --w:120px; --r:0deg; --dur:25s; --del:-5s;">
-        <svg viewBox="-82 -34 164 68">
-          <rect x="-78" y="-26" width="64" height="52" rx="14"/>
-          <rect x="14" y="-26" width="64" height="52" rx="14"/>
-          <path d="M-14 -8 Q0 -18 14 -8"/>
-        </svg>
-      </div>
+    <div class="m" style="left:70vw; top:47vh; --w:150px; --r:5deg;">
+      <svg viewBox="-80 -42 160 84">
+        <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
+        <path d="M-4 -3 Q0 -10 4 -3"/>
+        <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
+      </svg>
     </div>
   </div>
 
-  <header class="site-header">
-    <div class="logo-wrap">
-      <span class="store-name" id="store-name">Outils internes</span>
-      <span class="store-meta" id="store-meta"></span>
+  <!-- ── BARRE SUPÉRIEURE ──
+       Identité du magasin à gauche, actions transverses à droite. Collante :
+       « Mon magasin » et le rappel RGPD restent atteignables où qu'on soit
+       dans la page, ce qui n'était pas le cas quand ils vivaient en pied. -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="-80 -42 160 84">
+            <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
+            <path d="M-4 -3 Q0 -10 4 -3"/>
+            <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
+          </svg>
+        </span>
+        <span class="brand__txt">
+          <span class="brand__name" id="store-name">Outils internes</span>
+          <span class="brand__meta" id="store-meta"></span>
+        </span>
+      </div>
+      <nav class="topbar__actions" aria-label="Actions du magasin">
+        <a class="topbar__link" href="#aide">Aide &amp; documents</a>
+        <button class="store-settings-btn" id="open-settings" type="button">&#9881; Mon magasin</button>
+      </nav>
     </div>
-    <button class="store-settings-btn" id="open-settings" type="button">&#9881; Mon magasin</button>
   </header>
 
   <main class="main">
 
-    <section class="welcome" aria-label="Accueil">
-      <span class="ephemeris" aria-hidden="true">
-        <span class="ephemeris__base">
-          <span class="ephemeris__wd" id="eph-wd">&nbsp;</span>
-          <span class="ephemeris__day" id="eph-day">&nbsp;</span>
-          <span class="ephemeris__mo" id="eph-mo">&nbsp;</span>
+    <section class="hero" aria-label="Accueil">
+      <span class="today" id="today" role="img" aria-label="Date du jour">
+        <span class="today__base" aria-hidden="true">
+          <span class="today__wd" id="eph-wd">&nbsp;</span>
+          <span class="today__day" id="eph-day">&nbsp;</span>
+          <span class="today__mo" id="eph-mo">&nbsp;</span>
         </span>
-        <span class="ephemeris__page">
-          <span class="ephemeris__wd" id="eph-wd2">&nbsp;</span>
-          <span class="ephemeris__day" id="eph-day2">&nbsp;</span>
-          <span class="ephemeris__mo" id="eph-mo2">&nbsp;</span>
+        <span class="today__prev" aria-hidden="true">
+          <span class="today__wd" id="eph-wd2">&nbsp;</span>
+          <span class="today__day" id="eph-day2">&nbsp;</span>
+          <span class="today__mo" id="eph-mo2">&nbsp;</span>
         </span>
       </span>
-      <div>
-        <p class="welcome__greet" id="welcome-greet">Bonjour</p>
-        <p class="welcome__sub">Vos outils du quotidien, prêts à l'emploi.</p>
+      <div class="hero__txt">
+        <h1 class="hero__greet" id="welcome-greet">Bonjour</h1>
+        <p class="hero__sub">Vos outils métier, ouverts en un clic. Aucune donnée ne quitte cet appareil.</p>
       </div>
     </section>
 
-    <div class="setup-notice" id="setup-notice" hidden>
-      Votre magasin n'est pas encore configuré. Renseignez vos coordonnées une seule fois :
-      elles seront réutilisées par tous les outils.
+    <!-- Paramétrage manquant : l'avis disparaît dès que le nom du magasin est saisi. -->
+    <div class="notice notice--setup" id="setup-notice" hidden>
+      <svg class="notice__ico" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>
+      </svg>
+      <span class="notice__txt">
+        Votre magasin n'est pas encore configuré. Renseignez vos coordonnées une seule fois :
+        elles seront réutilisées par tous les outils.
+      </span>
       <button class="btn btn--primary" id="setup-notice-btn" type="button">Configurer mon magasin</button>
     </div>
 
-    <p class="section-title">Outils disponibles</p>
-
-    <div id="tools-grid">
-
-      <article class="tool-card" data-tool="pen">
-        <span class="tool-card__glare" aria-hidden="true"></span>
-        <div class="tool-card__top">
-          <span class="tool-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none">
-              <path class="ti-line" pathLength="100"
-                    d="M9 35 C12 29.5 18.5 29.5 18 34.5 C17.6 38.5 11.5 37.5 14 32.5 C17.5 25.5 27 33 40 29.5"
-                    stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-              <g class="ti-pen">
-                <path d="M37 10 L22.5 25" stroke-width="6" stroke-linecap="round"/>
-                <path class="accent-s" d="M33.7 13.4 L31.6 15.6" stroke-width="6.8"/>
-                <path class="fill" d="M20.4 24 L23.6 27 L15.8 32 Z"/>
-                <path class="ink" d="M19.2 27.4 L16.4 31" stroke-width="1.3" stroke-linecap="round"/>
-              </g>
-            </svg>
-          </span>
-          <span class="badge badge--available">Disponible</span>
-        </div>
-        <h2 class="tool-card__title">Demande / Ordonnance</h2>
-        <p class="tool-card__desc">
-          Formulaire de demande au médecin : modification de prescription, compte rendu
-          d'adaptation lentilles ou de contrôle de vision, renouvellement exceptionnel.
-          Export PDF et copie directe dans Gmail.
-        </p>
-        <a class="btn btn--primary tool-card__cta" href="outils/demande-ordonnance/">Accéder à l'outil</a>
-      </article>
-
-      <article class="tool-card" data-tool="calc">
-        <span class="tool-card__glare" aria-hidden="true"></span>
-        <div class="tool-card__top">
-          <span class="tool-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none">
-              <rect x="12.5" y="6" width="23" height="36" rx="4.5" stroke-width="2.4"/>
-              <rect class="accent" x="15.6" y="9" width="16.8" height="6.4" rx="2"/>
-              <g class="ti-keys">
-                <rect x="15.8" y="18.4" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="21.8" y="18.4" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="27.8" y="18.4" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="15.8" y="24.2" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="21.8" y="24.2" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="15.8" y="30" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="21.8" y="30" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="15.8" y="35.8" width="4.4" height="4.2" rx="1.2"/>
-                <rect x="21.8" y="35.8" width="4.4" height="4.2" rx="1.2"/>
-              </g>
-              <rect class="accent" x="27.8" y="24.2" width="4.4" height="14" rx="1.6"/>
-            </svg>
-          </span>
-          <span class="badge badge--available">Disponible</span>
-        </div>
-        <h2 class="tool-card__title">Clôture de Caisse</h2>
-        <p class="tool-card__desc">
-          Comptage de fin de journée : pièces, billets, paiements électroniques.
-          Calcul automatique du total espèces, de l'écart par rapport au logiciel métier,
-          et alerte remise. Le comptage de la veille est repris automatiquement.
-          Historique conservé dans le navigateur.
-        </p>
-        <a class="btn btn--primary tool-card__cta" href="outils/cloture-caisse/">Accéder à l'outil</a>
-      </article>
-
-      <article class="tool-card" data-tool="caliper">
-        <span class="tool-card__glare" aria-hidden="true"></span>
-        <div class="tool-card__top">
-          <span class="tool-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none">
-              <rect class="fill" x="7" y="18" width="33" height="3.8" rx="1.3"/>
-              <rect class="accent" x="7" y="20.2" width="33" height="1.2" rx=".6"/>
-              <path class="ink" d="M12 18.4 V20.4 M16 18.4 V20.4 M20 18.4 V20.4 M28 18.4 V20.4 M32 18.4 V20.4 M36 18.4 V20.4"
-                    stroke-width="1.1" stroke-linecap="round"/>
-              <path class="fill" d="M8.5 13.5 h3 v6 h-3 Z"/>
-              <path class="fill" d="M8.5 20 h3.4 v12 a1.4 1.4 0 0 1 -3.4 0 Z"/>
-              <g class="ti-jaw">
-                <rect class="accent" x="22" y="15.6" width="7.6" height="8.6" rx="1.6"/>
-                <path class="fill" d="M23.8 13 h2.6 v3 h-2.6 Z"/>
-                <path class="fill" d="M22.6 24 h3.4 v8 a1.4 1.4 0 0 1 -3.4 0 Z"/>
-              </g>
-            </svg>
-          </span>
-          <span class="badge badge--available">Disponible</span>
-        </div>
-        <h2 class="tool-card__title">Épaisseur des verres</h2>
-        <p class="tool-card__desc">
-          Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi, Ø mini du palet)
-          selon la correction, l'indice et la forme de monture (côtes A / B / D). Décentrement
-          OD / OG par le demi-écart et la hauteur, avec visualisation 3D manipulable des deux verres.
-        </p>
-        <a class="btn btn--primary tool-card__cta" href="outils/epaisseur-verres/">Accéder à l'outil</a>
-      </article>
-
-      <!-- Outil terminé mais volontairement non ouvert : la carte l'annonce sans y donner
-           accès (pas de lien, donc pas de cible au clavier ni au clic global de la grille). -->
-      <article class="tool-card tool-card--soon" data-tool="mail">
-        <div class="tool-card__top">
-          <span class="tool-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none">
-              <rect class="fill" x="14" y="14" width="27" height="20" rx="3.2"/>
-              <path class="ink" d="M16.8 17.4 L27.5 25.6 L38.2 17.4"
-                    stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
-              <g class="ti-send">
-                <rect class="accent" x="3" y="18.2" width="9.5" height="2.6" rx="1.3"/>
-                <rect class="accent" x="6" y="22.7" width="6.5" height="2.6" rx="1.3"/>
-                <rect class="accent" x="1" y="27.2" width="11.5" height="2.6" rx="1.3"/>
-              </g>
-            </svg>
-          </span>
-          <span class="badge badge--soon">Bientôt</span>
-        </div>
-        <h2 class="tool-card__title">Campagne e-mail</h2>
-        <p class="tool-card__desc">
-          CRM simplifié : modèle CSV fourni, import de votre liste d'adresses vérifiées, message
-          rédigé une fois avec variables de personnalisation, suivi des envois contact par contact.
-          Pas encore ouvert : écrire à une liste de clients engage le magasin, et les règles à
-          respecter sont détaillées dans le
-          <a href="docs/rgpd-mailing/">rappel RGPD</a>.
-        </p>
-        <span class="btn btn--disabled" aria-disabled="true">Bientôt disponible</span>
-      </article>
-
+    <!-- Rappel de tâche : n'apparaît que si la clôture du jour manque réellement
+         (outil déjà utilisé, journée entamée). Jamais de bloc vide. -->
+    <div class="notice notice--todo" id="todo-notice" hidden>
+      <svg class="notice__ico" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3 1.8"/>
+      </svg>
+      <span class="notice__txt" id="todo-txt"></span>
+      <a href="outils/cloture-caisse/">Ouvrir la clôture</a>
     </div>
+
+    <div class="sec">
+      <h2 class="sec__title" id="outils">Vos outils</h2>
+      <span class="sec__hint">Cliquez une carte pour l'ouvrir</span>
+    </div>
+
+    <ul id="tools-grid" role="list">
+
+      <!-- ORDONNANCE — bénéfice : le courrier au médecin part signé, sans
+           téléphone ni brouillon manuscrit. L'icône trace le paraphe. -->
+      <li class="tool-card" data-tool="ordonnance">
+        <span class="tool-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="M12 6h16l8 8v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/>
+            <path d="M28 6v8h8"/>
+            <path class="acc" d="M16 20h11"/>
+            <path class="acc" d="M16 25h15"/>
+            <path class="ti-sign" pathLength="100"
+                  d="M16 34c3-4.5 6 2.5 9-1.5 2-2.7 5 1 9-2"/>
+          </svg>
+        </span>
+        <h3 class="tool-card__title">
+          <a class="tool-card__link" href="outils/demande-ordonnance/">Demande / Ordonnance</a>
+        </h3>
+        <p class="tool-card__pitch">
+          Le courrier au médecin, rédigé et prêt à partir en deux minutes.
+        </p>
+        <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5l7 7-7 7"/>
+        </svg>
+        <details class="tool-card__more">
+          <summary>Ce que fait l'outil</summary>
+          <p>
+            Formulaire de demande au médecin : modification de prescription, compte rendu
+            d'adaptation lentilles ou de contrôle de vision, renouvellement exceptionnel.
+            Export PDF et copie directe dans Gmail. Vos coordonnées de magasin sont
+            reprises automatiquement.
+          </p>
+        </details>
+      </li>
+
+      <!-- CLÔTURE — bénéfice : plus de recomptage ni de calcul à la main.
+           L'icône empile les pièces puis tire le trait du total. -->
+      <li class="tool-card" data-tool="caisse">
+        <span class="tool-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <rect x="5" y="8" width="24" height="14" rx="3"/>
+            <circle cx="17" cy="15" r="3.2"/>
+            <g>
+              <circle class="ti-coin ti-coin--1 accf" cx="36" cy="38" r="5.2"/>
+              <circle class="ti-coin ti-coin--2 accf" cx="36" cy="31.5" r="5.2"/>
+              <circle class="ti-coin ti-coin--3 accf" cx="36" cy="25" r="5.2"/>
+            </g>
+            <path class="ti-total" pathLength="100" d="M6 28h17"/>
+          </svg>
+        </span>
+        <h3 class="tool-card__title">
+          <a class="tool-card__link" href="outils/cloture-caisse/">Clôture de caisse</a>
+        </h3>
+        <p class="tool-card__pitch">
+          Comptez les espèces&nbsp;: le total, l'écart et la remise se calculent seuls.
+        </p>
+        <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5l7 7-7 7"/>
+        </svg>
+        <details class="tool-card__more">
+          <summary>Ce que fait l'outil</summary>
+          <p>
+            Comptage de fin de journée : pièces, billets, paiements électroniques.
+            Calcul automatique du total espèces, de l'écart par rapport au logiciel métier
+            et alerte remise. Le comptage de la veille est repris automatiquement, et
+            l'historique des quinze derniers jours reste dans le navigateur.
+          </p>
+        </details>
+      </li>
+
+      <!-- ÉPAISSEUR — bénéfice : annoncer la bonne épaisseur avant la commande.
+           L'icône referme les mors du pied à coulisse sur le verre. -->
+      <li class="tool-card" data-tool="epaisseur">
+        <span class="tool-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="M24 9c7 7 7 23 0 30-7-7-7-23 0-30Z"/>
+            <g class="ti-jaw ti-jaw--l">
+              <path d="M10 13v22"/>
+              <path class="acc" d="M10 24h6"/>
+            </g>
+            <g class="ti-jaw ti-jaw--r">
+              <path d="M38 13v22"/>
+              <path class="acc" d="M38 24h-6"/>
+            </g>
+          </svg>
+        </span>
+        <h3 class="tool-card__title">
+          <a class="tool-card__link" href="outils/epaisseur-verres/">Épaisseur des verres</a>
+        </h3>
+        <p class="tool-card__pitch">
+          Annoncez la bonne épaisseur avant de commander, indice par indice.
+        </p>
+        <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5l7 7-7 7"/>
+        </svg>
+        <details class="tool-card__more">
+          <summary>Ce que fait l'outil</summary>
+          <p>
+            Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi,
+            Ø mini du palet) selon la correction, l'indice et la forme de monture
+            (côtes A / B / D). Décentrement OD / OG par le demi-écart et la hauteur,
+            avec visualisation 3D manipulable des deux verres et comparaison client.
+          </p>
+        </details>
+      </li>
+
+      <!-- CAMPAGNE E-MAIL — outil terminé mais volontairement non ouvert : la
+           carte l'annonce sans y donner accès (aucun lien, donc aucune cible
+           au clavier). L'icône reste immobile et atténuée. -->
+      <li class="tool-card tool-card--soon" data-tool="mail">
+        <span class="tool-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <rect x="17" y="14" width="25" height="19" rx="3"/>
+            <path d="M19.5 17.2 29.5 25l10-7.8"/>
+            <g>
+              <path class="ti-trail ti-trail--1 acc" d="M5 19h8"/>
+              <path class="ti-trail ti-trail--2 acc" d="M8 24h5"/>
+              <path class="ti-trail ti-trail--3 acc" d="M3 29h10"/>
+            </g>
+          </svg>
+        </span>
+        <h3 class="tool-card__title">
+          Campagne e-mail <span class="badge">Bientôt</span>
+        </h3>
+        <p class="tool-card__pitch">
+          Écrire une fois à toute votre liste, avec un suivi contact par contact.
+        </p>
+        <details class="tool-card__more">
+          <summary>Pourquoi l'outil n'est pas encore ouvert</summary>
+          <p>
+            CRM simplifié : modèle CSV fourni, import de votre liste d'adresses vérifiées,
+            message rédigé une fois avec variables de personnalisation, suivi des envois
+            contact par contact. Écrire à une liste de clients engage le magasin&nbsp;: les
+            règles à respecter sont détaillées dans le
+            <a href="docs/rgpd-mailing/">rappel RGPD</a>, et l'outil sera ouvert une fois
+            la procédure d'installation validée.
+          </p>
+        </details>
+      </li>
+
+    </ul>
+
+    <!-- ── AIDE & DOCUMENTS ──
+         Ces trois notices existaient déjà mais n'étaient joignables que depuis
+         le pied de page ou l'intérieur de la modale « Mon magasin ». Elles ont
+         maintenant un chemin visible depuis l'accueil. -->
+    <div class="sec">
+      <h2 class="sec__title" id="aide">Aide &amp; documents</h2>
+    </div>
+
+    <ul class="docs" role="list">
+      <li>
+        <a class="doc" href="docs/rgpd-mailing/">
+          <span class="doc__name">Écrire à ses clients : rappel RGPD</span>
+          <span class="doc__desc">Ce qu'on a le droit d'envoyer, à qui, et avec quel consentement.</span>
+        </a>
+      </li>
+      <li>
+        <a class="doc" href="docs/sync-drive/">
+          <span class="doc__name">Synchroniser plusieurs postes</span>
+          <span class="doc__desc">Partager le paramétrage du magasin via votre propre Google Drive.</span>
+        </a>
+      </li>
+      <li>
+        <a class="doc" href="docs/sauvegarde-fichier/">
+          <span class="doc__name">Sauvegarder par fichier</span>
+          <span class="doc__desc">Enregistrer et restaurer le paramétrage sans compte Google.</span>
+        </a>
+      </li>
+    </ul>
+
   </main>
 
   <footer class="site-footer">
     <p>Usage interne &nbsp;·&nbsp; Aucune donnée transmise au serveur</p>
-    <p class="site-footer__legal">
-      <a href="docs/rgpd-mailing/">Écrire à ses clients&nbsp;: rappel RGPD</a>
-    </p>
-    <p class="site-footer__feedback">
+    <p>
       Une remarque, une idée, un souci&nbsp;?
       <button type="button" class="footer-link" id="open-contact">Faites-le moi savoir</button>
     </p>
@@ -324,7 +353,7 @@
             c'est vous qui décidez selon votre situation.
           </p>
 
-          <p class="sync-title" style="margin-top:16px;">Façon 1 — avec Google Drive (partagé entre les postes)</p>
+          <p class="sync-title">Façon 1 — avec Google Drive (partagé entre les postes)</p>
           <p class="sync-desc">
             Relie tous les ordinateurs connectés au compte Google du magasin : vous paramétrez
             <strong>une seule fois</strong> et le profil se retrouve automatiquement sur chaque poste.
@@ -392,7 +421,7 @@
             <div class="cd-panel" id="c-tools-panel" role="group" aria-labelledby="c-tools-lbl" hidden>
               <label class="cd-opt"><input type="checkbox" value="Hub d'accueil"> Hub d'accueil</label>
               <label class="cd-opt"><input type="checkbox" value="Demande / Ordonnance"> Demande / Ordonnance</label>
-              <label class="cd-opt"><input type="checkbox" value="Clôture de Caisse"> Clôture de Caisse</label>
+              <label class="cd-opt"><input type="checkbox" value="Clôture de caisse"> Clôture de caisse</label>
               <label class="cd-opt"><input type="checkbox" value="Épaisseur des verres"> Épaisseur des verres</label>
               <label class="cd-opt"><input type="checkbox" value="Campagne e-mail"> Campagne e-mail</label>
             </div>
@@ -420,6 +449,8 @@
     var LS_RESERVE = 'cloture-fond-v1';
     var LS_FOND_CIBLE = 'cloture-fond-cible-v1';
     var LS_CAISSE = 'cloture-caisse-v1';
+    var LS_JOUR   = 'hub-jour-v1';             // dernier jour où l'éphéméride a tourné
+    var SS_INTRO  = 'hub-intro-v1';            // lecture unique des icônes dans cette session
     var HISTORY_DAYS = 15;
 
     function loadProfil() {
@@ -456,14 +487,12 @@
       var nom = (p.nom || '').trim();
       nameEl.textContent = nom || 'Outils internes';
 
+      // La barre est compacte : adresse et téléphone tiennent sur une seule ligne,
+      // séparés par un point médian plutôt qu'empilés.
       var metaParts = [];
       if ((p.adresse || '').trim()) { metaParts.push(p.adresse.trim()); }
       if ((p.tel || '').trim()) { metaParts.push('Tél : ' + p.tel.trim()); }
-      metaEl.textContent = '';
-      metaParts.forEach(function (part, i) {
-        if (i) { metaEl.appendChild(document.createElement('br')); }
-        metaEl.appendChild(document.createTextNode(part));
-      });
+      metaEl.textContent = metaParts.join(' · ');
 
       notice.hidden = isConfigured(p);
     }
@@ -615,6 +644,7 @@
             localStorage.setItem(LS_PROFIL, JSON.stringify(p));
             fillForm(p);
             renderHeader();
+            renderWelcome();
             if (!silent) { setStatus('Profil récupéré depuis le Drive ✓', true); }
           } catch (e) {
             if (!silent) { setStatus('Données du Drive illisibles.', false); }
@@ -661,6 +691,7 @@
       localStorage.setItem(LS_PROFIL, JSON.stringify(profil));
       localStorage.setItem(LS_SYNC, syncVal);
       renderHeader();
+      renderWelcome();
 
       if (syncVal) {
         // Synchro configurée : ne fermer la modale qu'une fois le résultat connu, pour que
@@ -770,6 +801,7 @@
           localStorage.setItem(LS_PROFIL, JSON.stringify(cleanProfil));
           fillForm(cleanProfil);
           renderHeader();
+          renderWelcome();
         }
         var reserve = typeof bundle.reserve === 'number' ? bundle.reserve : bundle.fond;
         if (typeof reserve === 'number') {
@@ -783,6 +815,7 @@
           var merged = capHistory((Array.isArray(local) ? local : []).concat(bundle.caisse));
           localStorage.setItem(LS_CAISSE, JSON.stringify(merged));
         }
+        renderTodo();
         setBackupStatus('Sauvegarde restaurée ✓ — profil et paramètres de caisse remplacés, historique fusionné.', true);
       };
       reader.onerror = function () { setBackupStatus('Impossible de lire le fichier.', false); };
@@ -798,7 +831,16 @@
       this.value = '';
     });
 
-    /* ── Accueil chaleureux : salutation selon l'heure + éphéméride du jour ── */
+    /* ── Accueil : salutation selon l'heure + éphéméride du jour ──
+       L'éphéméride ne se retourne qu'au premier chargement d'une nouvelle
+       journée : le mouvement rend compte d'un changement réel (la page du
+       calendrier a tourné) au lieu de rejouer à chaque ouverture. */
+    var JOURS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    var MOIS  = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin',
+                 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+
+    function setTxt(id, v) { var el = document.getElementById(id); if (el) { el.textContent = v; } }
+
     function renderWelcome() {
       var now = new Date();
       var h = now.getHours();
@@ -807,24 +849,87 @@
       var g = document.getElementById('welcome-greet');
       if (g) { g.textContent = nom ? greet + ', ' + nom : greet; }
 
-      var jours = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-      var mois  = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin',
-                   'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
-      var wd = jours[now.getDay()];
-      var day = String(now.getDate());
-      var mo = mois[now.getMonth()];
-      function setTxt(id, v) { var el = document.getElementById(id); if (el) { el.textContent = v; } }
-      // La page de surface affiche la veille, la base affiche aujourd'hui :
-      // au chargement, la page se retourne et « révèle » la date du jour.
+      // La vignette est annoncée d'un bloc aux lecteurs d'écran (« mardi
+      // 6 août ») plutôt qu'en trois fragments illisibles.
+      var tuile = document.getElementById('today');
+      if (tuile) {
+        tuile.setAttribute('aria-label', now.toLocaleDateString('fr-FR', {
+          weekday: 'long', day: 'numeric', month: 'long'
+        }));
+      }
+
       var hier = new Date(now.getTime() - 86400000);
-      setTxt('eph-wd', wd);  setTxt('eph-day', day);  setTxt('eph-mo', mo);
-      setTxt('eph-wd2', jours[hier.getDay()]);
+      setTxt('eph-wd', JOURS[now.getDay()]);
+      setTxt('eph-day', String(now.getDate()));
+      setTxt('eph-mo', MOIS[now.getMonth()]);
+      setTxt('eph-wd2', JOURS[hier.getDay()]);
       setTxt('eph-day2', String(hier.getDate()));
-      setTxt('eph-mo2', mois[hier.getMonth()]);
+      setTxt('eph-mo2', MOIS[hier.getMonth()]);
+    }
+
+    /* Clé de jour au format de l'historique de caisse (jj/mm/aaaa). */
+    function jourKey(d) {
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    /* ── Rappel : la clôture du jour n'est pas enregistrée ──
+       Ne se déclenche que si l'outil a déjà servi (historique non vide) et que
+       la journée est assez avancée : un indicateur qui n'appelle aucune action
+       n'a rien à faire sur un écran d'accueil. */
+    function renderTodo() {
+      var el = document.getElementById('todo-notice');
+      if (!el) { return; }
+      var now = new Date();
+      var hist = readJSON(LS_CAISSE, []);
+      if (!Array.isArray(hist) || hist.length === 0 || now.getHours() < 16) {
+        el.hidden = true;
+        return;
+      }
+      var today = jourKey(now);
+      var fait = hist.some(function (e) { return e && e.date === today; });
+      if (fait) { el.hidden = true; return; }
+      setTxt('todo-txt', 'Le comptage de caisse du jour n’est pas encore enregistré.');
+      el.hidden = false;
+    }
+
+    /* ── Lecture unique des animations d'icône ──
+       Le survol les rejoue à la demande sur un ordinateur ; au doigt, il n'y a
+       pas de survol. On les joue donc une fois par session, jamais en boucle. */
+    function playIntro() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+      var seen = false;
+      try { seen = sessionStorage.getItem(SS_INTRO) === '1'; } catch (e) { seen = true; }
+      if (seen) { return; }
+      try { sessionStorage.setItem(SS_INTRO, '1'); } catch (e) { /* mode privé : on joue quand même */ }
+
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.tool-card:not(.tool-card--soon)'));
+      cards.forEach(function (card, i) {
+        setTimeout(function () {
+          card.classList.add('icon-play');
+          setTimeout(function () { card.classList.remove('icon-play'); }, 1100);
+        }, i * 90);
+      });
+    }
+
+    /* L'éphéméride tourne une page au premier chargement d'une journée nouvelle. */
+    function playDayTurn() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+      var today = jourKey(new Date());
+      var last;
+      try { last = localStorage.getItem(LS_JOUR); } catch (e) { last = today; }
+      if (last === today) { return; }
+      try { localStorage.setItem(LS_JOUR, today); } catch (e) { /* stockage indisponible */ }
+      var el = document.getElementById('today');
+      // Sans repère antérieur (première visite), rien à « tourner » : on pose
+      // seulement la date du jour.
+      if (el && last) { el.classList.add('today--turn'); }
     }
 
     renderHeader();
     renderWelcome();
+    renderTodo();
+    playDayTurn();
+    playIntro();
     if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
   </script>
 
@@ -967,114 +1072,6 @@
           if (active === first || !overlay.contains(active)) { e.preventDefault(); last.focus(); }
         } else if (active === last) { e.preventDefault(); first.focus(); }
       });
-    })();
-  </script>
-
-  <!-- ── Apparition en cascade des cartes ──
-       100 % maison, sans dépendance ni CDN, transform/opacity uniquement.
-       Le survol (sur-élévation) et le reflet du bouton sont gérés en pur CSS.
-       Tout est neutralisé si prefers-reduced-motion. -->
-  <script>
-    (function revealCards() {
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-      var grid   = document.getElementById('tools-grid');
-      if (!grid) { return; }
-      var cards = Array.prototype.slice.call(grid.querySelectorAll('.tool-card'));
-
-      // ── Toute la carte est cliquable ──
-      // Un clic n'importe où sur la carte ouvre l'outil, en relayant vers son
-      // lien « Accéder à l'outil ». On laisse passer les clics directs sur un
-      // lien (navigation native, clic-droit, Ctrl/Cmd-clic) et on n'interfère
-      // pas avec une sélection de texte en cours.
-      grid.addEventListener('click', function (e) {
-        if (e.target.closest('a')) { return; }
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
-        if (window.getSelection && String(window.getSelection()).length) { return; }
-        var card = e.target.closest('.tool-card');
-        if (!card) { return; }
-        var link = card.querySelector('.tool-card__cta');
-        if (link) { link.click(); }
-      });
-
-      if (reduce.matches || !('IntersectionObserver' in window)) { return; }
-
-      // Apparition en cascade lorsque les cartes entrent dans le viewport.
-      grid.classList.add('reveal-ready');
-
-      // Révèle une carte (en cascade selon son index) sans la jouer deux fois.
-      function showCard(card) {
-        if (card.classList.contains('is-visible')) { return; }
-        var i = cards.indexOf(card);
-        setTimeout(function () {
-          if (card.classList.contains('is-visible')) { return; }
-          card.classList.add('is-visible');
-          // Joue l'icône thématique une fois à l'apparition (utile au tactile,
-          // sans survol). La classe est retirée pour ne pas boucler ensuite.
-          card.classList.add('icon-play');
-          setTimeout(function () { card.classList.remove('icon-play'); }, 2600);
-        }, Math.max(0, i) * 90);
-      }
-
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (!e.isIntersecting) { return; }
-          showCard(e.target);
-          io.unobserve(e.target);
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      cards.forEach(function (c) { io.observe(c); });
-
-      // QA-09 — Filet de sécurité : si l'observer ne se déclenche pas (onglet en
-      // arrière-plan au chargement, navigateur capricieux…), on force la
-      // révélation des cartes restées invisibles. La cascade est préservée.
-      function revealAll() {
-        cards.forEach(function (c) { io.unobserve(c); showCard(c); });
-      }
-      window.addEventListener('load', function () { setTimeout(revealAll, 1200); });
-      setTimeout(revealAll, 2500);
-    })();
-  </script>
-
-  <!-- ── Parallaxe du fond optique ──
-       Chaque plan suit le pointeur avec une amplitude propre (data-amp), lissée
-       par interpolation pour un mouvement velouté. Neutralisé si l'utilisateur
-       préfère réduire les animations. Sur mobile : suit l'inclinaison. -->
-  <script>
-    (function opticParallax() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
-      var layers = Array.prototype.slice.call(document.querySelectorAll('.optic .layer'));
-      if (!layers.length) { return; }
-
-      var tx = 0, ty = 0;   // cible (−0.5 … 0.5)
-      var cx = 0, cy = 0;   // position lissée
-      var raf = null;
-
-      function tick() {
-        cx += (tx - cx) * 0.06;
-        cy += (ty - cy) * 0.06;
-        layers.forEach(function (l) {
-          var amp = parseFloat(l.dataset.amp) || 20;
-          l.style.transform = 'translate3d(' + (-cx * amp).toFixed(2) + 'px,' +
-                              (-cy * amp).toFixed(2) + 'px, 0)';
-        });
-        if (Math.abs(tx - cx) > 0.0005 || Math.abs(ty - cy) > 0.0005) {
-          raf = requestAnimationFrame(tick);
-        } else { raf = null; }
-      }
-      function kick() { if (!raf) { raf = requestAnimationFrame(tick); } }
-
-      window.addEventListener('pointermove', function (e) {
-        tx = e.clientX / window.innerWidth  - 0.5;
-        ty = e.clientY / window.innerHeight - 0.5;
-        kick();
-      }, { passive: true });
-
-      window.addEventListener('deviceorientation', function (e) {
-        if (e.gamma === null) { return; }
-        tx = Math.max(-0.5, Math.min(0.5, e.gamma / 45));
-        ty = Math.max(-0.5, Math.min(0.5, (e.beta - 45) / 45));
-        kick();
-      }, { passive: true });
     })();
   </script>
 
