@@ -1,14 +1,122 @@
-LICENCE D'USAGE INTERNE
+LICENCE D'USAGE INTERNE — HUB D'OUTILS POUR MAGASINS D'OPTIQUE
 
-Copyright (c) 2025 J-Rbs91
+Copyright (c) 2025-2026 J-Rbs91. Tous droits non expressément concédés
+ci-dessous sont réservés.
 
-Ce logiciel et ses fichiers associés (le « Projet ») sont destinés à un usage
-interne par les magasins d'optique qui le déploient.
+---
 
-RESTRICTIONS :
-- Le Projet ne peut pas être commercialisé ou vendu à des tiers.
-- Toute modification reste sous la responsabilité du magasin qui la déploie.
+1. DÉFINITIONS
 
-CE PROJET EST FOURNI « EN L'ÉTAT », SANS GARANTIE D'AUCUNE SORTE.
+« Le Projet » désigne le code source, les feuilles de style, les gabarits, la
+documentation et les fichiers associés contenus dans ce dépôt, à l'exclusion
+des éléments appartenant à des tiers et identifiés comme tels.
 
-Usage interne uniquement.
+Sont notamment exclus du Projet, et donc du copyright ci-dessus comme de la
+présente licence, les fichiers du répertoire `.claude/` : il s'agit d'outillage
+de développement rédigé par des tiers, conservé dans le dépôt pour la commodité
+des contributeurs et soumis aux conditions de ses auteurs respectifs.
+
+« Le Déployeur » désigne toute personne physique ou morale qui installe,
+héberge ou utilise le Projet.
+
+« Usage interne » désigne l'utilisation du Projet par le Déployeur pour les
+besoins propres de son activité et de son personnel, y compris la publication
+du Projet sur un hébergement statique dont le Déployeur a le contrôle.
+
+2. CONCESSION DE DROITS
+
+Il est concédé au Déployeur, à titre gratuit, non exclusif, mondial et pour la
+durée des droits d'auteur, le droit de :
+
+a) utiliser, exécuter et afficher le Projet ;
+b) le reproduire et l'héberger sur ses propres supports ou sur un service
+   d'hébergement statique de son choix ;
+c) le modifier, l'adapter et en créer des versions dérivées ;
+d) le redistribuer, modifié ou non, à d'autres Déployeurs,
+
+le tout dans le cadre d'un Usage interne et sous réserve des articles 3 et 4.
+
+3. CONDITIONS
+
+Toute copie ou version dérivée redistribuée doit :
+
+a) conserver la présente licence et la mention de copyright ci-dessus ;
+b) indiquer de façon lisible les modifications substantielles apportées ;
+c) être soumise à la présente licence, sans conditions supplémentaires
+   restreignant les droits concédés à l'article 2.
+
+4. RESTRICTIONS
+
+Sont exclus de la concession de l'article 2 :
+
+a) la vente, la location ou la concession sous licence du Projet, en tout ou
+   en partie, en tant que produit ou composant logiciel ;
+b) sa commercialisation sous forme de service payant (hébergement, abonnement,
+   plateforme) proposé à des tiers ;
+c) l'usage du Projet comme support d'une prestation dont il constitue l'objet
+   principal facturé.
+
+N'est pas visé par ces restrictions l'usage du Projet comme outil interne dans
+le cadre normal de l'activité commerciale du Déployeur.
+
+5. CONTRIBUTIONS
+
+Sauf mention écrite contraire, toute contribution proposée au Projet (issue,
+pull request, correctif) est concédée sous la présente licence. Son auteur
+concède au titulaire du copyright un droit non exclusif, gratuit, irrévocable
+et transférable de l'utiliser, la modifier, la publier et la redistribuer dans
+le cadre du Projet. Chaque contributeur garantit détenir les droits nécessaires
+sur ce qu'il propose.
+
+6. MARQUES
+
+La présente licence ne concède aucun droit sur les marques, dénominations
+sociales, logos ou noms commerciaux du titulaire du copyright ou de tiers. Le
+Déployeur est seul responsable des signes distinctifs qu'il renseigne dans le
+Projet, notamment via le profil magasin.
+
+7. ABSENCE DE GARANTIE
+
+LE PROJET EST FOURNI « EN L'ÉTAT », SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU
+IMPLICITE, NOTAMMENT SANS GARANTIE DE QUALITÉ MARCHANDE, D'ADÉQUATION À UN
+USAGE PARTICULIER, D'EXACTITUDE DES CALCULS OU D'ABSENCE DE CONTREFAÇON.
+
+Les outils du Projet sont des aides à la décision destinées à des
+professionnels qualifiés. Ils ne se substituent en aucun cas au jugement
+professionnel, à la réglementation applicable à l'exercice de l'optique-
+lunetterie, ni à l'appréciation d'un professionnel de santé. Le Déployeur
+demeure seul responsable de la vérification des résultats produits et des
+décisions prises sur leur fondement.
+
+8. LIMITATION DE RESPONSABILITÉ
+
+Dans la limite permise par le droit applicable, le titulaire du copyright et
+les contributeurs ne peuvent être tenus responsables d'aucun dommage direct,
+indirect, accessoire ou consécutif, ni d'aucune perte d'exploitation, de
+données, de clientèle ou de chiffre d'affaires, résultant de l'utilisation ou
+de l'impossibilité d'utiliser le Projet.
+
+Cette limitation ne s'applique pas aux cas où elle serait légalement exclue,
+notamment en cas de faute lourde ou dolosive ou de dommage corporel.
+
+9. DONNÉES PERSONNELLES
+
+Le Projet ne comporte ni serveur, ni base de données, ni collecte centralisée :
+les données saisies restent dans le navigateur du poste utilisé. Le Déployeur
+qui traite, au moyen du Projet, des données à caractère personnel — y compris
+des données de santé — en est le seul responsable de traitement au sens du
+règlement (UE) 2016/679, et lui seul répond des obligations correspondantes
+(base légale, information, conservation, sécurité, registre).
+
+10. RÉSILIATION
+
+Les droits concédés à l'article 2 prennent fin automatiquement en cas de
+manquement aux articles 3 ou 4. Ils sont rétablis dès la cessation du
+manquement, si celle-ci intervient dans les trente (30) jours suivant sa
+notification.
+
+11. DROIT APPLICABLE
+
+La présente licence est régie par le droit français. Tout litige relatif à sa
+validité, son interprétation ou son exécution relève de la compétence des
+juridictions françaises.

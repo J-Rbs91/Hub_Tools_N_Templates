@@ -69,7 +69,9 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
   ne déclenche aucun appel réseau ; le mode *automatique*, facultatif et à activer explicitement,
   transmet une adresse à la fois vers le **compte Google du magasin lui-même**, via un script
   déployé et contrôlé par le magasin ([`docs/campagne-email/`](docs/campagne-email/)).
-- La seule ressource externe chargée est la police Manrope via Google Fonts (aucune donnée patient transmise).
+- **Aucune ressource externe** : ni police distante, ni CDN, ni image tierce. Les pages ne
+  déclenchent aucune requête vers un domaine tiers, pas même pour la typographie (pile de
+  polices système). Le site fonctionne intégralement hors ligne une fois chargé.
 
 ---
 

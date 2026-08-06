@@ -2,14 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#1F6FB2">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/hub.css">
   <style>
     /* QA-04 — Message non bloquant sous un champ de formulaire. */
@@ -940,7 +937,10 @@
        service tiers, CSP inchangée). -->
   <script>
     (function contactModal() {
-      var DEST = 'ribesjeremy@gmail.com';
+      // Adresse assemblée à l'exécution plutôt qu'écrite en clair : le dépôt et la page
+      // publiée sont accessibles à tous, et une adresse littérale y est ramassée par les
+      // robots de collecte. Reconstituée seulement au moment de préparer l'e-mail.
+      var DEST = ['ribesjeremy', 'gmail.com'].join(String.fromCharCode(64));
       var overlay = document.getElementById('contact-modal');
       var form    = document.getElementById('contact-form');
       if (!overlay || !form) { return; }

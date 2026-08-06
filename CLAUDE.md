@@ -13,8 +13,10 @@ each shop fills it once via the hub's "⚙ Mon magasin" modal, and it is kept in
 `localStorage` profile (see "Shared store profile" below) that every tool reads.
 
 Hard privacy constraint: **no user data ever leaves the browser**. No analytics, no trackers,
-no cookies, no network calls with user input. The only external resource is the Manrope webfont
-via Google Fonts. Exports (PDF, clipboard) are generated entirely client-side. Preserve this
+no cookies, no network calls with user input, and **no external resources at all** — no remote
+webfont, no CDN, no third-party image. Typography uses the system font stack declared in `--font`;
+never add a `<link>` to a font service or a remote host to the CSP.
+Exports (PDF, clipboard) are generated entirely client-side. Preserve this
 when adding or editing tools.
 
 ## Architecture

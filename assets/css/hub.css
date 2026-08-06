@@ -61,12 +61,12 @@
   --s-5: 24px;
   --s-6: 40px;
 
-  /* ─ Échelle typographique unifiée — Manrope obligatoire ─
+  /* ─ Échelle typographique unifiée — pile système, aucune police distante ─
      Mêmes variables et mêmes valeurs (px) répliquées dans chaque outil pour une
      cohérence de la police et des tailles d'un bout à l'autre du hub. Le hub
      n'en emploie que cinq : display, xl, lg, base, sm (plus label/hint pour les
      libellés courts). Les autres restent définies pour les outils. */
-  --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
   --fs-display: 24px;
   --fs-hero:    22px;
   --fs-2xl:     20px;
