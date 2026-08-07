@@ -739,7 +739,7 @@ body {
    Chaque animation joue le geste de l'outil, pas son objet :
    · Ordonnance      → le courrier s'écrit, la plume passe : il part signé.
    · Clôture         → le montant se pose, la coche se trace : caisse validée.
-   · Épaisseur       → les mors se referment : la cote est prise.
+   · Épaisseur       → le pied à coulisse s'ouvre et se referme sur le verre.
    · Campagne e-mail → la pile se forme, l'enveloppe se ferme : l'envoi part.
 
    Règle commune, valable pour les cinq animations du site : l'état au repos
@@ -788,26 +788,20 @@ body {
 .tool-card:focus-within .ti-ok,
 .tool-card.icon-play .ti-ok { animation: ic-draw .34s .24s ease-out both; }
 
-/* 3 — Épaisseur : les mors du pied à coulisse se referment sur le verre. */
-.tool-card:hover .ti-jaw--l,
-.tool-card:focus-within .ti-jaw--l,
-.tool-card.icon-play .ti-jaw--l { animation: jaw-l .78s cubic-bezier(.4,0,.2,1) both; }
+/* 3 — Épaisseur : le coulisseau du pied à coulisse s'ouvre puis se referme
+   sur le verre. Seul le coulisseau bouge — la règle et le bec fixe restent en
+   place, comme sur l'instrument. */
+.tool-card:hover .ti-slide,
+.tool-card:focus-within .ti-slide,
+.tool-card.icon-play .ti-slide { animation: caliper .85s cubic-bezier(.4,0,.2,1) both; }
 
-.tool-card:hover .ti-jaw--r,
-.tool-card:focus-within .ti-jaw--r,
-.tool-card.icon-play .ti-jaw--r { animation: jaw-r .78s cubic-bezier(.4,0,.2,1) both; }
-
-/* Repos = mors fermés sur le verre, c'est-à-dire l'icône telle qu'elle est
-   dessinée. Le mouvement écarte puis referme, et se termine exactement là où il
-   a commencé : aucun saut quand le survol s'arrête. */
-@keyframes jaw-l {
-  0%, 100% { transform: translateX(0); }
-  40%, 62% { transform: translateX(-2.2px); }
-}
-
-@keyframes jaw-r {
-  0%, 100% { transform: translateX(0); }
-  40%, 62% { transform: translateX(2.2px); }
+/* Repos = coulisseau fermé sur le verre, c'est-à-dire l'icône telle qu'elle est
+   dessinée. Le mouvement ouvre, marque le temps d'arrêt de la lecture, puis
+   referme exactement là où il a commencé : aucun saut quand le survol cesse. */
+@keyframes caliper {
+  0%        { transform: translateX(0); }
+  38%, 56%  { transform: translateX(2.6px); }
+  100%      { transform: translateX(0); }
 }
 
 /* 4 — Campagne e-mail : la pile de destinataires se forme, l'enveloppe se ferme. */
@@ -1278,12 +1272,9 @@ body {
   .tool-card:hover .ti-ok,
   .tool-card:focus-within .ti-ok,
   .tool-card.icon-play .ti-ok,
-  .tool-card:hover .ti-jaw--l,
-  .tool-card:focus-within .ti-jaw--l,
-  .tool-card.icon-play .ti-jaw--l,
-  .tool-card:hover .ti-jaw--r,
-  .tool-card:focus-within .ti-jaw--r,
-  .tool-card.icon-play .ti-jaw--r,
+  .tool-card:hover .ti-slide,
+  .tool-card:focus-within .ti-slide,
+  .tool-card.icon-play .ti-slide,
   .tool-card:hover .ti-stack,
   .tool-card:focus-within .ti-stack,
   .tool-card.icon-play .ti-stack,
