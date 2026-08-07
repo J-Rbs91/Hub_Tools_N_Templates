@@ -739,7 +739,7 @@ body {
    Chaque animation joue le geste de l'outil, pas son objet :
    · Ordonnance      → le courrier s'écrit, la plume passe : il part signé.
    · Clôture         → le montant se pose, la coche se trace : caisse validée.
-   · Épaisseur       → le pied à coulisse s'ouvre et se referme sur le verre.
+   · Épaisseur       → la coupe passe de palet concave à verre convexe.
    · Campagne e-mail → la pile se forme, l'enveloppe se ferme : l'envoi part.
 
    Règle commune, valable pour les cinq animations du site : l'état au repos
@@ -788,21 +788,11 @@ body {
 .tool-card:focus-within .ti-ok,
 .tool-card.icon-play .ti-ok { animation: ic-draw .34s .24s ease-out both; }
 
-/* 3 — Épaisseur : le coulisseau du pied à coulisse s'ouvre puis se referme
-   sur le verre. Seul le coulisseau bouge — la règle et le bec fixe restent en
-   place, comme sur l'instrument. */
-.tool-card:hover .ti-slide,
-.tool-card:focus-within .ti-slide,
-.tool-card.icon-play .ti-slide { animation: caliper .85s cubic-bezier(.4,0,.2,1) both; }
-
-/* Repos = coulisseau fermé sur le verre, c'est-à-dire l'icône telle qu'elle est
-   dessinée. Le mouvement ouvre, marque le temps d'arrêt de la lecture, puis
-   referme exactement là où il a commencé : aucun saut quand le survol cesse. */
-@keyframes caliper {
-  0%        { transform: translateX(0); }
-  38%, 56%  { transform: translateX(2.6px); }
-  100%      { transform: translateX(0); }
-}
+/* 3 — Épaisseur : la coupe du verre passe de concave à convexe et revient.
+   Seule animation du site qui ne vit pas ici : un morphage de tracé se fait en
+   SVG (<animate>), déclenché par le JS. Voir le commentaire de la carte dans
+   index.html. Rien à neutraliser sous mouvement réduit — le déclencheur est
+   déjà conditionné à la préférence. */
 
 /* 4 — Campagne e-mail : la pile de destinataires se forme, l'enveloppe se ferme. */
 .tool-card:hover .ti-stack,
@@ -1272,9 +1262,6 @@ body {
   .tool-card:hover .ti-ok,
   .tool-card:focus-within .ti-ok,
   .tool-card.icon-play .ti-ok,
-  .tool-card:hover .ti-slide,
-  .tool-card:focus-within .ti-slide,
-  .tool-card.icon-play .ti-slide,
   .tool-card:hover .ti-stack,
   .tool-card:focus-within .ti-stack,
   .tool-card.icon-play .ti-stack,
