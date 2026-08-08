@@ -199,11 +199,15 @@
       </li>
 
       <!-- ÉPAISSEUR — bénéfice : annoncer la bonne épaisseur avant la commande.
-           La coupe du verre, vue de côté, sur son axe optique : le palet brut
-           concave (bords épais, centre mince) se déforme en verre convexe
-           (centre épais, bords minces), et revient. À mi-course les deux faces
-           sont parallèles — le palet avant surfaçage. C'est l'objet même du
-           calcul : l'épaisseur, et où elle se trouve.
+           La coupe du verre, vue de côté : le palet brut concave (bords épais,
+           centre mince) se déforme en verre convexe (centre épais, bords
+           minces), et revient. À mi-course les deux faces sont parallèles — le
+           palet avant surfaçage. C'est l'objet même du calcul : l'épaisseur, et
+           où elle se trouve.
+
+           La forme est nue : ni axe optique, ni cote, ni instrument. Elle est
+           seule de son jeu à n'avoir aucun élément d'accent, et c'est voulu —
+           la silhouette porte les deux états à elle seule.
 
            Le verre est un aplat, pas un contour : à 28 px un plein donne la
            matière du verre là où un trait de 1,9 ne donne qu'un cerne. Le tracé
@@ -222,7 +226,6 @@
       <li class="tool-card" data-tool="epaisseur">
         <span class="tool-card__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
-            <path class="acc" d="M2.5 12h19"/>
             <path class="glass" d="M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z">
               <animate id="lens-morph" attributeName="d" begin="indefinite" dur="1.15s" fill="remove" calcMode="spline" keyTimes="0;0.5;1" keySplines=".4 0 .2 1;.4 0 .2 1" values="M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z;M11.1 4C5.13 8 5.13 16 11.1 20L12.9 20C18.87 16 18.87 8 12.9 4Z;M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z"/>
             </path>
