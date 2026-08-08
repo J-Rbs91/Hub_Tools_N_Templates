@@ -134,16 +134,19 @@ body {
   position: absolute;
   width: var(--w, 180px);
   transform: translate(-50%, -50%) rotate(var(--r, 0deg));
-  opacity: .5;
+  opacity: .38;
 }
 
+/* Le motif est tracé dans la grille 24 des icônes : l'épaisseur est donc
+   exprimée dans cette grille, et remise à l'échelle du filigrane (≈ 2,5 px
+   rendus à 190 px de large). */
 .optic .m svg {
   width: 100%;
   height: auto;
   display: block;
   fill: none;
   stroke: var(--blue-300);
-  stroke-width: 2;
+  stroke-width: .3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -212,13 +215,46 @@ body {
 
 .brand__mark svg {
   width: 22px;
-  height: auto;
+  height: 22px;
   display: block;
   fill: none;
   stroke: #fff;
-  stroke-width: 2.4;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* ── MARQUE ANIMÉE : « la mise au point » ──
+   Les branches, puis les verres, puis le pont : la paire se dessine en 0,8 s.
+   Jouée une fois par session au chargement (classe posée par le JS), rejouée
+   au survol de la marque sur un appareil qui a un pointeur.
+
+   Règle tenue ici : l'état AU REPOS est le tracé complet (dashoffset 0).
+   L'animation part de 100 et revient à 0 ; si elle ne se joue jamais — mouvement
+   réduit, JS coupé, session déjà vue — la marque reste entière. Une animation
+   d'apparition dont l'état final dépend du déclenchement finit par masquer
+   l'élément qu'elle était censée révéler. */
+.brand__mark svg circle,
+.brand__mark svg path { stroke-dasharray: 100; stroke-dashoffset: 0; }
+
+.brand__mark.mark-play .bm-temple,
+.brand:hover .bm-temple { animation: mark-draw .34s ease-out both; }
+
+.brand__mark.mark-play .bm-temple--r,
+.brand:hover .bm-temple--r { animation-delay: .06s; }
+
+.brand__mark.mark-play .bm-lens,
+.brand:hover .bm-lens { animation: mark-draw .42s .16s cubic-bezier(.4,0,.2,1) both; }
+
+.brand__mark.mark-play .bm-lens--r,
+.brand:hover .bm-lens--r { animation-delay: .27s; }
+
+.brand__mark.mark-play .bm-bridge,
+.brand:hover .bm-bridge { animation: mark-draw .22s .5s ease-out both; }
+
+@keyframes mark-draw {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
 }
 
 .brand__txt { min-width: 0; }
@@ -431,7 +467,7 @@ body {
   height: 20px;
   display: block;
   fill: none;
-  stroke-width: 2.2;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -582,7 +618,7 @@ body {
   display: block;
   fill: none;
   stroke: var(--blue-300);
-  stroke-width: 2.6;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: stroke .15s ease, transform .15s ease;
@@ -674,14 +710,17 @@ body {
   background: var(--blue);
 }
 
+/* Grille 24, trait 1,9, extrémités et jonctions rondes : les quatre icônes
+   viennent du même système et se lisent comme un jeu, pas comme quatre dessins.
+   Rendu à 28 px, le trait tombe à ≈ 2,2 px — la graisse de l'ensemble. */
 .tool-card__icon svg {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: block;
   overflow: visible;
   fill: none;
   stroke: var(--ic-line);
-  stroke-width: 2.1;
+  stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: stroke .18s ease;
@@ -691,93 +730,95 @@ body {
 .tool-card__icon svg .acc  { stroke: var(--ic-acc); transition: stroke .18s ease; }
 .tool-card__icon svg .accf { fill: var(--ic-acc); stroke: none; transition: fill .18s ease; }
 
+/* Aplat de matière — employé pour la coupe du verre. Le filet est de la même
+   couleur que le remplissage : il n'ajoute aucun contour visible, il ne fait
+   qu'arrondir les angles vifs du bord, que « fill » seul laisserait coupants
+   au milieu d'un jeu d'icônes à jonctions rondes. */
+.tool-card__icon svg .glass {
+  fill: var(--ic-line);
+  stroke: var(--ic-line);
+  stroke-width: .9;
+  stroke-linejoin: round;
+  transition: fill .18s ease, stroke .18s ease;
+}
+
 /* ── ANIMATIONS D'ICÔNE ──
    Une par outil, déclenchée (survol, focus, ou une lecture unique à
    l'ouverture posée par le JS via « .icon-play »), bornée à une itération de
    moins d'une seconde. Aucune boucle infinie : ce qui tourne en permanence
    derrière un texte est une taxe, pas une animation.
 
-   Chaque animation dit le bénéfice de l'outil, pas son objet :
-   · Ordonnance      → le paraphe se trace : le courrier part signé.
-   · Clôture         → les pièces s'empilent puis le total se tire.
-   · Épaisseur       → les mors se referment : la cote est prise.
-   · Campagne e-mail → les traits filent : l'envoi part. */
+   Chaque animation joue le geste de l'outil, pas son objet :
+   · Ordonnance      → le courrier s'écrit, la plume passe : il part signé.
+   · Clôture         → le montant se pose, la coche se trace : caisse validée.
+   · Épaisseur       → la coupe passe de palet concave à verre convexe.
+   · Campagne e-mail → la pile se forme, l'enveloppe se ferme : l'envoi part.
 
-/* 1 — Ordonnance : le paraphe s'écrit. */
-.ti-sign { stroke-dasharray: 100; stroke-dashoffset: 100; }
+   Règle commune, valable pour les cinq animations du site : l'état au repos
+   est l'icône complète. Les tracés animés partent de « pas encore tracé » et
+   reviennent à zéro ; jamais l'inverse. Une icône dont le trait final dépend
+   d'un survol disparaît au doigt, où il n'y a pas de survol. */
+.ti-w, .ti-ok, .ti-flap { stroke-dasharray: 100; stroke-dashoffset: 0; }
 
-.tool-card:hover .ti-sign,
-.tool-card:focus-within .ti-sign,
-.tool-card.icon-play .ti-sign { animation: sign-draw .75s ease-out forwards; }
-
-@keyframes sign-draw {
+@keyframes ic-draw {
   from { stroke-dashoffset: 100; }
   to   { stroke-dashoffset: 0; }
 }
 
-/* 2 — Clôture de caisse : les pièces montent une à une, puis le trait de total. */
-.tool-card:hover .ti-coin,
-.tool-card:focus-within .ti-coin,
-.tool-card.icon-play .ti-coin { animation: coin-in .34s cubic-bezier(.22,.61,.36,1) both; }
+/* 1 — Ordonnance : les deux lignes du courrier s'écrivent, la plume suit. */
+.tool-card:hover .ti-w,
+.tool-card:focus-within .ti-w,
+.tool-card.icon-play .ti-w { animation: ic-draw .3s ease-out both; }
 
-.tool-card:hover .ti-coin--2,
-.tool-card:focus-within .ti-coin--2,
-.tool-card.icon-play .ti-coin--2 { animation-delay: .11s; }
+.tool-card:hover .ti-w--2,
+.tool-card:focus-within .ti-w--2,
+.tool-card.icon-play .ti-w--2 { animation-delay: .14s; }
 
-.tool-card:hover .ti-coin--3,
-.tool-card:focus-within .ti-coin--3,
-.tool-card.icon-play .ti-coin--3 { animation-delay: .22s; }
+.tool-card:hover .ti-nib,
+.tool-card:focus-within .ti-nib,
+.tool-card.icon-play .ti-nib { animation: nib-pass .5s .22s cubic-bezier(.4,0,.2,1) both; }
 
-@keyframes coin-in {
-  from { transform: translateY(7px); opacity: 0; }
+@keyframes nib-pass {
+  from { transform: translate(-2.6px, 2.2px); opacity: 0; }
+  60%  { opacity: 1; }
   to   { transform: none; opacity: 1; }
 }
 
-.ti-total { stroke-dasharray: 100; stroke-dashoffset: 100; }
+/* 2 — Clôture de caisse : le montant se pose, puis la coche valide le compte. */
+.tool-card:hover .ti-amount,
+.tool-card:focus-within .ti-amount,
+.tool-card.icon-play .ti-amount { animation: amount-in .3s cubic-bezier(.22,.61,.36,1) both; }
 
-.tool-card:hover .ti-total,
-.tool-card:focus-within .ti-total,
-.tool-card.icon-play .ti-total { animation: sign-draw .3s .34s ease-out forwards; }
-
-/* 3 — Épaisseur : les mors du pied à coulisse se referment sur le verre. */
-.ti-jaw { transform-box: fill-box; transform-origin: 50% 50%; }
-
-.tool-card:hover .ti-jaw--l,
-.tool-card:focus-within .ti-jaw--l,
-.tool-card.icon-play .ti-jaw--l { animation: jaw-l .8s cubic-bezier(.4,0,.2,1) both; }
-
-.tool-card:hover .ti-jaw--r,
-.tool-card:focus-within .ti-jaw--r,
-.tool-card.icon-play .ti-jaw--r { animation: jaw-r .8s cubic-bezier(.4,0,.2,1) both; }
-
-@keyframes jaw-l {
-  0%, 100% { transform: translateX(0); }
-  45%, 65% { transform: translateX(4px); }
+@keyframes amount-in {
+  from { transform: scale(.55); opacity: 0; }
+  to   { transform: none; opacity: 1; }
 }
 
-@keyframes jaw-r {
-  0%, 100% { transform: translateX(0); }
-  45%, 65% { transform: translateX(-4px); }
+.ti-amount { transform-box: fill-box; transform-origin: 50% 50%; }
+
+.tool-card:hover .ti-ok,
+.tool-card:focus-within .ti-ok,
+.tool-card.icon-play .ti-ok { animation: ic-draw .34s .24s ease-out both; }
+
+/* 3 — Épaisseur : la coupe du verre passe de concave à convexe et revient.
+   Seule animation du site qui ne vit pas ici : un morphage de tracé se fait en
+   SVG (<animate>), déclenché par le JS. Voir le commentaire de la carte dans
+   index.html. Rien à neutraliser sous mouvement réduit — le déclencheur est
+   déjà conditionné à la préférence. */
+
+/* 4 — Campagne e-mail : la pile de destinataires se forme, l'enveloppe se ferme. */
+.tool-card:hover .ti-stack,
+.tool-card:focus-within .ti-stack,
+.tool-card.icon-play .ti-stack { animation: stack-in .38s cubic-bezier(.22,.61,.36,1) both; }
+
+@keyframes stack-in {
+  from { transform: translate(2px, -2px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
 }
 
-/* 4 — Campagne e-mail : les traits de vitesse filent une fois. */
-.tool-card:hover .ti-trail,
-.tool-card:focus-within .ti-trail,
-.tool-card.icon-play .ti-trail { animation: trail-go .6s ease-out both; }
-
-.tool-card:hover .ti-trail--2,
-.tool-card:focus-within .ti-trail--2,
-.tool-card.icon-play .ti-trail--2 { animation-delay: .08s; }
-
-.tool-card:hover .ti-trail--3,
-.tool-card:focus-within .ti-trail--3,
-.tool-card.icon-play .ti-trail--3 { animation-delay: .16s; }
-
-@keyframes trail-go {
-  0%   { opacity: 0; transform: translateX(-5px); }
-  55%  { opacity: 1; transform: none; }
-  100% { opacity: 1; transform: none; }
-}
+.tool-card:hover .ti-flap,
+.tool-card:focus-within .ti-flap,
+.tool-card.icon-play .ti-flap { animation: ic-draw .36s .2s ease-out both; }
 
 /* ── OUTIL ANNONCÉ, PAS ENCORE OUVERT ──
    La carte annonce ce qui vient sans y donner accès : aucun lien, donc aucune
@@ -869,11 +910,29 @@ body {
 
 .doc:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
+/* Le titre porte son icône : même grille et même graisse que les cartes
+   d'outils, en plus petit. Alignée sur la première ligne, pas centrée sur un
+   titre qui peut passer sur deux lignes. */
 .doc__name {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
   font-size: var(--fs-base);
   font-weight: var(--fw-bold);
   color: var(--blue-800);
+}
+
+.doc__ico {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  display: block;
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .doc__desc {
@@ -1170,7 +1229,7 @@ body {
 
   .tool-card__go { display: none; }
   .tool-card__icon { width: 46px; height: 46px; }
-  .tool-card__icon svg { width: 28px; height: 28px; }
+  .tool-card__icon svg { width: 24px; height: 24px; }
 
   .notice--setup .btn,
   .notice--todo a { margin-left: 0; }
@@ -1188,30 +1247,43 @@ body {
 
   .today--turn .today__prev { animation: none; opacity: 0; }
 
-  .ti-sign,
-  .ti-total { stroke-dashoffset: 0; }
+  /* Les tracés animés sont déjà complets au repos : les neutraliser suffit,
+     rien ne reste masqué ni décalé. */
+  .ti-w,
+  .ti-ok,
+  .ti-flap { stroke-dashoffset: 0; }
 
-  .tool-card:hover .ti-sign,
-  .tool-card:focus-within .ti-sign,
-  .tool-card.icon-play .ti-sign,
-  .tool-card:hover .ti-total,
-  .tool-card:focus-within .ti-total,
-  .tool-card.icon-play .ti-total,
-  .tool-card:hover .ti-coin,
-  .tool-card:focus-within .ti-coin,
-  .tool-card.icon-play .ti-coin,
-  .tool-card:hover .ti-jaw--l,
-  .tool-card:focus-within .ti-jaw--l,
-  .tool-card.icon-play .ti-jaw--l,
-  .tool-card:hover .ti-jaw--r,
-  .tool-card:focus-within .ti-jaw--r,
-  .tool-card.icon-play .ti-jaw--r,
-  .tool-card:hover .ti-trail,
-  .tool-card:focus-within .ti-trail,
-  .tool-card.icon-play .ti-trail {
+  .brand__mark .bm-temple,
+  .brand__mark .bm-lens,
+  .brand__mark .bm-bridge,
+  .brand__mark.mark-play .bm-temple,
+  .brand__mark.mark-play .bm-lens,
+  .brand__mark.mark-play .bm-bridge,
+  .brand:hover .bm-temple,
+  .brand:hover .bm-lens,
+  .brand:hover .bm-bridge,
+  .tool-card:hover .ti-w,
+  .tool-card:focus-within .ti-w,
+  .tool-card.icon-play .ti-w,
+  .tool-card:hover .ti-nib,
+  .tool-card:focus-within .ti-nib,
+  .tool-card.icon-play .ti-nib,
+  .tool-card:hover .ti-amount,
+  .tool-card:focus-within .ti-amount,
+  .tool-card.icon-play .ti-amount,
+  .tool-card:hover .ti-ok,
+  .tool-card:focus-within .ti-ok,
+  .tool-card.icon-play .ti-ok,
+  .tool-card:hover .ti-stack,
+  .tool-card:focus-within .ti-stack,
+  .tool-card.icon-play .ti-stack,
+  .tool-card:hover .ti-flap,
+  .tool-card:focus-within .ti-flap,
+  .tool-card.icon-play .ti-flap {
     animation: none;
     opacity: 1;
     transform: none;
+    stroke-dashoffset: 0;
   }
 
   .tool-card:hover .tool-card__go { transform: none; }

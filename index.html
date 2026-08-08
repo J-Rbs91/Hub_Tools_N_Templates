@@ -26,27 +26,26 @@
 
   <!-- ── FILIGRANE OPTIQUE (décoratif, non interactif) ──
        Motifs « lunettes » très estompés et immobiles : l'identité du métier
-       reste posée derrière la page sans rien animer en permanence. -->
+       reste posée derrière la page sans rien animer en permanence. Même tracé
+       que la marque et que la favicon — un seul dessin de lunettes dans tout le
+       site, à trois échelles. -->
   <div class="optic" aria-hidden="true">
-    <div class="m" style="left:8vw; top:14vh; --w:210px; --r:-9deg;">
-      <svg viewBox="-80 -42 160 84">
-        <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-        <path d="M-4 -3 Q0 -10 4 -3"/>
-        <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
+    <!-- Deux motifs seulement, et cantonnés à la bande d'accueil : posés en
+         pixels et non en pourcentage de hauteur, ils ne descendent jamais
+         derrière la grille d'outils, où ils traversaient les cartes. -->
+    <div class="m" style="left:4vw; top:190px; --w:150px; --r:-9deg;">
+      <svg viewBox="0 0 24 24">
+        <circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/>
+        <path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/>
+        <path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/>
+        <path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>
       </svg>
     </div>
-    <div class="m" style="left:88vw; top:9vh; --w:190px; --r:7deg;">
-      <svg viewBox="-82 -34 164 68">
-        <rect x="-78" y="-26" width="64" height="52" rx="14"/>
-        <rect x="14" y="-26" width="64" height="52" rx="14"/>
-        <path d="M-14 -8 Q0 -18 14 -8"/>
-      </svg>
-    </div>
-    <div class="m" style="left:70vw; top:47vh; --w:150px; --r:5deg;">
-      <svg viewBox="-80 -42 160 84">
-        <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-        <path d="M-4 -3 Q0 -10 4 -3"/>
-        <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
+    <div class="m" style="left:96vw; top:140px; --w:140px; --r:7deg;">
+      <svg viewBox="0 0 24 24">
+        <rect x="2" y="10" width="9" height="9" rx="2.5"/>
+        <rect x="13" y="10" width="9" height="9" rx="2.5"/>
+        <path d="M13 13.5a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/>
       </svg>
     </div>
   </div>
@@ -58,11 +57,17 @@
   <header class="topbar">
     <div class="topbar__inner">
       <div class="brand">
-        <span class="brand__mark" aria-hidden="true">
-          <svg viewBox="-80 -42 160 84">
-            <circle cx="-34" cy="0" r="30"/><circle cx="34" cy="0" r="30"/>
-            <path d="M-4 -3 Q0 -10 4 -3"/>
-            <path d="M-64 -6 L-78 -12"/><path d="M64 -6 L78 -12"/>
+        <!-- Marque : la paire de lunettes se trace au premier chargement de la
+             session (mise au point), puis se rejoue au survol de la marque.
+             Au repos elle est entièrement visible — l'animation redessine, elle
+             ne conditionne jamais l'affichage. -->
+        <span class="brand__mark" id="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path class="bm-temple bm-temple--l" pathLength="100" d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/>
+            <path class="bm-temple bm-temple--r" pathLength="100" d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>
+            <circle class="bm-lens bm-lens--l" pathLength="100" cx="6" cy="15" r="4"/>
+            <circle class="bm-lens bm-lens--r" pathLength="100" cx="18" cy="15" r="4"/>
+            <path class="bm-bridge" pathLength="100" d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/>
           </svg>
         </span>
         <span class="brand__txt">
@@ -101,7 +106,7 @@
     <!-- Paramétrage manquant : l'avis disparaît dès que le nom du magasin est saisi. -->
     <div class="notice notice--setup" id="setup-notice" hidden>
       <svg class="notice__ico" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
       </svg>
       <span class="notice__txt">
         Votre magasin n'est pas encore configuré. Renseignez vos coordonnées une seule fois :
@@ -114,7 +119,7 @@
          (outil déjà utilisé, journée entamée). Jamais de bloc vide. -->
     <div class="notice notice--todo" id="todo-notice" hidden>
       <svg class="notice__ico" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3 1.8"/>
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
       </svg>
       <span class="notice__txt" id="todo-txt"></span>
       <a href="outils/cloture-caisse/">Ouvrir la clôture</a>
@@ -128,16 +133,16 @@
     <ul id="tools-grid" role="list">
 
       <!-- ORDONNANCE — bénéfice : le courrier au médecin part signé, sans
-           téléphone ni brouillon manuscrit. L'icône trace le paraphe. -->
+           téléphone ni brouillon manuscrit. Le courrier s'écrit, puis la plume
+           passe : le document est prêt à envoyer. -->
       <li class="tool-card" data-tool="ordonnance">
         <span class="tool-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48">
-            <path d="M12 6h16l8 8v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/>
-            <path d="M28 6v8h8"/>
-            <path class="acc" d="M16 20h11"/>
-            <path class="acc" d="M16 25h15"/>
-            <path class="ti-sign" pathLength="100"
-                  d="M16 34c3-4.5 6 2.5 9-1.5 2-2.7 5 1 9-2"/>
+          <svg viewBox="0 0 24 24">
+            <path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/>
+            <path d="M14.487 7.858A1 1 0 0 1 14 7V2"/>
+            <path class="acc ti-w ti-w--1" pathLength="100" d="M8 11h4.5"/>
+            <path class="acc ti-w ti-w--2" pathLength="100" d="M8 14.5h3"/>
+            <path class="ti-nib" d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/>
           </svg>
         </span>
         <h3 class="tool-card__title">
@@ -147,7 +152,7 @@
           Le courrier au médecin, rédigé et prêt à partir en deux minutes.
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 5l7 7-7 7"/>
+          <path d="m9 18 6-6-6-6"/>
         </svg>
         <details class="tool-card__more">
           <summary>Ce que fait l'outil</summary>
@@ -161,18 +166,16 @@
       </li>
 
       <!-- CLÔTURE — bénéfice : plus de recomptage ni de calcul à la main.
-           L'icône empile les pièces puis tire le trait du total. -->
+           Le montant se pose, puis la coche se trace : la caisse est comptée
+           et validée pour la journée. -->
       <li class="tool-card" data-tool="caisse">
         <span class="tool-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48">
-            <rect x="5" y="8" width="24" height="14" rx="3"/>
-            <circle cx="17" cy="15" r="3.2"/>
-            <g>
-              <circle class="ti-coin ti-coin--1 accf" cx="36" cy="38" r="5.2"/>
-              <circle class="ti-coin ti-coin--2 accf" cx="36" cy="31.5" r="5.2"/>
-              <circle class="ti-coin ti-coin--3 accf" cx="36" cy="25" r="5.2"/>
-            </g>
-            <path class="ti-total" pathLength="100" d="M6 28h17"/>
+          <svg viewBox="0 0 24 24">
+            <path d="M11.748 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4.875"/>
+            <path d="M6 12h.01"/>
+            <path d="M18 12h.01"/>
+            <circle class="ti-amount" cx="12" cy="12" r="2"/>
+            <path class="acc ti-ok" pathLength="100" d="m16 19 2 2 4-4"/>
           </svg>
         </span>
         <h3 class="tool-card__title">
@@ -182,7 +185,7 @@
           Comptez les espèces&nbsp;: le total, l'écart et la remise se calculent seuls.
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 5l7 7-7 7"/>
+          <path d="m9 18 6-6-6-6"/>
         </svg>
         <details class="tool-card__more">
           <summary>Ce que fait l'outil</summary>
@@ -196,19 +199,36 @@
       </li>
 
       <!-- ÉPAISSEUR — bénéfice : annoncer la bonne épaisseur avant la commande.
-           L'icône referme les mors du pied à coulisse sur le verre. -->
+           La coupe du verre, vue de côté : le palet brut concave (bords épais,
+           centre mince) se déforme en verre convexe (centre épais, bords
+           minces), et revient. À mi-course les deux faces sont parallèles — le
+           palet avant surfaçage. C'est l'objet même du calcul : l'épaisseur, et
+           où elle se trouve.
+
+           La forme est nue : ni axe optique, ni cote, ni instrument. Elle est
+           seule de son jeu à n'avoir aucun élément d'accent, et c'est voulu —
+           la silhouette porte les deux états à elle seule.
+
+           Le verre est un aplat, pas un contour : à 28 px un plein donne la
+           matière du verre là où un trait de 1,9 ne donne qu'un cerne. Le tracé
+           est une seule courbe fermée — deux faces bombées reliées par les
+           bords — et la forme a été redessinée plus large en conséquence : un
+           contour ne se remplit pas sans reprendre les proportions.
+
+           Seules les abscisses changent d'un état à l'autre ; la hauteur et la
+           structure du chemin restent identiques — condition pour que
+           l'interpolation soit possible.
+
+           Le morphage passe par <animate> et non par une animation CSS : la
+           propriété « d » n'est pas animable de façon fiable partout, or
+           l'essentiel du parc est sous iOS. Le tracé au repos est le palet
+           concave, complet : si l'animation ne part jamais, l'icône tient. -->
       <li class="tool-card" data-tool="epaisseur">
         <span class="tool-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48">
-            <path d="M24 9c7 7 7 23 0 30-7-7-7-23 0-30Z"/>
-            <g class="ti-jaw ti-jaw--l">
-              <path d="M10 13v22"/>
-              <path class="acc" d="M10 24h6"/>
-            </g>
-            <g class="ti-jaw ti-jaw--r">
-              <path d="M38 13v22"/>
-              <path class="acc" d="M38 24h-6"/>
-            </g>
+          <svg viewBox="0 0 24 24">
+            <path class="glass" d="M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z">
+              <animate id="lens-morph" attributeName="d" begin="indefinite" dur="1.15s" fill="remove" calcMode="spline" keyTimes="0;0.5;1" keySplines=".4 0 .2 1;.4 0 .2 1" values="M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z;M11.1 4C5.13 8 5.13 16 11.1 20L12.9 20C18.87 16 18.87 8 12.9 4Z;M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z"/>
+            </path>
           </svg>
         </span>
         <h3 class="tool-card__title">
@@ -218,7 +238,7 @@
           Annoncez la bonne épaisseur avant de commander, indice par indice.
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 5l7 7-7 7"/>
+          <path d="m9 18 6-6-6-6"/>
         </svg>
         <details class="tool-card__more">
           <summary>Ce que fait l'outil</summary>
@@ -236,14 +256,10 @@
            au clavier). L'icône reste immobile et atténuée. -->
       <li class="tool-card tool-card--soon" data-tool="mail">
         <span class="tool-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48">
-            <rect x="17" y="14" width="25" height="19" rx="3"/>
-            <path d="M19.5 17.2 29.5 25l10-7.8"/>
-            <g>
-              <path class="ti-trail ti-trail--1 acc" d="M5 19h8"/>
-              <path class="ti-trail ti-trail--2 acc" d="M8 24h5"/>
-              <path class="ti-trail ti-trail--3 acc" d="M3 29h10"/>
-            </g>
+          <svg viewBox="0 0 24 24">
+            <path class="ti-stack" d="M17 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 1-1.732"/>
+            <rect x="7" y="3" width="15" height="12" rx="2"/>
+            <path class="acc ti-flap" pathLength="100" d="m22 5.5-6.419 4.179a2 2 0 0 1-2.162 0L7 5.5"/>
           </svg>
         </span>
         <h3 class="tool-card__title">
@@ -278,19 +294,40 @@
     <ul class="docs" role="list">
       <li>
         <a class="doc" href="docs/rgpd-mailing/">
-          <span class="doc__name">Écrire à ses clients : rappel RGPD</span>
+          <span class="doc__name">
+            <svg class="doc__ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            Écrire à ses clients : rappel RGPD
+          </span>
           <span class="doc__desc">Ce qu'on a le droit d'envoyer, à qui, et avec quel consentement.</span>
         </a>
       </li>
       <li>
         <a class="doc" href="docs/sync-drive/">
-          <span class="doc__name">Synchroniser plusieurs postes</span>
+          <span class="doc__name">
+            <svg class="doc__ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M8 16H3v5"/>
+            </svg>
+            Synchroniser plusieurs postes
+          </span>
           <span class="doc__desc">Partager le paramétrage du magasin via votre propre Google Drive.</span>
         </a>
       </li>
       <li>
         <a class="doc" href="docs/sauvegarde-fichier/">
-          <span class="doc__name">Sauvegarder par fichier</span>
+          <span class="doc__name">
+            <svg class="doc__ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+              <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/>
+              <path d="M7 3v4a1 1 0 0 0 1 1h7"/>
+            </svg>
+            Sauvegarder par fichier
+          </span>
           <span class="doc__desc">Enregistrer et restaurer le paramétrage sans compte Google.</span>
         </a>
       </li>
@@ -889,6 +926,30 @@
       el.hidden = false;
     }
 
+    /* ── Coupe du verre : concave ↔ convexe ──
+       Les trois autres icônes s'animent en CSS au survol. Celle-ci déforme un
+       tracé, ce que le CSS ne fait pas de façon fiable partout : le morphage
+       est confié à <animate>, qu'on déclenche ici.
+
+       Deux garde-fous : la préférence de mouvement réduit est vérifiée à chaque
+       lecture (et non une fois au chargement), et l'absence de beginElement
+       n'est pas une erreur — l'icône reste alors sur son tracé au repos, qui
+       est un dessin complet. */
+    function playLens() {
+      var a = document.getElementById('lens-morph');
+      if (!a || typeof a.beginElement !== 'function') { return; }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+      try { a.beginElement(); } catch (e) { /* SMIL indisponible : rien à faire */ }
+    }
+
+    var lensCard = document.querySelector('.tool-card[data-tool="epaisseur"]');
+    if (lensCard) {
+      // pointerenter, pas mouseover : une seule lecture à l'entrée du pointeur,
+      // et rien du tout au doigt, où le survol n'existe pas.
+      lensCard.addEventListener('pointerenter', playLens);
+      lensCard.addEventListener('focusin', playLens);
+    }
+
     /* ── Lecture unique des animations d'icône ──
        Le survol les rejoue à la demande sur un ordinateur ; au doigt, il n'y a
        pas de survol. On les joue donc une fois par session, jamais en boucle. */
@@ -899,12 +960,21 @@
       if (seen) { return; }
       try { sessionStorage.setItem(SS_INTRO, '1'); } catch (e) { /* mode privé : on joue quand même */ }
 
+      // La marque ouvre la séquence : la paire de lunettes se trace, puis les
+      // cartes s'allument l'une après l'autre.
+      var mark = document.getElementById('brand-mark');
+      if (mark) {
+        mark.classList.add('mark-play');
+        setTimeout(function () { mark.classList.remove('mark-play'); }, 1000);
+      }
+
       var cards = Array.prototype.slice.call(document.querySelectorAll('.tool-card:not(.tool-card--soon)'));
       cards.forEach(function (card, i) {
         setTimeout(function () {
+          if (card.dataset.tool === 'epaisseur') { playLens(); return; }
           card.classList.add('icon-play');
           setTimeout(function () { card.classList.remove('icon-play'); }, 1100);
-        }, i * 90);
+        }, 240 + i * 90);
       });
     }
 
