@@ -730,6 +730,18 @@ body {
 .tool-card__icon svg .acc  { stroke: var(--ic-acc); transition: stroke .18s ease; }
 .tool-card__icon svg .accf { fill: var(--ic-acc); stroke: none; transition: fill .18s ease; }
 
+/* Aplat de matière — employé pour la coupe du verre. Le filet est de la même
+   couleur que le remplissage : il n'ajoute aucun contour visible, il ne fait
+   qu'arrondir les angles vifs du bord, que « fill » seul laisserait coupants
+   au milieu d'un jeu d'icônes à jonctions rondes. */
+.tool-card__icon svg .glass {
+  fill: var(--ic-line);
+  stroke: var(--ic-line);
+  stroke-width: .9;
+  stroke-linejoin: round;
+  transition: fill .18s ease, stroke .18s ease;
+}
+
 /* ── ANIMATIONS D'ICÔNE ──
    Une par outil, déclenchée (survol, focus, ou une lecture unique à
    l'ouverture posée par le JS via « .icon-play »), bornée à une itération de

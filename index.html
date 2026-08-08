@@ -205,10 +205,15 @@
            sont parallèles — le palet avant surfaçage. C'est l'objet même du
            calcul : l'épaisseur, et où elle se trouve.
 
-           Le tracé est une seule courbe fermée : deux faces bombées reliées par
-           les bords. Seules les abscisses changent d'un état à l'autre, la
-           hauteur et la structure du chemin restent identiques — condition pour
-           que l'interpolation soit possible.
+           Le verre est un aplat, pas un contour : à 28 px un plein donne la
+           matière du verre là où un trait de 1,9 ne donne qu'un cerne. Le tracé
+           est une seule courbe fermée — deux faces bombées reliées par les
+           bords — et la forme a été redessinée plus large en conséquence : un
+           contour ne se remplit pas sans reprendre les proportions.
+
+           Seules les abscisses changent d'un état à l'autre ; la hauteur et la
+           structure du chemin restent identiques — condition pour que
+           l'interpolation soit possible.
 
            Le morphage passe par <animate> et non par une animation CSS : la
            propriété « d » n'est pas animable de façon fiable partout, or
@@ -218,8 +223,8 @@
         <span class="tool-card__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path class="acc" d="M2.5 12h19"/>
-            <path d="M7.5 4C12.83 8 12.83 16 7.5 20L16.5 20C11.17 16 11.17 8 16.5 4Z">
-              <animate id="lens-morph" attributeName="d" begin="indefinite" dur="1.15s" fill="remove" calcMode="spline" keyTimes="0;0.5;1" keySplines=".4 0 .2 1;.4 0 .2 1" values="M7.5 4C12.83 8 12.83 16 7.5 20L16.5 20C11.17 16 11.17 8 16.5 4Z;M11.5 4C6.17 8 6.17 16 11.5 20L12.5 20C17.83 16 17.83 8 12.5 4Z;M7.5 4C12.83 8 12.83 16 7.5 20L16.5 20C11.17 16 11.17 8 16.5 4Z"/>
+            <path class="glass" d="M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z">
+              <animate id="lens-morph" attributeName="d" begin="indefinite" dur="1.15s" fill="remove" calcMode="spline" keyTimes="0;0.5;1" keySplines=".4 0 .2 1;.4 0 .2 1" values="M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z;M11.1 4C5.13 8 5.13 16 11.1 20L12.9 20C18.87 16 18.87 8 12.9 4Z;M6.5 4C12.55 8 12.55 16 6.5 20L17.5 20C11.45 16 11.45 8 17.5 4Z"/>
             </path>
           </svg>
         </span>
