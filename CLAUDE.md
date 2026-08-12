@@ -45,6 +45,10 @@ Client-side patterns used by existing tools (reuse these instead of pulling in d
 - **Gmail copy** = `navigator.clipboard.write([new ClipboardItem(...)])` with a `text/html`
   blob, falling back gracefully on unsupported browsers (see `demande-ordonnance`).
 - **Persistence** = `localStorage` with a per-tool key (see `LS_CAISSE` in `cloture-caisse`).
+- **Image analysis** = plain canvas 2D + `getImageData` (no OpenCV, no WASM). `epaisseur-verres`
+  reads a lens outline off a photo this way: `createImageBitmap(file)` (FileReader/data-URL
+  fallback), analysis on an off-screen grid, `pointerdown/move/up` for the on-canvas handles.
+  The photo stays in memory and is never stored — only the resulting 72-point contour is.
 
 ### Shared store profile
 
