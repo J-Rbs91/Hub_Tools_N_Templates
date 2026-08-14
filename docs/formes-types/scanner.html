@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scanner de formes types</title>
+  <style>
+    :root {
+      --blue: #1F6FB2; --blue-d: #175A92; --ink: #1A2A3A; --bg: #F4F7FA;
+      --line: #C9D6E2; --grey: #5A6B7B; --green: #2E8B57; --warn: #B86A00;
+      --font: "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.45; font-size: 14px; }
+    header { background: var(--blue); color: #fff; padding: 14px 20px; }
+    header h1 { font-size: 18px; font-weight: 800; }
+    header p { font-size: 12px; opacity: .9; margin-top: 2px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 60px; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+    .card + .card { margin-top: 14px; }
+    .card h2 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--grey); margin-bottom: 10px; }
+    canvas { display: block; width: 100%; height: auto; background: #16242F; border-radius: 8px; }
+    .field { margin-bottom: 12px; }
+    .field > label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+    input[type=text], input[type=number], select {
+      width: 100%; font: inherit; font-size: 14px; color: var(--ink);
+      border: 1.5px solid var(--line); border-radius: 6px; padding: 7px 9px; background: #fff;
+    }
+    input[type=range] { width: 100%; }
+    .row { display: flex; gap: 10px; }
+    .row .field { flex: 1; }
+    .btn { font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--line);
+      background: #fff; color: var(--blue-d); border-radius: 6px; padding: 8px 12px; }
+    .btn:hover { background: var(--bg); }
+    .btn.on { border-color: var(--blue); background: #EBF2FA; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .hint { font-size: 11px; color: var(--grey); margin-top: 4px; }
+    .checks { list-style: none; font-size: 12px; }
+    .checks li { padding: 5px 0 5px 22px; position: relative; border-bottom: 1px solid #EAF0F5; line-height: 1.4; }
+    .checks li:last-child { border-bottom: 0; }
+    .checks li::before { position: absolute; left: 0; top: 5px; font-weight: 800; }
+    .checks li.ok::before { content: "\2713"; color: var(--green); }
+    .checks li.ko::before { content: "\26A0"; color: var(--warn); }
+    .checks li.na::before { content: "\00B7"; color: var(--grey); }
+    .checks li.ko { color: #7A5500; }
+    textarea { width: 100%; height: 190px; font: 12px/1.45 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      border: 1.5px solid var(--line); border-radius: 6px; padding: 8px; resize: vertical; background: #fff; color: var(--ink); }
+    .apercu { display: flex; gap: 12px; align-items: center; }
+    .apercu svg { background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+    .apercu p { font-size: 12px; color: var(--grey); }
+    .drop { border: 2px dashed var(--line); border-radius: 10px; padding: 26px 16px; text-align: center; background: #F8FBFE; color: var(--grey); }
+    .lead { font-size: 13px; margin-bottom: 12px; }
+    .lead b { color: var(--blue-d); }
+    a { color: var(--blue-d); }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Scanner de formes types</h1>
+    <p>Relève le contour d'un verre taillé photographié à plat et produit le gabarit à coller dans l'outil « Épaisseur des verres ».</p>
+  </header>
+
+  <main>
+    <p class="lead">
+      Protocole de prise de vue et vérifications : voir <a href="README.md">README.md</a>.
+      Rappel des trois repères à tracer sur la feuille : un <b>trait</b> donnant l'horizontale du verre,
+      un <b>N</b> à l'extrémité nasale de ce trait, une <b>flèche</b> vers le haut du verre.
+      Rien ne quitte le navigateur : la photo est lue en mémoire et n'est jamais envoyée.
+    </p>
+
+    <div class="grid">
+      <div>
+        <section class="card">
+          <h2>Photo</h2>
+          <div class="drop" id="drop">
+            Déposez la photo ici, ou
+            <label class="btn" for="fichier" style="display:inline-block;margin-left:6px;">choisir un fichier</label>
+            <input type="file" id="fichier" accept="image/*" hidden>
+          </div>
+          <div id="zone-canvas" hidden style="margin-top:12px;">
+            <canvas id="vue" width="800" height="600"></canvas>
+            <p class="hint">
+              Vert : contour retenu · rouge plein : contour brut avant réparation · rouge pointillé : boîte boxing ·
+              bleu : l'horizontale déduite de votre trait · orange : côté nasal.
+            </p>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Gabarit obtenu</h2>
+          <div class="apercu">
+            <svg id="apercu" width="240" height="210" role="img" aria-label="Aperçu du gabarit"></svg>
+            <p id="apercu-txt">En attente d'une photo.</p>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="card">
+          <h2>Réglages</h2>
+          <div class="field">
+            <label for="haut">Le haut du verre est vers…</label>
+            <select id="haut">
+              <option value="d">la droite de la photo</option>
+              <option value="g">la gauche de la photo</option>
+            </select>
+            <p class="hint">Donné par la flèche. Sans flèche, il faut le dire ici : la lettre N est symétrique à 180°, elle ne peut pas trancher.</p>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="nom">Nom affiché</label>
+              <input type="text" id="nom" value="Hexagone" maxlength="18">
+            </div>
+            <div class="field">
+              <label for="cle">Clé</label>
+              <input type="text" id="cle" value="hexagone" maxlength="18">
+            </div>
+          </div>
+          <div class="field">
+            <label for="cotea">Côte A (mm)</label>
+            <input type="number" id="cotea" value="50" min="28" max="70" step="0.5">
+            <p class="hint">Largeur boxing du verre. B est déduite du rapport mesuré.</p>
+          </div>
+          <div class="field">
+            <label for="seuil">Seuil verre / fond <span class="hint" id="seuil-val" style="display:inline;">auto</span></label>
+            <input type="range" id="seuil" min="0" max="255" step="1" value="0">
+            <p class="hint">0 = automatique (palier d'aire stable). À ne toucher que si le contour décroche.</p>
+          </div>
+          <label class="hint" for="convexe" style="display:block;margin-bottom:10px;">
+            <input type="checkbox" id="convexe" checked> Réparer les morsures de reflet (enveloppe convexe)
+          </label>
+          <div class="btn-row">
+            <button class="btn" type="button" id="recalc">Recalculer</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Vérifications</h2>
+          <ul class="checks" id="checks">
+            <li class="na">En attente d'une photo.</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>À coller dans l'outil</h2>
+          <textarea id="sortie" readonly aria-label="Bloc à coller"></textarea>
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn" type="button" id="copier">Copier</button>
+          </div>
+          <p class="hint">
+            À placer dans <code>outils/epaisseur-verres/index.html</code>, dans l'objet <code>SHAPES</code>,
+            en remplacement de l'entrée de même clé.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+  (function () {
+    'use strict';
+    var el = function (id) { return document.getElementById(id); };
+    var N = 72;              // points du gabarit final
+    var M = 360;             // finesse du balayage radial
+    var etat = null;         // dernier relevé
+
+    /* ═══════════ OUTILS IMAGE ═══════════ */
+    // Érosion / dilatation séparables : deux passes 1-D au lieu d'une fenêtre carrée.
+    function morpho(src, W, H, R, dilate) {
+      var a = new Uint8Array(W * H), b = new Uint8Array(W * H), x, y, k, v;
+      for (y = 0; y < H; y++) {
+        for (x = 0; x < W; x++) {
+          v = dilate ? 0 : 1;
+          for (k = -R; k <= R; k++) {
+            var xx = x + k;
+            var p = (xx < 0 || xx >= W) ? (dilate ? 0 : 0) : src[y * W + xx];
+            if (dilate) { if (p) { v = 1; break; } } else if (!p) { v = 0; break; }
+          }
+          a[y * W + x] = v;
+        }
+      }
+      for (y = 0; y < H; y++) {
+        for (x = 0; x < W; x++) {
+          v = dilate ? 0 : 1;
+          for (k = -R; k <= R; k++) {
+            var yy = y + k;
+            var q = (yy < 0 || yy >= H) ? (dilate ? 0 : 0) : a[yy * W + x];
+            if (dilate) { if (q) { v = 1; break; } } else if (!q) { v = 0; break; }
+          }
+          b[y * W + x] = v;
+        }
+      }
+      return b;
+    }
+    // Plus grande composante connexe (4-voisins) d'un masque binaire.
+    function composante(mask, W, H) {
+      var lab = new Int32Array(W * H).fill(-1), pile = [], best = null, id = 0, i;
+      for (i = 0; i < W * H; i++) {
+        if (!mask[i] || lab[i] >= 0) { continue; }
+        var aire = 0, x0 = W, x1 = -1, y0 = H, y1 = -1;
+        lab[i] = id; pile.length = 0; pile.push(i);
+        while (pile.length) {
+          var k = pile.pop(), kx = k % W, ky = (k - kx) / W;
+          aire++;
+          if (kx < x0) { x0 = kx; } if (kx > x1) { x1 = kx; }
+          if (ky < y0) { y0 = ky; } if (ky > y1) { y1 = ky; }
+          if (kx > 0 && mask[k - 1] && lab[k - 1] < 0) { lab[k - 1] = id; pile.push(k - 1); }
+          if (kx < W - 1 && mask[k + 1] && lab[k + 1] < 0) { lab[k + 1] = id; pile.push(k + 1); }
+          if (ky > 0 && mask[k - W] && lab[k - W] < 0) { lab[k - W] = id; pile.push(k - W); }
+          if (ky < H - 1 && mask[k + W] && lab[k + W] < 0) { lab[k + W] = id; pile.push(k + W); }
+        }
+        if (!best || aire > best.aire) { best = { id: id, aire: aire, x0: x0, y0: y0, x1: x1, y1: y1 }; }
+        id++;
+      }
+      return best ? { c: best, lab: lab } : null;
+    }
+    function luminance(data, n) {
+      var lum = new Float32Array(n), i;
+      for (i = 0; i < n; i++) { lum[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2]; }
+      return lum;
+    }
+    function dessine(img, max) {
+      var k = Math.min(1, max / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      var g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(img, 0, 0, c.width, c.height);
+      return { c: c, g: g, W: c.width, H: c.height };
+    }
+
+    /* ═══════════ SEUIL AUTOMATIQUE ═══════════
+       Le bon seuil est celui du palier : tant qu'il ne fait que noyer le chant du verre, l'aire
+       détectée ne bouge pas ; en dessous le verre se disloque, au-dessus il avale les ombres. */
+    function seuilAuto(lum, W, H) {
+      var n = W * H, essais = [], T, i;
+      for (T = 50; T <= 215; T += 5) {
+        var m = new Uint8Array(n);
+        for (i = 0; i < n; i++) { m[i] = lum[i] < T ? 1 : 0; }
+        var o = morpho(morpho(m, W, H, 2, false), W, H, 2, true);
+        var r = composante(o, W, H);
+        essais.push({ T: T, aire: r ? r.c.aire : 0 });
+      }
+      var run = null, k = 0;
+      while (k < essais.length) {
+        if (essais[k].aire < n * 0.01) { k++; continue; }
+        var j = k;
+        while (j + 1 < essais.length && essais[j + 1].aire > n * 0.01 &&
+               Math.abs(essais[j + 1].aire - essais[k].aire) / essais[k].aire < 0.10) { j++; }
+        if (!run || j - k > run[1] - run[0]) { run = [k, j]; }
+        k = j + 1;
+      }
+      return run ? essais[Math.round((run[0] + run[1]) / 2)].T : 110;
+    }
+
+    /* ═══════════ RELEVÉ ═══════════ */
+    function releve(img, opts) {
+      var petit = dessine(img, 420);
+      var lumP = luminance(petit.g.getImageData(0, 0, petit.W, petit.H).data, petit.W * petit.H);
+      var T = opts.seuil > 0 ? opts.seuil : seuilAuto(lumP, petit.W, petit.H);
+
+      var gr = dessine(img, 1100), W = gr.W, H = gr.H, n = W * H, i;
+      var lum = luminance(gr.g.getImageData(0, 0, W, H).data, n);
+      var brut = new Uint8Array(n);
+      for (i = 0; i < n; i++) { brut[i] = lum[i] < T ? 1 : 0; }
+      // l'ouverture efface le trait tracé sans entamer le verre
+      var ouvert = morpho(morpho(brut, W, H, 3, false), W, H, 3, true);
+      var res = composante(ouvert, W, H);
+      if (!res || res.c.aire < n * 0.008) { return { err: 'Verre non détecté. Ajustez le seuil à la main.' }; }
+      var verre = res.c, lab = res.lab, idV = verre.id;
+
+      // ── le trait : ACP sur les pixels sombres HORS du verre, là où il ne reste que lui ──
+      var mx = (verre.x0 + verre.x1) / 2, my = (verre.y0 + verre.y1) / 2;
+      var rx = (verre.x1 - verre.x0) * 0.62, ry = (verre.y1 - verre.y0) * 0.62;
+      var hors = [], sx = 0, sy = 0, x, y;
+      for (y = 0; y < H; y++) {
+        for (x = 0; x < W; x++) {
+          if (!brut[y * W + x]) { continue; }
+          if (Math.abs(x - mx) < rx && Math.abs(y - my) < ry) { continue; }
+          hors.push(x); hors.push(y); sx += x; sy += y;
+        }
+      }
+      var cnt = hors.length / 2;
+      if (cnt < 60) { return { err: 'Trait d\'horizontale introuvable : tracez-le bien au-delà du verre, des deux côtés.' }; }
+      var cx = sx / cnt, cy = sy / cnt, sxx = 0, syy = 0, sxy = 0;
+      for (i = 0; i < cnt; i++) {
+        var a = hors[i * 2] - cx, b = hors[i * 2 + 1] - cy;
+        sxx += a * a; syy += b * b; sxy += a * b;
+      }
+      var th = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+      var dx = Math.cos(th), dy = Math.sin(th);
+      // ── le « N » : la tache compacte écartée du trait ──
+      var nx = 0, ny = 0, nc = 0;
+      for (i = 0; i < cnt; i++) {
+        var ax2 = hors[i * 2] - cx, by2 = hors[i * 2 + 1] - cy;
+        if (Math.abs(-dy * ax2 + dx * by2) > 12) { nx += hors[i * 2]; ny += hors[i * 2 + 1]; nc++; }
+      }
+      var aN = nc > 20 ? ((nx / nc - cx) * dx + (ny / nc - cy) * dy) : 0;
+      if (aN > 0) { dx = -dx; dy = -dy; }          // nasal en −x canonique
+      var sg = opts.haut === 'g' ? 1 : -1;
+      var e1 = [dx, dy], e2 = [sg * dy, -sg * dx];
+      var versRep = function (px, py) {
+        var u = px - mx, v = py - my;
+        return [u * e1[0] + v * e1[1], u * e2[0] + v * e2[1]];
+      };
+      var versImg = function (X, Y) { return [mx + X * e1[0] + Y * e2[0], my + X * e1[1] + Y * e2[1]]; };
+
+      // ── boîte boxing dans le repère redressé ──
+      var X0 = 1e9, X1 = -1e9, Y0 = 1e9, Y1 = -1e9;
+      for (y = verre.y0; y <= verre.y1; y++) {
+        for (x = verre.x0; x <= verre.x1; x++) {
+          if (lab[y * W + x] !== idV) { continue; }
+          var p = versRep(x, y);
+          if (p[0] < X0) { X0 = p[0]; } if (p[0] > X1) { X1 = p[0]; }
+          if (p[1] < Y0) { Y0 = p[1]; } if (p[1] > Y1) { Y1 = p[1]; }
+        }
+      }
+      var bcx = (X0 + X1) / 2, bcy = (Y0 + Y1) / 2, ax = (X1 - X0) / 2, ay = (Y1 - Y0) / 2;
+
+      // ── contour au rayon, de l'extérieur vers l'intérieur ──
+      var r = [], k;
+      for (k = 0; k < M; k++) {
+        var phi = 2 * Math.PI * k / M, c1 = Math.cos(phi), s1 = Math.sin(phi);
+        var lim = Math.min(Math.abs(c1) > 1e-6 ? 1 / Math.abs(c1) : 9, Math.abs(s1) > 1e-6 ? 1 / Math.abs(s1) : 9);
+        var last = 0;
+        for (var t = lim; t >= 0.05; t -= 0.002) {
+          var q = versImg(bcx + c1 * t * ax, bcy + s1 * t * ay);
+          var qx = Math.round(q[0]), qy = Math.round(q[1]);
+          if (qx < 0 || qy < 0 || qx >= W || qy >= H) { continue; }
+          if (lab[qy * W + qx] === idV) { last = t; break; }
+        }
+        r.push(last);
+      }
+      var rBrut = r.slice(), repare = 0;
+      if (opts.convexe) { repare = enveloppe(r); }
+
+      // ── lissage : série de Fourier tronquée, puis 72 points ──
+      var lisse = fourier(r, 16, N);
+      var nmx = 0, nmy = 0;
+      for (k = 0; k < N; k++) {
+        var t2 = 2 * Math.PI * k / N;
+        nmx = Math.max(nmx, Math.abs(Math.cos(t2) * lisse[k]));
+        nmy = Math.max(nmy, Math.abs(Math.sin(t2) * lisse[k]));
+      }
+      var pts = [];
+      for (k = 0; k < N; k++) {
+        var t3 = 2 * Math.PI * k / N;
+        pts.push([Math.round(Math.cos(t3) * lisse[k] / nmx * 1000) / 1000,
+                  Math.round(Math.sin(t3) * lisse[k] / nmy * 1000) / 1000]);
+      }
+      return {
+        canvas: gr.c, W: W, H: H, T: T, seuilAuto: opts.seuil <= 0,
+        versImg: versImg, bcx: bcx, bcy: bcy, ax: ax, ay: ay,
+        angle: Math.atan2(e1[1], e1[0]) * 180 / Math.PI,
+        aspect: ax / ay, r: r, rBrut: rBrut, lisse: lisse, pts: pts,
+        repare: repare, nc: nc, aire: verre.aire / n
+      };
+    }
+
+    // Enveloppe convexe : un verre taillé a un contour convexe, donc toute rentrée est un
+    // artefact de prise de vue. Au-delà de 9 % d'écart on préserve le relevé : c'est alors une
+    // concavité voulue (goutte nasale d'un aviateur).
+    function enveloppe(r) {
+      var P = [], k;
+      for (k = 0; k < M; k++) {
+        var t = 2 * Math.PI * k / M;
+        P.push([Math.cos(t) * r[k], Math.sin(t) * r[k]]);
+      }
+      var tri = P.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+      var cr = function (o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); };
+      var bas = [], haut = [], i;
+      for (i = 0; i < tri.length; i++) {
+        while (bas.length > 1 && cr(bas[bas.length - 2], bas[bas.length - 1], tri[i]) <= 0) { bas.pop(); }
+        bas.push(tri[i]);
+      }
+      for (i = tri.length - 1; i >= 0; i--) {
+        while (haut.length > 1 && cr(haut[haut.length - 2], haut[haut.length - 1], tri[i]) <= 0) { haut.pop(); }
+        haut.push(tri[i]);
+      }
+      var hull = bas.slice(0, -1).concat(haut.slice(0, -1)), n = 0;
+      for (k = 0; k < M; k++) {
+        var th2 = 2 * Math.PI * k / M, dx = Math.cos(th2), dy = Math.sin(th2), R = 0;
+        for (i = 0; i < hull.length; i++) {
+          var a = hull[i], b = hull[(i + 1) % hull.length];
+          var ex = b[0] - a[0], ey = b[1] - a[1], det = ex * dy - dx * ey;
+          if (Math.abs(det) < 1e-12) { continue; }
+          var tt = (ex * a[1] - a[0] * ey) / det, ss = (dx * a[1] - dy * a[0]) / det;
+          if (tt > 0 && ss >= -1e-6 && ss <= 1 + 1e-6 && tt > R) { R = tt; }
+        }
+        if (R > r[k]) {
+          var d = (R - r[k]) / R;
+          if (d > 0.002 && d < 0.09) { r[k] = R; n++; }
+        }
+      }
+      return n / M;
+    }
+
+    function fourier(r, kmax, sortie) {
+      var A = [], B = [], h, m, out = [], t;
+      for (h = 0; h <= kmax; h++) {
+        var ca = 0, cb = 0;
+        for (m = 0; m < r.length; m++) {
+          var u = 2 * Math.PI * m / r.length;
+          ca += r[m] * Math.cos(h * u); cb += r[m] * Math.sin(h * u);
+        }
+        A.push(2 * ca / r.length); B.push(2 * cb / r.length);
+      }
+      A[0] /= 2; B[0] = 0;
+      for (m = 0; m < sortie; m++) {
+        t = 2 * Math.PI * m / sortie;
+        var v = A[0];
+        for (h = 1; h <= kmax; h++) { v += A[h] * Math.cos(h * t) + B[h] * Math.sin(h * t); }
+        out.push(v);
+      }
+      return out;
+    }
+
+    /* ═══════════ AFFICHAGE ═══════════ */
+    function trace(g, res, prof, n, style, largeur) {
+      g.strokeStyle = style; g.lineWidth = largeur;
+      g.beginPath();
+      for (var k = 0; k <= n; k++) {
+        var t = 2 * Math.PI * (k % n) / n;
+        var p = res.versImg(res.bcx + Math.cos(t) * prof[k % n] * res.ax,
+                            res.bcy + Math.sin(t) * prof[k % n] * res.ay);
+        if (k === 0) { g.moveTo(p[0], p[1]); } else { g.lineTo(p[0], p[1]); }
+      }
+      g.closePath(); g.stroke();
+    }
+    function rendu(res) {
+      var cv = el('vue'), g = cv.getContext('2d');
+      cv.width = res.W; cv.height = res.H;
+      g.drawImage(res.canvas, 0, 0);
+      trace(g, res, res.rBrut, M, 'rgba(255,70,70,.9)', 2);
+      trace(g, res, res.lisse, N, 'rgba(0,220,130,.95)', 3);
+      g.strokeStyle = 'rgba(255,80,80,.9)'; g.lineWidth = 2; g.setLineDash([7, 5]);
+      g.beginPath();
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (q, i) {
+        var p = res.versImg(res.bcx + q[0] * res.ax, res.bcy + q[1] * res.ay);
+        if (i === 0) { g.moveTo(p[0], p[1]); } else { g.lineTo(p[0], p[1]); }
+      });
+      g.closePath(); g.stroke(); g.setLineDash([]);
+      g.strokeStyle = 'rgba(80,160,255,.95)'; g.lineWidth = 2;
+      var p1 = res.versImg(res.bcx - res.ax * 1.7, res.bcy), p2 = res.versImg(res.bcx + res.ax * 1.7, res.bcy);
+      g.beginPath(); g.moveTo(p1[0], p1[1]); g.lineTo(p2[0], p2[1]); g.stroke();
+      g.fillStyle = '#FFC48C'; g.font = 'bold 26px sans-serif';
+      var pn = res.versImg(res.bcx - res.ax * 1.5, res.bcy);
+      g.fillText('N', pn[0] - 10, pn[1] - 12);
+      el('zone-canvas').hidden = false;
+    }
+    function apercu(res, A, B) {
+      var W = 240, H = 210, sx = 92, sy = 92 / res.aspect, d = '', k;
+      for (k = 0; k <= res.pts.length; k++) {
+        var p = res.pts[k % res.pts.length];
+        d += (k ? 'L' : 'M') + (W / 2 - p[0] * sx).toFixed(1) + ' ' + (H / 2 - p[1] * sy).toFixed(1);
+      }
+      el('apercu').innerHTML =
+        '<rect x="' + (W / 2 - sx) + '" y="' + (H / 2 - sy) + '" width="' + (2 * sx) + '" height="' + (2 * sy) +
+        '" fill="none" stroke="#D83A3A" stroke-dasharray="4 3"/>' +
+        '<path d="' + d + 'Z" fill="#DCE7F1" stroke="#175A92" stroke-width="2.4"/>';
+      el('apercu-txt').textContent = 'Vue de face côté œil droit, nez à droite. ' + A + ' × ' + B +
+        ' mm, rapport A/B ' + res.aspect.toFixed(3) + '.';
+    }
+
+    /* ═══════════ VÉRIFICATIONS ═══════════ */
+    function verifs(res, A, B) {
+      var v = [];
+      var ecart = Math.abs(((res.angle % 180) + 180) % 180 - 90);
+      v.push({ ok: res.nc > 200, t: 'Trait d\'horizontale : ' + res.nc + ' pixels retenus hors du verre' +
+        (res.nc > 200 ? '' : ' — trop peu, rallongez le trait de part et d\'autre') });
+      v.push({ ok: true, t: 'Verre posé à ' + res.angle.toFixed(1) + '° dans la photo, redressé automatiquement' });
+      v.push({ ok: res.aire > 0.03 && res.aire < 0.6,
+        t: 'Le verre occupe ' + Math.round(res.aire * 100) + ' % de l\'image' +
+        (res.aire > 0.03 ? '' : ' — approchez-vous, la précision se joue là') });
+      v.push({ ok: res.aspect > 1.0 && res.aspect < 2.0,
+        t: 'Rapport A/B mesuré : ' + res.aspect.toFixed(3) +
+        (res.aspect > 1.0 ? '' : ' — un verre plus haut que large est douteux : le haut est peut-être mal réglé') });
+      v.push({ ok: res.repare < 0.35,
+        t: Math.round(res.repare * 100) + ' % du contour repris sur l\'enveloppe convexe' +
+        (res.repare < 0.35 ? '' : ' — beaucoup : reflets marqués, vérifiez le contour vert à l\'œil') });
+      v.push({ ok: res.seuilAuto, t: res.seuilAuto ? 'Seuil trouvé automatiquement (' + res.T + ')' : 'Seuil forcé à la main (' + res.T + ')' });
+      var mn = 9, mx = 0, k;
+      for (k = 0; k < res.pts.length; k++) {
+        var d2 = Math.sqrt(res.pts[k][0] * res.pts[k][0] + res.pts[k][1] * res.pts[k][1]);
+        mn = Math.min(mn, d2); mx = Math.max(mx, d2);
+      }
+      v.push({ ok: mn > 0.4, t: 'Contour étoilé depuis le centre-boîte (rayon mini ' + mn.toFixed(2) + ')' +
+        (mn > 0.4 ? '' : ' — une rentrée trop profonde fausserait le calcul d\'épaisseur') });
+      v.push({ ok: B >= 14 && B <= 60 && A >= 28 && A <= 70,
+        t: 'Côtes ' + A + ' × ' + B + ' mm dans les bornes de l\'outil' });
+      el('checks').innerHTML = v.map(function (x) {
+        return '<li class="' + (x.ok ? 'ok' : 'ko') + '">' + x.t + '</li>';
+      }).join('');
+    }
+
+    /* ═══════════ SORTIE ═══════════ */
+    function sortie(res, A, B) {
+      var cle = (el('cle').value || 'perso').replace(/[^a-z0-9]/gi, '').toLowerCase();
+      var nom = (el('nom').value || 'Perso').replace(/'/g, '’');
+      var f = function (x) { var s = (Math.round(x * 1000) / 1000).toString(); return s === '-0' ? '0' : s; };
+      var out = '      ' + cle + ': { label: \'' + nom + '\', defA: ' + A + ', defB: ' + B + ', pts: [\n', i;
+      for (i = 0; i < res.pts.length; i += 6) {
+        out += '        ' + res.pts.slice(i, i + 6).map(function (p) {
+          return '[' + f(p[0]) + ',' + f(p[1]) + ']';
+        }).join(', ') + (i + 6 < res.pts.length ? ',' : '') + '\n';
+      }
+      el('sortie').value = out + '      ] },';
+    }
+
+    /* ═══════════ ORCHESTRATION ═══════════ */
+    var image = null;
+    function calcule() {
+      if (!image) { return; }
+      var res = releve(image, {
+        haut: el('haut').value,
+        seuil: parseInt(el('seuil').value, 10) || 0,
+        convexe: el('convexe').checked
+      });
+      if (res.err) {
+        el('checks').innerHTML = '<li class="ko">' + res.err + '</li>';
+        return;
+      }
+      var A = parseFloat(el('cotea').value) || 50;
+      var B = Math.round(A / res.aspect);
+      etat = res;
+      rendu(res); apercu(res, A, B); verifs(res, A, B); sortie(res, A, B);
+    }
+    function charge(file) {
+      if (!file) { return; }
+      var fr = new FileReader();
+      fr.onload = function () {
+        var im = new Image();
+        im.onload = function () { image = im; calcule(); };
+        im.onerror = function () { el('checks').innerHTML = '<li class="ko">Photo illisible.</li>'; };
+        im.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    }
+    el('fichier').addEventListener('change', function () { charge(this.files && this.files[0]); });
+    el('drop').addEventListener('dragover', function (e) { e.preventDefault(); });
+    el('drop').addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (e.dataTransfer && e.dataTransfer.files) { charge(e.dataTransfer.files[0]); }
+    });
+    ['haut', 'convexe'].forEach(function (id) { el(id).addEventListener('change', calcule); });
+    ['nom', 'cle', 'cotea'].forEach(function (id) {
+      el(id).addEventListener('input', function () {
+        if (etat) {
+          var A = parseFloat(el('cotea').value) || 50, B = Math.round(A / etat.aspect);
+          apercu(etat, A, B); verifs(etat, A, B); sortie(etat, A, B);
+        }
+      });
+    });
+    el('seuil').addEventListener('input', function () {
+      el('seuil-val').textContent = this.value === '0' ? 'auto' : this.value;
+    });
+    el('seuil').addEventListener('change', calcule);
+    el('recalc').addEventListener('click', calcule);
+    el('copier').addEventListener('click', function () {
+      el('sortie').select();
+      try { document.execCommand('copy'); this.textContent = 'Copié'; } catch (e) { this.textContent = 'Copie refusée'; }
+      var b = this;
+      window.setTimeout(function () { b.textContent = 'Copier'; }, 1500);
+    });
+  })();
+  </script>
+</body>
+</html>
