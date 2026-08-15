@@ -94,8 +94,11 @@ Le scanner affiche une liste de contrôles. Tous doivent être au vert avant d'i
 
 1. Copier le bloc produit par le scanner.
 2. L'ouvrir dans `outils/epaisseur-verres/index.html`, objet `SHAPES`, et **remplacer l'entrée de
-   même clé**. Ne pas changer l'ordre des clés : `SHAPE_KEYS` fixe l'ordre du sélecteur, réglé sur
-   la fréquence réelle des formes au catalogue.
+   même clé**. Ne pas déplacer les clés existantes : `SHAPE_KEYS` fixe l'ordre du sélecteur, réglé
+   sur la fréquence réelle des formes au catalogue. Pour une forme qui n'a pas encore sa place dans
+   la série, ajouter l'entrée à `SHAPES` **et** la clé à `SHAPE_KEYS`, insérée à son rang de
+   fréquence — le sélecteur passe de quatre colonnes sur écran large à trois sur mobile, donc une
+   série de 9, 12… formes reste régulière, et un libellé long y tient sur deux lignes.
 3. Format attendu, à respecter tel quel : 72 points en sens trigonométrique depuis 3 h, repère
    canonique **x = temporal, y = haut**, contour normalisé pour toucher exactement les quatre
    côtés de la boîte (c'est la définition du boxing).
