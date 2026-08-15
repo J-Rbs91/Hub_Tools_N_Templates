@@ -70,6 +70,11 @@ Because all pages share the same GitHub Pages origin, they share this key. Conve
 - `localStorage` is per browser/device, so profiles never leak between shops — and do not sync
   between two machines of the same shop unless the optional Drive sync below is configured.
 
+**Frame-shape templates** — the `SHAPES` gabarits of `epaisseur-verres` are relevés, not drawings:
+first traced off catalogue front photos, then replaced one family at a time by scans of real edged
+lenses. The shooting protocol, the browser-side scanner and the checklist to run before swapping a
+gabarit live in `docs/formes-types/` (see its `README.md`).
+
 **Optional Drive sync** (still no project backend): the hub can mirror the profile to the shop's own
 Google Drive via a user-deployed **Apps Script web app**. The shop pastes the script's `…/exec` URL
 (stored under `sync-url-v1`); the hub reads/writes the profile through it using **JSONP**
