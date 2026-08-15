@@ -56,7 +56,9 @@ Ouvrir `scanner.html`, déposer la photo. Le scanner enchaîne :
    bouge plus. En dessous le verre se disloque, au-dessus il avale les ombres.
 2. **Ouverture morphologique**, qui efface le trait tracé sans entamer le verre.
 3. **Mesure de l'angle du trait** par analyse en composantes principales sur les pixels sombres
-   situés hors du verre.
+   situés hors du verre, resserrée par paliers autour de l'axe trouvé. Le N est sombre et hors du
+   verre lui aussi : il est écarté dès le premier resserrage, sans quoi il tire l'horizontale de un
+   à deux degrés — et fait sortir tout le gabarit tourné d'autant.
 4. **Repérage du N**, la tache compacte écartée du trait : son extrémité donne le côté nasal.
 5. **Balayage radial** du contour dans le repère redressé, de l'extérieur vers l'intérieur.
 6. **Réparation des morsures de reflet** par enveloppe convexe : un verre taillé a un contour
