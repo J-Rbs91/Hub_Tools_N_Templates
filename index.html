@@ -479,6 +479,94 @@
   </div>
 
   <script>
+    /* ── Retour arrière : une couche ouverte se ferme sur le geste retour ────────
+       Sur Android, le bouton retour du système rejoue l'historique. Une couche
+       ouverte — modale, feuille, assistant — n'y figurant pas, l'appui quittait la
+       page entière au lieu de refermer la couche, et la saisie en cours partait
+       avec elle.
+
+       Chaque ouverture empile donc une entrée d'historique, et la fermeture la
+       consomme. Rien n'est intercepté : c'est le navigateur qui dépile, on se
+       contente d'écouter `popstate`. Le bouton de fermeture, la touche Échap et le
+       clic sur le fond passent par le même chemin, de sorte que le geste du système
+       et celui de l'interface aboutissent au même endroit.
+
+       Ce bloc est identique dans index.html, outils/demande-ordonnance/index.html
+       et outils/epaisseur-verres/index.html : les outils sont autonomes par
+       construction, donc il est recopié plutôt qu'importé, et
+       tests/navigation-retour.test.mjs vérifie que les copies ne divergent pas.
+       Le raisonnement complet est dans docs/navigation-retour.md. */
+    var Couches = (function () {
+      var pile = [];
+      var aIgnorer = 0;   // dépilages provoqués par nous, donc déjà traités
+
+      window.addEventListener('popstate', function () {
+        if (aIgnorer > 0) { aIgnorer -= 1; return; }
+        var couche = pile.pop();
+        if (couche) { couche.fermer(); }
+      });
+
+      /* Rechargement pendant qu'une couche était ouverte : l'entrée empilée
+         survit, la couche non. Sans ce rattrapage, le premier appui sur retour
+         tomberait dans le vide — et un appui qui ne fait rien se lit comme une
+         application bloquée. */
+      if (window.history.state && window.history.state.hubCouche) {
+        try { window.history.back(); } catch (e) { /* historique indisponible */ }
+      }
+
+      /* Une traversée d'historique ne lève qu'un seul `popstate`, quelle que soit
+         sa profondeur : on n'en ignore donc qu'un par appel, pas un par entrée. */
+      function traverser(entrees) {
+        if (!entrees) { return; }
+        aIgnorer += 1;
+        try { window.history.go(-entrees); } catch (e) { aIgnorer -= 1; }
+      }
+
+      return {
+        /* `fermer` est la fonction qui remet réellement l'interface en état. */
+        ouvrir: function (nom, fermer) {
+          var empile = false;
+          try { window.history.pushState({ hubCouche: nom }, ''); empile = true; }
+          catch (e) { empile = false; }
+          pile.push({ nom: nom, fermer: fermer, empile: empile });
+        },
+
+        /* Fermeture demandée par l'interface. On ferme d'abord — l'ordre des
+           opérations reste celui d'avant l'historique — puis on consomme l'entrée
+           empilée. Sans entrée empilée, parce que pushState a été refusé, on ferme
+           quand même : mieux vaut une couche sans historique qu'une couche
+           captive. Renvoie `true` si une couche a bien été fermée. */
+        fermer: function () {
+          var couche = pile.pop();
+          if (!couche) { return false; }
+          couche.fermer();
+          traverser(couche.empile ? 1 : 0);
+          return true;
+        },
+
+        /* Fermeture d'une couche et de tout ce qui a été empilé au-dessus d'elle —
+           un assistant qu'on quitte d'un coup. Seule la fermeture de la couche
+           nommée est jouée : rejouer celles du dessus ferait repasser par les
+           étapes qu'on est précisément en train d'abandonner. */
+        fermerJusqua: function (nom) {
+          var i, profondeur = -1, entrees = 0, retirees;
+          for (i = pile.length - 1; i >= 0; i -= 1) {
+            if (pile[i].nom === nom) { profondeur = i; break; }
+          }
+          if (profondeur < 0) { return false; }
+          retirees = pile.splice(profondeur);
+          for (i = 0; i < retirees.length; i += 1) {
+            if (retirees[i].empile) { entrees += 1; }
+          }
+          retirees[0].fermer();
+          traverser(entrees);
+          return true;
+        },
+
+        ouverte: function () { return pile.length > 0; }
+      };
+    })();
+
     var LS_PROFIL = 'profil-magasin-v1';
     var LS_SYNC   = 'sync-url-v1';
     var LS_SYNC_PENDING = 'sync-pending-v1';   // marque un envoi Drive échoué (profil local plus récent non synchronisé)
@@ -564,6 +652,15 @@
       document.getElementById('settings-modal').hidden = false;
       document.body.style.overflow = 'hidden';   // QA-03 : verrouille le scroll d'arrière-plan
       document.getElementById('f-nom').focus();
+      // Le geste retour d'Android referme la modale au lieu de quitter le hub.
+      Couches.ouvrir('reglages', closeModal);
+    }
+
+    /* Fermeture demandée par l'interface : on dépile, et c'est `popstate` qui
+       appellera `closeModal`. Les deux gestes suivent ainsi le même chemin. */
+    function demanderFermetureModal() {
+      if (document.getElementById('settings-modal').hidden) { return; }
+      Couches.fermer();
     }
 
     function closeModal() {
@@ -732,9 +829,9 @@
       if (syncVal) {
         // Synchro configurée : ne fermer la modale qu'une fois le résultat connu, pour que
         // l'échec éventuel de l'envoi reste visible (#sync-status est dans la modale).
-        syncPush(profil, function (ok) { if (ok) { closeModal(); } });
+        syncPush(profil, function (ok) { if (ok) { demanderFermetureModal(); } });
       } else {
-        closeModal();
+        demanderFermetureModal();
       }
     });
 
@@ -753,12 +850,12 @@
 
     document.getElementById('open-settings').addEventListener('click', openModal);
     document.getElementById('setup-notice-btn').addEventListener('click', openModal);
-    document.getElementById('cancel-settings').addEventListener('click', closeModal);
+    document.getElementById('cancel-settings').addEventListener('click', demanderFermetureModal);
     document.getElementById('settings-modal').addEventListener('click', function (e) {
-      if (e.target === this) { closeModal(); }
+      if (e.target === this) { demanderFermetureModal(); }
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { closeModal(); return; }
+      if (e.key === 'Escape') { demanderFermetureModal(); return; }
       trapFocus(e);   // QA-02 : confine le focus tant que la modale est ouverte
     });
 
@@ -1076,6 +1173,17 @@
         overlay.hidden = false;
         document.body.style.overflow = 'hidden';
         (objetEl || msgEl).focus();
+        // Même contrat que la modale « Mon magasin » : le geste retour referme.
+        Couches.ouvrir('contact', close);
+      }
+
+      /* Le menu « Outil concerné » n'est pas enregistré comme couche : c'est un
+         dépliant à l'intérieur de la modale, pas un écran. Échap le referme en
+         premier ; le geste retour, lui, referme la modale entière — ce que fait
+         aussi le bouton « Annuler », donc les deux retours restent d'accord. */
+      function demanderFermeture() {
+        if (overlay.hidden) { return; }
+        Couches.fermer();
       }
 
       function close() {
@@ -1112,8 +1220,8 @@
       });
 
       if (openBtn)   { openBtn.addEventListener('click', open); }
-      if (cancelBtn) { cancelBtn.addEventListener('click', close); }
-      overlay.addEventListener('click', function (e) { if (e.target === overlay) { close(); } });
+      if (cancelBtn) { cancelBtn.addEventListener('click', demanderFermeture); }
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) { demanderFermeture(); } });
 
       // Déclencheur du menu : ouvre/ferme le panneau de cases à cocher.
       if (cdToggle) {
@@ -1131,7 +1239,7 @@
       document.addEventListener('keydown', function (e) {
         if (overlay.hidden) { return; }
         if (e.key === 'Escape') {
-          if (cdIsOpen()) { cdOpen(false); cdToggle.focus(); } else { close(); }
+          if (cdIsOpen()) { cdOpen(false); cdToggle.focus(); } else { demanderFermeture(); }
           return;
         }
         if (e.key !== 'Tab') { return; }

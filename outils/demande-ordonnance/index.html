@@ -406,6 +406,94 @@
 </div>
 
 <script>
+  /* ── Retour arrière : une couche ouverte se ferme sur le geste retour ────────
+     Sur Android, le bouton retour du système rejoue l'historique. Une couche
+     ouverte — modale, feuille, assistant — n'y figurant pas, l'appui quittait la
+     page entière au lieu de refermer la couche, et la saisie en cours partait
+     avec elle.
+
+     Chaque ouverture empile donc une entrée d'historique, et la fermeture la
+     consomme. Rien n'est intercepté : c'est le navigateur qui dépile, on se
+     contente d'écouter `popstate`. Le bouton de fermeture, la touche Échap et le
+     clic sur le fond passent par le même chemin, de sorte que le geste du système
+     et celui de l'interface aboutissent au même endroit.
+
+     Ce bloc est identique dans index.html, outils/demande-ordonnance/index.html
+     et outils/epaisseur-verres/index.html : les outils sont autonomes par
+     construction, donc il est recopié plutôt qu'importé, et
+     tests/navigation-retour.test.mjs vérifie que les copies ne divergent pas.
+     Le raisonnement complet est dans docs/navigation-retour.md. */
+  var Couches = (function () {
+    var pile = [];
+    var aIgnorer = 0;   // dépilages provoqués par nous, donc déjà traités
+
+    window.addEventListener('popstate', function () {
+      if (aIgnorer > 0) { aIgnorer -= 1; return; }
+      var couche = pile.pop();
+      if (couche) { couche.fermer(); }
+    });
+
+    /* Rechargement pendant qu'une couche était ouverte : l'entrée empilée
+       survit, la couche non. Sans ce rattrapage, le premier appui sur retour
+       tomberait dans le vide — et un appui qui ne fait rien se lit comme une
+       application bloquée. */
+    if (window.history.state && window.history.state.hubCouche) {
+      try { window.history.back(); } catch (e) { /* historique indisponible */ }
+    }
+
+    /* Une traversée d'historique ne lève qu'un seul `popstate`, quelle que soit
+       sa profondeur : on n'en ignore donc qu'un par appel, pas un par entrée. */
+    function traverser(entrees) {
+      if (!entrees) { return; }
+      aIgnorer += 1;
+      try { window.history.go(-entrees); } catch (e) { aIgnorer -= 1; }
+    }
+
+    return {
+      /* `fermer` est la fonction qui remet réellement l'interface en état. */
+      ouvrir: function (nom, fermer) {
+        var empile = false;
+        try { window.history.pushState({ hubCouche: nom }, ''); empile = true; }
+        catch (e) { empile = false; }
+        pile.push({ nom: nom, fermer: fermer, empile: empile });
+      },
+
+      /* Fermeture demandée par l'interface. On ferme d'abord — l'ordre des
+         opérations reste celui d'avant l'historique — puis on consomme l'entrée
+         empilée. Sans entrée empilée, parce que pushState a été refusé, on ferme
+         quand même : mieux vaut une couche sans historique qu'une couche
+         captive. Renvoie `true` si une couche a bien été fermée. */
+      fermer: function () {
+        var couche = pile.pop();
+        if (!couche) { return false; }
+        couche.fermer();
+        traverser(couche.empile ? 1 : 0);
+        return true;
+      },
+
+      /* Fermeture d'une couche et de tout ce qui a été empilé au-dessus d'elle —
+         un assistant qu'on quitte d'un coup. Seule la fermeture de la couche
+         nommée est jouée : rejouer celles du dessus ferait repasser par les
+         étapes qu'on est précisément en train d'abandonner. */
+      fermerJusqua: function (nom) {
+        var i, profondeur = -1, entrees = 0, retirees;
+        for (i = pile.length - 1; i >= 0; i -= 1) {
+          if (pile[i].nom === nom) { profondeur = i; break; }
+        }
+        if (profondeur < 0) { return false; }
+        retirees = pile.splice(profondeur);
+        for (i = 0; i < retirees.length; i += 1) {
+          if (retirees[i].empile) { entrees += 1; }
+        }
+        retirees[0].fermer();
+        traverser(entrees);
+        return true;
+      },
+
+      ouverte: function () { return pile.length > 0; }
+    };
+  })();
+
   /* ---------- profil magasin (partagé via localStorage) ---------- */
   function profil(){
     try{ return JSON.parse(localStorage.getItem('profil-magasin-v1')||'{}')||{}; }
@@ -768,7 +856,13 @@
   /* Copier pour Gmail : si des champs clés sont vides, on prévient d'abord (popup
      non bloquante) ; sinon on copie directement. Dans tous les cas le mail est copié. */
   function copyForGmail(){
-    if(hasBlankFields()){ document.getElementById('blank-modal').hidden=false; return; }
+    if(hasBlankFields()){
+      document.getElementById('blank-modal').hidden=false;
+      /* Le geste retour d'Android referme la popup au lieu de quitter l'outil —
+         un formulaire à moitié rempli ne se rattrape pas. */
+      Couches.ouvrir('champs-vides', closeBlankModal);
+      return;
+    }
     doCopy();
   }
   function closeBlankModal(){
@@ -777,9 +871,13 @@
     m.hidden=true;
     return true;
   }
-  function blankValidate(){ if(closeBlankModal()) doCopy(); }          // Valider : ferme + copie
+  /* Les deux boutons passent par la pile de couches, pas par `closeBlankModal`
+     directement : c'est ce qui garde le geste retour et le geste de l'interface
+     sur le même chemin. `closeBlankModal` reste la seule fermeture réelle,
+     appelée par la pile. */
+  function blankValidate(){ if(Couches.fermer()) doCopy(); }           // Valider : ferme + copie
   function blankComplete(){                                            // Compléter : ferme + copie + revient au 1er champ
-    if(!closeBlankModal()) return;
+    if(!Couches.fermer()) return;
     doCopy();
     var f=firstBlankField();
     if(f){ f.focus(); if(f.scrollIntoView) f.scrollIntoView({block:'center'}); }
