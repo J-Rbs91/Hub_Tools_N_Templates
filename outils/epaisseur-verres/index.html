@@ -763,6 +763,94 @@
   (function () {
     'use strict';
 
+    /* ── Retour arrière : une couche ouverte se ferme sur le geste retour ────────
+       Sur Android, le bouton retour du système rejoue l'historique. Une couche
+       ouverte — modale, feuille, assistant — n'y figurant pas, l'appui quittait la
+       page entière au lieu de refermer la couche, et la saisie en cours partait
+       avec elle.
+
+       Chaque ouverture empile donc une entrée d'historique, et la fermeture la
+       consomme. Rien n'est intercepté : c'est le navigateur qui dépile, on se
+       contente d'écouter `popstate`. Le bouton de fermeture, la touche Échap et le
+       clic sur le fond passent par le même chemin, de sorte que le geste du système
+       et celui de l'interface aboutissent au même endroit.
+
+       Ce bloc est identique dans index.html, outils/demande-ordonnance/index.html
+       et outils/epaisseur-verres/index.html : les outils sont autonomes par
+       construction, donc il est recopié plutôt qu'importé, et
+       tests/navigation-retour.test.mjs vérifie que les copies ne divergent pas.
+       Le raisonnement complet est dans docs/navigation-retour.md. */
+    var Couches = (function () {
+      var pile = [];
+      var aIgnorer = 0;   // dépilages provoqués par nous, donc déjà traités
+
+      window.addEventListener('popstate', function () {
+        if (aIgnorer > 0) { aIgnorer -= 1; return; }
+        var couche = pile.pop();
+        if (couche) { couche.fermer(); }
+      });
+
+      /* Rechargement pendant qu'une couche était ouverte : l'entrée empilée
+         survit, la couche non. Sans ce rattrapage, le premier appui sur retour
+         tomberait dans le vide — et un appui qui ne fait rien se lit comme une
+         application bloquée. */
+      if (window.history.state && window.history.state.hubCouche) {
+        try { window.history.back(); } catch (e) { /* historique indisponible */ }
+      }
+
+      /* Une traversée d'historique ne lève qu'un seul `popstate`, quelle que soit
+         sa profondeur : on n'en ignore donc qu'un par appel, pas un par entrée. */
+      function traverser(entrees) {
+        if (!entrees) { return; }
+        aIgnorer += 1;
+        try { window.history.go(-entrees); } catch (e) { aIgnorer -= 1; }
+      }
+
+      return {
+        /* `fermer` est la fonction qui remet réellement l'interface en état. */
+        ouvrir: function (nom, fermer) {
+          var empile = false;
+          try { window.history.pushState({ hubCouche: nom }, ''); empile = true; }
+          catch (e) { empile = false; }
+          pile.push({ nom: nom, fermer: fermer, empile: empile });
+        },
+
+        /* Fermeture demandée par l'interface. On ferme d'abord — l'ordre des
+           opérations reste celui d'avant l'historique — puis on consomme l'entrée
+           empilée. Sans entrée empilée, parce que pushState a été refusé, on ferme
+           quand même : mieux vaut une couche sans historique qu'une couche
+           captive. Renvoie `true` si une couche a bien été fermée. */
+        fermer: function () {
+          var couche = pile.pop();
+          if (!couche) { return false; }
+          couche.fermer();
+          traverser(couche.empile ? 1 : 0);
+          return true;
+        },
+
+        /* Fermeture d'une couche et de tout ce qui a été empilé au-dessus d'elle —
+           un assistant qu'on quitte d'un coup. Seule la fermeture de la couche
+           nommée est jouée : rejouer celles du dessus ferait repasser par les
+           étapes qu'on est précisément en train d'abandonner. */
+        fermerJusqua: function (nom) {
+          var i, profondeur = -1, entrees = 0, retirees;
+          for (i = pile.length - 1; i >= 0; i -= 1) {
+            if (pile[i].nom === nom) { profondeur = i; break; }
+          }
+          if (profondeur < 0) { return false; }
+          retirees = pile.splice(profondeur);
+          for (i = 0; i < retirees.length; i += 1) {
+            if (retirees[i].empile) { entrees += 1; }
+          }
+          retirees[0].fermer();
+          traverser(entrees);
+          return true;
+        },
+
+        ouverte: function () { return pile.length > 0; }
+      };
+    })();
+
     /* ═══════════ UTILITAIRES ═══════════ */
     var el = function (id) { return document.getElementById(id); };
     // Tolère la virgule décimale (saisie FR) : "-4,25" → -4.25.
@@ -2422,7 +2510,7 @@
       pm.boxTouched = false; pm.bTouched = false; pm.level = null;
       el('pm-rot').value = '0'; el('pm-rot-val').textContent = '0,0°';
       pmBuildWork();
-      pmGoto(2);
+      pmDescendre(2);
     }
     function pmLoadFile(file) {
       if (!file) { return; }
@@ -3121,7 +3209,7 @@
       abTouched = true;
       el('coteA').value = s.defA; el('coteB').value = s.defB;
       selectShape(persoId(s));
-      pmClose();
+      pmQuitter();
       // Parcours remis à zéro : la photo est relâchée, la modale rouvrira sur une page blanche.
       pm.src = null; pm.work = null; pm.box = null; pm.rad = null;
       pm.detected = false; pm.boxTouched = false; pm.bTouched = false; pm.level = null;
@@ -3135,21 +3223,44 @@
       el('pm-b').value = el('coteB').value;
       el('pm-mirror').checked = pm.mirror;
       pmSetSide(pm.side);
-      pmGoto(pm.src ? pm.step : 1);
+      var cible = pm.src ? pm.step : 1;
+      /* La pile d'historique se recalcule depuis l'étape affichée, jamais depuis
+         les clics : rouvrir l'assistant sur l'étape 4 doit coûter autant
+         d'appuis sur retour que d'y être descendu. */
+      Couches.ouvrir('photo', pmClose);
+      for (var e = 2; e <= cible; e += 1) { pmEmpilerEtape(e); }
+      pmGoto(cible);
     }
     function pmClose() {
       el('photo-modal').hidden = true;
       document.body.style.overflow = '';
     }
 
+    /* Une étape franchie est une descente : elle empile une entrée, et le geste
+       retour du système remonte à la précédente — exactement où mène
+       « ← Précédent ». Sans cela, un appui sur retour au milieu de l'assistant
+       effaçait quatre étapes de relevé d'un coup. */
+    function pmEmpilerEtape(etape) {
+      Couches.ouvrir('photo-etape-' + etape, function () { pmGoto(etape - 1); });
+    }
+    function pmDescendre(etape) {
+      pmEmpilerEtape(etape);
+      pmGoto(etape);
+    }
+    /* Quitter l'assistant : la couche entière part, les étapes empilées avec
+       elle. Le relevé en cours reste en mémoire — rouvrir revient où on était. */
+    function pmQuitter() {
+      if (!Couches.fermerJusqua('photo')) { pmClose(); }
+    }
+
     /* ── branchements de la modale ── */
     el('open-photo').addEventListener('click', pmOpen);
-    el('pm-close').addEventListener('click', pmClose);
+    el('pm-close').addEventListener('click', pmQuitter);
     el('photo-modal').addEventListener('click', function (ev) {
-      if (ev.target === this) { pmClose(); }
+      if (ev.target === this) { pmQuitter(); }
     });
     document.addEventListener('keydown', function (ev) {
-      if ((ev.key === 'Escape' || ev.keyCode === 27) && !el('photo-modal').hidden) { pmClose(); }
+      if ((ev.key === 'Escape' || ev.keyCode === 27) && !el('photo-modal').hidden) { pmQuitter(); }
     });
     el('pm-input').addEventListener('change', function () {
       if (this.files && this.files[0]) { pmLoadFile(this.files[0]); }
@@ -3190,11 +3301,15 @@
       var v = this.getAttribute('data-b');
       if (v) { el('pm-b').value = v.replace('.', ','); pmRatioCheck(); }
     });
-    el('pm-prev').addEventListener('click', function () { if (pm.step > 1) { pmGoto(pm.step - 1); } });
+    /* « ← Précédent » dépile, il ne navigue pas vers l'étape précédente : c'est
+       la seule façon que les deux retours — celui du système et celui de
+       l'interface — aboutissent au même endroit et coûtent le même nombre
+       d'appuis pour sortir. */
+    el('pm-prev').addEventListener('click', function () { if (pm.step > 1) { Couches.fermer(); } });
     el('pm-next').addEventListener('click', function () {
       if (pm.step === 5) { pmCreate(); return; }
       if (pm.step === 1 && !pm.src) { return; }
-      pmGoto(pm.step + 1);
+      pmDescendre(pm.step + 1);
     });
     (function () {
       var cv = el('pm-canvas');

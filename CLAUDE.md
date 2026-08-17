@@ -107,6 +107,13 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
    On iOS, hide the in-header `← Retour` to avoid duplication (`body.is-ios .back-link{display:none}`).
    Use `env(safe-area-inset-*)` for notch/home-bar spacing, and place it where it won't clash
    with the tool's own fixed bars (see `cloture-caisse` = bottom-left, `demande-ordonnance` = top-right).
+8. **Android back button** — any layer the tool opens (modal, popup, sheet, wizard) must close on
+   the system back gesture instead of leaving the page. Copy the `Couches` block verbatim from
+   `index.html`, call `Couches.ouvrir('<name>', <the function that actually closes>)` when opening,
+   and route every close path (button, Escape, backdrop click) through `Couches.fermer()` — never
+   the close function directly, or the two back gestures diverge. Wizard steps push one entry each;
+   "Précédent" pops. Full contract, rationale and the six manual checks: `docs/navigation-retour.md`.
+   `tests/navigation-retour.test.mjs` guards the structure in CI.
 
 ## Local checks (mirror CI — there are no app tests)
 

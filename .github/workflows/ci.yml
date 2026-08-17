@@ -80,6 +80,22 @@ jobs:
 
           exit "$fail"
 
+  navigation:
+    name: Contrat de navigation arrière
+    runs-on: ubuntu-latest
+    container: node:22
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Garde-fous structurels : copies non divergentes du gestionnaire de
+      # couches, fermeture routée par la pile, bouton retour iOS sur chaque
+      # outil. Le comportement lui-même se constate sur un téléphone —
+      # docs/navigation-retour.md.
+      - name: Contrôles de navigation
+        run: node tests/navigation-retour.test.mjs
+
   html-validate:
     name: Validation HTML
     runs-on: ubuntu-latest
