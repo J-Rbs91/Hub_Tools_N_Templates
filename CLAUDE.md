@@ -142,5 +142,12 @@ trailing whitespace (except `.md`), and a final newline.
   GitHub Pages. Do not hand-build or push to a `gh-pages` branch.
 - Dependabot updates GitHub Action versions weekly.
 - **No em-dash in user-visible text**: the em-dash character (—) must never appear in any
-  user-visible text of the hub or its tools (`index.html`, `outils/**/index.html`); use a
-  comma, period, colon, or `-` instead. Internal docs and code comments are exempt.
+  text a shop employee can read; use a comma, period, colon, or `-` instead. This covers
+  `index.html`, `outils/**/index.html`, **and the `docs/*/index.html` pages** (RGPD reminder,
+  Drive sync, file backup, e-mail campaign) — those are linked as cards from the hub home
+  page and from the tools, so they are part of the app, not internal documentation. It also
+  covers `<title>` tags and any code sample displayed for the shop to copy. Only genuine
+  code comments, `README.md`, and the maintainer-only material (`docs/formes-types/`,
+  `docs/navigation-retour.md`, `tests/`) are exempt.
+  Check with: `git grep -nP '\xe2\x80\x94' -- '*.html' | grep -v '^tests/'` then discard
+  comment hits.

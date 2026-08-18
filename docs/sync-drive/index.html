@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synchronisation Google Drive — Procédure</title>
+  <title>Synchronisation Google Drive : procédure</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#1F6FB2">
   <style>
@@ -150,7 +150,7 @@
       par <strong>fichier</strong> sur clé USB / ordinateur. Aucune n'est meilleure&nbsp;: c'est vous qui
       choisissez. Cette page décrit la façon <strong>Google&nbsp;Drive</strong> : le paramétrage est
       mémorisé dans <strong>votre propre Drive</strong>, ce qui permet de le retrouver
-      <strong>automatiquement sur tous les postes</strong> connectés au compte Google du magasin —
+      <strong>automatiquement sur tous les postes</strong> connectés au compte Google du magasin,
       sans avoir à le refaire poste par poste.
     </p>
     <p>
@@ -170,7 +170,7 @@
         <li><strong>Vous restez propriétaire et maître.</strong> Le petit programme est créé sous
           votre compte Google ; vous pouvez le supprimer ou couper l'accès à tout moment.</li>
         <li><strong>Aucune donnée patient n'est concernée.</strong> Seules les coordonnées du magasin
-          sont synchronisées — jamais les informations des clients.</li>
+          sont synchronisées, jamais les informations des clients.</li>
         <li><strong>Le code est court et lisible</strong> (vous le collez vous-même à l'étape 2) :
           il ne fait que lire et écrire un fichier dans ce dossier.</li>
       </ul>
@@ -266,7 +266,7 @@ function ecrire_(contenu) {
           <p class="why"><b>Pourquoi ces réglages&nbsp;?</b> « Exécuter en tant que moi » fait que le
           programme agit dans <b>votre</b> Drive (et nulle part ailleurs). « Tout le monde » signifie
           seulement que l'outil peut joindre cette adresse&nbsp;: l'adresse est longue et connue de
-          vous seul, elle joue le rôle de clé — ne la partagez qu'en interne.</p>
+          vous seul, elle joue le rôle de clé : ne la partagez qu'en interne.</p>
 
           <div class="panel panel--warn" style="margin-top:14px;">
             <h3>Le choix « Tout le monde » n'apparaît pas&nbsp;?</h3>
@@ -288,7 +288,7 @@ function ecrire_(contenu) {
         <div class="step-title">Autoriser votre propre programme</div>
         <div class="step-body">
           Google vous demande d'autoriser l'accès à votre Drive : acceptez avec le compte du magasin.
-          <p class="why"><b>Un écran d'avertissement « Application non vérifiée » va apparaître — c'est
+          <p class="why"><b>Un écran d'avertissement « Application non vérifiée » va apparaître : c'est
           normal et sans danger ici.</b> Google l'affiche pour tout script personnel qu'il n'a pas
           audité&nbsp;; comme c'est <b>vous</b> qui venez de le créer, vous pouvez continuer en toute confiance.</p>
 
@@ -332,7 +332,7 @@ function ecrire_(contenu) {
           <p class="why"><b>Pourquoi Google annonce « tous vos fichiers Drive »&nbsp;?</b> C'est une limite
           technique d'Apps Script : il réclame l'autorisation Drive complète. En pratique, le script que vous
           avez collé ne lit et n'écrit <b>qu'un seul fichier</b> (<code>profil-magasin.json</code>, dans le
-          dossier <code>Hub_Facilities</code>) — vous pouvez le vérifier dans le code de l'étape 2.</p>
+          dossier <code>Hub_Facilities</code>) : vous pouvez le vérifier dans le code de l'étape 2.</p>
         </div>
       </li>
 
@@ -346,7 +346,7 @@ function ecrire_(contenu) {
             <div class="d-ok">Mise à jour du déploiement effectuée.</div>
             <div class="d-lbl">ID de déploiement</div>
             <div class="d-val"><code>AKfycb…qpbsMh</code><span class="d-copy">Copier</span></div>
-            <div class="d-lbl">Application Web — URL</div>
+            <div class="d-lbl">Application Web : URL</div>
             <div class="d-val"><code>https://script.google.com/macros/s/AKfycb…/exec</code><span class="d-copy">Copier</span></div>
             <div class="d-btns"><span class="d-btn">OK</span></div>
           </div>

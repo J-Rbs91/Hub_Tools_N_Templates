@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Envoi automatique des campagnes — Procédure</title>
+  <title>Envoi automatique des campagnes : procédure</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#1F6FB2">
   <style>
@@ -112,7 +112,7 @@
       <em>assisté</em>, il prépare les messages un par un et vous les envoyez depuis votre messagerie
       habituelle. Cette page décrit l'<strong>option facultative</strong> qui automatise l'envoi en
       série&nbsp;: les messages partent alors <strong>de votre propre boîte Gmail</strong>, via un petit
-      programme que vous déployez et contrôlez. Aucun serveur de ce site n'intervient — il n'en existe pas.
+      programme que vous déployez et contrôlez. Aucun serveur de ce site n'intervient, il n'en existe pas.
     </p>
     <p><span class="time">Durée : environ 5 minutes, une seule fois</span></p>
 
@@ -136,7 +136,7 @@
       <li>
         <div class="step-title">Ouvrir l'outil de script de Google</div>
         <div class="step-body">
-          Sur l'ordinateur, connectez-vous au <strong>compte Google du magasin</strong> — celui dont
+          Sur l'ordinateur, connectez-vous au <strong>compte Google du magasin</strong>, celui dont
           l'adresse doit apparaître comme expéditeur. Ouvrez un nouvel onglet, allez sur
           <code>script.google.com</code> puis cliquez sur <strong>Nouveau projet</strong>.
           <p class="why"><b>Pourquoi&nbsp;?</b> «&nbsp;Apps Script&nbsp;» est l'outil officiel de Google
@@ -159,7 +159,7 @@
             <p style="margin-bottom:8px;">Tout en haut du code&nbsp;:</p>
             <p style="margin-bottom:8px;"><code>var CLE = 'a-remplacer';</code></p>
             <p style="margin-bottom:0;">
-              Remplacez <code>a-remplacer</code> par un mot de passe à vous — l'outil sait vous en
+              Remplacez <code>a-remplacer</code> par un mot de passe à vous : l'outil sait vous en
               générer un&nbsp;: dans <strong>Campagne e-mail → mode automatique</strong>, cliquez sur
               <em>Générer une clé</em>, puis collez la même valeur ici <strong>et</strong> dans le champ
               «&nbsp;Clé de sécurité&nbsp;». Tant que la ligne n'est pas modifiée, le programme refuse
@@ -210,7 +210,7 @@
         <div class="step-title">Autoriser votre propre programme</div>
         <div class="step-body">
           Google demande d'autoriser l'envoi d'e-mails en votre nom&nbsp;: acceptez avec le compte du magasin.
-          <p class="why"><b>Un écran «&nbsp;Application non vérifiée&nbsp;» va apparaître — c'est normal
+          <p class="why"><b>Un écran «&nbsp;Application non vérifiée&nbsp;» va apparaître : c'est normal
           et sans danger ici.</b> Google l'affiche pour tout script personnel qu'il n'a pas audité&nbsp;;
           comme c'est <b>vous</b> qui venez de le créer, vous pouvez continuer.</p>
           <p style="margin-bottom:0;">Les deux écrans concernés sont reproduits et commentés en détail
@@ -237,7 +237,7 @@
           <ul>
             <li>collez l'URL dans <em>URL du programme d'envoi</em>&nbsp;;</li>
             <li>collez votre clé dans <em>Clé de sécurité</em>&nbsp;;</li>
-            <li>cliquez sur <strong>Vérifier la connexion</strong> — le nombre d'envois restants s'affiche&nbsp;;</li>
+            <li>cliquez sur <strong>Vérifier la connexion</strong> : le nombre d'envois restants s'affiche&nbsp;;</li>
             <li>saisissez votre adresse et cliquez sur <strong>Envoyer un test</strong>.</li>
           </ul>
           <p class="why"><b>Le test n'utilise aucune donnée réelle&nbsp;:</b> il emploie un client fictif
@@ -304,7 +304,7 @@
        devraient sinon être échappées une par une — source d'erreurs à la moindre
        retouche. Il est recopié tel quel dans le <pre> au chargement. -->
   <script type="text/plain" id="gs-src">/************************************************************
- * ENVOI DE CAMPAGNE E-MAIL — programme du magasin
+ * ENVOI DE CAMPAGNE E-MAIL : programme du magasin
  *
  * Déployé par le magasin, sous son propre compte Google.
  * Il sait faire deux choses :
