@@ -141,3 +141,6 @@ trailing whitespace (except `.md`), and a final newline.
 - **Deploy**: pushing to `main` triggers `.github/workflows/deploy.yml`, which publishes to
   GitHub Pages. Do not hand-build or push to a `gh-pages` branch.
 - Dependabot updates GitHub Action versions weekly.
+- **No em-dash in user-visible text**: the em-dash character (—) must never appear in any
+  user-visible text of the hub or its tools (`index.html`, `outils/**/index.html`); use a
+  comma, period, colon, or `-` instead. Internal docs and code comments are exempt.

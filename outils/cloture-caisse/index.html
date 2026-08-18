@@ -1038,7 +1038,7 @@
         ecartEl.textContent = (ecart >= 0 ? '+' : '') + fmt(ecart);
         ecartEl.className = 'er-val ' + (ecart > 0.005 ? 'pos' : ecart < -0.005 ? 'neg' : 'zero');
       } else {
-        ecartEl.textContent = '—';
+        ecartEl.textContent = '-';
         ecartEl.className = 'er-val zero';
       }
 
@@ -1118,10 +1118,10 @@
           { cls: '', text: entry.date },
           { cls: 'h-r ht-bold', text: fmt(entry.comptage) },
           { cls: 'h-r', text: fmt(typeof entry.reserve === 'number' ? entry.reserve : entry.fond || 0) },
-          { cls: 'h-r', text: typeof entry.fondCible === 'number' ? fmt(entry.fondCible) : '—' },
-          { cls: 'h-r', text: typeof entry.sortie === 'number' ? fmt(entry.sortie) : '—' },
-          { cls: 'h-r', text: entry.ref > 0 ? fmt(entry.ref) : '—' },
-          { cls: 'h-r ' + ecartCls, text: hasEcart ? ecartSign + fmt(entry.ecart) : '—' }
+          { cls: 'h-r', text: typeof entry.fondCible === 'number' ? fmt(entry.fondCible) : '-' },
+          { cls: 'h-r', text: typeof entry.sortie === 'number' ? fmt(entry.sortie) : '-' },
+          { cls: 'h-r', text: entry.ref > 0 ? fmt(entry.ref) : '-' },
+          { cls: 'h-r ' + ecartCls, text: hasEcart ? ecartSign + fmt(entry.ecart) : '-' }
         ];
 
         cells.forEach(function(c) {
