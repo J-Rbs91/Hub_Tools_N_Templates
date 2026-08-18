@@ -364,7 +364,7 @@
         <ol>
           <li>Ouvrez le fichier téléchargé dans Excel, LibreOffice ou Google Sheets.</li>
           <li>Remplacez les deux lignes d'exemple par vos clients&nbsp;: une ligne par personne.</li>
-          <li><strong>Civilité</strong> accepte <code>M.</code> ou <code>Mme</code> — elle sert à la formule d'appel
+          <li><strong>Civilité</strong> accepte <code>M.</code> ou <code>Mme</code> : elle sert à la formule d'appel
             («&nbsp;Cher&nbsp;» / «&nbsp;Chère&nbsp;»). Laissée vide, la formule reste neutre.</li>
           <li>Une seule adresse par ligne, et <strong>uniquement des adresses vérifiées</strong>&nbsp;:
             les adresses invalides sont écartées automatiquement, mais elles abîment votre réputation d'expéditeur.</li>
@@ -538,14 +538,14 @@
 
     <div class="modes">
       <label class="mode is-on" id="mode-manuel">
-        <span class="mode__t"><input type="radio" name="mode" value="manuel" checked> Assisté — sans configuration</span>
+        <span class="mode__t"><input type="radio" name="mode" value="manuel" checked> Assisté, sans configuration</span>
         <span class="mode__d">
           Le message est préparé contact par contact&nbsp;: vous le collez dans votre messagerie et vous envoyez.
           Rien ne quitte cet appareil.
         </span>
       </label>
       <label class="mode" id="mode-auto">
-        <span class="mode__t"><input type="radio" name="mode" value="auto"> Automatique — via le Gmail du magasin</span>
+        <span class="mode__t"><input type="radio" name="mode" value="auto"> Automatique, via le Gmail du magasin</span>
         <span class="mode__d">
           L'outil envoie la campagne en série depuis <em>votre</em> compte Google, via un petit programme
           que vous déployez vous-même. Configuration&nbsp;: environ 5 minutes, une seule fois.
@@ -557,7 +557,7 @@
     <div id="pan-manuel">
       <div class="cur" id="cur-box">
         <p class="cur__pos" id="cur-pos">Aucun contact en attente</p>
-        <p class="cur__who" id="cur-who">—</p>
+        <p class="cur__who" id="cur-who">-</p>
         <p class="cur__mail" id="cur-mail"></p>
         <div class="row">
           <button type="button" class="btn btn--primary" id="m-copy">&#128203; Copier le message</button>
@@ -572,7 +572,7 @@
           <ol>
             <li><strong>Copier le message</strong> place la version mise en page dans le presse-papiers.</li>
             <li><strong>Ouvrir ma messagerie</strong> ouvre un nouveau message avec le destinataire et l'objet déjà remplis.</li>
-            <li>Dans le corps du message, collez (Ctrl+V) — la mise en page est conservée dans Gmail et Outlook.</li>
+            <li>Dans le corps du message, collez (Ctrl+V) : la mise en page est conservée dans Gmail et Outlook.</li>
             <li>Envoyez, puis revenez ici et cliquez sur <strong>Marquer envoyé</strong>&nbsp;: l'outil passe au suivant.</li>
           </ol>
           <p style="margin-top:8px;">
@@ -650,8 +650,8 @@
   <section class="step">
     <div class="step__hd"><span class="step__num">4</span><h2 class="step__ttl">Avant d'envoyer</h2></div>
     <p class="step__lead">
-      Le résumé tient en trois points. La version complète — qui a le droit de recevoir quoi, ce que
-      le message doit contenir, ce qu'il ne doit jamais contenir, combien de temps garder une adresse —
+      Le résumé tient en trois points. La version complète (qui a le droit de recevoir quoi, ce que
+      le message doit contenir, ce qu'il ne doit jamais contenir, combien de temps garder une adresse)
       est dans le <a href="../../docs/rgpd-mailing/"><strong>rappel RGPD</strong></a>.
     </p>
     <div class="panel panel--stop">
@@ -900,7 +900,7 @@
     switch (c.statut) {
       case 'envoye':   return 'Envoyé';
       case 'invalide': return 'Adresse invalide';
-      case 'encours':  return 'En cours — à vérifier';
+      case 'encours':  return 'En cours, à vérifier';
       case 'erreur':   return 'À vérifier';
       case 'passe':    return 'Passé';
       case 'stop':     return 'Ne plus contacter';
@@ -1041,7 +1041,7 @@
     entetes.forEach(function (h, i) {
       var o = document.createElement('option');
       o.value = String(i);
-      o.textContent = 'Colonne ' + (i + 1) + (h ? ' — ' + h : '');
+      o.textContent = 'Colonne ' + (i + 1) + (h ? ' : ' + h : '');
       sel.appendChild(o);
     });
     sel.value = String(typeof choisi === 'number' ? choisi : -1);
@@ -1172,7 +1172,7 @@
       var tr = document.createElement('tr');
 
       var td1 = document.createElement('td');
-      td1.textContent = ((c.civ ? c.civ + ' ' : '') + (c.prenom ? c.prenom + ' ' : '') + c.nom).trim() || '—';
+      td1.textContent = ((c.civ ? c.civ + ' ' : '') + (c.prenom ? c.prenom + ' ' : '') + c.nom).trim() || '-';
       tr.appendChild(td1);
 
       var td2 = document.createElement('td');
@@ -1480,7 +1480,7 @@
       $('cur-pos').textContent = etat.contacts.length
         ? 'Aucun contact en attente'
         : 'Importez d’abord une liste (étape 1)';
-      $('cur-who').textContent = '—';
+      $('cur-who').textContent = '-';
       $('cur-mail').textContent = '';
       boutons.forEach(function (b) { $(b).disabled = true; });
     } else {
@@ -1502,7 +1502,7 @@
     var pct = total ? Math.round(faits / total * 100) : 0;
     $('bar').style.width = pct + '%';
     $('bar-txt').textContent = faits + ' envoyé(s) sur ' + total + ' · ' + pct + ' %'
-      + (run.paused ? ' — en pause' : '');
+      + (run.paused ? ', en pause' : '');
   }
 
   /* ---------- mode assisté ---------- */
@@ -1636,7 +1636,7 @@
     setEpStatus('Vérification…');
     appelEndpoint({ a: 'quota', cle: v('ep-key') }, function (r) {
       if (r && r.ok) {
-        setEpStatus('Connexion établie ✓ — ' + r.quota + ' envoi(s) encore possibles aujourd’hui.', true);
+        setEpStatus('Connexion établie ✓, ' + r.quota + ' envoi(s) encore possibles aujourd’hui.', true);
       } else if (r && r.error === 'cle') {
         setEpStatus('Clé de sécurité refusée par le programme.', false);
       } else if (r && r.error && r.error !== 'url') {
@@ -1701,7 +1701,7 @@
 
     var i = prochain();
     if (i < 0) {
-      arreterRun('Campagne terminée ✓ — ' + compte(function (c) { return c.statut === 'envoye'; })
+      arreterRun('Campagne terminée ✓, ' + compte(function (c) { return c.statut === 'envoye'; })
         + ' message(s) envoyé(s).', true);
       return;
     }
@@ -1712,7 +1712,7 @@
        persisté AVANT l'appel réseau. Si la page est fermée pendant l'envoi,
        la ligne garde un statut non vide et ne repartira pas toute seule. */
     c.statut = 'encours';
-    c.info = 'Envoi lancé le ' + nowStamp() + ' — vérifier les éléments envoyés avant de relancer';
+    c.info = 'Envoi lancé le ' + nowStamp() + ', vérifier les éléments envoyés avant de relancer';
     c.ts = '';
     save();
     rendreListe();

@@ -385,11 +385,11 @@
         <div class="sync-section">
           <p class="sync-title">Retrouver votre paramétrage sur plusieurs postes <span class="field__opt">facultatif</span></p>
           <p class="sync-desc">
-            Deux façons possibles, au choix — aucune n'est obligatoire ni « meilleure » que l'autre :
+            Deux façons possibles, au choix : aucune n'est obligatoire ni « meilleure » que l'autre,
             c'est vous qui décidez selon votre situation.
           </p>
 
-          <p class="sync-title">Façon 1 — avec Google Drive (partagé entre les postes)</p>
+          <p class="sync-title">Façon 1 : avec Google Drive (partagé entre les postes)</p>
           <p class="sync-desc">
             Relie tous les ordinateurs connectés au compte Google du magasin : vous paramétrez
             <strong>une seule fois</strong> et le profil se retrouve automatiquement sur chaque poste.
@@ -406,7 +406,7 @@
         </div>
 
         <div class="sync-section">
-          <p class="sync-title">Façon 2 — par fichier (clé USB ou ordinateur)</p>
+          <p class="sync-title">Façon 2 : par fichier (clé USB ou ordinateur)</p>
           <p class="sync-desc">
             Sans compte Google. Le paramétrage est <strong>propre à chaque poste</strong> : vous
             l'enregistrez dans un fichier que vous conservez (clé USB ou sur l'ordinateur) et que
@@ -810,7 +810,7 @@
       // On le sauvegarde tel quel et on affiche un simple avertissement.
       var mail = document.getElementById('f-mail').value.trim();
       setMailMsg(mail && !isPlausibleEmail(mail)
-        ? 'Adresse e-mail inhabituelle — enregistrée telle quelle. Vérifiez-la si besoin.'
+        ? 'Adresse e-mail inhabituelle, enregistrée telle quelle. Vérifiez-la si besoin.'
         : '');
       var fondRaw = document.getElementById('f-fond').value.trim();
       var fond = fondRaw === '' ? null : parseFloat(fondRaw.replace(',', '.'));
@@ -949,7 +949,7 @@
           localStorage.setItem(LS_CAISSE, JSON.stringify(merged));
         }
         renderTodo();
-        setBackupStatus('Sauvegarde restaurée ✓ — profil et paramètres de caisse remplacés, historique fusionné.', true);
+        setBackupStatus('Sauvegarde restaurée ✓ : profil et paramètres de caisse remplacés, historique fusionné.', true);
       };
       reader.onerror = function () { setBackupStatus('Impossible de lire le fichier.', false); };
       reader.readAsText(file);
@@ -1210,7 +1210,7 @@
         try { nomMag = (JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}).nom || ''; }
         catch (err) { nomMag = ''; }
         var corps = (outils.length ? 'Outil(s) concerné(s) : ' + outils.join(', ') + '\n\n' : '') +
-                    message + '\n\n— — —\nEnvoyé depuis les outils internes' +
+                    message + '\n\n-----\nEnvoyé depuis les outils internes' +
                     (nomMag ? ' (' + nomMag + ')' : '') + '.';
         var href = 'mailto:' + DEST +
                    '?subject=' + encodeURIComponent(objet) +

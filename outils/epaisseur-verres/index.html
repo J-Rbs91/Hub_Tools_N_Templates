@@ -390,7 +390,7 @@
       <div>
         <!-- ── MONTURE ── -->
         <section class="card">
-          <h2>Monture — forme &amp; côtes</h2>
+          <h2>Monture : forme &amp; côtes</h2>
           <div class="shapes" id="shapes"></div>
           <p class="hint">Gabarits vus de face, côté <strong>œil droit</strong> (nez à droite de l'aperçu).</p>
           <button class="btn btn-photo" type="button" id="open-photo">📷 Forme perso d'après une photo du verre</button>
@@ -435,13 +435,13 @@
           <div class="field">
             <label for="indice">Indice</label>
             <select id="indice">
-              <option value="1.5">CR39 — 1,50</option>
-              <option value="1.59">Polycarbonate — 1,59</option>
+              <option value="1.5">CR39, 1,50</option>
+              <option value="1.59">Polycarbonate, 1,59</option>
               <option value="1.6">1,60</option>
               <option value="1.67">1,67</option>
               <option value="1.74">1,74</option>
-              <option value="1.8">Minéral — 1,80</option>
-              <option value="1.9">Minéral — 1,90</option>
+              <option value="1.8">Minéral, 1,80</option>
+              <option value="1.9">Minéral, 1,90</option>
             </select>
           </div>
           <div class="row">
@@ -587,7 +587,7 @@
             <span><i class="sw-back"></i>dépassement arrière</span>
           </div>
           <div class="cal">
-            <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> — cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, calibrez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). La 3D passe alors en <strong>perspective réaliste</strong> : le plan du point le plus proche de la monture est à l'échelle exacte (mesurez de face), le reste fuit en profondeur comme à l'œil. <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
+            <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> : cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, calibrez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). La 3D passe alors en <strong>perspective réaliste</strong> : le plan du point le plus proche de la monture est à l'échelle exacte (mesurez de face), le reste fuit en profondeur comme à l'œil. <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
             <div class="cal-state" id="cal-state"></div>
           </div>
 
@@ -609,19 +609,19 @@
         </div>
         <div class="profiles-carousel" id="profiles-carousel" aria-label="Vues 2D des verres">
           <article class="profiles-slide is-active" data-profile-title="Vue de face">
-            <h3>Vue de face — cartographie des épaisseurs</h3>
+            <h3>Vue de face : cartographie des épaisseurs</h3>
             <div class="profiles-grid" id="profile-face"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue côté temporal">
-            <h3>Vue côté temporal — coupe verticale au centre optique</h3>
+            <h3>Vue côté temporal : coupe verticale au centre optique</h3>
             <div class="profiles-grid" id="profile-temporal"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessus">
-            <h3>Vue du dessus — coupe horizontale au centre optique</h3>
+            <h3>Vue du dessus : coupe horizontale au centre optique</h3>
             <div class="profiles-grid" id="profile-top"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue du dessous">
-            <h3>Vue du dessous — coupe horizontale au centre optique, face avant en bas</h3>
+            <h3>Vue du dessous : coupe horizontale au centre optique, face avant en bas</h3>
             <div class="profiles-grid" id="profile-bottom"></div>
           </article>
         </div>
@@ -685,8 +685,8 @@
         <!-- étape 2 : côté -->
         <div class="pm-step" id="pm-s2" hidden>
           <div class="pm-side">
-            <button type="button" id="pm-side-od">Verre DROIT<small>OD — nez à droite sur la photo</small></button>
-            <button type="button" id="pm-side-og">Verre GAUCHE<small>OG — nez à gauche sur la photo</small></button>
+            <button type="button" id="pm-side-od">Verre DROIT<small>OD, nez à droite sur la photo</small></button>
+            <button type="button" id="pm-side-og">Verre GAUCHE<small>OG, nez à gauche sur la photo</small></button>
           </div>
           <label class="check" for="pm-mirror" style="margin-top:12px;">
             <input type="checkbox" id="pm-mirror"> La photo montre la <strong>face arrière</strong> du verre (image inversée)
@@ -743,7 +743,7 @@
           <div class="field">
             <label for="pm-name">Nom de la forme</label>
             <input type="text" id="pm-name" maxlength="24" value="">
-            <p class="hint">Référence de monture ou repère d'atelier — n'y mettez pas de donnée patient.</p>
+            <p class="hint">Référence de monture ou repère d'atelier, n'y mettez pas de donnée patient.</p>
           </div>
           <div class="pm-ok" id="pm-ratio-ok" hidden></div>
           <div class="pm-warn" id="pm-ratio-warn" hidden>
@@ -1509,7 +1509,7 @@
         var mer = toricMeridians(m);
         var line = document.createElement('div');
         line.className = 'merid-line';
-        line.innerHTML = '<b>' + p[0] + ' torique</b> — bord ' +
+        line.innerHTML = '<b>' + p[0] + ' torique</b> : bord ' +
           mer.map(function (x) {
             return 'méridien ' + x.deg + '° : ' + fmt(Math.min(x.e1, x.e2)) + ' → ' + fmt(Math.max(x.e1, x.e2));
           }).join(' · ');
@@ -2831,7 +2831,7 @@
       var jeu = Math.round(Math.max(mx, my) * 100);
       s.textContent = jeu <= 1
         ? 'Cadre ajusté au contour : les côtes A et B correspondront bien à la forme relevée.'
-        : 'Le contour laisse ' + jeu + ' % de jeu dans le cadre — « Ajuster le cadre au contour » pour coller au boxing.';
+        : 'Le contour laisse ' + jeu + ' % de jeu dans le cadre : « Ajuster le cadre au contour » pour coller au boxing.';
     }
 
     /* ── redressement automatique : angle qui minimise l'aire du rectangle englobant ── */
