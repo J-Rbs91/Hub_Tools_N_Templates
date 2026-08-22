@@ -119,9 +119,24 @@
         });
       }
 
-      /* ── Correctif VULN-003 : copie exacte de isValidSyncUrl. ── */
+      /* ── Correctif VULN-003 : copie exacte de syncEndpointId / isValidSyncUrl
+           et de la reconstruction de l'URL JSONP (cf. jsonp dans index.html). ── */
+      var SYNC_PREFIXE = 'https://script.google.com/macros/s/';
+      var SYNC_SUFFIXE = '/exec';
+      var SYNC_ID = /^https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]{1,200})\/exec\/?$/;
+
+      function syncEndpointId(u) {
+        var brut = String(u == null ? '' : u).trim().split('#')[0].split('?')[0];
+        var m = SYNC_ID.exec(brut);
+        return m ? m[1] : '';
+      }
+
       function isValidSyncUrl(u) {
-        return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec(?:[?#].*)?$/.test(u || '');
+        return syncEndpointId(u) !== '';
+      }
+
+      function srcJsonp(u) {
+        return SYNC_PREFIXE + encodeURIComponent(syncEndpointId(u)) + SYNC_SUFFIXE + '?callback=cb_1';
       }
 
       /* ── Correctif VULN-005 : copie exacte de sanitizeProfil. ── */
@@ -156,6 +171,16 @@
         isValidSyncUrl('javascript:alert(1)') === false);
       assert("VULN-003 — chaîne vide rejetée",
         isValidSyncUrl('') === false);
+      assert("VULN-003 — identifiant à caractères encodés ('…/x%2F..%2Fevil/exec') rejeté",
+        isValidSyncUrl('https://script.google.com/macros/s/x%2F..%2Fevil/exec') === false);
+      assert("VULN-003 — guillemet injecté dans l'URL rejeté",
+        isValidSyncUrl('https://script.google.com/macros/s/a/exec\" onload=\"alert(1)') === false);
+      assert("VULN-003 — l'URL chargée est reconstruite à partir de littéraux",
+        srcJsonp('https://script.google.com/macros/s/AKfycbABC123/exec?x=1')
+          === 'https://script.google.com/macros/s/AKfycbABC123/exec?callback=cb_1');
+      assert("VULN-003 — la reconstruction garde l'hôte et le chemin officiels",
+        srcJsonp('https://script.google.com/macros/s/AKfycb-A_b9/exec')
+          .indexOf('https://script.google.com/macros/s/') === 0);
 
       /* ════════ (c) VULN-005 : assainissement du profil importé ════════ */
       var clean = sanitizeProfil({ nom: 'A', adresse: 123, tel: null, mail: undefined, evil: 'x' });

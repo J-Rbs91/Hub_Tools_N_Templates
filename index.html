@@ -714,12 +714,24 @@
       el.className = 'sync-status' + (ok === true ? ' ok' : ok === false ? ' err' : '');
     }
 
-    /* Sécurité : n'autoriser que les endpoints Apps Script HTTPS officiels pour la synchro JSONP. */
-    function isValidSyncUrl(u) {
-      return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec(?:[?#].*)?$/.test(u || '');
+    /* Sécurité : n'autoriser que les endpoints Apps Script HTTPS officiels pour la synchro JSONP.
+       Seul l'identifiant de déploiement est retenu ; l'URL réellement chargée est reconstruite
+       à partir de littéraux (cf. jsonp), donc aucune saisie ne peut détourner l'hôte ni le chemin. */
+    var SYNC_PREFIXE = 'https://script.google.com/macros/s/';
+    var SYNC_SUFFIXE = '/exec';
+    var SYNC_ID = /^https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]{1,200})\/exec\/?$/;
+
+    function syncEndpointId(u) {
+      var brut = String(u == null ? '' : u).trim().split('#')[0].split('?')[0];
+      var m = SYNC_ID.exec(brut);
+      return m ? m[1] : '';
     }
 
-    function jsonp(base, params, cb) {
+    function isValidSyncUrl(u) {
+      return syncEndpointId(u) !== '';
+    }
+
+    function jsonp(id, params, cb) {
       var name = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
       var s = document.createElement('script');
       var done = false;
@@ -736,7 +748,9 @@
       var q = [];
       for (var k in params) { if (params.hasOwnProperty(k)) { q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k])); } }
       q.push('callback=' + name);
-      s.src = base + (base.indexOf('?') >= 0 ? '&' : '?') + q.join('&');
+      /* Hôte et chemin sont des littéraux ; seul l'identifiant de déploiement,
+         déjà filtré par syncEndpointId, est inséré (et ré-encodé par précaution). */
+      s.src = SYNC_PREFIXE + encodeURIComponent(id) + SYNC_SUFFIXE + '?' + q.join('&');
       document.body.appendChild(s);
     }
 
@@ -744,12 +758,13 @@
       function done(ok) { if (typeof onDone === 'function') { onDone(ok); } }
       var url = syncUrl();
       if (!url) { done(true); return; }
-      if (!isValidSyncUrl(url)) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); done(false); return; }
+      var id = syncEndpointId(url);
+      if (!id) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); done(false); return; }
       // Marque l'envoi comme « en attente » : tant qu'il n'a pas réussi, le profil local est plus récent
       // que le Drive et ne doit pas être écrasé par un syncPull silencieux (cf. syncPull).
       localStorage.setItem(LS_SYNC_PENDING, '1');
       setStatus('Envoi vers le Drive…');
-      jsonp(url, { action: 'save', data: JSON.stringify(profil) }, function (res) {
+      jsonp(id, { action: 'save', data: JSON.stringify(profil) }, function (res) {
         if (res && res.ok) {
           localStorage.removeItem(LS_SYNC_PENDING);
           setStatus('Enregistré sur le Drive ✓', true);
@@ -764,12 +779,13 @@
     function syncPull(silent) {
       var url = syncUrl();
       if (!url) { if (!silent) { setStatus('Renseignez d’abord l’URL de synchronisation.', false); } return; }
-      if (!isValidSyncUrl(url)) { if (!silent) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); } return; }
+      var id = syncEndpointId(url);
+      if (!id) { if (!silent) { setStatus('URL de synchronisation invalide (attendu : https://script.google.com/macros/s/…/exec).', false); } return; }
       // Ne pas écraser silencieusement au chargement un profil local non encore synchronisé
       // (un envoi précédent a échoué) : cela ferait perdre les dernières modifications.
       if (silent && localStorage.getItem(LS_SYNC_PENDING)) { return; }
       if (!silent) { setStatus('Récupération depuis le Drive…'); }
-      jsonp(url, { action: 'load' }, function (res) {
+      jsonp(id, { action: 'load' }, function (res) {
         if (res && res.ok && res.data) {
           try {
             var p = JSON.parse(res.data);

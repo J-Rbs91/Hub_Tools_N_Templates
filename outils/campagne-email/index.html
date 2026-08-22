@@ -1571,12 +1571,25 @@
     el.className = 'status' + (ok === true ? ' ok' : ok === false ? ' err' : '');
   }
 
-  /* Seuls les points de terminaison Apps Script officiels sont acceptés. */
-  function endpointOk(u) {
-    return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec(?:[?#].*)?$/.test(u || '');
+  /* Seuls les points de terminaison Apps Script officiels sont acceptés.
+     On n'en retient que l'identifiant de déploiement : l'URL réellement
+     chargée est reconstruite à partir de littéraux (cf. jsonp), donc aucune
+     saisie ne peut détourner l'hôte, le chemin ni le protocole du script. */
+  var EP_PREFIXE = 'https://script.google.com/macros/s/';
+  var EP_SUFFIXE = '/exec';
+  var EP_ID = /^https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]{1,200})\/exec\/?$/;
+
+  function endpointId(u) {
+    var brut = String(u == null ? '' : u).trim().split('#')[0].split('?')[0];
+    var m = EP_ID.exec(brut);
+    return m ? m[1] : '';
   }
 
-  function jsonp(base, params, cb) {
+  function endpointOk(u) {
+    return endpointId(u) !== '';
+  }
+
+  function jsonp(id, params, cb) {
     var nom = 'cbm_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
     var s = document.createElement('script');
     var fini = false;
@@ -1599,7 +1612,9 @@
       }
     });
     q.push('callback=' + nom);
-    s.src = base + (base.indexOf('?') >= 0 ? '&' : '?') + q.join('&');
+    /* Hôte et chemin sont des littéraux ; seul l'identifiant de déploiement,
+       déjà filtré par endpointId, est inséré (et ré-encodé par précaution). */
+    s.src = EP_PREFIXE + encodeURIComponent(id) + EP_SUFFIXE + '?' + q.join('&');
     document.body.appendChild(s);
   }
 
@@ -1618,8 +1633,8 @@
   }
 
   function appelEndpoint(params, cb) {
-    var url = v('ep-url');
-    if (!endpointOk(url)) {
+    var id = endpointId(v('ep-url'));
+    if (!id) {
       setEpStatus('URL invalide (attendu : https://script.google.com/macros/s/…/exec).', false);
       cb({ ok: false, error: 'url' });
       return;
@@ -1629,7 +1644,7 @@
       cb({ ok: false, error: 'cle' });
       return;
     }
-    jsonp(url, params, cb);
+    jsonp(id, params, cb);
   }
 
   function verifierConnexion() {
