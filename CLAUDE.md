@@ -13,20 +13,24 @@ each shop fills it once via the hub's "⚙ Mon magasin" modal, and it is kept in
 `localStorage` profile (see "Shared store profile" below) that every tool reads.
 
 Hard privacy constraint: **no user data ever leaves the browser**. No cookies, no network calls
-carrying user input, and **no external resources in the tools** — no remote webfont, no CDN, no
-third-party image. Typography uses the system font stack declared in `--font`; never add a
-`<link>` to a font service or a remote host to a tool's CSP.
+carrying user input, and **no external resource other than the visit counter below** — no remote
+webfont, no CDN, no third-party image. Typography uses the system font stack declared in `--font`;
+never add a `<link>` to a font service or a remote host to a page's CSP.
 Exports (PDF, clipboard) are generated entirely client-side. Preserve this
 when adding or editing tools.
 
-**One exception, the hub home page only**: `index.html` loads GoatCounter
-(`https://gc.zgo.at/count.js`, counting into `https://j-rbs-hub.goatcounter.com/count`) to count
-page views. Cookieless, no user input, no `localStorage`: only what the request itself carries
-(path, referrer, browser, country). Its CSP therefore allows `gc.zgo.at` in `script-src` and the
-counting host in `img-src`/`connect-src`, and a footer line states it in French. **No tool page
-and no `docs/` page carries the counter**, and their CSPs must not be opened to it: anything that
-touches patient or store data stays strictly offline. Keep the two hosts in `index.html` in sync
-with the CSP if the GoatCounter site code ever changes.
+**The one external resource, the visit counter**: `index.html` and every `outils/*/index.html`
+load GoatCounter (`https://gc.zgo.at/count.js`, counting into
+`https://j-rbs-hub.goatcounter.com/count`). It sends the page's own path and nothing else:
+cookieless, no `localStorage`, no user input, no photo. Everything typed into a tool stays local
+exactly as before. Each counting page therefore allows `gc.zgo.at` in `script-src` and the
+counting host in `img-src`/`connect-src`, ships the `<script data-goatcounter…>` right before
+`</body>`, and states it in French (`.mesure-note` in a tool, the footer line on the hub).
+**The `docs/*/index.html` pages and the maintainer-only pages (`tests/`,
+`docs/formes-types/scanner.html`) do not carry the counter** and their CSPs stay closed. All
+counting pages share one GoatCounter site, so each path is its own row in a single dashboard;
+if the site code ever changes, update the two hosts and the `data-goatcounter` URL together on
+every counting page.
 
 ## Architecture
 
@@ -123,6 +127,10 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
    the close function directly, or the two back gestures diverge. Wizard steps push one entry each;
    "Précédent" pops. Full contract, rationale and the six manual checks: `docs/navigation-retour.md`.
    `tests/navigation-retour.test.mjs` guards the structure in CI.
+9. **Visit counter** — copy the three pieces from an existing tool: the two GoatCounter hosts in
+   the CSP, the `<p class="mesure-note">` line with its style (hidden in `@media print`), and the
+   `<script data-goatcounter…>` before `</body>`. Without them the tool is invisible in the
+   dashboard, which is the whole point of counting per path.
 
 ## Local checks (mirror CI — there are no app tests)
 

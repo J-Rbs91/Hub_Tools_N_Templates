@@ -60,25 +60,26 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
 
 - Zéro backend, zéro serveur, zéro base de données.
 - Aucun cookie, aucun traceur publicitaire, aucun profilage.
-- **Une seule mesure de fréquentation, sur la page d'accueil uniquement** : `index.html` charge
-  [GoatCounter](https://www.goatcounter.com/) pour compter ses visites. Sans cookie, sans
-  `localStorage`, sans donnée saisie : seulement ce que la requête porte déjà (page consultée,
-  provenance, navigateur, pays). Les outils et les pages `docs/` n'embarquent pas le compteur, et
-  leur CSP continue d'interdire toute requête tierce. Le pied de page de l'accueil le dit
-  explicitement.
+- **Une mesure de fréquentation, sur l'accueil et sur les outils** : ces pages chargent
+  [GoatCounter](https://www.goatcounter.com/) pour compter leurs visites. Sans cookie, sans
+  `localStorage`, sans donnée saisie ni photo : seulement ce que la requête porte déjà (page
+  consultée, provenance, navigateur, pays). Tout part dans un seul site GoatCounter, donc un seul
+  tableau de bord où chaque page tient sa propre ligne. Les pages `docs/` n'embarquent pas le
+  compteur et leur CSP continue d'interdire toute requête tierce. Chaque page qui compte le dit
+  en toutes lettres : pied de page sur l'accueil, ligne `.mesure-note` dans les outils.
 - Toutes les saisies (données patient, prescriptions) restent strictement locales dans le navigateur.
 - Les exports (PDF, copie Gmail) sont générés entièrement côté client.
 - La synchronisation Drive (facultative) ne transmet que le profil du magasin, vers le Drive du
   magasin, et jamais de donnée patient.
 - La liste de contacts de **Campagne e-mail** reste dans le navigateur du poste : elle n'est jamais
   incluse dans la sauvegarde du profil ni dans la synchronisation Drive. Le mode d'envoi *assisté*
-  ne déclenche aucun appel réseau ; le mode *automatique*, facultatif et à activer explicitement,
+  n'envoie aucune adresse ; le mode *automatique*, facultatif et à activer explicitement,
   transmet une adresse à la fois vers le **compte Google du magasin lui-même**, via un script
   déployé et contrôlé par le magasin ([`docs/campagne-email/`](docs/campagne-email/)).
-- **Aucune ressource externe dans les outils** : ni police distante, ni CDN, ni image tierce, pas
-  même pour la typographie (pile de polices système). Les outils ne déclenchent aucune requête
-  vers un domaine tiers et fonctionnent intégralement hors ligne une fois chargés. Seule la page
-  d'accueil charge un script distant, celui du compteur de visites ci-dessus.
+- **Une seule ressource externe sur tout le site, le compteur ci-dessus** : ni police distante,
+  ni CDN, ni image tierce, pas même pour la typographie (pile de polices système). Une fois la
+  page chargée, un outil fonctionne intégralement hors ligne : le compteur échoue en silence et
+  rien d'autre ne sort.
 
 ---
 
