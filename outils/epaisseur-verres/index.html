@@ -2,7 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <!-- gc.zgo.at / j-rbs-hub.goatcounter.com : compteur de visites (chemin de la page
+       seulement, sans cookie), voir le script en fin de fichier. La photo analysée,
+       elle, ne sort jamais du navigateur. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://j-rbs-hub.goatcounter.com; connect-src 'self' https://j-rbs-hub.goatcounter.com; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Épaisseur des verres</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
@@ -372,6 +375,18 @@
     @media (prefers-reduced-motion: reduce) {
       .profiles-nav .btn { animation: none; }
     }
+
+    /* Mesure de fréquentation : mention discrète, jamais imprimée. */
+    .mesure-note {
+      max-width: 52ch;
+      margin: 32px auto 20px;
+      padding: 0 16px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--grey, #5A6B7B);
+    }
+    @media print { .mesure-note { display: none; } }
   </style>
 </head>
 <body>
@@ -758,6 +773,11 @@
       </div>
     </div>
   </div>
+
+  <p class="mesure-note">
+    Fréquentation de cette page mesurée de façon anonyme, sans cookie.
+    Vos saisies et vos photos ne quittent jamais cet appareil.
+  </p>
 
   <script>
   (function () {
@@ -3525,6 +3545,11 @@
     load3D();
   })();
   </script>
+
+  <!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
+       aucune donnée saisie ni photo transmise. -->
+  <script data-goatcounter="https://j-rbs-hub.goatcounter.com/count"
+          async src="https://gc.zgo.at/count.js"></script>
 
 </body>
 </html>

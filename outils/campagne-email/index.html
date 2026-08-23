@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <!-- script.google.com / script.googleusercontent.com : uniquement pour le mode d'envoi
        automatique (JSONP vers le script Apps Script déployé par le magasin lui-même).
-       Le mode assisté, actif par défaut, ne déclenche aucun appel réseau. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+       Le mode assisté, actif par défaut, n'envoie aucune donnée de contact.
+       gc.zgo.at / j-rbs-hub.goatcounter.com : compteur de visites (chemin de la page
+       seulement, sans cookie), voir le script en fin de fichier. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://j-rbs-hub.goatcounter.com; connect-src 'self' https://j-rbs-hub.goatcounter.com; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Campagne e-mail</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
@@ -315,6 +317,18 @@
       .step { padding: 16px 14px 18px; }
       .btn { padding: 9px 14px; font-size: var(--fs-sm); }
     }
+
+    /* Mesure de fréquentation : mention discrète, jamais imprimée. */
+    .mesure-note {
+      max-width: 52ch;
+      margin: 32px auto 20px;
+      padding: 0 16px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--grey, #5A7080);
+    }
+    @media print { .mesure-note { display: none; } }
   </style>
 </head>
 <body>
@@ -541,7 +555,7 @@
         <span class="mode__t"><input type="radio" name="mode" value="manuel" checked> Assisté, sans configuration</span>
         <span class="mode__d">
           Le message est préparé contact par contact&nbsp;: vous le collez dans votre messagerie et vous envoyez.
-          Rien ne quitte cet appareil.
+          Aucune donnée de contact ne quitte cet appareil.
         </span>
       </label>
       <label class="mode" id="mode-auto">
@@ -693,6 +707,11 @@
 
 </div>
 
+<p class="mesure-note">
+  Fréquentation de cette page mesurée de façon anonyme, sans cookie.
+  Vos saisies ne quittent jamais cet appareil.
+</p>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -700,7 +719,7 @@
      CAMPAGNE E-MAIL — CRM simplifié, 100 % côté navigateur
 
      Deux modes d'envoi :
-       · assisté     — presse-papiers + mailto, aucun appel réseau ;
+       · assisté     — presse-papiers + mailto, aucune donnée de contact envoyée ;
        · automatique — JSONP vers un Apps Script déployé par le magasin
                        (même mécanique que la synchro Drive du hub, qui
                        contourne ainsi les limites CORS d'Apps Script).
@@ -1952,5 +1971,10 @@
     document.body.classList.add('is-ios');
   }
 </script>
+
+<!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
+     aucune donnée saisie transmise. -->
+<script data-goatcounter="https://j-rbs-hub.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
