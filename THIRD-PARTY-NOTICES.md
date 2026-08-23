@@ -4,8 +4,9 @@ Ce fichier recense les ressources extérieures reprises dans le dépôt, avec le
 et la date à laquelle celle-ci a été lue. Il est tenu à jour **au moment où la ressource
 entre**, jamais après coup.
 
-Le site ne charge aucune ressource distante (voir `CLAUDE.md`) : ce qui figure ici a été
-**copié** dans les fichiers du projet. C'est précisément ce cas qui demande une mention —
+Le site ne charge qu'une seule ressource distante, le compteur de visites de la page
+d'accueil (voir `CLAUDE.md`) : tout le reste, ce qui figure ici, a été **copié** dans les
+fichiers du projet. C'est précisément ce cas qui demande une mention —
 un tracé SVG collé dans une page ne porte plus rien qui le rattache à sa licence.
 
 ---

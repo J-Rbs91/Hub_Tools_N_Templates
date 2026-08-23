@@ -12,12 +12,21 @@ Store-specific identity (shop name, address, phone, e-mail, default cash float) 
 each shop fills it once via the hub's "⚙ Mon magasin" modal, and it is kept in a shared
 `localStorage` profile (see "Shared store profile" below) that every tool reads.
 
-Hard privacy constraint: **no user data ever leaves the browser**. No analytics, no trackers,
-no cookies, no network calls with user input, and **no external resources at all** — no remote
-webfont, no CDN, no third-party image. Typography uses the system font stack declared in `--font`;
-never add a `<link>` to a font service or a remote host to the CSP.
+Hard privacy constraint: **no user data ever leaves the browser**. No cookies, no network calls
+carrying user input, and **no external resources in the tools** — no remote webfont, no CDN, no
+third-party image. Typography uses the system font stack declared in `--font`; never add a
+`<link>` to a font service or a remote host to a tool's CSP.
 Exports (PDF, clipboard) are generated entirely client-side. Preserve this
 when adding or editing tools.
+
+**One exception, the hub home page only**: `index.html` loads GoatCounter
+(`https://gc.zgo.at/count.js`, counting into `https://j-rbs-hub.goatcounter.com/count`) to count
+page views. Cookieless, no user input, no `localStorage`: only what the request itself carries
+(path, referrer, browser, country). Its CSP therefore allows `gc.zgo.at` in `script-src` and the
+counting host in `img-src`/`connect-src`, and a footer line states it in French. **No tool page
+and no `docs/` page carries the counter**, and their CSPs must not be opened to it: anything that
+touches patient or store data stays strictly offline. Keep the two hosts in `index.html` in sync
+with the CSP if the GoatCounter site code ever changes.
 
 ## Architecture
 

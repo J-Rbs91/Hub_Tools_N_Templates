@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://j-rbs-hub.goatcounter.com; connect-src 'self' https://j-rbs-hub.goatcounter.com; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -99,7 +99,7 @@
       </span>
       <div class="hero__txt">
         <h1 class="hero__greet" id="welcome-greet">Bonjour</h1>
-        <p class="hero__sub">Vos outils métier, ouverts en un clic. Aucune donnée ne quitte cet appareil.</p>
+        <p class="hero__sub">Vos outils métier, ouverts en un clic. Vos saisies ne quittent jamais cet appareil.</p>
       </div>
     </section>
 
@@ -338,10 +338,14 @@
   </main>
 
   <footer class="site-footer">
-    <p>Usage interne &nbsp;·&nbsp; Aucune donnée transmise au serveur</p>
+    <p>Usage interne &nbsp;·&nbsp; Aucune donnée métier transmise au serveur</p>
     <p>
       Une remarque, une idée, un souci&nbsp;?
       <button type="button" class="footer-link" id="open-contact">Faites-le moi savoir</button>
+    </p>
+    <p class="site-footer__fine">
+      Seule cette page d'accueil compte ses visites, de façon anonyme et sans cookie
+      (GoatCounter). Les outils, eux, n'envoient rien.
     </p>
   </footer>
 
@@ -1270,6 +1274,12 @@
       });
     })();
   </script>
+
+  <!-- Compteur de visites GoatCounter : page d'accueil uniquement, sans cookie,
+       aucune donnée saisie transmise. Le site j-rbs-hub doit exister côté
+       GoatCounter (Settings > Sites) pour que la mesure soit enregistrée. -->
+  <script data-goatcounter="https://j-rbs-hub.goatcounter.com/count"
+          async src="https://gc.zgo.at/count.js"></script>
 
 </body>
 </html>

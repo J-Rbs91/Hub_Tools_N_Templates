@@ -59,7 +59,13 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
 **Aucune donnée saisie ne quitte le navigateur.**
 
 - Zéro backend, zéro serveur, zéro base de données.
-- Aucun tracker, aucun analytics, aucun cookie.
+- Aucun cookie, aucun traceur publicitaire, aucun profilage.
+- **Une seule mesure de fréquentation, sur la page d'accueil uniquement** : `index.html` charge
+  [GoatCounter](https://www.goatcounter.com/) pour compter ses visites. Sans cookie, sans
+  `localStorage`, sans donnée saisie : seulement ce que la requête porte déjà (page consultée,
+  provenance, navigateur, pays). Les outils et les pages `docs/` n'embarquent pas le compteur, et
+  leur CSP continue d'interdire toute requête tierce. Le pied de page de l'accueil le dit
+  explicitement.
 - Toutes les saisies (données patient, prescriptions) restent strictement locales dans le navigateur.
 - Les exports (PDF, copie Gmail) sont générés entièrement côté client.
 - La synchronisation Drive (facultative) ne transmet que le profil du magasin, vers le Drive du
@@ -69,9 +75,10 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
   ne déclenche aucun appel réseau ; le mode *automatique*, facultatif et à activer explicitement,
   transmet une adresse à la fois vers le **compte Google du magasin lui-même**, via un script
   déployé et contrôlé par le magasin ([`docs/campagne-email/`](docs/campagne-email/)).
-- **Aucune ressource externe** : ni police distante, ni CDN, ni image tierce. Les pages ne
-  déclenchent aucune requête vers un domaine tiers, pas même pour la typographie (pile de
-  polices système). Le site fonctionne intégralement hors ligne une fois chargé.
+- **Aucune ressource externe dans les outils** : ni police distante, ni CDN, ni image tierce, pas
+  même pour la typographie (pile de polices système). Les outils ne déclenchent aucune requête
+  vers un domaine tiers et fonctionnent intégralement hors ligne une fois chargés. Seule la page
+  d'accueil charge un script distant, celui du compteur de visites ci-dessus.
 
 ---
 
