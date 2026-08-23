@@ -22,10 +22,12 @@ jobs:
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
-    # CodeQL (job le plus coûteux) ne tourne pas sur les push : il reste couvert par
-    # les PR, le planning hebdomadaire et le déclenchement manuel. La détection de
-    # secrets (job « secrets »), peu coûteuse, reste exécutée sur chaque push.
-    if: github.event_name != 'push'
+    # CodeQL tourne aussi sur les push vers main. GitHub ne referme une alerte de
+    # code scanning que lorsqu'une nouvelle analyse de la branche par défaut ne la
+    # contient plus : en sautant les push, un correctif fusionné laissait l'alerte
+    # ouverte jusqu'au planning hebdomadaire, soit jusqu'à sept jours d'écart entre
+    # l'onglet « Security » et l'état réel du code. Le dépôt est public, les minutes
+    # Actions y sont gratuites.
     permissions:
       contents: read
       security-events: write

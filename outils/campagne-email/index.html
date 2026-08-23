@@ -502,7 +502,7 @@
       <label class="fld">
         <span class="fld__lbl">Lien du bouton <span class="fld__opt">facultatif</span></span>
         <input type="url" id="f-cta-url" placeholder="https://…" autocomplete="off">
-        <span class="fld__hint">Sans lien, le bouton n'apparaît pas.</span>
+        <span class="fld__hint">Le bouton n'apparaît qu'avec un lien commençant par https:// (ou http://).</span>
       </label>
     </div>
 
@@ -1349,7 +1349,12 @@
     }
 
     /* Coordonnées */
-    var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail].filter(Boolean).join(' &#183; ');
+    /* Chaque coordonnée est échappée avant la jointure : le séparateur est une
+       entité HTML, on ne peut donc pas échapper la chaîne une fois assemblée.
+       Le profil magasin peut venir d'une restauration Drive : il est traité
+       comme une saisie, jamais comme du balisage. */
+    var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail]
+      .filter(Boolean).map(esc).join(' &#183; ');
     h += '<tr><td style="padding:24px 26px 22px;font-family:' + F + ';font-size:13px;color:#1A2A3A;">'
       + '<span style="font-weight:bold;">' + esc(m.nom) + '</span>'
       + (coord ? '<br><span style="color:#5A7080;font-size:12px;">' + coord + '</span>' : '')
@@ -1385,6 +1390,14 @@
     return l.join('\n');
   }
 
+  /* Lien du bouton : seul un http(s) est retenu. Un « javascript: » ou un
+     « data: » saisi ici deviendrait un lien actif dans l'aperçu, dans le message
+     copié et dans la charge utile envoyée au programme d'envoi. */
+  function lienSur(u) {
+    var s = String(u == null ? '' : u).trim();
+    return urlOk(s) ? s : '';
+  }
+
   /* Assemble les champs de campagne fusionnés pour un contact donné. */
   function campagnePour(c) {
     var m = magasinCtx();
@@ -1394,7 +1407,7 @@
       corps: merge(etat.camp.corps, c, m),
       encart: merge(etat.camp.encart, c, m),
       cta: etat.camp.cta.trim(),
-      ctaUrl: etat.camp.ctaUrl.trim(),
+      ctaUrl: lienSur(etat.camp.ctaUrl),
       pied: merge(etat.camp.pied, c, m),
       salut: salutation(c)
     };

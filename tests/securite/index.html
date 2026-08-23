@@ -80,7 +80,7 @@
     <h1>Tests de non-régression sécurité</h1>
     <p class="intro">
       Cette page exécute en navigateur des assertions sur les correctifs de sécurité
-      (VULN-001, VULN-003, VULN-005). Chaque test affiche PASS ou FAIL.
+      (VULN-001, VULN-003, VULN-005, VULN-008). Chaque test affiche PASS ou FAIL.
     </p>
     <div id="summary">Exécution des tests…</div>
     <ul id="results"></ul>
@@ -139,6 +139,29 @@
         return SYNC_PREFIXE + encodeURIComponent(syncEndpointId(u)) + SYNC_SUFFIXE + '?callback=cb_1';
       }
 
+      /* ── Correctif VULN-008 : copies exactes de esc, urlOk et lienSur
+           (outils/campagne-email/index.html), plus le fragment d'aperçu qui
+           assemble les coordonnées du magasin dans emailHtml_. ── */
+      function esc(v) {
+        return String(v == null ? '' : v)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function urlOk(u) { return /^https?:\/\/[^\s]+$/i.test(String(u || '').trim()); }
+
+      function lienSur(u) {
+        var t = String(u == null ? '' : u).trim();
+        return urlOk(t) ? t : '';
+      }
+
+      function blocCoordonnees(m) {
+        var coord = [m.adresse, m.tel ? 'Tél ' + m.tel : '', m.mail]
+          .filter(Boolean).map(esc).join(' &#183; ');
+        return '<span style="font-weight:bold;">' + esc(m.nom) + '</span>'
+          + (coord ? '<br><span>' + coord + '</span>' : '');
+      }
+
       /* ── Correctif VULN-005 : copie exacte de sanitizeProfil. ── */
       function sanitizeProfil(p) {
         if (!p || typeof p !== 'object') { return {}; }
@@ -193,6 +216,33 @@
         typeof clean.tel === 'string' && typeof clean.mail === 'string');
       assert("VULN-005 — coercition correcte (adresse '123', tel '', mail '', nom 'A')",
         clean.nom === 'A' && clean.adresse === '123' && clean.tel === '' && clean.mail === '');
+
+      /* ════════ (d) VULN-008 : aperçu de la campagne e-mail ════════ */
+      var charge2 = '<img src=x onerror="window.__xss2=1">';
+      var hote2 = document.createElement('div');
+      host.appendChild(hote2);
+      hote2.innerHTML = blocCoordonnees({
+        nom: 'Magasin', adresse: charge2,
+        tel: '04.00.00.00.00', mail: 'contact@exemple.fr'
+      });
+
+      assert('VULN-008 — coordonnées du magasin : aucun script exécuté',
+        typeof window.__xss2 === 'undefined');
+      assert('VULN-008 — coordonnées du magasin : aucun élément <img> créé',
+        hote2.getElementsByTagName('img').length === 0);
+      assert('VULN-008 — coordonnées du magasin : la charge est affichée comme texte littéral',
+        hote2.textContent.indexOf(charge2) !== -1);
+      assert('VULN-008 — coordonnées du magasin : le séparateur reste du balisage',
+        hote2.textContent.indexOf('\u00b7') !== -1);
+
+      assert("VULN-008 — lien du bouton : 'javascript:alert(1)' rejeté",
+        lienSur('javascript:alert(1)') === '');
+      assert("VULN-008 — lien du bouton : 'data:text/html,<svg onload=alert(1)>' rejeté",
+        lienSur('data:text/html,<svg onload=alert(1)>') === '');
+      assert('VULN-008 — lien du bouton : saisie sans schéma rejetée',
+        lienSur('www.exemple.fr') === '');
+      assert("VULN-008 — lien du bouton : 'https://exemple.fr/rdv' accepté",
+        lienSur('https://exemple.fr/rdv') === 'https://exemple.fr/rdv');
 
       /* ── Récapitulatif ── */
       var summary = document.getElementById('summary');
