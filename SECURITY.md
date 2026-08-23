@@ -18,11 +18,14 @@ Par conception, la surface d'attaque est volontairement réduite :
 
 - **aucune donnée saisie ne quitte le navigateur** (pas de backend, pas de base
   de données, pas de serveur applicatif) ;
-- aucun tracker, aucun cookie, aucun analytics ;
+- aucun cookie, aucun traceur publicitaire, aucun profilage ;
+- la **page d'accueil seule** compte ses visites via GoatCounter (`gc.zgo.at`) : sans cookie,
+  sans `localStorage`, sans donnée saisie ; aucune page d'outil ni page `docs/` ne charge ce
+  compteur ;
 - les exports (PDF, copie presse-papiers) sont générés entièrement côté client ;
-- **aucune ressource externe n'est chargée** : ni police distante, ni CDN, ni image tierce ;
-  la typographie repose sur une pile de polices système, et la CSP de chaque page interdit
-  désormais tout `font-src` et `style-src` distant ;
+- **aucune ressource externe n'est chargée dans les outils** : ni police distante, ni CDN, ni
+  image tierce ; la typographie repose sur une pile de polices système, et la CSP de chaque page
+  interdit tout `font-src` et `style-src` distant ;
 - la synchronisation Drive optionnelle ne transite **que** le profil magasin
   (jamais de donnée patient), via un script Apps Script déployé par le magasin
   lui-même.

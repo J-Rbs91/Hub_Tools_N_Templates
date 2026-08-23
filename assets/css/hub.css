@@ -1170,6 +1170,17 @@ body {
 
 .site-footer p + p { margin-top: 2px; }
 
+/* Mention de transparence sur la mesure de fréquentation : présente, lisible,
+   mais en retrait des deux lignes utiles du pied de page. */
+.site-footer .site-footer__fine {
+  margin-top: var(--s-2);
+  max-width: 52ch;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 .footer-link {
   font-family: inherit;
   font-size: var(--fs-sm);
