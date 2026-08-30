@@ -53,6 +53,16 @@ Ces règles découlent des contraintes du projet (voir `CLAUDE.md`) :
   bouton flottant `← Retour` pour iOS (classe `.ios-back`, voir `CLAUDE.md`).
 - **Cohérence visuelle** : réutiliser les jetons de couleur existants
   (`--blue`, `--blue-d`, `--ink`, `--bg`, `--border`…).
+- **Combler le trou plutôt que changer l'étiquette** : un contrôle qui échoue
+  demande du travail, il n'autorise pas à affirmer moins. Une erreur
+  `html-validate` se corrige dans le HTML et jamais en désactivant la règle
+  dans `.htmlvalidate.json` ; un lien mort se répare et ne s'ajoute pas à une
+  liste d'exclusion ; un test de `tests/` qui tombe signale un défaut de
+  l'outil, pas du test. Avant d'ajouter une ressource tierce (icône, police,
+  tracé, extrait de code), lire sa licence et la déclarer dans
+  `THIRD-PARTY-NOTICES.md` : « elle est sûrement permissive » est une
+  affirmation non vérifiée. N'abaisser une affirmation qu'après une tentative
+  réelle, en disant ce qui a été tenté et comment cela a échoué.
 
 ## Contrôles locaux (identiques à la CI)
 
