@@ -150,6 +150,33 @@ Other CI jobs: `actionlint` (workflow linting), `lychee` (link checking), CodeQL
 and `gitleaks` (secret detection). `.editorconfig` enforces UTF-8, LF, 2-space indent, trimmed
 trailing whitespace (except `.md`), and a final newline.
 
+## Close the gap rather than relabel
+
+When a claim turns out to be stronger than what was established, two moves make it honest:
+lower the claim to what was actually done, or go and do what was missing and keep it. Both
+produce an exact record; only the second produces a fact, and a fact is never re-acquired.
+In a diff the two look identical, so the expected one is stated here.
+
+A check that fires names a gap; it never says to make the claim smaller. Concretely, in this
+repository:
+
+- A `html-validate` error is fixed in the HTML. Never add a rule to `.htmlvalidate.json`, an
+  inline `<!-- [html-validate-disable ...] -->`, or an exclusion to the glob to get a green
+  run. Same for `lychee`: a dead link is repaired or replaced, not added to an ignore list.
+- A failing check in `tests/` (`navigation-retour.test.mjs`) is a bug in the tool, not in the
+  test. Repair the `Couches` wiring; never weaken or delete the assertion.
+- Before adding any third-party asset (icon, font, frame outline, snippet), read its licence
+  and record it in `THIRD-PARTY-NOTICES.md`. "It is probably permissive" is itself an
+  unverified claim; an asset whose licence was not read does not enter the repository.
+- A tool that fails on a real phone is fixed on the phone. Narrowing what the tool claims to
+  do is exact and answers nothing.
+
+Lower a claim only after a real attempt, and say what was attempted, where, and how it
+failed, in the commit or the pull request: without that record the same attempt is repaid by
+whoever picks the file up next. A motivated downgrade is the exact report of a real limit; it
+is simply not finished work. The test before accepting the move: did I answer the question,
+or make it smaller?
+
 ## Conventions
 
 - **Commits**: prefix `HF-XXX — <short description in French>` (e.g.
