@@ -4,9 +4,9 @@ ticket: TKT-009
 attempts:
 - id: WKR-a9640c3fa4c5
   mode: new
-  status: running
+  status: candidate
   started_at: '2026-09-05T12:51:21Z'
-  finished_at: null
+  finished_at: '2026-09-05T12:53:34Z'
   pid: 3634
   worktree: /home/user/wt/TKT-009
   branch: arc/lentilles-souples/TKT-009
@@ -14,6 +14,26 @@ attempts:
   context_ref: .agentic/features/lentilles-souples/execution/context/TKT-009.yaml
   context_digest: sha256:a6a9bb75b4b17128886585ff53d93e5347bc902780917c9a13aea7c73251fe4c
   raw_log_ref: .agentic/features/lentilles-souples/execution/worker-raw/TKT-009/WKR-a9640c3fa4c5.log
+  exit_code: 0
+  result_ref: .agentic/features/lentilles-souples/execution/work-results/TKT-009.yaml
+  final_commit: 8dfe8a2
+  changed_paths:
+  - outils/lentilles-souples/index.html
+  dirty_paths: []
+  outside_scope: []
+  failure: null
+- id: WKR-e146d633e964
+  mode: resume
+  status: running
+  started_at: '2026-09-05T12:54:25Z'
+  finished_at: null
+  pid: 5087
+  worktree: /home/user/wt/TKT-009
+  branch: arc/lentilles-souples/TKT-009
+  baseline_commit: 8dfe8a201fda3e8dfb27c5d41a850f6fcc957473
+  context_ref: .agentic/features/lentilles-souples/execution/context/TKT-009.yaml
+  context_digest: sha256:a6a9bb75b4b17128886585ff53d93e5347bc902780917c9a13aea7c73251fe4c
+  raw_log_ref: .agentic/features/lentilles-souples/execution/worker-raw/TKT-009/WKR-e146d633e964.log
   exit_code: null
   result_ref: null
   final_commit: null

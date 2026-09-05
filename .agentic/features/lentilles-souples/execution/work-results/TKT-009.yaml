@@ -1,0 +1,42 @@
+schema_version: 1
+ticket: TKT-009
+status: candidate_done
+actor: worker
+commit: 8dfe8a2
+validation:
+- 'node tests/lentilles-souples.test.mjs : 166 controles, 0 echec ; node tests/navigation-retour.test.mjs
+  : 25 controles passes ; npx html-validate@11.5.6 outils/lentilles-souples/index.html
+  : 0 erreur ; git grep trailing-whitespace/CRLF sur le fichier : 0 hit'
+discoveries: []
+recommendation: done
+reported_at: '2026-09-05T12:53:30Z'
+routing_evidence:
+  sequence: 1
+  policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+  runtime:
+    provider: claude-code
+    requested:
+      capability_tier: balanced
+      effort: high
+      context_profile: extended
+    resolved:
+      capability_tier: balanced
+      model: sonnet
+      effort: high
+      context_profile: null
+    support:
+      model_selection: true
+      effort_selection: true
+      context_selection: false
+    enforcement:
+      model: supported
+      effort: supported
+      context: unsupported
+    available: unverified
+    applied: false
+    argv:
+    - claude
+    - --model
+    - sonnet
+    - --effort
+    - high

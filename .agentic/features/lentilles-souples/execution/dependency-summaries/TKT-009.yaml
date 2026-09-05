@@ -1,0 +1,19 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-009
+commit: 8dfe8a2
+behavior:
+- renderProblemes() dans outils/lentilles-souples/index.html pose desormais un span
+  .probleme-label (texte Erreur ou Avertissement, selon p.gravite) avant .probleme-code
+  sur chaque ligne de probleme (blocs A/B/C et catalogue-erreurs) ; la gravite reste
+  aussi codee par couleur (classes probleme-erreur/probleme-avert) mais n'est plus
+  color-only
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/index.html
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T12:53:30Z'

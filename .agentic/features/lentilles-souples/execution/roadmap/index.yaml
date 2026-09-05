@@ -1917,6 +1917,25 @@ tickets:
       - sonnet
       - --effort
       - high
+  history:
+  - from: to_execute
+    to: partial_execution
+    at: '2026-09-05T12:54:17Z'
+    reason: provisoire
+  - from: partial_execution
+    to: to_execute
+    at: '2026-09-05T12:54:18Z'
+    reason: 'Le correctif lui meme est bon et accepte sur le fond : un libelle textuel
+      Erreur ou Avertissement est desormais pose sur chaque probleme, independamment
+      de la couleur. Ne pas y revenir, ne pas le refaire. UN SEUL POINT A CORRIGER,
+      et il porte sur le message de commit, pas sur le code. Le commit 8dfe8a2 s intitule
+      HF-009, or ce numero est deja pris trois fois dans l historique du depot (Demande/Ordonnance,
+      epaisseur verres, et un autre). CLAUDE.md interdit de reutiliser un numero existant.
+      HF-009 est le numero du ticket TKT-009, ce n est pas le numero de commit. Le
+      prochain numero HF libre se lit par git log --all --oneline puis grep -oP HF-[0-9]+
+      puis sort -u puis tail -1 : le maximum actuel est HF-089, donc prendre HF-090.
+      Attendu : reprendre le meme commit avec git commit --amend en changeant uniquement
+      le prefixe du message, sans toucher au contenu, puis reporter le nouveau SHA.'
 - schema_version: 1
   id: TKT-010
   title: Remediate FIND-02
@@ -2368,4 +2387,4 @@ tickets:
   - 'TKT-010: file scope not explicit for both tickets; fail closed'
   - 'TKT-011: file scope not explicit for both tickets; fail closed'
   blocks: []
-updated_at: '2026-09-05T12:51:20Z'
+updated_at: '2026-09-05T12:54:18Z'
