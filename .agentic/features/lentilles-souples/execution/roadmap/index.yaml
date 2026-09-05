@@ -4,7 +4,7 @@ roadmap_version: 2
 plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
 execution:
   strategy: dependency-aware
-  current_wave: 2
+  current_wave: 3
 tickets:
 - schema_version: 1
   id: TKT-001
@@ -456,7 +456,7 @@ tickets:
   id: TKT-003
   title: Modèle de catalogue fabricant, jeu de données de démonstration explicitement
     fictif, et validateur déterministe couvrant les douze cas d'échec exigés.
-  status: to_execute
+  status: done
   origin:
     type: planned
     parent: LS-03
@@ -606,6 +606,7 @@ tickets:
     mode: serial
   commit:
     policy: one-ticket-one-commit
+    sha: 5976d6b
   parallel_with: []
   parallel_reason: []
   serial_reason:
@@ -649,6 +650,16 @@ tickets:
       - sonnet
       - --effort
       - medium
+  completion:
+    commit: 5976d6b
+    completed_at: '2026-09-05T11:46:09Z'
+    actor: worker
+    accepted_by: orchestrator
+  history:
+  - from: to_execute
+    to: done
+    at: '2026-09-05T11:46:09Z'
+    reason: candidate result passed orchestrator acceptance
 - schema_version: 1
   id: TKT-004
   title: Disponibilité exacte d'une combinaison, recherche bornée d'alternatives,
@@ -1485,4 +1496,4 @@ tickets:
     to: done
     at: '2026-09-05T11:24:52Z'
     reason: candidate result passed orchestrator acceptance
-updated_at: '2026-09-05T11:36:33Z'
+updated_at: '2026-09-05T11:46:09Z'

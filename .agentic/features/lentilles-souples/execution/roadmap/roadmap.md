@@ -15,7 +15,7 @@ This file is generated from `index.yaml`. The index is authoritative.
 
 - **TKT-002 — Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens et stabilité).** — `done`, actor `securix`, depends on: TKT-001, TKT-008
   - serial because: TKT-003: shared files: tests/lentilles-souples.test.mjs
-- **TKT-003 — Modèle de catalogue fabricant, jeu de données de démonstration explicitement fictif, et validateur déterministe couvrant les douze cas d'échec exigés.** — `to_execute`, actor `securix`, depends on: TKT-001
+- **TKT-003 — Modèle de catalogue fabricant, jeu de données de démonstration explicitement fictif, et validateur déterministe couvrant les douze cas d'échec exigés.** — `done`, actor `securix`, depends on: TKT-001
   - serial because: TKT-002: shared files: tests/lentilles-souples.test.mjs
 
 ## Wave 3

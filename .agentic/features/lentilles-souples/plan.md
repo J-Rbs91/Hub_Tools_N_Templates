@@ -112,40 +112,44 @@ risks:
 
 ```yaml agentic:task
 id: LS-03
-objective: >-
-  Modèle de catalogue fabricant, jeu de données de démonstration explicitement fictif, et
-  validateur déterministe couvrant les douze cas d'échec exigés.
-status: pending
+objective: Modèle de catalogue fabricant, jeu de données de démonstration explicitement
+  fictif, et validateur déterministe couvrant les douze cas d'échec exigés.
+status: done
 dependencies:
-  - LS-01
+- LS-01
 files:
-  - outils/lentilles-souples/noyau/catalogue.js
-  - outils/lentilles-souples/donnees/catalogue-demo.js
-  - tests/lentilles-souples.test.mjs
+- outils/lentilles-souples/noyau/catalogue.js
+- outils/lentilles-souples/donnees/catalogue-demo.js
+- tests/lentilles-souples.test.mjs
 acceptance_criteria:
-  - le modèle porte manufacturers, products, manufacturing_rules et sources avec les champs du contrat admis
-  - une gamme peut porter plusieurs règles, avec des pas de sphère différents et des modes d'axe différents
-  - le validateur échoue avec un code stable pour chacun des douze cas exigés, un test par code
-  - le validateur accepte le catalogue de démonstration livré
-  - le validateur refuse un catalogue dont un produit actif n'a aucune règle exploitable
-  - les données de démonstration couvrent sphérique, torique régulier, axes irréguliers en LIST, plusieurs pas de sphère, mode RANGE et variations de rayon et de diamètre
-  - chaque fabricant de démonstration est ouvertement fictif, marqué comme tel dans les données, et aucun nom de fabricant réel n'apparaît
-  - chaque règle est rattachée à une source, et le validateur refuse un source_id inexistant
+- le modèle porte manufacturers, products, manufacturing_rules et sources avec les
+  champs du contrat admis
+- une gamme peut porter plusieurs règles, avec des pas de sphère différents et des
+  modes d'axe différents
+- le validateur échoue avec un code stable pour chacun des douze cas exigés, un test
+  par code
+- le validateur accepte le catalogue de démonstration livré
+- le validateur refuse un catalogue dont un produit actif n'a aucune règle exploitable
+- les données de démonstration couvrent sphérique, torique régulier, axes irréguliers
+  en LIST, plusieurs pas de sphère, mode RANGE et variations de rayon et de diamètre
+- chaque fabricant de démonstration est ouvertement fictif, marqué comme tel dans
+  les données, et aucun nom de fabricant réel n'apparaît
+- chaque règle est rattachée à une source, et le validateur refuse un source_id inexistant
 tests:
-  - unit
-  - negative-path
-  - fixture
+- unit
+- negative-path
+- fixture
 security_requirements:
   securix_rules:
-    - SEC-INJ-016
-  notes: >-
-    Le catalogue est une donnée locale versionnée, jamais désérialisée depuis une source distante.
+  - SEC-INJ-016
+  notes: Le catalogue est une donnée locale versionnée, jamais désérialisée depuis
+    une source distante.
 evidence_required:
-  - exécution de node tests/lentilles-souples.test.mjs
-  - liste des douze codes d'erreur avec le test qui les déclenche
+- exécution de node tests/lentilles-souples.test.mjs
+- liste des douze codes d'erreur avec le test qui les déclenche
 risks:
-  - un jeu de démonstration trop pauvre laisserait passer un défaut du moteur de disponibilité
-  - une donnée fictive prise pour réelle serait plus dangereuse qu'une donnée absente
+- un jeu de démonstration trop pauvre laisserait passer un défaut du moteur de disponibilité
+- une donnée fictive prise pour réelle serait plus dangereuse qu'une donnée absente
 ```
 
 ```yaml agentic:task
