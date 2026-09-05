@@ -51,6 +51,7 @@
     cursor:pointer;list-style:none;padding:16px 18px;font-size:15px;font-weight:700;
     color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:10px;
   }
+  details.bloc-b > summary h2{font:inherit;color:inherit;margin:0}
   details.bloc-b > summary::-webkit-details-marker{display:none}
   details.bloc-b > summary::marker{content:''}
   details.bloc-b > summary::after{content:'▾';color:var(--blue);font-size:12px}
@@ -257,7 +258,7 @@
 
     <!-- ══════════════ BLOC B (facultatif) ══════════════ -->
     <details class="bloc-b" id="bloc-b">
-      <summary>B · Surréfraction (facultatif)</summary>
+      <summary><h2>B · Surréfraction (facultatif)</h2></summary>
       <div class="bloc-b-corps">
         <p class="sous-titre">Utile seulement si une surréfraction a été mesurée sur la lentille déjà portée. Laisser replié si la première adaptation se limite au bloc A.</p>
 
