@@ -19,6 +19,7 @@ import vm from 'node:vm';
 
 const racine = join(dirname(fileURLToPath(import.meta.url)), '..');
 const cheminNoyau = join(racine, 'outils/lentilles-souples/noyau/prescription.js');
+const cheminMoteurs = join(racine, 'outils/lentilles-souples/noyau/moteurs.js');
 
 const echecs = [];
 let passes = 0;
@@ -67,6 +68,32 @@ verifier(
 verifier(
   'la branche navigateur calcule comme la branche Node',
   PNavigateur && PNavigateur.normalizeAxis(361) === P.normalizeAxis(361),
+);
+
+const M = require(cheminMoteurs);
+
+verifier('module.exports (moteurs) expose les dix fonctions attendues', [
+  'compenserVertexSpherique', 'decompenserVertexSpherique',
+  'compenserVertexSpheroCylindrique', 'decompenserVertexSpheroCylindrique',
+  'axeReellementPorte', 'axeACommander', 'arrondirPrescription',
+  'calculerMoteurA', 'calculerMoteurB',
+].every((nom) => typeof M[nom] === 'function'));
+
+const contexteNavigateurMoteurs = vm.createContext({});
+vm.runInContext(readFileSync(cheminNoyau, 'utf8'), contexteNavigateurMoteurs, { filename: cheminNoyau });
+vm.runInContext(readFileSync(cheminMoteurs, 'utf8'), contexteNavigateurMoteurs, { filename: cheminMoteurs });
+const MNavigateur = contexteNavigateurMoteurs.LentillesMoteurs;
+
+verifier(
+  'moteurs.js s\'expose sur globalThis dans un contexte sans module/require (navigateur)',
+  MNavigateur && typeof MNavigateur.calculerMoteurA === 'function',
+);
+verifier(
+  'la branche navigateur de moteurs.js calcule comme la branche Node',
+  MNavigateur && presque(
+    MNavigateur.compenserVertexSpherique(-8, 12, 'vertex'),
+    M.compenserVertexSpherique(-8, 12, 'vertex'),
+  ),
 );
 
 /* ── normalizeAxis ──────────────────────────────────────────────────────── */
@@ -292,6 +319,256 @@ verifier(
 );
 verifier('estSurLaGrille refuse un pas nul', leve(() => P.estSurLaGrille(1, 0)));
 verifier('estSurLaGrille refuse un pas negatif', leve(() => P.estSurLaGrille(1, -0.25)));
+
+/* ── Moteur A / Moteur B (outils/lentilles-souples/noyau/moteurs.js) ────── */
+
+/* -- compenserVertexSpherique / decompenserVertexSpherique -- */
+
+verifier(
+  'vertex 0 laisse la puissance inchangee',
+  M.compenserVertexSpherique(-5.5, 0, 'vertex') === -5.5,
+);
+verifier(
+  'vertex a faible puissance : compensation quasi nulle',
+  presque(M.compenserVertexSpherique(-0.25, 12, 'vertex'), -0.25, 1e-3),
+);
+verifier(
+  'sphere negative de forte puissance devient moins negative au plan corneen (exemple de reference -8.00 D a 12 mm)',
+  presque(M.compenserVertexSpherique(-8, 12, 'vertex'), -7.2993, 1e-3)
+    && M.compenserVertexSpherique(-8, 12, 'vertex') > -8,
+);
+verifier(
+  'sphere positive de forte puissance devient plus positive au plan corneen (exemple de reference +8.00 D a 12 mm)',
+  presque(M.compenserVertexSpherique(8, 12, 'vertex'), 8.8496, 1e-3)
+    && M.compenserVertexSpherique(8, 12, 'vertex') > 8,
+);
+verifier(
+  'vertex standard (12 mm) sur une puissance moderee reste plausible',
+  presque(M.compenserVertexSpherique(-3, 12, 'vertex'), -3 / (1 - 0.012 * -3)),
+);
+
+for (const [sph, distanceMm] of [[-8, 12], [8, 12], [-0.25, 8], [4.5, 16], [-12, 20]]) {
+  const compense = M.compenserVertexSpherique(sph, distanceMm, 'vertex');
+  const retour = M.decompenserVertexSpherique(compense, distanceMm, 'vertex');
+  verifier(
+    'compensation aller puis retour (spherique, sph=' + sph + ', d=' + distanceMm + 'mm) redonne la valeur de depart a moins de 0.001 D',
+    presque(retour, sph, 1e-3),
+    JSON.stringify({ sph, distanceMm, compense, retour }),
+  );
+}
+
+verifier(
+  'compenserVertexSpherique refuse une distance negative',
+  leve(() => M.compenserVertexSpherique(-5, -3, 'vertex')),
+);
+verifier(
+  'compenserVertexSpherique refuse une distance aberrante',
+  leve(() => M.compenserVertexSpherique(-5, 500, 'vertex')),
+);
+verifier(
+  'compenserVertexSpherique refuse une distance non numerique',
+  leve(() => M.compenserVertexSpherique(-5, 'x', 'vertex')) && leve(() => M.compenserVertexSpherique(-5, undefined, 'vertex')),
+);
+
+/* -- compenserVertexSpheroCylindrique -- */
+
+const sphCylNul = M.compenserVertexSpheroCylindrique({ sph: -4, cyl: 0, axe: null }, 12, 'vertex');
+verifier(
+  'sphero-cylindrique a cylindre nul equivaut au cas spherique',
+  presque(sphCylNul.sph, M.compenserVertexSpherique(-4, 12, 'vertex')) && sphCylNul.cyl === 0 && sphCylNul.axe === null,
+  JSON.stringify(sphCylNul),
+);
+
+const deuxMeridiensEleves = M.compenserVertexSpheroCylindrique({ sph: -1, cyl: -6, axe: 45 }, 12, 'vertex');
+verifier(
+  'sphero-cylindrique a deux meridiens eleves compense chaque meridien separement (pas seulement la sphere)',
+  presque(deuxMeridiensEleves.sph, M.compenserVertexSpherique(-1, 12, 'vertex'))
+    && presque(deuxMeridiensEleves.sph + deuxMeridiensEleves.cyl, M.compenserVertexSpherique(-1 + -6, 12, 'vertex'))
+    && deuxMeridiensEleves.axe === 45,
+  JSON.stringify(deuxMeridiensEleves),
+);
+
+const correctionMixte = M.compenserVertexSpheroCylindrique({ sph: 2, cyl: -3, axe: 170 }, 12, 'vertex');
+verifier(
+  'sphero-cylindrique en correction mixte (sph positive, cyl negatif) reconduit l\'axe inchange',
+  correctionMixte.axe === 170,
+  JSON.stringify(correctionMixte),
+);
+verifier(
+  'sphero-cylindrique ne compense pas seulement la sphere : le cylindre change avec la distance vertex',
+  M.compenserVertexSpheroCylindrique({ sph: -1, cyl: -6, axe: 45 }, 12, 'vertex').cyl !== -6,
+);
+
+for (const rx of [{ sph: -1, cyl: -6, axe: 45 }, { sph: 2, cyl: -3, axe: 170 }, { sph: -8, cyl: -1, axe: 90 }]) {
+  const compense = M.compenserVertexSpheroCylindrique(rx, 12, 'vertex');
+  const retour = M.decompenserVertexSpheroCylindrique(compense, 12, 'vertex');
+  verifier(
+    'compensation aller puis retour (sphero-cylindrique, axe=' + rx.axe + ') redonne la valeur de depart a moins de 0.001 D',
+    presque(retour.sph, rx.sph, 1e-3) && presque(retour.cyl, rx.cyl, 1e-3) && retour.axe === rx.axe,
+    JSON.stringify({ rx, compense, retour }),
+  );
+}
+
+/* -- axeReellementPorte / axeACommander : reciprocite de la rotation -- */
+
+for (const sens of ['gauche', 'droite']) {
+  for (const rotation of [0, 8, 25]) {
+    const porte = M.axeReellementPorte(60, rotation, sens);
+    const commande = M.axeACommander(porte, rotation, sens);
+    verifier(
+      'axeACommander(axeReellementPorte(axe, r, ' + sens + '), r, ' + sens + ') redonne l\'axe de depart (r=' + rotation + ')',
+      commande === 60,
+      JSON.stringify({ sens, rotation, porte, commande }),
+    );
+  }
+}
+
+verifier(
+  'rotation nulle ne modifie pas l\'axe',
+  M.axeReellementPorte(75, 0, 'gauche') === 75 && M.axeACommander(75, 0, 'droite') === 75,
+);
+verifier(
+  'axeReellementPorte enveloppe correctement autour de 180/0',
+  M.axeReellementPorte(5, 10, 'gauche') === P.normalizeAxis(5 - 10),
+);
+verifier(
+  'axeReellementPorte refuse un sens inconnu',
+  leve(() => M.axeReellementPorte(60, 10, 'haut')),
+);
+
+/* -- calculerMoteurA -- */
+
+const moteurAVertexNul = M.calculerMoteurA({ sph: -3.5, cyl: -1, axe: 90, vertexMm: 0 });
+verifier(
+  'moteurA : vertex nul laisse la correction inchangee',
+  moteurAVertexNul.problemes.length === 0
+    && moteurAVertexNul.theorique.sph === -3.5 && moteurAVertexNul.theorique.cyl === -1 && moteurAVertexNul.theorique.axe === 90,
+  JSON.stringify(moteurAVertexNul),
+);
+
+const moteurASphereSeule = M.calculerMoteurA({ sph: -6, cyl: 0, axe: null, vertexMm: 12 });
+verifier(
+  'moteurA : correction spherique, la theorique et la cible arrondie coexistent sans que la seconde efface la premiere',
+  presque(moteurASphereSeule.theorique.sph, -6 / (1 - 0.012 * -6))
+    && moteurASphereSeule.cible.sph === P.roundToStep(moteurASphereSeule.theorique.sph, 0.25)
+    && moteurASphereSeule.theorique.sph !== moteurASphereSeule.cible.sph,
+  JSON.stringify(moteurASphereSeule),
+);
+
+const moteurASpheroCyl = M.calculerMoteurA({ sph: -1, cyl: -6, axe: 45, vertexMm: 12 });
+verifier(
+  'moteurA : sphero-cylindrique, les deux meridiens sont compenses separement et l\'axe est reconduit',
+  moteurASpheroCyl.problemes.length === 0
+    && moteurASpheroCyl.theorique.axe === 45
+    && moteurASpheroCyl.theorique.cyl !== -6,
+  JSON.stringify(moteurASpheroCyl),
+);
+
+for (const vertexMm of [-5, 500, NaN, 'x', undefined]) {
+  const resultat = M.calculerMoteurA({ sph: -3, cyl: 0, axe: null, vertexMm });
+  verifier(
+    'moteurA : vertex invalide (' + String(vertexMm) + ') produit un probleme identifie et aucune valeur',
+    resultat.theorique === null && resultat.cible === null && resultat.problemes.length === 1 && resultat.problemes[0].gravite === 'erreur',
+    JSON.stringify(resultat),
+  );
+}
+verifier(
+  'moteurA : les codes de probleme distinguent negatif, aberrant et non numerique',
+  M.calculerMoteurA({ sph: -3, cyl: 0, axe: null, vertexMm: -5 }).problemes[0].code === 'DISTANCE_NEGATIVE'
+    && M.calculerMoteurA({ sph: -3, cyl: 0, axe: null, vertexMm: 500 }).problemes[0].code === 'DISTANCE_ABERRANTE'
+    && M.calculerMoteurA({ sph: -3, cyl: 0, axe: null, vertexMm: 'x' }).problemes[0].code === 'DISTANCE_NON_NUMERIQUE',
+);
+
+/* -- calculerMoteurB -- */
+
+const rotationNulle = M.calculerMoteurB({
+  lentille: { sph: -2, cyl: -1, axe: 90 },
+  surrefraction: { sph: 0, cyl: 0, axe: null },
+  distanceSurrefractionMm: 0,
+  rotation: { valeur: 0, sens: 'gauche', stable: true },
+});
+verifier(
+  'moteurB : rotation nulle et surrefraction nulle redonnent la lentille portee',
+  rotationNulle.problemes.length === 0
+    && rotationNulle.cible.sph === -2 && rotationNulle.cible.cyl === -1 && rotationNulle.cible.axe === 90,
+  JSON.stringify(rotationNulle),
+);
+
+for (const sens of ['gauche', 'droite']) {
+  const rotationObservee = M.calculerMoteurB({
+    lentille: { sph: -2, cyl: -1, axe: 90 },
+    surrefraction: { sph: 0, cyl: 0, axe: null },
+    distanceSurrefractionMm: 0,
+    rotation: { valeur: 12, sens, stable: true },
+  });
+  verifier(
+    'moteurB : rotation observee (' + sens + ') avec surrefraction nulle redonne la lentille portee',
+    rotationObservee.problemes.length === 0
+      && rotationObservee.cible.sph === -2 && rotationObservee.cible.cyl === -1 && rotationObservee.cible.axe === 90,
+    JSON.stringify(rotationObservee),
+  );
+}
+
+const distinctionDistances = M.calculerMoteurB({
+  lentille: { sph: -2, cyl: 0, axe: null },
+  surrefraction: { sph: -0.5, cyl: 0, axe: null },
+  distanceSurrefractionMm: 12,
+  rotation: { valeur: 0, sens: 'gauche', stable: true },
+});
+const memeCalculVertexA = M.calculerMoteurA({ sph: -2, cyl: 0, axe: null, vertexMm: 12 });
+verifier(
+  'moteurB : la distance de surrefraction est un parametre distinct de la distance vertex du moteur A (memes 12 mm, resultats differents car les entrees different)',
+  distinctionDistances.theorique.sph !== memeCalculVertexA.theorique.sph,
+  JSON.stringify({ distinctionDistances, memeCalculVertexA }),
+);
+
+const surrefractionAxeDifferent = M.calculerMoteurB({
+  lentille: { sph: -2, cyl: -2, axe: 90 },
+  surrefraction: { sph: -0.5, cyl: -1, axe: 30 },
+  distanceSurrefractionMm: 0,
+  rotation: { valeur: 0, sens: 'gauche', stable: true },
+});
+const additionNaive = { sph: -2 + -0.5, cyl: -2 + -1 };
+verifier(
+  'moteurB : une surrefraction sphero-cylindrique d\'axe different est combinee par vecteurs de puissance, jamais par addition composante a composante',
+  !presque(surrefractionAxeDifferent.theorique.cyl, additionNaive.cyl, 1e-6)
+    || !presque(surrefractionAxeDifferent.theorique.sph, additionNaive.sph, 1e-6),
+  JSON.stringify({ surrefractionAxeDifferent, additionNaive }),
+);
+verifier(
+  'moteurB : la combinaison ci-dessus correspond bien a combinePrescriptions du noyau (meme code, pas une formule reecrite)',
+  presque(
+    surrefractionAxeDifferent.theorique.sph,
+    P.combinePrescriptions({ sph: -2, cyl: -2, axe: 90 }, { sph: -0.5, cyl: -1, axe: 30 }).sph,
+  ),
+);
+
+const rotationInstable = M.calculerMoteurB({
+  lentille: { sph: -2, cyl: -1, axe: 90 },
+  surrefraction: { sph: 0, cyl: 0, axe: null },
+  distanceSurrefractionMm: 0,
+  rotation: { valeur: 12, sens: 'gauche', stable: false },
+});
+verifier(
+  'moteurB : une rotation declaree instable est signalee sans supprimer la valeur calculee',
+  rotationInstable.cible !== null
+    && rotationInstable.problemes.some((p) => p.code === 'ROTATION_INSTABLE' && p.gravite === 'avertissement'),
+  JSON.stringify(rotationInstable),
+);
+
+for (const distanceSurrefractionMm of [-5, 500, NaN]) {
+  const resultat = M.calculerMoteurB({
+    lentille: { sph: -2, cyl: 0, axe: null },
+    surrefraction: { sph: 0, cyl: 0, axe: null },
+    distanceSurrefractionMm,
+    rotation: { valeur: 0, sens: 'gauche', stable: true },
+  });
+  verifier(
+    'moteurB : distance de surrefraction invalide (' + String(distanceSurrefractionMm) + ') produit un probleme identifie et aucune valeur',
+    resultat.theorique === null && resultat.cible === null && resultat.problemes.length === 1 && resultat.problemes[0].gravite === 'erreur',
+    JSON.stringify(resultat),
+  );
+}
 
 /* ── Bilan ─────────────────────────────────────────────────────────────── */
 
