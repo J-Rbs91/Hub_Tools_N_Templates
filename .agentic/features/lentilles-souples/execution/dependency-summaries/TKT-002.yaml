@@ -1,0 +1,39 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-002
+commit: ccee1fc
+behavior:
+- 'outils/lentilles-souples/noyau/moteurs.js expose LentillesMoteurs (module.exports
+  Node + globalThis navigateur, meme enveloppe double-export que prescription.js)
+  : compenserVertexSpherique/decompenserVertexSpherique(puissanceD, distanceMm, parametre),
+  compenserVertexSpheroCylindrique/decompenserVertexSpheroCylindrique(rx, distanceMm,
+  parametre) compensent chaque meridien principal separement et ne touchent jamais
+  l''axe, axeReellementPorte/axeACommander(axe, rotationDeg, sens in {''gauche'',''droite''})
+  sont reciproques par construction, arrondirPrescription(rx, pas=0.25) ne modifie
+  jamais rx et renvoie {valeurs, detail}, calculerMoteurA({sph,cyl,axe,vertexMm})
+  et calculerMoteurB({lentille,surrefraction,distanceSurrefractionMm,rotation:{valeur,sens,stable}})
+  renvoient {theorique, cible, problemes[]} et ne combinent jamais sph/cyl par addition
+  directe (P.combinePrescriptions par vecteurs de puissance).'
+- toute distance (vertexMm du moteur A, distanceSurrefractionMm du moteur B, parametres
+  distincts) negative, > 20mm (DISTANCE_MM_MAX, borne de plausibilite de saisie choisie
+  par ce ticket faute de borne fixee en amont, pas une recommandation clinique) ou
+  non numerique produit un objet {code in DISTANCE_NEGATIVE|DISTANCE_ABERRANTE|DISTANCE_NON_NUMERIQUE,
+  gravite:'erreur', parametre, message} dans problemes[] et force theorique=cible=null
+  ; une rotation.stable===false ajoute {code:'ROTATION_INSTABLE', gravite:'avertissement'}
+  sans toucher au calcul.
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/noyau/moteurs.js
+- tests/lentilles-souples.test.mjs
+migrations: []
+invariants: []
+limitations:
+- 20mm comme borne 'aberrante' pour vertexMm/distanceSurrefractionMm est un choix
+  d'implementation de ce ticket (aucune borne n'etait fixee dans mission/design/research)
+  ; a revalider explicitement si un ticket ulterieur (UI, review) a une exigence differente.
+- moteurs.js n'est pas encore charge par outils/lentilles-souples/index.html (le squelette
+  de TKT-008 est volontairement vide de logique) ; le branchement UI reste hors scope
+  de ce ticket.
+discoveries: []
+reported_at: '2026-09-05T11:33:50Z'

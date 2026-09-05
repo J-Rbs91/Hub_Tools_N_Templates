@@ -67,7 +67,7 @@ id: LS-02
 objective: Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur
   B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens et
   stabilité).
-status: pending
+status: done
 dependencies:
 - LS-01
 files:
