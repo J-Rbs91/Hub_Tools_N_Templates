@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<!-- gc.zgo.at / j-rbs-hub.goatcounter.com : compteur de visites (chemin de la page
+     seulement, sans cookie), voir le script en fin de fichier. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://j-rbs-hub.goatcounter.com; connect-src 'self' https://j-rbs-hub.goatcounter.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lentilles souples</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1F6FB2">
+<style>
+  :root{
+    --blue:#1F6FB2; --blue-d:#175A92; --ink:#1A2A3A; --grey:#5A6B7B;
+    --line:#C9D6E2; --light:#EEF4F9; --bg:#F4F7FA; --white:#fff;
+    --font: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family: var(--font);
+    background:var(--bg);color:var(--ink);line-height:1.4;
+    padding:24px 16px 92px;
+  }
+  .sheet{
+    max-width:640px;margin:0 auto;background:var(--white);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    box-shadow:0 6px 30px rgba(26,42,58,.08);
+  }
+  header{background:var(--blue);color:#fff;padding:14px 28px}
+  header h1{font-size:18px;font-weight:700;letter-spacing:.2px}
+  header .meta{font-size:12px;opacity:.95;margin-top:3px}
+  .body{padding:22px 28px 26px}
+  .body p{font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 12px}
+  .body p:last-child{margin-bottom:0}
+  .note{
+    background:var(--light);border-left:4px solid var(--blue);
+    border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:var(--grey);
+  }
+
+  /* retour aux outils (en haut) */
+  .topbar{max-width:640px;margin:0 auto 12px}
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+    font-size:13px;font-weight:700;color:var(--blue);
+    border:1px solid var(--line);background:var(--white);
+    padding:7px 14px;border-radius:8px;transition:.15s;
+  }
+  .back-link:hover{background:var(--light)}
+
+  /* bouton retour flottant (iOS : pas de bouton retour navigateur) */
+  .ios-back{
+    display:none;position:fixed;z-index:1000;align-items:center;gap:6px;
+    right:calc(env(safe-area-inset-right,0px) + 14px);
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    background:var(--blue);color:#fff;text-decoration:none;
+    font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;
+    box-shadow:0 4px 16px rgba(26,42,58,.32);
+  }
+  body.is-ios .ios-back{display:inline-flex}
+  body.is-ios .topbar{display:none}
+
+  /* responsive smartphone */
+  @media (max-width:640px){
+    body{padding:14px 10px 20px}
+    header{padding:12px 16px}
+    .body{padding:16px 16px 20px}
+  }
+
+  /* Mesure de fréquentation : mention discrète, jamais imprimée. */
+  .mesure-note{
+    max-width:52ch;
+    margin:32px auto 20px;
+    padding:0 16px;
+    text-align:center;
+    font-size:12px;
+    line-height:1.5;
+    color:var(--grey,#5A6B7B)
+  }
+  @media print{ .mesure-note{display:none!important} }
+</style>
+</head>
+<body>
+
+<a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
+
+<div class="topbar"><a class="back-link" href="../../">&#8592; Retour aux outils</a></div>
+
+<div class="sheet">
+  <header>
+    <h1>Lentilles souples</h1>
+    <div class="meta">Aide au calcul et à la sélection de paramètres</div>
+  </header>
+
+  <div class="body">
+    <p>
+      Ce module accompagnera la conversion d'une prescription de lunettes vers une
+      lentille souple, la prise en compte d'une surréfraction, puis la recherche des
+      paramètres fabricant disponibles.
+    </p>
+    <p class="note">
+      Cette page pose le squelette de l'outil. Les blocs de calcul (conversion,
+      surréfraction, fabrication) seront ajoutés dans une prochaine étape, avec
+      leurs propres tests.
+    </p>
+  </div>
+</div>
+
+<p class="mesure-note">
+  Fréquentation de cette page mesurée de façon anonyme, sans cookie.
+  Vos saisies ne quittent jamais cet appareil.
+</p>
+
+<script>
+  /* Détection iOS : affiche le bouton retour flottant (iPhone/iPad n'ont
+     pas de bouton retour navigateur, notamment en mode plein écran) */
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
+    document.body.classList.add('is-ios');
+  }
+</script>
+
+<!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
+     aucune donnée saisie transmise. -->
+<script data-goatcounter="https://j-rbs-hub.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
