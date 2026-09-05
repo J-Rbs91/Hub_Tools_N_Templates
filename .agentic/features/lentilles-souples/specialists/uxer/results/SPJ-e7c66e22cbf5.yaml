@@ -1,0 +1,35 @@
+status: passed
+summary: 'Les 4 remediations bloquantes precedentes sont bien presentes dans le code
+  : libelle textuel Erreur/Avertissement, role=status+aria-live=polite sur les 7 zones
+  de resultat, h2 dans le summary du bloc B, niveau 4 a 17px (label et valeur, par
+  heritage CSS). Aucune regression relevee sur le perimetre lu.'
+evidence:
+- outils/lentilles-souples/index.html:608 span.probleme-label avec texte 'Avertissement'/'Erreur'
+  selon p.gravite
+- outils/lentilles-souples/index.html:230,253,329,396,413,431,450 role="status" aria-live="polite"
+  sur les 7 zones de sortie (a-od-out, a-og-out, b-od-out, b-og-out, c-catalogue-erreurs,
+  c-od-out, c-og-out)
+- outils/lentilles-souples/index.html:261 <summary><h2>B · Surréfraction (facultatif)</h2></summary>,
+  reset CSS neutre ligne 54
+- outils/lentilles-souples/index.html:119-120 .val-tier-4{font-size:17px} sans override
+  de font-size sur .val-tier-4 .val-tier-lab, donc heritage vers le label et le noeud
+  texte de la valeur ajoute par ligneTier() (538-544) ; usage reel ligne 932
+findings: []
+limitations:
+- 'Aucun navigateur/outil Playwright disponible dans l''environnement : pas de verification
+  par execution ni de capture visuelle du rendu (message d''erreur reellement affiche
+  a l''ecran, attributs ARIA post-rendu, ouverture effective du details, taille de
+  police calculee via getComputedStyle)'
+- 'npx html-validate@11.5.6 non execute (demande d''approbation non resolue dans ce
+  contexte) : conformite HTML non revalidee par l''outil CI, seulement par lecture'
+files_examined:
+- outils/lentilles-souples/index.html
+capabilities_used:
+- ui-review-qa
+changes_made: []
+job_id: SPJ-e7c66e22cbf5
+specialist: uxer
+feature_id: lentilles-souples
+phase: review
+schema_version: 1
+reported_at: '2026-09-05T13:07:39Z'

@@ -1,0 +1,19 @@
+## Revue finale : `outils/lentilles-souples/index.html`
+
+J'ai relu l'intégralité du fichier et vérifié chacun des quatre points de remédiation par lecture directe du code (markup statique + logique JS de rendu, qui est déterministe ici : pas d'ambiguïté d'exécution pour ce qui est demandé).
+
+**1. Libellé textuel ERREUR/AVERTISSEMENT** — confirmé. `texteAffichableProbleme` reste séparée du rendu, et `renderProblemes` (ligne 602-614) crée systématiquement un `<span class="probleme-label">` avec le texte `'Avertissement'` ou `'Erreur'` (ligne 608), en plus de la couleur/bordure. Le distinguo n'est plus porté par la seule couleur.
+
+**2. `role="status"` + `aria-live="polite"`** — confirmé sur les sept zones de résultat dynamiques : `a-od-out`, `a-og-out` (230, 253), `b-od-out`, `b-og-out` (329, 396), `c-catalogue-erreurs`, `c-od-out`, `c-og-out` (413, 431, 450). Aucune zone de sortie n'a été oubliée.
+
+**3. `<h2>` dans le `summary` du bloc B** — confirmé, ligne 261 : `<summary><h2>B · Surréfraction (facultatif)</h2></summary>`, avec un reset CSS neutre (`font:inherit;color:inherit;margin:0`, ligne 54) qui ne casse pas le style visuel du summary.
+
+**4. Niveau 4 à 17px, valeur incluse** — confirmé. `.val-tier-4{font-size:17px;...}` (ligne 119) s'applique au `<p>` entier ; `.val-tier-lab` ne redéfinit pas `font-size`, donc le label hérite des 17px, et le texte de la valeur (nœud texte ajouté après le label dans `ligneTier`, ligne 538-544) hérite aussi du `<p>` parent : les deux sont bien à 17px, pas seulement le libellé. Usage réel confirmé ligne 932 (`'Paramètre fabricant disponible '` sur une carte `.resultat-c`).
+
+Aucune régression visible ailleurs dans le fichier sur ce périmètre (structure des blocs A/B/C, gestion des états vides, catalogue de démo, compteur de visite) au vu de cette lecture.
+
+**Limitation** : aucune vérification par exécution ou visuelle n'a pu être menée (pas de navigateur/Playwright disponible dans l'environnement, `html-validate` bloqué par une demande d'approbation non résolue). Les quatre points relèvent d'un rendu statique/déterministe (attributs présents dans le markup, cascade CSS non conditionnelle), donc la preuve de code est solide, mais ce n'est pas une preuve d'exécution.
+
+ARCLINE_UXER_RESULT_BEGIN
+{"status":"passed","summary":"Les 4 remediations bloquantes precedentes sont bien presentes dans le code : libelle textuel Erreur/Avertissement, role=status+aria-live=polite sur les 7 zones de resultat, h2 dans le summary du bloc B, niveau 4 a 17px (label et valeur, par heritage CSS). Aucune regression relevee sur le perimetre lu.","evidence":["outils/lentilles-souples/index.html:608 span.probleme-label avec texte 'Avertissement'/'Erreur' selon p.gravite","outils/lentilles-souples/index.html:230,253,329,396,413,431,450 role=\"status\" aria-live=\"polite\" sur les 7 zones de sortie (a-od-out, a-og-out, b-od-out, b-og-out, c-catalogue-erreurs, c-od-out, c-og-out)","outils/lentilles-souples/index.html:261 <summary><h2>B · Surréfraction (facultatif)</h2></summary>, reset CSS neutre ligne 54","outils/lentilles-souples/index.html:119-120 .val-tier-4{font-size:17px} sans override de font-size sur .val-tier-4 .val-tier-lab, donc heritage vers le label et le noeud texte de la valeur ajoute par ligneTier() (538-544) ; usage reel ligne 932"],"findings":[],"limitations":["Aucun navigateur/outil Playwright disponible dans l'environnement : pas de verification par execution ni de capture visuelle du rendu (message d'erreur reellement affiche a l'ecran, attributs ARIA post-rendu, ouverture effective du details, taille de police calculee via getComputedStyle)","npx html-validate@11.5.6 non execute (demande d'approbation non resolue dans ce contexte) : conformite HTML non revalidee par l'outil CI, seulement par lecture"],"files_examined":["outils/lentilles-souples/index.html"],"capabilities_used":["ui-review-qa"],"changes_made":[]}
+ARCLINE_UXER_RESULT_END

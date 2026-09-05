@@ -1,0 +1,20 @@
+schema_version: 1
+id: SPJ-e7c66e22cbf5
+specialist: uxer
+feature_id: lentilles-souples
+phase: review
+objective: 'Revue UX/UI finale de outils/lentilles-souples/index.html apres remediation
+  des quatre findings bloquants de la revue precedente : libelle textuel ERREUR ou
+  AVERTISSEMENT sur chaque message, role=status et aria-live sur les zones de resultat,
+  h2 dans le summary du bloc surrefraction, niveau 4 porte a 17 px avec la valeur.
+  Verifier que ces quatre points sont bien traites et rendre un verdict sur l ensemble.'
+scope:
+  ticket: null
+  files:
+  - outils/lentilles-souples/index.html
+requested_capabilities:
+- ui-review-qa
+- responsive-accessibility
+profile: deep
+mode: inspect
+created_at: '2026-09-05T13:05:01Z'
