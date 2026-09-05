@@ -4,7 +4,7 @@ roadmap_version: 2
 plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
 execution:
   strategy: dependency-aware
-  current_wave: 1
+  current_wave: 2
 tickets:
 - schema_version: 1
   id: TKT-001
@@ -1204,7 +1204,7 @@ tickets:
 - schema_version: 1
   id: TKT-008
   title: 'Page de l''outil : squelette conforme au contrat de navigation du hub'
-  status: to_execute
+  status: done
   origin:
     type: discovered
     discovered_during: TKT-002
@@ -1349,6 +1349,7 @@ tickets:
     mode: parallel
   commit:
     policy: one-ticket-one-commit
+    sha: 62bf121
   blocks:
   - TKT-002
   parallel_with:
@@ -1356,4 +1357,49 @@ tickets:
   parallel_reason:
   - 'TKT-001: no dependency relation; explicit file scopes are disjoint'
   serial_reason: []
-updated_at: '2026-09-05T11:13:30Z'
+  assignment:
+    branch: arc/lentilles-souples/TKT-008
+    worktree: /home/user/wt/TKT-008
+    actor: WKR-TKT-008
+    scope:
+    - outils/lentilles-souples/index.html
+    routing_sequence: 1
+    routing_policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+    capability_runtime:
+      provider: claude-code
+      requested:
+        capability_tier: economy
+        effort: low
+        context_profile: standard
+      resolved:
+        capability_tier: economy
+        model: sonnet
+        effort: low
+        context_profile: null
+      support:
+        model_selection: true
+        effort_selection: true
+        context_selection: false
+      enforcement:
+        model: supported
+        effort: supported
+        context: unsupported
+      available: unverified
+      applied: false
+      argv:
+      - claude
+      - --model
+      - sonnet
+      - --effort
+      - low
+  completion:
+    commit: 62bf121
+    completed_at: '2026-09-05T11:24:52Z'
+    actor: worker
+    accepted_by: orchestrator
+  history:
+  - from: to_execute
+    to: done
+    at: '2026-09-05T11:24:52Z'
+    reason: candidate result passed orchestrator acceptance
+updated_at: '2026-09-05T11:24:52Z'

@@ -7,7 +7,7 @@ This file is generated from `index.yaml`. The index is authoritative.
 - **TKT-001 — Noyau de prescription : conventions de cylindre et d'axe, arithmétique entière en millièmes de dioptrie, arrondi centralisé avec détection d'égalité, transposition, normalisation, vecteurs de puissance et combinaison.** — `done`, actor `uxer`, depends on: none
   - parallel with: TKT-008
   - why: TKT-008: no dependency relation; explicit file scopes are disjoint
-- **TKT-008 — Page de l'outil : squelette conforme au contrat de navigation du hub** — `to_execute`, actor `implementer`, depends on: none
+- **TKT-008 — Page de l'outil : squelette conforme au contrat de navigation du hub** — `done`, actor `implementer`, depends on: none
   - parallel with: TKT-001
   - why: TKT-001: no dependency relation; explicit file scopes are disjoint
 
