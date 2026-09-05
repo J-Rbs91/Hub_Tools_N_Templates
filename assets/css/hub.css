@@ -608,6 +608,32 @@ body {
   line-height: 1.5;
 }
 
+/* Outil pas encore ouvert au magasin : la carte reste en place et lisible,
+   elle annonce simplement qu'un code est demandé à l'arrivée. C'est une
+   commodité de mise au point, pas une mesure de sécurité. */
+.tool-card__badge {
+  display: inline-block;
+  margin-left: var(--s-2);
+  vertical-align: middle;
+  font-size: var(--fs-hint);
+  font-weight: var(--fw-bold);
+  letter-spacing: .02em;
+  color: var(--blue-800);
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: var(--r-pill);
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.tool-card__note {
+  display: block;
+  margin-top: var(--s-1);
+  font-style: normal;
+  font-size: var(--fs-label);
+  color: var(--muted-2);
+}
+
 /* Chevron de destination : signale la nature « navigation » de la carte. */
 .tool-card__go {
   grid-area: go;
