@@ -1,0 +1,41 @@
+schema_version: 1
+id: DEC-0008
+mission: lentilles-souples
+phase: review
+category: product_semantics
+statement: Verrouiller l'acces a l'outil lentilles souples derriere un code de commodite
+  (2406), le temps de la mise au point, afin que le module ne soit pas employe en
+  magasin avant d'etre pret.
+status: accepted
+authority:
+  actor: human
+  level: D
+  delegated: false
+  delegated_levels: []
+  approval_ref: 'Demande directe du mainteneur en session : « il faut bloquer l''acces
+    a l''outil lentille souple avec un code : 2406 [...] ce n''est pas une question
+    de securite seulement de commodite afin de pouvoir dev et tester le truc de mon
+    cote sans que les opticiens n''y accede. »'
+options_considered: []
+chosen: Verrouiller l'acces a l'outil lentilles souples derriere un code de commodite
+  (2406), le temps de la mise au point, afin que le module ne soit pas employe en
+  magasin avant d'etre pret.
+rationale:
+- 'Decision du mainteneur, qui qualifie lui-meme le besoin de commodite et non de
+  securite. Le code est ecrit en clair dans outils/lentilles-souples/index.html, page
+  que le navigateur livre telle quelle : quiconque ouvre la source le lit. Ce n''est
+  donc pas un controle d''acces et ce n''est presente comme tel nulle part, ni dans
+  le code, ni dans l''interface, ni dans la revue. L''etat deverrouille est memorise
+  par poste sous la cle localStorage lentilles-acces-v1, qui ne contient qu un drapeau
+  et aucune donnee personnelle. L''ecran de code n''est deliberement pas une couche
+  Couches : le geste retour d''Android le refermerait, ce qui contournerait le verrou
+  ; c''est l''etat initial de la page, pas une modale posee par-dessus le contenu.
+  Un bouton Verrouiller permet de refermer avant de rendre l''appareil. Le retrait
+  du verrou tient en trois blocs a supprimer, nommes dans le commentaire du code.'
+evidence:
+- 'outils/lentilles-souples/index.html (ecran #verrou, enveloppe #outil, bloc de logique)
+  ; index.html et assets/css/hub.css (pastille Acces par code) ; node verrou.mjs :
+  huit scenarios verifies dans Chromium.'
+reversibility: easy
+requires_user_approval: true
+created_at: '2026-09-05T15:40:20Z'

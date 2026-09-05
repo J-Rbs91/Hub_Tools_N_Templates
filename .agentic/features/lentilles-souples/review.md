@@ -431,6 +431,36 @@ evidence: >-
   blinker, cryptography, paquets du conteneur).
 ```
 
+## Changement postérieur à la revue
+
+Le mainteneur a demandé, après la revue, que l'outil soit verrouillé par un code le temps de sa
+mise au point (`DEC-0008`). L'écran de code est l'état initial de la page ; le contenu de l'outil
+est enveloppé dans `#outil` et n'apparaît qu'une fois le code saisi. L'état déverrouillé est
+mémorisé par poste sous `lentilles-acces-v1`, un simple drapeau.
+
+Trois points sont consignés ici pour que la prochaine revue n'ait pas à les redécouvrir :
+
+- **Le code est en clair dans la page livrée.** C'est assumé et dit tel quel dans le commentaire
+  du code, dans `DEC-0008` et ici : c'est une commodité de mise au point, pas un contrôle
+  d'accès. Rien dans l'interface ne laisse croire l'inverse.
+- **L'écran de code n'est pas une couche `Couches`, volontairement.** Le geste retour d'Android
+  refermerait la couche et contournerait le verrou. `tests/navigation-retour.test.mjs` reste vert
+  parce que l'écran n'est ni `role="dialog"` ni `.modal-overlay` : ce n'est pas une modale posée
+  par-dessus le contenu, c'est l'état initial de la page. Les deux liens `← Retour` restent
+  atteignables verrouillé.
+- **Une clé `localStorage` s'ajoute à l'inventaire de SEC-FE-022** : `lentilles-acces-v1`, valeur
+  `'1'`, aucune donnée personnelle.
+
+Vérifié dans Chromium, huit scénarios : arrivée verrouillée avec focus sur le champ, code faux
+refusé en français, code juste accepté à la touche Entrée, outil fonctionnel après ouverture,
+état conservé au rechargement, bouton « Verrouiller » qui referme et efface la clé, verrouillage
+persistant après rechargement, et poste neuf verrouillé. Aucune erreur JavaScript. Pas de
+débordement horizontal à 360 px ni à 1280 px, sur la page comme sur le hub.
+
+**Ce changement n'est pas couvert par la revue SECURIX**, dont le verdict reste attaché au commit
+`f1367935f09f4edf893a83395d03b56aa5780e60`. La revue précède ce changement ; elle ne le valide
+pas et ne le contredit pas.
+
 ## Not run
 
 Ce qui n'a pas été exécuté est nommé ici plutôt que compté comme propre.

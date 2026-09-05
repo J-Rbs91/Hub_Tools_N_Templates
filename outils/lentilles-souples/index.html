@@ -181,13 +181,98 @@
     color:var(--grey,#5A6B7B)
   }
   @media print{ .mesure-note{display:none!important} }
+
+  /* Verrou d'acces. Commodite de developpement, pas une mesure de securite :
+     le code est dans la source de la page et n'importe qui sachant l'ouvrir le
+     lira. Il sert a ce que l'outil ne soit pas emprunte par erreur pendant
+     qu'il est encore en cours de mise au point. */
+  #verrou{
+    max-width:420px;margin:48px auto;padding:0 16px;
+  }
+  .verrou-carte{
+    background:var(--white);border:1px solid var(--line);border-radius:14px;
+    padding:26px 24px;box-shadow:0 2px 10px rgba(26,42,58,.06);text-align:center;
+  }
+  .verrou-carte h1{font-size:19px;margin:0 0 6px;color:var(--ink)}
+  .verrou-carte p{font-size:14px;line-height:1.55;color:var(--grey);margin:0 0 18px}
+  .verrou-champ{
+    width:100%;box-sizing:border-box;text-align:center;
+    font-size:22px;font-weight:700;letter-spacing:.28em;
+    padding:12px 10px;border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);background:var(--white);
+  }
+  .verrou-champ:focus{outline:2px solid var(--blue);outline-offset:1px}
+  .verrou-valider{
+    margin-top:14px;width:100%;cursor:pointer;
+    background:var(--blue);color:#fff;border:0;border-radius:10px;
+    font-size:15px;font-weight:700;padding:12px 16px;
+  }
+  .verrou-valider:hover{background:var(--blue-d)}
+  .verrou-erreur{
+    margin:14px 0 0;font-size:13px;font-weight:700;color:var(--err-ink);
+    background:var(--err-bg);border:1px solid var(--err-line);
+    border-radius:8px;padding:9px 12px;
+  }
+  .verrou-erreur[hidden]{display:none}
+  .reverrouiller{
+    display:inline-block;margin-left:auto;font-size:12px;font-weight:700;
+    color:var(--grey);background:none;border:0;cursor:pointer;padding:7px 10px;
+    text-decoration:underline;
+  }
+  .reverrouiller:hover{color:var(--ink)}
+  .topbar{display:flex;align-items:center;gap:10px}
+
+  /* Etat par defaut : verrouille. La classe est posee tres tot par un script
+     en tete de body, pour qu'un poste deja deverrouille ne voie pas l'ecran de
+     code clignoter. */
+  #outil{display:none}
+  html.deverrouille #outil{display:block}
+  html.deverrouille #verrou{display:none}
+  html.deverrouille .reverrouiller{display:inline-block}
+  html:not(.deverrouille) .reverrouiller{display:none}
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
 </style>
 </head>
 <body>
 
+<script>
+  /* Avant le rendu : un poste deja deverrouille ne doit pas voir l'ecran de
+     code apparaitre une fraction de seconde. */
+  try {
+    if (localStorage.getItem('lentilles-acces-v1') === '1') {
+      document.documentElement.className += ' deverrouille';
+    }
+  } catch (e) { /* stockage indisponible : on reste verrouille */ }
+</script>
+
 <a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
 
-<div class="topbar"><a class="back-link" href="../../">&#8592; Retour aux outils</a></div>
+<div class="topbar">
+  <a class="back-link" href="../../">&#8592; Retour aux outils</a>
+  <button type="button" class="reverrouiller" id="reverrouiller">Verrouiller</button>
+</div>
+
+<section id="verrou">
+  <div class="verrou-carte">
+    <h1>Outil en cours de mise au point</h1>
+    <p>
+      Cet outil n'est pas encore ouvert au magasin. Saisissez le code d'accès pour
+      continuer, ou revenez à la liste des outils.
+    </p>
+    <form id="verrou-form" novalidate>
+      <label class="sr-only" for="verrou-code">Code d'accès</label>
+      <input type="password" id="verrou-code" class="verrou-champ" inputmode="numeric"
+             autocomplete="off" maxlength="12" placeholder="Code" aria-describedby="verrou-msg">
+      <button type="submit" class="verrou-valider">Ouvrir l'outil</button>
+    </form>
+    <p class="verrou-erreur" id="verrou-msg" role="status" aria-live="polite" hidden></p>
+  </div>
+</section>
+
+<div id="outil">
 
 <div class="sheet">
   <header>
@@ -459,6 +544,83 @@
   Fréquentation de cette page mesurée de façon anonyme, sans cookie.
   Vos saisies ne quittent jamais cet appareil.
 </p>
+
+</div><!-- #outil -->
+
+<script>
+/* Verrou d'acces a l'outil.
+   Ceci n'est pas une mesure de securite et ne pretend pas en etre une : le code
+   est ecrit en clair juste en dessous, dans une page que le navigateur livre
+   telle quelle. Quiconque ouvre la source le lit. C'est une commodite, le temps
+   que l'outil soit mis au point : elle evite qu'il soit employe par erreur en
+   magasin avant d'etre pret. Le jour ou l'outil s'ouvre au magasin, il suffit de
+   retirer ce bloc, l'ecran #verrou et l'enveloppe #outil. */
+(function () {
+  'use strict';
+
+  var CODE = '2406';
+  var CLE = 'lentilles-acces-v1';
+
+  var ecran = document.getElementById('verrou');
+  var form = document.getElementById('verrou-form');
+  var champ = document.getElementById('verrou-code');
+  var msg = document.getElementById('verrou-msg');
+  var bouton = document.getElementById('reverrouiller');
+  var racine = document.documentElement;
+
+  function memoriser(ouvert) {
+    try {
+      if (ouvert) { localStorage.setItem(CLE, '1'); } else { localStorage.removeItem(CLE); }
+    } catch (e) {
+      /* Navigation privee ou stockage refuse : le code sera redemande a chaque
+         visite. C'est genant, ce n'est pas cassé, et on ne le cache pas. */
+    }
+  }
+
+  function ouvrir() {
+    racine.className = racine.className.replace(/\s*\bdeverrouille\b/g, '') + ' deverrouille';
+    msg.hidden = true;
+    champ.value = '';
+  }
+
+  function fermer() {
+    racine.className = racine.className.replace(/\s*\bdeverrouille\b/g, '');
+    memoriser(false);
+    msg.hidden = true;
+    champ.value = '';
+    champ.focus();
+  }
+
+  form.addEventListener('submit', function (evenement) {
+    evenement.preventDefault();
+    if (champ.value.trim() === CODE) {
+      memoriser(true);
+      ouvrir();
+      return;
+    }
+    msg.textContent = 'Code incorrect.';
+    msg.hidden = false;
+    champ.value = '';
+    champ.focus();
+  });
+
+  champ.addEventListener('input', function () {
+    if (!msg.hidden) { msg.hidden = true; }
+  });
+
+  bouton.addEventListener('click', fermer);
+
+  /* Le script en tete de body a deja pose la classe si l'acces etait memorise.
+     Sinon on donne le focus au champ. */
+  if (!/\bdeverrouille\b/.test(racine.className)) {
+    champ.focus();
+  }
+
+  /* Le mainteneur garde une porte de sortie sans passer par l'interface :
+     localStorage.setItem('lentilles-acces-v1', '1') dans la console. */
+  void ecran;
+}());
+</script>
 
 <script src="noyau/prescription.js"></script>
 <script src="noyau/moteurs.js"></script>
