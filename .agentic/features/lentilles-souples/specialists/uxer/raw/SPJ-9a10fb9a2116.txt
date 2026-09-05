@@ -1,0 +1,113 @@
+I've completed the UXER research-phase framing for the lentilles-souples module: read the mission/constraints/decisions already recorded by Arcline, inspected the hub's real navigation contract (`tests/navigation-retour.test.mjs`, `docs/navigation-retour.md`) and its closest structural precedent (`outils/epaisseur-verres`), and ran the four requested UXER capabilities against that evidence. Two of the five capabilities (`ux-resource-researcher`, `product-pattern-research`) could only run in a degraded/offline mode: neither the UXER reference catalog (outside the allowed working directory) nor WebSearch/WebFetch were grantable in this session, so their own "cross two source categories" requirement wasn't met — flagged honestly below rather than simulated.
+
+ARCLINE_UXER_RESULT_BEGIN
+{
+  "status": "partial",
+  "summary": "UX/UI framing produced for the not-yet-built lentilles-souples module, grounded in real repo evidence (navigation contract, closest precedent tool). ux-request-clarifier and ux-navigation-audit ran with full evidence. ux-resource-researcher and product-pattern-research ran in degraded/offline mode: both the UXER reference catalog and WebSearch/WebFetch were permission-blocked in this session, so their mandatory external cross-validation could not be executed; conclusions rest on repo precedent and the analyst's general documented knowledge only, explicitly flagged as such rather than presented as sourced consultation.",
+  "evidence": [
+    "tests/navigation-retour.test.mjs:78-96: Couches manager is required only when the tool's HTML contains role=\"dialog\"/role=\"alertdialog\" or class=\"modal-overlay\"; an inline <details> accordion triggers no such requirement.",
+    "tests/navigation-retour.test.mjs:32-35: outils/ is auto-discovered via readdirSync, so a future outils/lentilles-souples/index.html is automatically checked (iOS back class, is-ios detection, href=\"../../\") with no manual test registration needed.",
+    "docs/navigation-retour.md: full Couches/back-navigation contract (push on open, consume on close, single close path, wizard step = one push) and its six manual verification steps.",
+    "outils/epaisseur-verres/index.html:507-533: existing OD/OG dual-eye input precedent is a fixed <table class=\"eyes\"> (5 data columns), CSS at :204-209 only shrinks font/padding at narrow widths, no reflow/stacking rule found.",
+    "outils/epaisseur-verres/index.html:3250-3273: the only true modal/wizard in the repo (photo-based shape scanner) uses Couches.ouvrir per step and Couches.fermerJusqua to exit; the surrounding calculation sections (Monture, Verre, Ordonnance, Synthese) are plain stacked <section class=\"card\"> blocks, not a wizard.",
+    "index.html:138-283: all 4 existing tool-card pitches are benefit statements in the imperative; none currently need to signal 'aide au choix, pas de prescription' because none of them select among ranked alternatives the way lentilles-souples will.",
+    "index.html campagne-email card (tool-card--soon, no href): existing precedent for shipping a card that announces a tool without yet granting access, relevant if lentilles-souples ships blocks incrementally.",
+    ".agentic/features/lentilles-souples/{research,design,plan,review,ship}.md: all still template-empty; .agentic/missions/lentilles-souples/mission.yaml and constraints.yaml already fix the three-block UI, the visual hierarchy, the forbidden/required terminology, and the ban on multifocals/patient data — confirming the UX scope this framing must not re-litigate.",
+    "Repeated tool calls to Read (/home/user/uxer/skills/uxer-orchestrator/references/routing-table.md) and Bash (cat of the same path) were both refused: 'Claude Code may only concatenate files from the allowed working directories for this session: /home/user/Hub_Tools_N_Templates' — confirms the UXER corpus outside the product repo is inaccessible here.",
+    "WebSearch calls (GOV.UK calculated-result patterns; NN/g progressive disclosure) both returned 'you haven't granted it yet' — confirms no network research capability was available this session."
+  ],
+  "findings": [
+    {
+      "id": "UX-001",
+      "severity": "medium",
+      "blocking": false,
+      "description": "Whether DESIGN chooses an inline <details> accordion or a true dialog/sheet for 'Détails du calcul' and for any manufacturer/catalogue picker is not just a visual choice: tests/navigation-retour.test.mjs only requires the Couches manager (and fails CI without it) when the markup contains role=\"dialog\"/role=\"alertdialog\" or class=\"modal-overlay\". An accordion avoids that obligation entirely; a modal-styled picker must reuse Couches verbatim or CI breaks.",
+      "evidence": "tests/navigation-retour.test.mjs:78-96 (structural check), docs/navigation-retour.md section 6 ('Si l'outil n'ouvre aucune couche, il n'y a rien à faire')"
+    },
+    {
+      "id": "UX-002",
+      "severity": "medium",
+      "blocking": false,
+      "description": "The repo's only existing dense per-eye numeric input (epaisseur-verres' OD/OG table, 5 columns) does not reflow on narrow viewports, it only shrinks font/padding. Block A of lentilles-souples has a comparable field count (4: sph/cyl/axe/vertex) so the same approach is plausible, but Block B (lentille portée + surréfraction + rotation/sens/stabilité) has materially more fields per eye; reusing an unmodified shrink-only table for Block B risks becoming illegible on a 320-375px phone, which is the primary usage context per the mission (CON-010, staff use on smartphones in-store).",
+      "evidence": "outils/epaisseur-verres/index.html:507-533 (table markup) and :204-209 (CSS: padding/font-size only, no @media reflow rule found for .eyes)"
+    },
+    {
+      "id": "UX-003",
+      "severity": "medium",
+      "blocking": false,
+      "description": "None of the 4 existing hub tool-cards need to signal 'this is an aid, not a prescription' because none of them rank alternatives the way lentilles-souples will (Block C surfaces a scored Top 3-5 of manufacturer parameters). The mission's terminology ban (never 'lentille/puissance à commander') is enforced inside the tool's own UI (CON-020) but nothing currently extends that framing to the hub's entry point (card pitch and its <details class=\"tool-card__more\">). A rushed reading of the card alone could misread the tool as an ordering shortcut before it is even opened.",
+      "evidence": "index.html:138-283 (all 4 card pitches inspected); mission.yaml constraint CON-020 / mission.raw_request §32-33 scopes the terminology rule to the tool's interface, not explicitly to the hub card"
+    },
+    {
+      "id": "UX-004",
+      "severity": "low",
+      "blocking": false,
+      "description": "Recommended pattern for Blocks A/B/C: persistent stacked <section class=\"card\"> blocks (as in epaisseur-verres' Monture/Verre/Ordonnance/Synthèse), not a sequential wizard that hides prior steps. This matches the mission's explicit requirement that no step silently overwrite a previous one and lets an optician compare Block A's theoretical value against Block C's availability result without navigating away. Condition of validity: holds as long as total page height stays scrollable-reasonable on mobile; if catalogue/alternatives content grows large, an in-page anchor/quick-nav should be considered before ever converting to a wizard.",
+      "evidence": "Reasoning grounded in outils/epaisseur-verres/index.html structure (stacked cards for the calculation flow, a separate Couches-driven wizard used only for the disposable, genuinely sequential photo-capture sub-task) and mission.raw_request §30 ('aucune étape ne remplace silencieusement la précédente'). Not cross-validated against an external documented source this session (see limitations)."
+    },
+    {
+      "id": "UX-005",
+      "severity": "low",
+      "blocking": false,
+      "description": "Recommended pattern for the 'Détails du calcul' zone per block: native <details>/accordion, consistent with the hub's own existing disclosure pattern (index.html's .tool-card__more), rather than a popover or modal. Advantage beyond consistency: an optician can open the calculation detail of two different blocks at once while scrolling to compare, which a single-instance modal would prevent.",
+      "evidence": "CLAUDE.md architecture section ('the long description lives in a <details class=\"tool-card__more\"> so nothing is deleted, only folded away'); cross-referenced with UX-001's CI implication."
+    },
+    {
+      "id": "UX-006",
+      "severity": "medium",
+      "blocking": false,
+      "description": "For the Block C ranking, distinguishing 'combinaison exacte' from 'alternative fabricant' should not rely on color alone (e.g. green vs. grey background only) given the general accessibility principle that color cannot be the sole carrier of meaning; a text label/badge should carry the distinction independent of color, on top of avoiding the prescriptive tone the mission already bans.",
+      "evidence": "Analyst's general documented knowledge (WCAG 'use of color' principle) — not verified against a live W3C source this session; treat as a to-verify recommendation, not a sourced citation."
+    },
+    {
+      "id": "UX-007",
+      "severity": "medium",
+      "blocking": false,
+      "description": "Communicating an unstable toric rotation reading needs a neutral, peer-register advisory pattern (e.g. a status label such as 'rotation non stabilisée : à vérifier' next to the value) rather than an alarming/red error banner or a silently hidden value, and must never present the compensated axis as reliably corrected. Getting this tone wrong risks either alarming staff unnecessarily or, worse, having an unstable read over-trusted.",
+      "evidence": "Directly derived from mission.raw_request §14 ('si rotation instable, information claire, pas de présentation automatique de l'axe compensé comme fiable, formulation professionnelle et non alarmiste') combined with general clinical-tool-tone reasoning; not cross-validated externally."
+    },
+    {
+      "id": "UX-008",
+      "severity": "low",
+      "blocking": false,
+      "description": "Open structuring decision not yet resolved: should Block C (Fabrication/availability search) be usable standalone without having filled Block A or B first? Recommendation: allow standalone use (an optician may just want to check stock for an already-known target), with soft auto-fill from A/B's output when available, never a hard gate — this matches the mission's 'aide' framing rather than a rigid enforced pipeline.",
+      "evidence": "mission.raw_request §29-31 describes three blocks and a shared visual hierarchy but does not state block sequencing/gating; classified here as a structuring ambiguity for DESIGN to confirm, not inferable with high confidence from the repo alone."
+    }
+  ],
+  "limitations": [
+    "ux-resource-researcher and product-pattern-research both explicitly require crossing at least two source categories (observation + documented reasoning) for pattern decisions; neither the UXER local reference catalog (resource-catalog.md, resource-selection-matrix.md, pattern-domains.md — all under /home/user/uxer/, outside this session's allowed working directory) nor WebSearch/WebFetch (both refused: 'you haven't granted it yet') were accessible, so this requirement was not met. All pattern/resource conclusions above rest on repo precedent plus the analyst's own general knowledge, explicitly flagged per finding rather than attributed to a consulted source.",
+    "No visual or executed-behaviour evidence was collected or claimed: outils/lentilles-souples/ does not exist yet in this repository, so there is nothing to run, screenshot, or browser-explore in an inspect/research job — all findings above are code-evidence or repo-precedent based only.",
+    "ux-request-clarifier's standard output format assumes a human who can answer up to five options-based questions; this is a single-shot delegated specialist job with no interactive channel back to a person, so open points were resolved as documented recommendations with stated confidence/reversibility (equivalent to the skill's bypass_clarification handling) rather than left as pending questions.",
+    "Formula/optics validity (vertex compensation sign, power-vector math, rotation convention) is explicitly out of UXER's scope and is called out in the mission itself as unverified pending RESEARCH by the optics/engineering track (UNK-001, mission.raw_request §39); nothing above should be read as validating those formulas."
+  ],
+  "files_examined": [
+    "CLAUDE.md",
+    "index.html",
+    "assets/css/hub.css",
+    "outils/epaisseur-verres/index.html",
+    "outils/demande-ordonnance/index.html",
+    "outils/cloture-caisse/index.html",
+    "docs/navigation-retour.md",
+    "tests/navigation-retour.test.mjs",
+    ".agentic/features/lentilles-souples/intake.yaml",
+    ".agentic/features/lentilles-souples/research.md",
+    ".agentic/features/lentilles-souples/design.md",
+    ".agentic/features/lentilles-souples/plan.md",
+    ".agentic/features/lentilles-souples/review.md",
+    ".agentic/features/lentilles-souples/ship.md",
+    ".agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-9a10fb9a2116.yaml",
+    ".agentic/missions/lentilles-souples/mission.yaml",
+    ".agentic/missions/lentilles-souples/constraints.yaml",
+    ".agentic/decisions/DEC-0001.yaml",
+    ".agentic/decisions/DEC-0002.yaml"
+  ],
+  "capabilities_used": [
+    "uxer-orchestrator",
+    "ux-request-clarifier",
+    "ux-resource-researcher",
+    "product-pattern-research",
+    "ux-navigation-audit"
+  ],
+  "changes_made": []
+}
+ARCLINE_UXER_RESULT_END

@@ -388,17 +388,17 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T09:51:06Z'
+  updated_at: '2026-09-05T09:55:01Z'
 classification:
   profile: critical
   reasons:
   - Aide au calcul dans un contexte de sante visuelle ; contraintes de confidentialite
     fortes (aucune donnee patient, aucune sortie reseau) ; touche la CI et la CSP
     du Hub ; classification Arcline suggeree = critical
-phase: research
+phase: design
 phases:
-  research: in_progress
-  design: pending
+  research: passed
+  design: in_progress
   plan: pending
   execute: pending
   review: pending
@@ -406,9 +406,12 @@ phases:
 integrations:
   uxer:
     applicable: true
-    status: in_progress
+    status: error
     evidence:
     - 'UXER delegated job SPJ-9a10fb9a2116: .agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-9a10fb9a2116.yaml'
+    - 'UXER research result SPJ-9a10fb9a2116: .agentic/features/lentilles-souples/specialists/uxer/results/SPJ-9a10fb9a2116.yaml'
+    notes: 'UXER modified Arcline control-plane state | limitations: specialists may
+      not edit .agentic/ during delegated execution'
   securix:
     applicable: true
     status: in_progress
@@ -424,6 +427,10 @@ execution:
   unexpected_scope: []
 blocking_findings: []
 next_action:
-  phase: research
-  reason: Start the research phase
-history: []
+  phase: design
+  reason: Complete the design phase and satisfy its gate
+history:
+- from: research
+  to: design
+  at: '2026-09-05T09:51:40Z'
+  reason: advancing research -> design
