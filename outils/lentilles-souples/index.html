@@ -570,7 +570,7 @@
       case 'CYLINDRE_INVALIDE':
         return 'le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.';
       case 'AXE_INVALIDE':
-        return 'l\'axe doit être un nombre entre 1 et 180 degrés.';
+        return 'l\'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).';
       case 'AXE_INCOHERENT_CYLINDRE_NUL':
         return 'un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n\'a été effectué pour cet oeil.';
       case 'AXE_MANQUANT':
@@ -660,7 +660,18 @@
 
     var axe = axeVide ? null : parseNombre(axeRaw);
     if (!axeVide && Number.isNaN(axe)) {
-      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 1 et 180 degrés.") };
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).") };
+    }
+    /* Domaine de saisie de l'axe : 1..180, 0 lu comme 180 (convention clinique
+       de l'axe torique). normalizeAxis (noyau) replie tout angle par modulo
+       180 et sert aux axes calculés par les moteurs, pas à la saisie brute :
+       une faute de frappe comme 200 ne doit jamais atterrir dans le noyau
+       et en ressortir plausible (20°) sans réserve affichée. */
+    if (!axeVide && (axe < 0 || axe > 180)) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).") };
+    }
+    if (!axeVide && axe === 0) {
+      axe = 180;
     }
 
     if (cyl === 0 && !axeVide) {
