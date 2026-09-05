@@ -154,7 +154,7 @@ id: FIND-01
 axis: ux
 source: uxer SPJ-992b682f9ef7 UX-003
 severity: high
-status: open
+status: resolved
 blocking: true
 description: >-
   La gravite d un message n est portee que par la couleur : rouge pour une erreur bloquante,
@@ -163,6 +163,12 @@ description: >-
   la hierarchie est portee par la typographie et le libelle, pas par la couleur seule, et le
   constat UX-006 rendu par UXER des la phase Research. Un opticien daltonien, ou un magasin
   peu eclaire, ne distingue pas ce qui empeche la suite de ce qui informe.
+remediation: TKT-009
+resolution: >-
+  TKT-009, commit e065aed. Un libelle textuel ERREUR ou AVERTISSEMENT precede desormais
+  chaque message, independamment de sa couleur. Constate en execution dans Chromium : les dix
+  cas d erreur affichent ERREUR, et ROTATION_INSTABLE affiche AVERTISSEMENT, ce qui distingue
+  bien par le texte ce qui empeche la suite de ce qui informe.
 evidence: >-
   UXER UX-003 sur outils/lentilles-souples/index.html ; design.md section UX decision point 4 ;
   UXER UX-006 du job SPJ-9a10fb9a2116 en phase Research.
@@ -173,13 +179,17 @@ id: FIND-02
 axis: ux
 source: uxer SPJ-992b682f9ef7 UX-004
 severity: high
-status: open
+status: resolved
 blocking: true
 description: >-
   Aucun conteneur de resultat genere dynamiquement ne porte aria-live, role=status ni
   role=alert. Un utilisateur de lecteur d ecran qui appuie sur Calculer ou sur Chercher n est
   pas averti qu un resultat vient d apparaitre plus bas dans la page. Le module produit
   pourtant tout son sens dans ces zones.
+remediation: TKT-010
+resolution: >-
+  TKT-010, commit 6c33ed8. role=status et aria-live=polite sur les six conteneurs de resultat
+  et sur la zone d erreurs catalogue. Verifie dans le diff et par relecture du DOM servi.
 evidence: >-
   UXER UX-004 ; #a-od-out, #a-og-out, #b-od-out, #b-og-out, #c-od-out, #c-og-out dans
   outils/lentilles-souples/index.html.
@@ -190,13 +200,18 @@ id: FIND-03
 axis: ux
 source: uxer SPJ-992b682f9ef7 UX-005
 severity: medium
-status: open
+status: resolved
 blocking: true
 description: >-
   Le bloc B, surrefraction, n a aucun element de titre. Son intitule n existe que dans un
   summary, alors que les blocs A et C emploient un h2. La navigation par titres d un lecteur
   d ecran saute donc entierement le bloc B, et les h3 OD et OG qu il contient se retrouvent
   sans h2 englobant, ce qui casse la structure de titres etablie par les deux autres blocs.
+remediation: TKT-011
+resolution: >-
+  TKT-011, commit b70e013. Un h2 dans le summary du bloc B, avec font:inherit pour ne pas
+  changer l apparence. Le bloc reste un details repliable et la structure de titres redevient
+  coherente avec les blocs A et C.
 evidence: >-
   UXER UX-005 ; lignes 264 et 331 de outils/lentilles-souples/index.html.
 ```
@@ -206,7 +221,7 @@ id: FIND-04
 axis: ux
 source: uxer SPJ-992b682f9ef7 UX-001
 severity: high
-status: open
+status: resolved
 blocking: true
 description: >-
   Le niveau 4, parametre fabricant disponible, est visuellement moins proeminent que le
@@ -214,6 +229,11 @@ description: >-
   intitule fixe. La demande fixe une progression saisie, theorique, cible, parametre
   disponible ou aucune etape n en remplace une autre ; une hierarchie qui decroit sur la
   derniere etape la contredit.
+remediation: TKT-012
+resolution: >-
+  TKT-012, commit 0a77a1a. Le niveau 4 passe de 15 a 17 px et porte desormais la valeur elle
+  meme et non plus un intitule fixe. Constate sur capture a 360 px : la progression saisie,
+  theorique, cible, parametre disponible croit jusqu au bout, sans debordement horizontal.
 evidence: >-
   UXER UX-001 ; classes .val-tier-3 et .val-tier-4 dans outils/lentilles-souples/index.html ;
   mission.raw_request section 30.

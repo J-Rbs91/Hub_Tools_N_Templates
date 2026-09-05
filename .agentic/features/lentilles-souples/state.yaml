@@ -388,7 +388,7 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T13:00:39Z'
+  updated_at: '2026-09-05T13:04:39Z'
 classification:
   profile: critical
   reasons:
@@ -434,16 +434,18 @@ integrations:
       Elle n a pas ete faite et n est donc pas declaree faite. Statut partial, jamais
       promu.'
 execution:
-  local_checks: []
+  local_checks:
+  - name: ticket-control-plane
+    status: passed
+    evidence: TKT-001=efb47fb713f36863eefdac115cff89116a3f325f; TKT-002=ccee1fc; TKT-003=5976d6b;
+      TKT-004=811ff65; TKT-005=994b01e; TKT-006=8c8b5d1; TKT-007=3ad3358; TKT-008=62bf121;
+      TKT-009=e065aed9eabaf539d04e3eda327c4d81d4be29eb; TKT-010=6c33ed84c351d25bd06b18b23e200dc9705e9c50;
+      TKT-011=b70e0138054dca6eaaa1ac10a88d007145508db6; TKT-012=0a77a1a
   unexpected_scope: []
-blocking_findings:
-- FIND-01
-- FIND-02
-- FIND-03
-- FIND-04
+blocking_findings: []
 next_action:
   phase: review
-  reason: 'Resolve blocking findings: FIND-01, FIND-02, FIND-03, FIND-04'
+  reason: Complete the review phase and satisfy its gate
 history:
 - from: research
   to: design

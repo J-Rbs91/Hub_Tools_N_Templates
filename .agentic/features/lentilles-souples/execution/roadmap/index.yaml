@@ -4,7 +4,7 @@ roadmap_version: 6
 plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
 execution:
   strategy: dependency-aware
-  current_wave: 1
+  current_wave: null
 tickets:
 - schema_version: 1
   id: TKT-001
@@ -2371,7 +2371,7 @@ tickets:
 - schema_version: 1
   id: TKT-012
   title: Remediate FIND-04
-  status: to_execute
+  status: done
   origin:
     type: remediation
     source_review: review.md
@@ -2510,6 +2510,7 @@ tickets:
     mode: serial
   commit:
     policy: one-ticket-one-commit
+    sha: 0a77a1a
   parallel_with: []
   parallel_reason: []
   serial_reason:
@@ -2573,4 +2574,13 @@ tickets:
       fixe. Ne pas casser la lisibilite des niveaux 1 et 2, qui restent volontairement
       plus discrets, et ne pas introduire de nouveau jeton de couleur. Verifier que
       rien ne deborde horizontalement a 360 px.'
-updated_at: '2026-09-05T13:00:38Z'
+  - from: to_execute
+    to: done
+    at: '2026-09-05T13:02:44Z'
+    reason: candidate result passed orchestrator acceptance
+  completion:
+    commit: 0a77a1a
+    completed_at: '2026-09-05T13:02:44Z'
+    actor: worker
+    accepted_by: orchestrator
+updated_at: '2026-09-05T13:02:44Z'
