@@ -2,14 +2,14 @@ schema_version: 1
 ticket: TKT-009
 status: candidate_done
 actor: worker
-commit: 8dfe8a2
+commit: e065aed9eabaf539d04e3eda327c4d81d4be29eb
 validation:
-- 'node tests/lentilles-souples.test.mjs : 166 controles, 0 echec ; node tests/navigation-retour.test.mjs
-  : 25 controles passes ; npx html-validate@11.5.6 outils/lentilles-souples/index.html
-  : 0 erreur ; git grep trailing-whitespace/CRLF sur le fichier : 0 hit'
+- Next-free HF number verified via git log --all --oneline | grep -oP HF-[0-9]+ |
+  sort -n (max was HF-089); html-validate@11.5.6 clean on outils/lentilles-souples/index.html;
+  no trailing whitespace, no CRLF, final newline present
 discoveries: []
 recommendation: done
-reported_at: '2026-09-05T12:53:30Z'
+reported_at: '2026-09-05T12:55:10Z'
 routing_evidence:
   sequence: 1
   policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
