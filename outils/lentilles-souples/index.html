@@ -116,7 +116,7 @@
   .val-tier-2 .val-tier-lab{color:var(--ink)}
   .val-tier-3{color:var(--blue-d);font-size:16px;font-weight:700;margin-top:8px}
   .val-tier-3 .val-tier-lab{color:var(--blue-d)}
-  .val-tier-4{color:var(--green-d);font-size:15px;font-weight:700;margin-top:10px}
+  .val-tier-4{color:var(--green-d);font-size:17px;font-weight:700;margin-top:10px}
   .val-tier-4 .val-tier-lab{color:var(--green-d)}
 
   /* ── problèmes (erreurs et avertissements) ── */
@@ -929,7 +929,7 @@
       var source = catalogueDemo.sources.filter(function (s) { return s.source_id === r.source_id; })[0];
 
       var carte = el('div', { class: 'resultat-c' });
-      carte.appendChild(ligneTier('val-tier-4', '', 'Paramètre fabricant disponible'));
+      carte.appendChild(ligneTier('val-tier-4', 'Paramètre fabricant disponible ', formatRx({ sph: r.sph, cyl: r.cyl, axe: r.axe })));
       carte.appendChild(el('p', {
         class: 'resultat-c-statut',
         text: r.exact ? 'Solution disponible : combinaison exacte' : 'Alternative fabricant',
@@ -938,7 +938,6 @@
         class: 'resultat-c-produit',
         text: (produit ? produit.name : r.product_id) + ' (' + (fabricant ? fabricant.name : r.manufacturer_id) + ')',
       }));
-      carte.appendChild(el('p', { text: 'Paramètres proposés : ' + formatRx({ sph: r.sph, cyl: r.cyl, axe: r.axe }) }));
       carte.appendChild(el('p', { text: 'Écart optique par rapport à la cible : ' + formatEcart(r.ecart) + (r.exact ? ' (nul)' : '') }));
       carte.appendChild(el('p', {
         class: 'resultat-c-source',
