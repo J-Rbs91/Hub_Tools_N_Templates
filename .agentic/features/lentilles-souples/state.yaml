@@ -388,20 +388,20 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T12:39:47Z'
+  updated_at: '2026-09-05T12:42:28Z'
 classification:
   profile: critical
   reasons:
   - Aide au calcul dans un contexte de sante visuelle ; contraintes de confidentialite
     fortes (aucune donnee patient, aucune sortie reseau) ; touche la CI et la CSP
     du Hub ; classification Arcline suggeree = critical
-phase: plan
+phase: review
 phases:
   research: passed
   design: passed
-  plan: in_progress
-  execute: pending
-  review: pending
+  plan: passed
+  execute: passed
+  review: in_progress
   ship: pending
 integrations:
   uxer:
@@ -414,14 +414,23 @@ integrations:
       not edit .agentic/ during delegated execution'
   securix:
     applicable: true
-    status: in_progress
+    status: partial
     evidence:
     - 'profil adopte : project-security-profile.yaml (108 regles applicables)'
     - 'selection : .agentic/features/lentilles-souples/specialists/securix/applicable-rules.yaml'
     - 'controles automatises sur 66753b46 : .agentic/features/lentilles-souples/specialists/securix/controls-66753b46.yaml'
-    notes: 'Obligations selectionnees et controles executes. La revue d''assurance
-      ALL_APPLICABLE porte sur le depot entier et n''est pas encore faite : le statut
-      ne sera pas monte a passed tant qu''elle ne l''est pas.'
+    - 'profil adopte : project-security-profile.yaml, 108 regles applicables sur 252
+      (144 exclues par les capacites declarees)'
+    - 'controles automatises executes sur le SHA candidat f1367935f09f4edf893a83395d03b56aa5780e60
+      : specialists/securix/controls-candidat.yaml, 7 executes, 1 non lance (CTRL-SECRET-HISTORY)'
+    - 'CTRL-FE-DANGEROUS-SINKS : 22 occurrences suspectes, identique a la mesure de
+      base sur 66753b46, donc aucune ajoutee par le module'
+    - 'squelette de revue CHANGE_REVIEW lie au SHA candidat : specialists/securix/review-skeleton.yaml'
+    - 'release_gate.py sur ce squelette : BLOCKED, 108 NOT_VERIFIED, 0 PASS'
+    notes: 'La revue d assurance SECURIX porte sur le depot entier (review_coverage
+      ALL_APPLICABLE) et non sur le seul module : elle couvre les quatre outils preexistants.
+      Elle n a pas ete faite et n est donc pas declaree faite. Statut partial, jamais
+      promu.'
 execution:
   local_checks:
   - name: ticket-control-plane
@@ -431,8 +440,8 @@ execution:
   unexpected_scope: []
 blocking_findings: []
 next_action:
-  phase: plan
-  reason: Complete the plan phase and satisfy its gate
+  phase: review
+  reason: Complete the review phase and satisfy its gate
 history:
 - from: research
   to: design
@@ -442,3 +451,11 @@ history:
   to: plan
   at: '2026-09-05T10:00:52Z'
   reason: advancing design -> plan
+- from: plan
+  to: execute
+  at: '2026-09-05T12:40:26Z'
+  reason: advancing plan -> execute
+- from: execute
+  to: review
+  at: '2026-09-05T12:40:32Z'
+  reason: advancing execute -> review
