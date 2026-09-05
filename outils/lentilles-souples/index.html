@@ -548,13 +548,62 @@
      calcul non interprétable. Chaque code affiché ici est un code réel,
      produit par le noyau ou par la vérification d'entrée qui le précède
      immédiatement (jamais une valeur devinée à sa place). */
+
+  var LIBELLES_DISTANCE = {
+    vertex: 'la distance vertex',
+    distanceSurrefraction: 'la distance du verre de surréfraction',
+  };
+
+  /* Le noyau (moteurs.js) est écrit sans accent et nomme ses paramètres par
+     leur identifiant interne (« cyl », « sph », « vertex »...) : ce sont des
+     conventions de code, pas du texte utilisateur. Cette page ne réaffiche
+     donc jamais p.message tel quel pour un code qu'elle reconnaît ; elle lui
+     substitue une phrase française destinée à l'opticien. Le repli sur
+     p.message ne sert que pour un code encore inconnu de cette page (par
+     exemple une erreur de catalogue, déjà en français dans catalogue.js). */
+  function texteAffichableProbleme(p) {
+    switch (p.code) {
+      case 'SPHERE_MANQUANTE':
+        return 'la sphère est obligatoire dès qu\'un autre champ de cet oeil est renseigné.';
+      case 'SPHERE_INVALIDE':
+        return 'la sphère doit être un nombre, par exemple -3,00.';
+      case 'CYLINDRE_INVALIDE':
+        return 'le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.';
+      case 'AXE_INVALIDE':
+        return 'l\'axe doit être un nombre entre 1 et 180 degrés.';
+      case 'AXE_INCOHERENT_CYLINDRE_NUL':
+        return 'un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n\'a été effectué pour cet oeil.';
+      case 'AXE_MANQUANT':
+        return 'l\'axe est obligatoire dès que le cylindre n\'est pas nul.';
+      case 'DISTANCE_NON_NUMERIQUE':
+        return (LIBELLES_DISTANCE[p.parametre] || 'la distance') + ' doit être un nombre.';
+      case 'DISTANCE_NEGATIVE':
+        return (LIBELLES_DISTANCE[p.parametre] || 'la distance') + ' ne peut pas être négative.';
+      case 'DISTANCE_ABERRANTE':
+        return (LIBELLES_DISTANCE[p.parametre] || 'la distance') + ' dépasse ' + window.LentillesMoteurs.DISTANCE_MM_MAX +
+          ' mm, hors du domaine plausible : vérifier une confusion possible entre millimètres et centimètres.';
+      case 'ROTATION_INSTABLE':
+        return 'la rotation déclarée n\'est pas stable : l\'axe compensé est une indication à vérifier, pas une valeur acquise.';
+      case 'ROTATION_INVALIDE':
+        return 'la rotation observée doit être un nombre, avec un sens choisi dans la liste.';
+      case 'CALCUL_NON_INTERPRETABLE':
+        return 'cette combinaison de puissance et de distance ne peut pas être calculée : vérifier la saisie.';
+      case 'PRESCRIPTION_INVALIDE':
+        return 'la prescription saisie est incohérente ou incomplète pour cet oeil : vérifier sphère, cylindre et axe.';
+      case 'AUCUN_RESULTAT':
+        return 'aucune combinaison ni alternative trouvée dans le catalogue de démonstration pour cette cible.';
+      default:
+        return p.message;
+    }
+  }
+
   function renderProblemes(liste) {
     var conteneur = el('div', { class: 'problemes' });
     liste.forEach(function (p) {
       var classe = (p.gravite === 'avertissement') ? 'probleme probleme-avert' : 'probleme probleme-erreur';
       var ligne = el('p', { class: classe });
       ligne.appendChild(el('span', { class: 'probleme-code', text: p.code }));
-      ligne.appendChild(document.createTextNode(p.message));
+      ligne.appendChild(document.createTextNode(texteAffichableProbleme(p)));
       conteneur.appendChild(ligne);
     });
     return conteneur;
@@ -571,25 +620,57 @@
     return s;
   }
 
-  /* Vérification qu'aucune fonction du noyau ne fait : un cylindre nul
-     avec un axe renseigné est une saisie incohérente (cas 2 du contrat),
-     que normalizePrescription se contenterait sinon d'ignorer en silence
-     en mettant l'axe à null. */
-  function validerEtNormaliser(sphRaw, cylRaw, axeRaw) {
-    var sph = parseNombre(sphRaw);
-    var cyl = parseNombre(cylRaw);
-    var axe = parseNombre(axeRaw);
-    if (cyl === 0 && axeRaw.trim() !== '') {
-      return {
-        ok: false,
-        probleme: {
-          code: 'AXE_INCOHERENT_CYLINDRE_NUL',
-          gravite: 'erreur',
-          message: "un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n'a été effectué pour cet oeil.",
-        },
-      };
+  function champVide(str) { return (str || '').trim() === ''; }
+
+  function creerProbleme(code, message) {
+    return { code: code, gravite: 'erreur', message: message };
+  }
+
+  /* Lit un triplet sphère/cylindre/axe pour un oeil.
+     - Un oeil entièrement vide (aucun des trois champs rempli) n'est pas une
+       erreur : c'est un oeil que l'opticien n'a pas encore renseigné, et le
+       bloc doit rester silencieux pour cet oeil (étape « vide »).
+     - Un cylindre laissé vide vaut zéro : c'est l'écriture usuelle d'une
+       correction sphérique pure, jamais une valeur manquante.
+     - Un axe renseigné avec un cylindre nul, ou un cylindre non nul sans
+       axe, reste une saisie incohérente (cas du contrat) que
+       normalizePrescription se contenterait sinon soit d'ignorer en silence,
+       soit de refuser avec un message de noyau non destiné à l'écran. */
+  function lireRx(sphRaw, cylRaw, axeRaw) {
+    var sphVide = champVide(sphRaw);
+    var cylVide = champVide(cylRaw);
+    var axeVide = champVide(axeRaw);
+
+    if (sphVide && cylVide && axeVide) {
+      return { etat: 'vide' };
     }
-    return { ok: true, entree: { sph: sph, cyl: cyl, axe: axe } };
+
+    if (sphVide) {
+      return { etat: 'erreur', probleme: creerProbleme('SPHERE_MANQUANTE', "la sphère est obligatoire dès qu'un autre champ de cet oeil est renseigné.") };
+    }
+    var sph = parseNombre(sphRaw);
+    if (Number.isNaN(sph)) {
+      return { etat: 'erreur', probleme: creerProbleme('SPHERE_INVALIDE', 'la sphère doit être un nombre, par exemple -3,00.') };
+    }
+
+    var cyl = cylVide ? 0 : parseNombre(cylRaw);
+    if (Number.isNaN(cyl)) {
+      return { etat: 'erreur', probleme: creerProbleme('CYLINDRE_INVALIDE', "le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.") };
+    }
+
+    var axe = axeVide ? null : parseNombre(axeRaw);
+    if (!axeVide && Number.isNaN(axe)) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 1 et 180 degrés.") };
+    }
+
+    if (cyl === 0 && !axeVide) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INCOHERENT_CYLINDRE_NUL', "un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n'a été effectué pour cet oeil.") };
+    }
+    if (cyl !== 0 && axeVide) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_MANQUANT', "l'axe est obligatoire dès que le cylindre n'est pas nul.") };
+    }
+
+    return { etat: 'ok', entree: { sph: sph, cyl: cyl, axe: axe } };
   }
 
   /* ══════════════ BLOC A ══════════════ */
@@ -650,12 +731,18 @@
       var sphRaw = val('a-' + oeil + '-sph');
       var cylRaw = val('a-' + oeil + '-cyl');
       var axeRaw = val('a-' + oeil + '-axe');
-      var vertex = parseNombre(val('a-' + oeil + '-vertex'));
+      var out = document.getElementById('a-' + oeil + '-out');
 
-      var v = validerEtNormaliser(sphRaw, cylRaw, axeRaw);
+      var v = lireRx(sphRaw, cylRaw, axeRaw);
+      if (v.etat === 'vide') {
+        vider(out);
+        return;
+      }
+
+      var vertex = parseNombre(val('a-' + oeil + '-vertex'));
       var entreeAffichage = { sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw), vertexMm: vertex };
 
-      if (!v.ok) {
+      if (v.etat === 'erreur') {
         renderResultatA(oeil, entreeAffichage, { theorique: null, cible: null, problemes: [v.probleme] });
         return;
       }
@@ -717,9 +804,21 @@
 
   function calculerB() {
     ['od', 'og'].forEach(function (oeil) {
+      var out = document.getElementById('b-' + oeil + '-out');
       var lSphRaw = val('b-' + oeil + '-l-sph');
       var lCylRaw = val('b-' + oeil + '-l-cyl');
       var lAxeRaw = val('b-' + oeil + '-l-axe');
+
+      /* La lentille portée est le champ qui décide si cet oeil participe au
+         calcul de surréfraction : la laisser vide (état par défaut, aucune
+         valeur pré-remplie) signifie que l'opticien n'a pas encore ouvert
+         ce bloc pour cet oeil, ce qui doit rester silencieux. */
+      var vL = lireRx(lSphRaw, lCylRaw, lAxeRaw);
+      if (vL.etat === 'vide') {
+        vider(out);
+        return;
+      }
+
       var sSphRaw = val('b-' + oeil + '-s-sph');
       var sCylRaw = val('b-' + oeil + '-s-cyl');
       var sAxeRaw = val('b-' + oeil + '-s-axe');
@@ -729,8 +828,11 @@
       var rotSens = val('b-' + oeil + '-rot-sens') || 'gauche';
       var rotStable = document.getElementById('b-' + oeil + '-rot-stable').checked;
 
-      var vL = validerEtNormaliser(lSphRaw, lCylRaw, lAxeRaw);
-      var vS = validerEtNormaliser(sSphRaw, sCylRaw, sAxeRaw);
+      /* La surréfraction est facultative (champs pré-remplis à zéro) : un
+         oeil qui n'en porte aucune (les trois champs vidés par l'opticien)
+         vaut « aucune surréfraction mesurée », jamais une erreur. */
+      var vS = lireRx(sSphRaw, sCylRaw, sAxeRaw);
+      var surrefractionEntree = (vS.etat === 'ok') ? vS.entree : { sph: 0, cyl: 0, axe: null };
 
       var saisieTexte = 'lentille portée ' + formatRx({ sph: parseNombre(lSphRaw), cyl: parseNombre(lCylRaw), axe: parseNombre(lAxeRaw) }) +
         ' ; surréfraction ' + formatRx({ sph: parseNombre(sSphRaw), cyl: parseNombre(sCylRaw), axe: parseNombre(sAxeRaw) }) +
@@ -738,17 +840,17 @@
         ' ; rotation ' + (Number.isFinite(rotValeur) ? rotValeur : '?') + '° vers la ' + rotSens +
         (rotStable ? '' : ', déclarée instable');
 
-      if (!vL.ok || !vS.ok) {
-        var problemesEntree = [];
-        if (!vL.ok) { problemesEntree.push(vL.probleme); }
-        if (!vS.ok) { problemesEntree.push(vS.probleme); }
+      var problemesEntree = [];
+      if (vL.etat === 'erreur') { problemesEntree.push(vL.probleme); }
+      if (vS.etat === 'erreur') { problemesEntree.push(vS.probleme); }
+      if (problemesEntree.length) {
         renderResultatB(oeil, saisieTexte, { theorique: null, cible: null, problemes: problemesEntree });
         return;
       }
 
       var resultat = window.LentillesMoteurs.calculerMoteurB({
         lentille: vL.entree,
-        surrefraction: vS.entree,
+        surrefraction: surrefractionEntree,
         distanceSurrefractionMm: dist,
         rotation: { valeur: rotValeur, sens: rotSens, stable: rotStable },
       });
@@ -848,9 +950,16 @@
       var sphRaw = val('c-' + oeil + '-sph');
       var cylRaw = val('c-' + oeil + '-cyl');
       var axeRaw = val('c-' + oeil + '-axe');
-      var v = validerEtNormaliser(sphRaw, cylRaw, axeRaw);
+      var v = lireRx(sphRaw, cylRaw, axeRaw);
 
-      if (!v.ok) {
+      /* Une cible fabrication non renseignée pour cet oeil reste silencieuse :
+         le bloc C est utilisable seul et un oeil laissé de côté n'est pas une
+         erreur (l'output a déjà été vidé au-dessus). */
+      if (v.etat === 'vide') {
+        return;
+      }
+
+      if (v.etat === 'erreur') {
         out.appendChild(ligneTier('val-tier-1', 'Cible ', formatRx({ sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw) })));
         out.appendChild(renderProblemes([v.probleme]));
         return;
