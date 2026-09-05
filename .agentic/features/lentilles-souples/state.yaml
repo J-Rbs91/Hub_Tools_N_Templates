@@ -388,7 +388,7 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T12:35:39Z'
+  updated_at: '2026-09-05T12:39:47Z'
 classification:
   profile: critical
   reasons:
@@ -423,7 +423,11 @@ integrations:
       ALL_APPLICABLE porte sur le depot entier et n''est pas encore faite : le statut
       ne sera pas monte a passed tant qu''elle ne l''est pas.'
 execution:
-  local_checks: []
+  local_checks:
+  - name: ticket-control-plane
+    status: passed
+    evidence: TKT-001=efb47fb713f36863eefdac115cff89116a3f325f; TKT-002=ccee1fc; TKT-003=5976d6b;
+      TKT-004=811ff65; TKT-005=994b01e; TKT-006=8c8b5d1; TKT-007=3ad3358; TKT-008=62bf121
   unexpected_scope: []
 blocking_findings: []
 next_action:

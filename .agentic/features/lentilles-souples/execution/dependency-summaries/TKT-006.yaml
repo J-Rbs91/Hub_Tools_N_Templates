@@ -1,0 +1,24 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-006
+commit: 8c8b5d1
+behavior:
+- 'index.html#tools-grid now has a li.tool-card (data-tool=lentilles) for Lentilles
+  souples: relative link to outils/lentilles-souples/, benefit-framed pitch that presents
+  it as a calculation aid (not an ordering shortcut), reusing only pre-existing CSS
+  classes/tokens (tool-card__icon, .acc) with a static (non-animated) icon since this
+  ticket''s scope is index.html only and could not touch assets/css/hub.css for a
+  dedicated icon animation like the other four tools.'
+contracts: []
+interfaces: []
+files:
+- index.html
+migrations: []
+invariants: []
+limitations:
+- Icon has no dedicated hover/focus animation (the other four tool cards each have
+  one, defined in assets/css/hub.css). Scope for TKT-006 was index.html only, so no
+  CSS keyframe was added; a follow-up ticket touching hub.css would be needed to give
+  it one.
+discoveries: []
+reported_at: '2026-09-05T12:38:34Z'

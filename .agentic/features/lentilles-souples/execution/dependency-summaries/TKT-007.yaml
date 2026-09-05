@@ -1,0 +1,18 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-007
+commit: 3ad3358
+behavior:
+- Nouveau job CI 'lentilles-souples' (.github/workflows/ci.yml), calque sur le job
+  navigation (container node:22, checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  pinne, persist-credentials false), qui execute node tests/lentilles-souples.test.mjs
+  ; aucun job existant modifie.
+contracts: []
+interfaces: []
+files:
+- .github/workflows/ci.yml
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T12:37:23Z'

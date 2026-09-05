@@ -257,62 +257,68 @@ risks:
 
 ```yaml agentic:task
 id: LS-06
-objective: Intégrer le module au hub par une carte dans index.html, cadrée comme un outil d'aide.
-status: pending
+objective: Intégrer le module au hub par une carte dans index.html, cadrée comme un
+  outil d'aide.
+status: done
 dependencies:
-  - LS-05
+- LS-05
 files:
-  - index.html
+- index.html
 acceptance_criteria:
-  - une li.tool-card complète est présente dans ul#tools-grid, avec icône, titre, lien, promesse, chevron et details
-  - le lien est relatif et pointe vers outils/lentilles-souples/
-  - la promesse énonce un bénéfice et cadre l'outil comme une aide, pas comme un raccourci de commande
-  - le style reprend les jetons existants sans en introduire de nouveau
-  - aucun em-dash dans le texte ajouté
+- une li.tool-card complète est présente dans ul#tools-grid, avec icône, titre, lien,
+  promesse, chevron et details
+- le lien est relatif et pointe vers outils/lentilles-souples/
+- la promesse énonce un bénéfice et cadre l'outil comme une aide, pas comme un raccourci
+  de commande
+- le style reprend les jetons existants sans en introduire de nouveau
+- aucun em-dash dans le texte ajouté
 tests:
-  - html-validate
-  - link-check
+- html-validate
+- link-check
 security_requirements:
   securix_rules:
-    - SEC-FE-015
+  - SEC-FE-015
   notes: Aucun script ajouté à la page d'accueil.
 evidence_required:
-  - sortie de npx --yes html-validate@11.5.6
-  - vérification que le chemin relatif résout vers un fichier existant
+- sortie de npx --yes html-validate@11.5.6
+- vérification que le chemin relatif résout vers un fichier existant
 risks:
-  - une carte mal cadrée ferait lire l'outil comme un outil de commande avant même son ouverture
+- une carte mal cadrée ferait lire l'outil comme un outil de commande avant même son
+  ouverture
 ```
 
 ```yaml agentic:task
 id: LS-07
-objective: >-
-  Faire exécuter réellement les tests du module et la validation du catalogue par la CI existante,
-  de façon minimale et cohérente avec les jobs déjà présents.
-status: pending
+objective: Faire exécuter réellement les tests du module et la validation du catalogue
+  par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.
+status: done
 dependencies:
-  - LS-04
-  - LS-05
+- LS-04
+- LS-05
 files:
-  - .github/workflows/ci.yml
-  - tests/lentilles-souples.test.mjs
+- .github/workflows/ci.yml
+- tests/lentilles-souples.test.mjs
 acceptance_criteria:
-  - un job unique exécute node tests/lentilles-souples.test.mjs, calqué sur le job navigation existant
-  - l'action de checkout est la même, épinglée par le même SHA, avec persist-credentials false
-  - le test échoue avec un code de sortie non nul si le validateur refuse le catalogue livré
-  - aucun job existant n'est modifié, aucune assertion existante n'est affaiblie
-  - actionlint passe sur le workflow modifié
+- un job unique exécute node tests/lentilles-souples.test.mjs, calqué sur le job navigation
+  existant
+- l'action de checkout est la même, épinglée par le même SHA, avec persist-credentials
+  false
+- le test échoue avec un code de sortie non nul si le validateur refuse le catalogue
+  livré
+- aucun job existant n'est modifié, aucune assertion existante n'est affaiblie
+- actionlint passe sur le workflow modifié
 tests:
-  - ci-lint
-  - unit
+- ci-lint
+- unit
 security_requirements:
   securix_rules:
-    - SEC-SUPPLY-001
-  notes: >-
-    Aucune action tierce nouvelle ; réutilisation de l'action de checkout déjà épinglée.
+  - SEC-SUPPLY-001
+  notes: Aucune action tierce nouvelle ; réutilisation de l'action de checkout déjà
+    épinglée.
 evidence_required:
-  - sortie locale de node tests/lentilles-souples.test.mjs
-  - sortie d'actionlint sur le workflow
-  - état du job dans un run réel de la CI GitHub
+- sortie locale de node tests/lentilles-souples.test.mjs
+- sortie d'actionlint sur le workflow
+- état du job dans un run réel de la CI GitHub
 risks:
-  - un validateur qui ne serait pas appelé par la CI serait un faux validateur
+- un validateur qui ne serait pas appelé par la CI serait un faux validateur
 ```

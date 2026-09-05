@@ -28,10 +28,10 @@ This file is generated from `index.yaml`. The index is authoritative.
 
 ## Wave 5
 
-- **TKT-006 — Intégrer le module au hub par une carte dans index.html, cadrée comme un outil d'aide.** — `to_execute`, actor `securix`, depends on: TKT-005
+- **TKT-006 — Intégrer le module au hub par une carte dans index.html, cadrée comme un outil d'aide.** — `done`, actor `securix`, depends on: TKT-005
   - parallel with: TKT-007
   - why: TKT-007: no dependency relation; explicit file scopes are disjoint
-- **TKT-007 — Faire exécuter réellement les tests du module et la validation du catalogue par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.** — `to_execute`, actor `securix`, depends on: TKT-004, TKT-005
+- **TKT-007 — Faire exécuter réellement les tests du module et la validation du catalogue par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.** — `done`, actor `securix`, depends on: TKT-004, TKT-005
   - parallel with: TKT-006
   - why: TKT-006: no dependency relation; explicit file scopes are disjoint
 

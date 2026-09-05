@@ -4,7 +4,7 @@ roadmap_version: 2
 plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
 execution:
   strategy: dependency-aware
-  current_wave: 5
+  current_wave: null
 tickets:
 - schema_version: 1
   id: TKT-001
@@ -1125,7 +1125,7 @@ tickets:
   id: TKT-006
   title: Intégrer le module au hub par une carte dans index.html, cadrée comme un
     outil d'aide.
-  status: to_execute
+  status: done
   origin:
     type: planned
     parent: LS-06
@@ -1264,6 +1264,7 @@ tickets:
     mode: parallel
   commit:
     policy: one-ticket-one-commit
+    sha: 8c8b5d1
   parallel_with:
   - TKT-007
   parallel_reason:
@@ -1305,11 +1306,21 @@ tickets:
       - sonnet
       - --effort
       - medium
+  completion:
+    commit: 8c8b5d1
+    completed_at: '2026-09-05T12:39:45Z'
+    actor: worker
+    accepted_by: orchestrator
+  history:
+  - from: to_execute
+    to: done
+    at: '2026-09-05T12:39:45Z'
+    reason: candidate result passed orchestrator acceptance
 - schema_version: 1
   id: TKT-007
   title: Faire exécuter réellement les tests du module et la validation du catalogue
     par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.
-  status: to_execute
+  status: done
   origin:
     type: planned
     parent: LS-07
@@ -1451,6 +1462,7 @@ tickets:
     mode: parallel
   commit:
     policy: one-ticket-one-commit
+    sha: 3ad3358
   parallel_with:
   - TKT-006
   parallel_reason:
@@ -1493,6 +1505,16 @@ tickets:
       - sonnet
       - --effort
       - medium
+  completion:
+    commit: 3ad3358
+    completed_at: '2026-09-05T12:39:46Z'
+    actor: worker
+    accepted_by: orchestrator
+  history:
+  - from: to_execute
+    to: done
+    at: '2026-09-05T12:39:46Z'
+    reason: candidate result passed orchestrator acceptance
 - schema_version: 1
   id: TKT-008
   title: 'Page de l''outil : squelette conforme au contrat de navigation du hub'
@@ -1694,4 +1716,4 @@ tickets:
     to: done
     at: '2026-09-05T11:24:52Z'
     reason: candidate result passed orchestrator acceptance
-updated_at: '2026-09-05T12:36:12Z'
+updated_at: '2026-09-05T12:39:46Z'
