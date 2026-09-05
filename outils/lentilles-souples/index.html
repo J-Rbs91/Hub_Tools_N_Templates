@@ -226,7 +226,7 @@
             <input type="text" inputmode="decimal" id="a-od-vertex" value="0" aria-label="OD distance vertex">
           </div>
         </div>
-        <div class="sortie" id="a-od-out"></div>
+        <div class="sortie" id="a-od-out" role="status" aria-live="polite"></div>
       </div>
 
       <div class="oeil-groupe">
@@ -249,7 +249,7 @@
             <input type="text" inputmode="decimal" id="a-og-vertex" value="0" aria-label="OG distance vertex">
           </div>
         </div>
-        <div class="sortie" id="a-og-out"></div>
+        <div class="sortie" id="a-og-out" role="status" aria-live="polite"></div>
       </div>
 
       <button type="button" class="action" id="a-calculer">Calculer la conversion</button>
@@ -325,7 +325,7 @@
             </div>
           </div>
 
-          <div class="sortie" id="b-od-out"></div>
+          <div class="sortie" id="b-od-out" role="status" aria-live="polite"></div>
         </div>
 
         <div class="oeil-groupe">
@@ -392,7 +392,7 @@
             </div>
           </div>
 
-          <div class="sortie" id="b-og-out"></div>
+          <div class="sortie" id="b-og-out" role="status" aria-live="polite"></div>
         </div>
 
         <button type="button" class="action" id="b-calculer">Calculer la surréfraction</button>
@@ -409,7 +409,7 @@
         confondre avec un catalogue réel.
       </p>
 
-      <div class="catalogue-erreurs" id="c-catalogue-erreurs" hidden></div>
+      <div class="catalogue-erreurs" id="c-catalogue-erreurs" role="status" aria-live="polite" hidden></div>
 
       <div class="oeil-groupe">
         <h3>OD, oeil droit</h3>
@@ -427,7 +427,7 @@
             <input type="text" inputmode="numeric" id="c-od-axe" placeholder="si cylindre non nul" aria-label="OD axe cible fabrication">
           </div>
         </div>
-        <div class="sortie" id="c-od-out"></div>
+        <div class="sortie" id="c-od-out" role="status" aria-live="polite"></div>
       </div>
 
       <div class="oeil-groupe">
@@ -446,7 +446,7 @@
             <input type="text" inputmode="numeric" id="c-og-axe" placeholder="si cylindre non nul" aria-label="OG axe cible fabrication">
           </div>
         </div>
-        <div class="sortie" id="c-og-out"></div>
+        <div class="sortie" id="c-og-out" role="status" aria-live="polite"></div>
       </div>
 
       <button type="button" class="action" id="c-chercher">Chercher les paramètres fabricant disponibles</button>
