@@ -154,41 +154,48 @@ risks:
 
 ```yaml agentic:task
 id: LS-04
-objective: >-
-  Disponibilité exacte d'une combinaison, recherche bornée d'alternatives, score optique par la
-  norme du résidu, et garde-fou de performance.
-status: pending
+objective: Disponibilité exacte d'une combinaison, recherche bornée d'alternatives,
+  score optique par la norme du résidu, et garde-fou de performance.
+status: done
 dependencies:
-  - LS-01
-  - LS-03
+- LS-01
+- LS-03
 files:
-  - outils/lentilles-souples/noyau/selection.js
-  - tests/lentilles-souples.test.mjs
+- outils/lentilles-souples/noyau/selection.js
+- tests/lentilles-souples.test.mjs
 acceptance_criteria:
-  - isCombinationAvailable renvoie available, matched_rule_id et source_id, et le résultat est reproductible d'une exécution à l'autre
-  - une sphère hors plage, hors pas, un cylindre absent de la liste ou un axe hors mode sont refusés avec une raison identifiée
-  - le mode RANGE et le mode LIST sont tous deux couverts, ainsi que le cas sphérique avec cylindre nul et axe nul
-  - une lentille sphérique et une lentille torique passent par le même moteur de disponibilité
-  - une combinaison exacte, quand elle existe, obtient le meilleur score et la première place
-  - le classement de plusieurs alternatives est cohérent et totalement ordonné, sans dépendre de l'ordre d'itération
-  - la distance d'axe tient compte du repliement à 180 degrés, vérifié sur un couple proche de 180 et 5
-  - la recherche ne construit jamais le produit cartésien, le nombre de candidats évalués par règle est borné
-  - un catalogue synthétique de plusieurs centaines de règles est traité sous un budget de temps mesuré et affiché par le test
+- isCombinationAvailable renvoie available, matched_rule_id et source_id, et le résultat
+  est reproductible d'une exécution à l'autre
+- une sphère hors plage, hors pas, un cylindre absent de la liste ou un axe hors mode
+  sont refusés avec une raison identifiée
+- le mode RANGE et le mode LIST sont tous deux couverts, ainsi que le cas sphérique
+  avec cylindre nul et axe nul
+- une lentille sphérique et une lentille torique passent par le même moteur de disponibilité
+- une combinaison exacte, quand elle existe, obtient le meilleur score et la première
+  place
+- le classement de plusieurs alternatives est cohérent et totalement ordonné, sans
+  dépendre de l'ordre d'itération
+- la distance d'axe tient compte du repliement à 180 degrés, vérifié sur un couple
+  proche de 180 et 5
+- la recherche ne construit jamais le produit cartésien, le nombre de candidats évalués
+  par règle est borné
+- un catalogue synthétique de plusieurs centaines de règles est traité sous un budget
+  de temps mesuré et affiché par le test
 tests:
-  - unit
-  - negative-path
-  - performance-guard
+- unit
+- negative-path
+- performance-guard
 security_requirements:
   securix_rules:
-    - SEC-BIZ-006
-  notes: >-
-    La formule de score est dans le noyau et jamais dans l'affichage, pour rester vérifiable.
+  - SEC-BIZ-006
+  notes: La formule de score est dans le noyau et jamais dans l'affichage, pour rester
+    vérifiable.
 evidence_required:
-  - exécution de node tests/lentilles-souples.test.mjs
-  - durée mesurée du garde-fou de performance
+- exécution de node tests/lentilles-souples.test.mjs
+- durée mesurée du garde-fou de performance
 risks:
-  - un score qui ignore l'astigmatisme résiduel classerait mal dès que les axes diffèrent
-  - une génération de candidats trop étroite pourrait manquer la combinaison exacte
+- un score qui ignore l'astigmatisme résiduel classerait mal dès que les axes diffèrent
+- une génération de candidats trop étroite pourrait manquer la combinaison exacte
 ```
 
 ```yaml agentic:task

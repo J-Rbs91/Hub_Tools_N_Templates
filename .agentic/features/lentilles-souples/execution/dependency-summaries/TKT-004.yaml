@@ -1,0 +1,32 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-004
+commit: 811ff65
+behavior:
+- LentillesSelection (outils/lentilles-souples/noyau/selection.js) expose distanceAxe,
+  ecartOptique, compilerProduit, compilerIndex, isCombinationAvailable, chercherAlternatives
+  via module.exports/globalThis.LentillesSelection ; depend uniquement de prescription.js,
+  jamais de catalogue.js.
+- isCombinationAvailable(produitCompile, sphere, cylindre, axe) deterministe (regles
+  triees par rule_id, premiere qui accepte gagne) renvoie {available, matched_rule_id,
+  source_id, raisons} avec codes stables SPHERE_HORS_PLAGE/SPHERE_HORS_PAS/CYLINDRE_ABSENT/AXE_HORS_MODE/AUCUNE_REGLE_EXPLOITABLE
+  ; cylindre===0 exige axe===null quel que soit axis_mode, meme moteur pour spherique
+  et torique.
+- chercherAlternatives(index, cible, options) borne chaque regle a CANDIDATS_MAX_PAR_REGLE=45
+  candidats (5 spheres x 3 cylindres x 3 axes, jamais de produit cartesien), score
+  par ecartOptique = norme du residu M/J0/J45 (0 pour une combinaison exacte, toujours
+  premiere), ordre total a egalite (ecart, sphere, cylindre, axe, product_id, rule_id)
+  independant de l'ordre d'iteration.
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/noyau/selection.js
+- tests/lentilles-souples.test.mjs
+migrations: []
+invariants: []
+limitations:
+- 'Le job CI executant tests/lentilles-souples.test.mjs n''est pas encore cable dans
+  .github/workflows/ci.yml ; hors scope de ce ticket (fichiers assignes : selection.js
+  et tests/lentilles-souples.test.mjs uniquement).'
+discoveries: []
+reported_at: '2026-09-05T11:55:39Z'

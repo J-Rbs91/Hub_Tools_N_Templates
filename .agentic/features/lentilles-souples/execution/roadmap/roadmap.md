@@ -20,7 +20,7 @@ This file is generated from `index.yaml`. The index is authoritative.
 
 ## Wave 3
 
-- **TKT-004 — Disponibilité exacte d'une combinaison, recherche bornée d'alternatives, score optique par la norme du résidu, et garde-fou de performance.** — `to_execute`, actor `securix`, depends on: TKT-001, TKT-003
+- **TKT-004 — Disponibilité exacte d'une combinaison, recherche bornée d'alternatives, score optique par la norme du résidu, et garde-fou de performance.** — `done`, actor `securix`, depends on: TKT-001, TKT-003
 
 ## Wave 4
 
