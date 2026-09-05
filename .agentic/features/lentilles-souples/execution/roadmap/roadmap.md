@@ -12,7 +12,7 @@ This file is generated from `index.yaml`. The index is authoritative.
   - why: TKT-001: no dependency relation; explicit file scopes are disjoint
 - **TKT-009 — Remediate FIND-01** — `done`, actor `implementer`, depends on: none
   - serial because: TKT-001: file scope not explicit for both tickets; fail closed; TKT-008: file scope not explicit for both tickets; fail closed; TKT-010: file scope not explicit for both tickets; fail closed; TKT-011: file scope not explicit for both tickets; fail closed; TKT-012: file scope not explicit for both tickets; fail closed
-- **TKT-010 — Remediate FIND-02** — `to_execute`, actor `implementer`, depends on: none
+- **TKT-010 — Remediate FIND-02** — `done`, actor `implementer`, depends on: none
   - serial because: TKT-001: file scope not explicit for both tickets; fail closed; TKT-008: file scope not explicit for both tickets; fail closed; TKT-009: file scope not explicit for both tickets; fail closed; TKT-011: file scope not explicit for both tickets; fail closed; TKT-012: file scope not explicit for both tickets; fail closed
 - **TKT-011 — Remediate FIND-03** — `to_execute`, actor `implementer`, depends on: none
   - serial because: TKT-001: file scope not explicit for both tickets; fail closed; TKT-008: file scope not explicit for both tickets; fail closed; TKT-009: file scope not explicit for both tickets; fail closed; TKT-010: file scope not explicit for both tickets; fail closed; TKT-012: file scope not explicit for both tickets; fail closed
