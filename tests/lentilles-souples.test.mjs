@@ -20,6 +20,8 @@ import vm from 'node:vm';
 const racine = join(dirname(fileURLToPath(import.meta.url)), '..');
 const cheminNoyau = join(racine, 'outils/lentilles-souples/noyau/prescription.js');
 const cheminMoteurs = join(racine, 'outils/lentilles-souples/noyau/moteurs.js');
+const cheminCatalogue = join(racine, 'outils/lentilles-souples/noyau/catalogue.js');
+const cheminCatalogueDemo = join(racine, 'outils/lentilles-souples/donnees/catalogue-demo.js');
 
 const echecs = [];
 let passes = 0;
@@ -94,6 +96,36 @@ verifier(
     MNavigateur.compenserVertexSpherique(-8, 12, 'vertex'),
     M.compenserVertexSpherique(-8, 12, 'vertex'),
   ),
+);
+
+const C = require(cheminCatalogue);
+const CD = require(cheminCatalogueDemo);
+
+verifier('module.exports (catalogue) expose validerCatalogue', typeof C.validerCatalogue === 'function');
+verifier(
+  'module.exports (catalogue-demo) expose catalogueDemo',
+  CD && typeof CD.catalogueDemo === 'object' && CD.catalogueDemo !== null,
+);
+
+const contexteNavigateurCatalogue = vm.createContext({});
+vm.runInContext(readFileSync(cheminNoyau, 'utf8'), contexteNavigateurCatalogue, { filename: cheminNoyau });
+vm.runInContext(readFileSync(cheminCatalogue, 'utf8'), contexteNavigateurCatalogue, { filename: cheminCatalogue });
+vm.runInContext(readFileSync(cheminCatalogueDemo, 'utf8'), contexteNavigateurCatalogue, { filename: cheminCatalogueDemo });
+const CNavigateur = contexteNavigateurCatalogue.LentillesCatalogue;
+const CDNavigateur = contexteNavigateurCatalogue.LentillesCatalogueDemo;
+
+verifier(
+  'catalogue.js s\'expose sur globalThis dans un contexte sans module/require (navigateur)',
+  CNavigateur && typeof CNavigateur.validerCatalogue === 'function',
+);
+verifier(
+  'catalogue-demo.js s\'expose sur globalThis dans un contexte sans module/require (navigateur)',
+  CDNavigateur && typeof CDNavigateur.catalogueDemo === 'object',
+);
+verifier(
+  'la branche navigateur de catalogue.js valide le catalogue de demonstration comme la branche Node',
+  CNavigateur && CDNavigateur
+    && CNavigateur.validerCatalogue(CDNavigateur.catalogueDemo).length === C.validerCatalogue(CD.catalogueDemo).length,
 );
 
 /* ── normalizeAxis ──────────────────────────────────────────────────────── */
@@ -569,6 +601,177 @@ for (const distanceSurrefractionMm of [-5, 500, NaN]) {
     JSON.stringify(resultat),
   );
 }
+
+/* ── Moteur C (outils/lentilles-souples/noyau/catalogue.js) : modele et validateur ── */
+
+function cloneCatalogue() {
+  return JSON.parse(JSON.stringify(CD.catalogueDemo));
+}
+
+function codes(catalogue) {
+  return C.validerCatalogue(catalogue).map((e) => e.code);
+}
+
+verifier(
+  'validerCatalogue accepte le catalogue de demonstration livre',
+  C.validerCatalogue(CD.catalogueDemo).length === 0,
+  JSON.stringify(C.validerCatalogue(CD.catalogueDemo)),
+);
+
+/* -- Douze cas d'echec exiges par le contrat, un test par code -- */
+
+const casManufacturerIntrouvable = cloneCatalogue();
+casManufacturerIntrouvable.products[0].manufacturer_id = 'MFR-INEXISTANT';
+verifier(
+  'validerCatalogue signale MANUFACTURER_ID_INTROUVABLE quand un produit reference un fabricant absent',
+  codes(casManufacturerIntrouvable).includes('MANUFACTURER_ID_INTROUVABLE'),
+);
+
+const casProductIntrouvable = cloneCatalogue();
+casProductIntrouvable.manufacturing_rules[0].product_id = 'PRD-INEXISTANT';
+verifier(
+  'validerCatalogue signale PRODUCT_ID_INTROUVABLE quand une regle reference un produit absent',
+  codes(casProductIntrouvable).includes('PRODUCT_ID_INTROUVABLE'),
+);
+
+const casIdentifiantDuplique = cloneCatalogue();
+casIdentifiantDuplique.manufacturing_rules[1].rule_id = casIdentifiantDuplique.manufacturing_rules[0].rule_id;
+verifier(
+  'validerCatalogue signale IDENTIFIANT_DUPLIQUE sur deux regles partageant le meme rule_id',
+  codes(casIdentifiantDuplique).includes('IDENTIFIANT_DUPLIQUE'),
+);
+
+const casSourceIntrouvable = cloneCatalogue();
+casSourceIntrouvable.manufacturing_rules[0].source_id = 'SRC-INEXISTANT';
+verifier(
+  'validerCatalogue signale SOURCE_ID_INTROUVABLE quand une regle reference une source absente',
+  codes(casSourceIntrouvable).includes('SOURCE_ID_INTROUVABLE'),
+);
+
+const casSphPlageInvalide = cloneCatalogue();
+casSphPlageInvalide.manufacturing_rules[0].sph_min = 10;
+casSphPlageInvalide.manufacturing_rules[0].sph_max = 5;
+verifier(
+  'validerCatalogue signale SPH_PLAGE_INVALIDE quand sph_min > sph_max',
+  codes(casSphPlageInvalide).includes('SPH_PLAGE_INVALIDE'),
+);
+
+const casSphPasInvalide = cloneCatalogue();
+casSphPasInvalide.manufacturing_rules[0].sph_step = 0;
+verifier(
+  'validerCatalogue signale SPH_PAS_INVALIDE quand sph_step <= 0',
+  codes(casSphPasInvalide).includes('SPH_PAS_INVALIDE'),
+);
+
+const casCylindreNonNumerique = cloneCatalogue();
+casCylindreNonNumerique.manufacturing_rules[0].cyl_values = [0, 'x'];
+verifier(
+  'validerCatalogue signale CYLINDRE_NON_NUMERIQUE quand cyl_values contient une valeur non numerique',
+  codes(casCylindreNonNumerique).includes('CYLINDRE_NON_NUMERIQUE'),
+);
+
+const casAxeHorsPlage = cloneCatalogue();
+const regleRangePourAxe = casAxeHorsPlage.manufacturing_rules.find((r) => r.axis_mode === 'RANGE');
+regleRangePourAxe.axis_max = 200;
+verifier(
+  'validerCatalogue signale AXE_HORS_PLAGE quand une borne d\'axe sort du domaine 1..180',
+  codes(casAxeHorsPlage).includes('AXE_HORS_PLAGE'),
+);
+
+const casRangeSansPas = cloneCatalogue();
+const regleRangePourPas = casRangeSansPas.manufacturing_rules.find((r) => r.axis_mode === 'RANGE');
+delete regleRangePourPas.axis_step;
+verifier(
+  'validerCatalogue signale RANGE_SANS_PAS quand une regle RANGE n\'a pas d\'axis_step exploitable',
+  codes(casRangeSansPas).includes('RANGE_SANS_PAS'),
+);
+
+const casListSansValeurs = cloneCatalogue();
+const regleListPourValeurs = casListSansValeurs.manufacturing_rules.find((r) => r.axis_mode === 'LIST');
+regleListPourValeurs.axis_values = [];
+verifier(
+  'validerCatalogue signale LIST_SANS_VALEURS quand une regle LIST n\'a pas d\'axis_values exploitable',
+  codes(casListSansValeurs).includes('LIST_SANS_VALEURS'),
+);
+
+const casProduitSansRegleExploitable = cloneCatalogue();
+casProduitSansRegleExploitable.manufacturing_rules
+  .filter((r) => r.product_id === 'PRD-DEMO-SPH-001')
+  .forEach((r) => { r.active = false; });
+verifier(
+  'validerCatalogue signale PRODUIT_SANS_REGLE_EXPLOITABLE quand toutes les regles d\'un produit actif sont inactives',
+  codes(casProduitSansRegleExploitable).includes('PRODUIT_SANS_REGLE_EXPLOITABLE'),
+);
+
+const casIncoherenceType = cloneCatalogue();
+const regleSphPourIncoherence = casIncoherenceType.manufacturing_rules.find((r) => r.product_id === 'PRD-DEMO-SPH-001');
+regleSphPourIncoherence.cyl_values = [0, -0.5];
+verifier(
+  'validerCatalogue signale INCOHERENCE_TYPE_LENTILLE quand une regle SPHERICAL porte un cylindre non nul',
+  codes(casIncoherenceType).includes('INCOHERENCE_TYPE_LENTILLE'),
+);
+
+/* -- Une gamme peut porter plusieurs regles, pas de sphere et modes d'axe differents -- */
+
+const reglesTorRegulier = CD.catalogueDemo.manufacturing_rules.filter((r) => r.product_id === 'PRD-DEMO-TOR-001');
+verifier(
+  'une gamme du catalogue de demonstration porte plusieurs regles',
+  reglesTorRegulier.length >= 2,
+  JSON.stringify(reglesTorRegulier.map((r) => r.rule_id)),
+);
+verifier(
+  'ces regles ont des pas de sphere differents et des modes d\'axe differents',
+  new Set(reglesTorRegulier.map((r) => r.sph_step)).size > 1
+    && new Set(reglesTorRegulier.map((r) => r.axis_mode)).size > 1,
+  JSON.stringify(reglesTorRegulier.map((r) => ({ rule_id: r.rule_id, sph_step: r.sph_step, axis_mode: r.axis_mode }))),
+);
+
+/* -- Couverture exigee des donnees de demonstration -- */
+
+verifier(
+  'les donnees de demonstration couvrent le mode RANGE et le mode LIST',
+  CD.catalogueDemo.manufacturing_rules.some((r) => r.axis_mode === 'RANGE')
+    && CD.catalogueDemo.manufacturing_rules.some((r) => r.axis_mode === 'LIST'),
+);
+verifier(
+  'les donnees de demonstration couvrent un produit spherique et un produit torique',
+  CD.catalogueDemo.products.some((p) => p.lens_type === 'SPHERICAL')
+    && CD.catalogueDemo.products.some((p) => p.lens_type === 'TORIC'),
+);
+verifier(
+  'les donnees de demonstration couvrent des axes irreguliers en mode LIST',
+  CD.catalogueDemo.manufacturing_rules.some((r) => r.axis_mode === 'LIST'
+    && new Set(r.axis_values.map((a, idx, arr) => (idx === 0 ? null : a - arr[idx - 1])).filter((d) => d !== null)).size > 1),
+);
+verifier(
+  'les donnees de demonstration couvrent plusieurs pas de sphere',
+  new Set(CD.catalogueDemo.manufacturing_rules.map((r) => r.sph_step)).size > 1,
+);
+verifier(
+  'les donnees de demonstration couvrent des variations de rayon (bc_values) et de diametre (dia_values)',
+  new Set(CD.catalogueDemo.manufacturing_rules.map((r) => JSON.stringify(r.bc_values))).size > 1
+    && new Set(CD.catalogueDemo.manufacturing_rules.map((r) => JSON.stringify(r.dia_values))).size > 1,
+);
+
+/* -- Fabricants de demonstration ouvertement fictifs -- */
+
+verifier(
+  'chaque fabricant de demonstration est marque fictional: true',
+  CD.catalogueDemo.manufacturers.every((m) => m.fictional === true),
+);
+verifier(
+  'chaque fabricant de demonstration porte la mention "fictif" dans son nom',
+  CD.catalogueDemo.manufacturers.every((m) => /fictif/i.test(m.name)),
+);
+
+/* -- Chaque regle est rattachee a une source existante -- */
+
+verifier(
+  'chaque regle du catalogue de demonstration reference un source_id existant',
+  CD.catalogueDemo.manufacturing_rules.every(
+    (r) => CD.catalogueDemo.sources.some((s) => s.source_id === r.source_id),
+  ),
+);
 
 /* ── Bilan ─────────────────────────────────────────────────────────────── */
 
