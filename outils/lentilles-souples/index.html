@@ -123,6 +123,7 @@
   .probleme{margin:4px 0;font-size:13px;padding:8px 10px;border-radius:6px;border-left:4px solid transparent}
   .probleme-erreur{background:var(--err-bg);border-left-color:var(--err);color:var(--err-ink)}
   .probleme-avert{background:var(--avert-bg);border-left-color:var(--avert);color:var(--avert)}
+  .probleme-label{font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.04em;margin-right:8px}
   .probleme-code{font-weight:700;margin-right:6px}
 
   .catalogue-erreurs{background:var(--err-bg);border:1px solid var(--err-line);border-radius:8px;padding:10px 12px;margin:0 0 14px}
@@ -600,8 +601,10 @@
   function renderProblemes(liste) {
     var conteneur = el('div', { class: 'problemes' });
     liste.forEach(function (p) {
-      var classe = (p.gravite === 'avertissement') ? 'probleme probleme-avert' : 'probleme probleme-erreur';
+      var estAvertissement = p.gravite === 'avertissement';
+      var classe = estAvertissement ? 'probleme probleme-avert' : 'probleme probleme-erreur';
       var ligne = el('p', { class: classe });
+      ligne.appendChild(el('span', { class: 'probleme-label', text: estAvertissement ? 'Avertissement' : 'Erreur' }));
       ligne.appendChild(el('span', { class: 'probleme-code', text: p.code }));
       ligne.appendChild(document.createTextNode(texteAffichableProbleme(p)));
       conteneur.appendChild(ligne);
