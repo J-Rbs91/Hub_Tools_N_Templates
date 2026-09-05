@@ -13,6 +13,9 @@
   :root{
     --blue:#1F6FB2; --blue-d:#175A92; --ink:#1A2A3A; --grey:#5A6B7B;
     --line:#C9D6E2; --light:#EEF4F9; --bg:#F4F7FA; --white:#fff;
+    --green:#1E8E5A; --green-d:#176E46;
+    --err:#C0271A; --err-bg:#FBEAEA; --err-line:#E3B3AC; --err-ink:#7A1D14;
+    --avert:#8A6100; --avert-bg:#FBF3E1; --avert-line:#E8C776;
     --font: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -22,23 +25,129 @@
     padding:24px 16px 92px;
   }
   .sheet{
-    max-width:640px;margin:0 auto;background:var(--white);
+    max-width:760px;margin:0 auto;background:var(--white);
     border:1px solid var(--line);border-radius:10px;overflow:hidden;
     box-shadow:0 6px 30px rgba(26,42,58,.08);
   }
   header{background:var(--blue);color:#fff;padding:14px 28px}
   header h1{font-size:18px;font-weight:700;letter-spacing:.2px}
   header .meta{font-size:12px;opacity:.95;margin-top:3px}
-  .body{padding:22px 28px 26px}
-  .body p{font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 12px}
-  .body p:last-child{margin-bottom:0}
-  .note{
+  .body{padding:20px 24px 26px}
+
+  .role-note{
     background:var(--light);border-left:4px solid var(--blue);
-    border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:var(--grey);
+    border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:var(--ink);
+    margin:0 0 18px;
+  }
+  .role-note strong{color:var(--blue-d)}
+
+  /* ── blocs ── */
+  .bloc{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 18px;background:#fff}
+  .bloc h2{font-size:15px;color:var(--ink);margin-bottom:3px}
+  .bloc .sous-titre{font-size:12px;color:var(--grey);margin-bottom:10px}
+
+  details.bloc-b{border:1px solid var(--line);border-radius:10px;margin:0 0 18px;background:#fff;overflow:hidden}
+  details.bloc-b > summary{
+    cursor:pointer;list-style:none;padding:16px 18px;font-size:15px;font-weight:700;
+    color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  details.bloc-b > summary::-webkit-details-marker{display:none}
+  details.bloc-b > summary::marker{content:''}
+  details.bloc-b > summary::after{content:'▾';color:var(--blue);font-size:12px}
+  details.bloc-b[open] > summary{border-bottom:1px solid var(--line)}
+  details.bloc-b[open] > summary::after{content:'▴'}
+  .bloc-b-corps{padding:14px 18px 18px}
+  .bloc-b-corps .sous-titre{font-size:12px;color:var(--grey);margin:0 0 12px}
+
+  .bandeau-demo{
+    background:#FFF6E5;border:1px solid var(--avert-line);color:var(--avert);
+    border-radius:6px;padding:10px 12px;font-size:13px;font-weight:600;margin:0 0 14px;
   }
 
+  /* ── groupes par oeil ── */
+  .oeil-groupe{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 12px}
+  .oeil-groupe h3{
+    font-size:12px;color:var(--blue-d);text-transform:uppercase;letter-spacing:.5px;
+    margin-bottom:8px;font-weight:700;
+  }
+  .sous-groupe{margin:0 0 12px}
+  .sous-groupe:last-child{margin-bottom:0}
+  .sous-groupe-titre{font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+
+  /* ── grille de champs, se réagence, ne rétrécit jamais ── */
+  .grille-champs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px 14px;margin:0}
+  .champ{display:flex;flex-direction:column;gap:3px}
+  .champ label{font-size:11px;color:var(--grey);font-weight:600}
+  .champ input, .champ select{
+    font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);
+    border-radius:6px;padding:8px 8px;background:#FBFDFE;width:100%;
+  }
+  .champ input:focus, .champ select:focus{outline:none;border-color:var(--blue);background:#fff}
+  .champ-case{flex-direction:row;align-items:center;gap:8px}
+  .champ-case input{width:auto;accent-color:var(--blue)}
+  .champ-case label{font-size:12px;color:var(--ink);font-weight:500}
+
+  @media (max-width:640px){
+    body{padding:14px 10px 20px}
+    header{padding:12px 16px}
+    .body{padding:16px 16px 20px}
+    .bloc, details.bloc-b{padding:0}
+    .bloc{padding:14px 14px}
+    details.bloc-b > summary{padding:14px 14px}
+    .bloc-b-corps{padding:12px 14px 14px}
+    .grille-champs{grid-template-columns:repeat(2,1fr)}
+  }
+
+  /* ── boutons ── */
+  button.action{
+    background:var(--blue);color:#fff;border:none;border-radius:8px;
+    padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;
+  }
+  button.action:hover{background:var(--blue-d)}
+  button.action:active{transform:translateY(1px)}
+
+  /* ── hiérarchie à quatre niveaux ── */
+  .sortie{margin-top:12px}
+  .val-tier{margin:5px 0;font-size:13px}
+  .val-tier-lab{font-weight:700;color:var(--grey);margin-right:6px}
+  .val-tier-1{color:var(--grey)}
+  .val-tier-2{color:var(--ink);font-size:14px;font-weight:600}
+  .val-tier-2 .val-tier-lab{color:var(--ink)}
+  .val-tier-3{color:var(--blue-d);font-size:16px;font-weight:700;margin-top:8px}
+  .val-tier-3 .val-tier-lab{color:var(--blue-d)}
+  .val-tier-4{color:var(--green-d);font-size:15px;font-weight:700;margin-top:10px}
+  .val-tier-4 .val-tier-lab{color:var(--green-d)}
+
+  /* ── problèmes (erreurs et avertissements) ── */
+  .problemes{margin:8px 0}
+  .probleme{margin:4px 0;font-size:13px;padding:8px 10px;border-radius:6px;border-left:4px solid transparent}
+  .probleme-erreur{background:var(--err-bg);border-left-color:var(--err);color:var(--err-ink)}
+  .probleme-avert{background:var(--avert-bg);border-left-color:var(--avert);color:var(--avert)}
+  .probleme-code{font-weight:700;margin-right:6px}
+
+  .catalogue-erreurs{background:var(--err-bg);border:1px solid var(--err-line);border-radius:8px;padding:10px 12px;margin:0 0 14px}
+  .catalogue-erreurs .probleme-titre{font-weight:700;color:var(--err-ink);margin-bottom:4px;font-size:13px}
+
+  /* ── détails du calcul ── */
+  details.detail-calcul{margin-top:10px;font-size:12px;color:var(--grey)}
+  details.detail-calcul summary{cursor:pointer;font-weight:700;color:var(--blue-d)}
+  details.detail-calcul dl{margin-top:8px;display:grid;grid-template-columns:auto 1fr;gap:5px 12px}
+  details.detail-calcul dt{font-weight:600;color:var(--grey)}
+  details.detail-calcul dd{color:var(--ink)}
+  @media (max-width:640px){
+    details.detail-calcul dl{grid-template-columns:1fr}
+    details.detail-calcul dt{margin-top:6px}
+  }
+
+  /* ── résultats fabrication ── */
+  .resultat-c{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;background:#F8FBFD}
+  .resultat-c p{margin:2px 0;font-size:13px}
+  .resultat-c-statut{font-weight:700;color:var(--green-d)}
+  .resultat-c-produit{font-weight:700;color:var(--ink)}
+  .resultat-c-source{color:var(--grey);font-size:12px}
+
   /* retour aux outils (en haut) */
-  .topbar{max-width:640px;margin:0 auto 12px}
+  .topbar{max-width:760px;margin:0 auto 12px}
   .back-link{
     display:inline-flex;align-items:center;gap:6px;text-decoration:none;
     font-size:13px;font-weight:700;color:var(--blue);
@@ -58,13 +167,6 @@
   }
   body.is-ios .ios-back{display:inline-flex}
   body.is-ios .topbar{display:none}
-
-  /* responsive smartphone */
-  @media (max-width:640px){
-    body{padding:14px 10px 20px}
-    header{padding:12px 16px}
-    .body{padding:16px 16px 20px}
-  }
 
   /* Mesure de fréquentation : mention discrète, jamais imprimée. */
   .mesure-note{
@@ -88,20 +190,266 @@
 <div class="sheet">
   <header>
     <h1>Lentilles souples</h1>
-    <div class="meta">Aide au calcul et à la sélection de paramètres</div>
+    <div class="meta" id="hdr-sub">Aide au calcul et à la sélection de paramètres</div>
   </header>
 
   <div class="body">
-    <p>
-      Ce module accompagnera la conversion d'une prescription de lunettes vers une
-      lentille souple, la prise en compte d'une surréfraction, puis la recherche des
-      paramètres fabricant disponibles.
+    <p class="role-note">
+      <strong>Cet outil aide au calcul et à la sélection de paramètres fabricant disponibles.</strong>
+      Il ne prescrit pas et ne se substitue pas au jugement clinique de l'opticien : la décision
+      finale, y compris le choix final d'une lentille, lui appartient toujours.
     </p>
-    <p class="note">
-      Cette page pose le squelette de l'outil. Les blocs de calcul (conversion,
-      surréfraction, fabrication) seront ajoutés dans une prochaine étape, avec
-      leurs propres tests.
-    </p>
+
+    <!-- ══════════════ BLOC A ══════════════ -->
+    <section class="bloc" id="bloc-a">
+      <h2>A · Conversion lunettes vers lentille</h2>
+      <p class="sous-titre">Sphère, cylindre, axe et distance vertex par oeil ; correction théorique au plan cornéen puis correction cible arrondie au pas clinique.</p>
+
+      <div class="oeil-groupe">
+        <h3>OD, oeil droit</h3>
+        <div class="grille-champs">
+          <div class="champ">
+            <label for="a-od-sph">Sphère (D)</label>
+            <input type="text" inputmode="decimal" id="a-od-sph" placeholder="ex. -3,00" aria-label="OD sphère lunettes">
+          </div>
+          <div class="champ">
+            <label for="a-od-cyl">Cylindre (D)</label>
+            <input type="text" inputmode="decimal" id="a-od-cyl" placeholder="ex. -1,00 ou 0" aria-label="OD cylindre lunettes">
+          </div>
+          <div class="champ">
+            <label for="a-od-axe">Axe (°)</label>
+            <input type="text" inputmode="numeric" id="a-od-axe" placeholder="si cylindre non nul" aria-label="OD axe lunettes">
+          </div>
+          <div class="champ">
+            <label for="a-od-vertex">Distance vertex (mm)</label>
+            <input type="text" inputmode="decimal" id="a-od-vertex" value="0" aria-label="OD distance vertex">
+          </div>
+        </div>
+        <div class="sortie" id="a-od-out"></div>
+      </div>
+
+      <div class="oeil-groupe">
+        <h3>OG, oeil gauche</h3>
+        <div class="grille-champs">
+          <div class="champ">
+            <label for="a-og-sph">Sphère (D)</label>
+            <input type="text" inputmode="decimal" id="a-og-sph" placeholder="ex. -3,00" aria-label="OG sphère lunettes">
+          </div>
+          <div class="champ">
+            <label for="a-og-cyl">Cylindre (D)</label>
+            <input type="text" inputmode="decimal" id="a-og-cyl" placeholder="ex. -1,00 ou 0" aria-label="OG cylindre lunettes">
+          </div>
+          <div class="champ">
+            <label for="a-og-axe">Axe (°)</label>
+            <input type="text" inputmode="numeric" id="a-og-axe" placeholder="si cylindre non nul" aria-label="OG axe lunettes">
+          </div>
+          <div class="champ">
+            <label for="a-og-vertex">Distance vertex (mm)</label>
+            <input type="text" inputmode="decimal" id="a-og-vertex" value="0" aria-label="OG distance vertex">
+          </div>
+        </div>
+        <div class="sortie" id="a-og-out"></div>
+      </div>
+
+      <button type="button" class="action" id="a-calculer">Calculer la conversion</button>
+    </section>
+
+    <!-- ══════════════ BLOC B (facultatif) ══════════════ -->
+    <details class="bloc-b" id="bloc-b">
+      <summary>B · Surréfraction (facultatif)</summary>
+      <div class="bloc-b-corps">
+        <p class="sous-titre">Utile seulement si une surréfraction a été mesurée sur la lentille déjà portée. Laisser replié si la première adaptation se limite au bloc A.</p>
+
+        <div class="oeil-groupe">
+          <h3>OD, oeil droit</h3>
+
+          <div class="sous-groupe">
+            <div class="sous-groupe-titre">Lentille portée</div>
+            <div class="grille-champs">
+              <div class="champ">
+                <label for="b-od-l-sph">Sphère (D)</label>
+                <input type="text" inputmode="decimal" id="b-od-l-sph" placeholder="ex. -3,00" aria-label="OD sphère lentille portée">
+              </div>
+              <div class="champ">
+                <label for="b-od-l-cyl">Cylindre (D)</label>
+                <input type="text" inputmode="decimal" id="b-od-l-cyl" placeholder="ex. -0,75 ou 0" aria-label="OD cylindre lentille portée">
+              </div>
+              <div class="champ">
+                <label for="b-od-l-axe">Axe (°)</label>
+                <input type="text" inputmode="numeric" id="b-od-l-axe" placeholder="si cylindre non nul" aria-label="OD axe lentille portée">
+              </div>
+            </div>
+          </div>
+
+          <div class="sous-groupe">
+            <div class="sous-groupe-titre">Surréfraction mesurée</div>
+            <div class="grille-champs">
+              <div class="champ">
+                <label for="b-od-s-sph">Sphère (D)</label>
+                <input type="text" inputmode="decimal" id="b-od-s-sph" value="0" aria-label="OD sphère surréfraction">
+              </div>
+              <div class="champ">
+                <label for="b-od-s-cyl">Cylindre (D)</label>
+                <input type="text" inputmode="decimal" id="b-od-s-cyl" value="0" aria-label="OD cylindre surréfraction">
+              </div>
+              <div class="champ">
+                <label for="b-od-s-axe">Axe (°)</label>
+                <input type="text" inputmode="numeric" id="b-od-s-axe" placeholder="si cylindre non nul" aria-label="OD axe surréfraction">
+              </div>
+              <div class="champ">
+                <label for="b-od-dist">Distance verre de surréfraction (mm)</label>
+                <input type="text" inputmode="decimal" id="b-od-dist" value="0" aria-label="OD distance verre de surréfraction">
+              </div>
+            </div>
+          </div>
+
+          <div class="sous-groupe">
+            <div class="sous-groupe-titre">Rotation torique observée</div>
+            <div class="grille-champs">
+              <div class="champ">
+                <label for="b-od-rot-valeur">Rotation observée (°)</label>
+                <input type="text" inputmode="decimal" id="b-od-rot-valeur" value="0" aria-label="OD rotation observée">
+              </div>
+              <div class="champ">
+                <label for="b-od-rot-sens">Sens</label>
+                <select id="b-od-rot-sens" aria-label="OD sens de la rotation">
+                  <option value="gauche">Vers la gauche (praticien)</option>
+                  <option value="droite">Vers la droite (praticien)</option>
+                </select>
+              </div>
+              <div class="champ champ-case">
+                <input type="checkbox" id="b-od-rot-stable" checked>
+                <label for="b-od-rot-stable">Rotation stable (résultat reproductible)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="sortie" id="b-od-out"></div>
+        </div>
+
+        <div class="oeil-groupe">
+          <h3>OG, oeil gauche</h3>
+
+          <div class="sous-groupe">
+            <div class="sous-groupe-titre">Lentille portée</div>
+            <div class="grille-champs">
+              <div class="champ">
+                <label for="b-og-l-sph">Sphère (D)</label>
+                <input type="text" inputmode="decimal" id="b-og-l-sph" placeholder="ex. -3,00" aria-label="OG sphère lentille portée">
+              </div>
+              <div class="champ">
+                <label for="b-og-l-cyl">Cylindre (D)</label>
+                <input type="text" inputmode="decimal" id="b-og-l-cyl" placeholder="ex. -0,75 ou 0" aria-label="OG cylindre lentille portée">
+              </div>
+              <div class="champ">
+                <label for="b-og-l-axe">Axe (°)</label>
+                <input type="text" inputmode="numeric" id="b-og-l-axe" placeholder="si cylindre non nul" aria-label="OG axe lentille portée">
+              </div>
+            </div>
+          </div>
+
+          <div class="sous-groupe">
+            <div class="sous-groupe-titre">Surréfraction mesurée</div>
+            <div class="grille-champs">
+              <div class="champ">
+                <label for="b-og-s-sph">Sphère (D)</label>
+                <input type="text" inputmode="decimal" id="b-og-s-sph" value="0" aria-label="OG sphère surréfraction">
+              </div>
+              <div class="champ">
+                <label for="b-og-s-cyl">Cylindre (D)</label>
+                <input type="text" inputmode="decimal" id="b-og-s-cyl" value="0" aria-label="OG cylindre surréfraction">
+              </div>
+              <div class="champ">
+                <label for="b-og-s-axe">Axe (°)</label>
+                <input type="text" inputmode="numeric" id="b-og-s-axe" placeholder="si cylindre non nul" aria-label="OG axe surréfraction">
+              </div>
+              <div class="champ">
+                <label for="b-og-dist">Distance verre de surréfraction (mm)</label>
+                <input type="text" inputmode="decimal" id="b-og-dist" value="0" aria-label="OG distance verre de surréfraction">
+              </div>
+            </div>
+          </div>
+
+          <div class="sous-groupe">
+            <div class="sous-groupe-titre">Rotation torique observée</div>
+            <div class="grille-champs">
+              <div class="champ">
+                <label for="b-og-rot-valeur">Rotation observée (°)</label>
+                <input type="text" inputmode="decimal" id="b-og-rot-valeur" value="0" aria-label="OG rotation observée">
+              </div>
+              <div class="champ">
+                <label for="b-og-rot-sens">Sens</label>
+                <select id="b-og-rot-sens" aria-label="OG sens de la rotation">
+                  <option value="gauche">Vers la gauche (praticien)</option>
+                  <option value="droite">Vers la droite (praticien)</option>
+                </select>
+              </div>
+              <div class="champ champ-case">
+                <input type="checkbox" id="b-og-rot-stable" checked>
+                <label for="b-og-rot-stable">Rotation stable (résultat reproductible)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="sortie" id="b-og-out"></div>
+        </div>
+
+        <button type="button" class="action" id="b-calculer">Calculer la surréfraction</button>
+      </div>
+    </details>
+
+    <!-- ══════════════ BLOC C ══════════════ -->
+    <section class="bloc" id="bloc-c">
+      <h2>C · Fabrication</h2>
+      <p class="sous-titre">Utilisable seul, indépendamment des blocs A et B : combinaisons exactes, paramètres compatibles, meilleures alternatives et provenance de la règle.</p>
+
+      <p class="bandeau-demo">
+        Catalogue de démonstration : fabricants, produits et règles fictifs. À ne jamais
+        confondre avec un catalogue réel.
+      </p>
+
+      <div class="catalogue-erreurs" id="c-catalogue-erreurs" hidden></div>
+
+      <div class="oeil-groupe">
+        <h3>OD, oeil droit</h3>
+        <div class="grille-champs">
+          <div class="champ">
+            <label for="c-od-sph">Sphère cible (D)</label>
+            <input type="text" inputmode="decimal" id="c-od-sph" placeholder="ex. -3,00" aria-label="OD sphère cible fabrication">
+          </div>
+          <div class="champ">
+            <label for="c-od-cyl">Cylindre cible (D)</label>
+            <input type="text" inputmode="decimal" id="c-od-cyl" placeholder="ex. -0,75 ou 0" aria-label="OD cylindre cible fabrication">
+          </div>
+          <div class="champ">
+            <label for="c-od-axe">Axe cible (°)</label>
+            <input type="text" inputmode="numeric" id="c-od-axe" placeholder="si cylindre non nul" aria-label="OD axe cible fabrication">
+          </div>
+        </div>
+        <div class="sortie" id="c-od-out"></div>
+      </div>
+
+      <div class="oeil-groupe">
+        <h3>OG, oeil gauche</h3>
+        <div class="grille-champs">
+          <div class="champ">
+            <label for="c-og-sph">Sphère cible (D)</label>
+            <input type="text" inputmode="decimal" id="c-og-sph" placeholder="ex. -3,00" aria-label="OG sphère cible fabrication">
+          </div>
+          <div class="champ">
+            <label for="c-og-cyl">Cylindre cible (D)</label>
+            <input type="text" inputmode="decimal" id="c-og-cyl" placeholder="ex. -0,75 ou 0" aria-label="OG cylindre cible fabrication">
+          </div>
+          <div class="champ">
+            <label for="c-og-axe">Axe cible (°)</label>
+            <input type="text" inputmode="numeric" id="c-og-axe" placeholder="si cylindre non nul" aria-label="OG axe cible fabrication">
+          </div>
+        </div>
+        <div class="sortie" id="c-og-out"></div>
+      </div>
+
+      <button type="button" class="action" id="c-chercher">Chercher les paramètres fabricant disponibles</button>
+    </section>
   </div>
 </div>
 
@@ -110,13 +458,543 @@
   Vos saisies ne quittent jamais cet appareil.
 </p>
 
+<script src="noyau/prescription.js"></script>
+<script src="noyau/moteurs.js"></script>
+<script src="noyau/selection.js"></script>
+<script src="noyau/catalogue.js"></script>
+<script src="donnees/catalogue-demo.js"></script>
 <script>
+(function () {
+  'use strict';
+
   /* Détection iOS : affiche le bouton retour flottant (iPhone/iPad n'ont
      pas de bouton retour navigateur, notamment en mode plein écran) */
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
     document.body.classList.add('is-ios');
   }
+
+  /* ── Profil magasin, lecture seule : jamais d'écriture depuis cet outil ── */
+  function profilMagasin() {
+    try { return JSON.parse(localStorage.getItem('profil-magasin-v1') || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function storeName() {
+    var p = profilMagasin();
+    return (p && p.nom && String(p.nom).trim()) || 'Mon magasin';
+  }
+
+  /* ── Petits utilitaires DOM et de formatage. Aucune formule optique ici :
+     tout calcul passe par LentillesPrescription / LentillesMoteurs /
+     LentillesSelection / LentillesCatalogue, chargés ci-dessus. Tout affichage
+     de valeur passe par textContent, jamais par innerHTML avec une donnée. ── */
+  function val(id) {
+    var e = document.getElementById(id);
+    return e ? e.value : '';
+  }
+  function vider(noeud) {
+    while (noeud.firstChild) { noeud.removeChild(noeud.firstChild); }
+  }
+  function el(tag, opts) {
+    var e = document.createElement(tag);
+    if (opts) {
+      if (opts.class) { e.className = opts.class; }
+      if (opts.text !== undefined) { e.textContent = opts.text; }
+    }
+    return e;
+  }
+
+  function parseNombre(str) {
+    var t = (str || '').trim();
+    if (t === '') { return null; }
+    var v = Number(t.replace(',', '.'));
+    return Number.isFinite(v) ? v : NaN;
+  }
+
+  function formatD(v) {
+    if (typeof v !== 'number' || !Number.isFinite(v)) { return '?'; }
+    var s = v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (v > 0 ? '+' : '') + s + ' D';
+  }
+  function formatMm(v) {
+    if (typeof v !== 'number' || !Number.isFinite(v)) { return '?'; }
+    return v.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' mm';
+  }
+  function formatEcart(v) {
+    return v.toLocaleString('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' D';
+  }
+  function formatRx(rx) {
+    if (!rx) { return '?'; }
+    var s = 'sph ' + formatD(rx.sph);
+    if (rx.cyl) {
+      var axeTexte = (typeof rx.axe === 'number' && Number.isFinite(rx.axe)) ? (rx.axe + '°') : '?';
+      s += ', cyl ' + formatD(rx.cyl) + ', axe ' + axeTexte;
+    }
+    return s;
+  }
+
+  function ligneTier(classe, label, texte) {
+    var p = el('p', { class: 'val-tier ' + classe });
+    var lab = el('span', { class: 'val-tier-lab', text: label });
+    p.appendChild(lab);
+    p.appendChild(document.createTextNode(texte));
+    return p;
+  }
+
+  /* Un "problème" affiché ici est toujours l'un des dix cas du contrat :
+     axe absent avec cylindre non nul, cylindre nul avec axe incompatible,
+     valeur non numérique, vertex négatif, vertex aberrant, axe hors plage,
+     catalogue invalide, produit sans règle, rotation torique instable,
+     calcul non interprétable. Chaque code affiché ici est un code réel,
+     produit par le noyau ou par la vérification d'entrée qui le précède
+     immédiatement (jamais une valeur devinée à sa place). */
+
+  var LIBELLES_DISTANCE = {
+    vertex: 'la distance vertex',
+    distanceSurrefraction: 'la distance du verre de surréfraction',
+  };
+
+  /* Le noyau (moteurs.js) est écrit sans accent et nomme ses paramètres par
+     leur identifiant interne (« cyl », « sph », « vertex »...) : ce sont des
+     conventions de code, pas du texte utilisateur. Cette page ne réaffiche
+     donc jamais p.message tel quel pour un code qu'elle reconnaît ; elle lui
+     substitue une phrase française destinée à l'opticien. Le repli sur
+     p.message ne sert que pour un code encore inconnu de cette page (par
+     exemple une erreur de catalogue, déjà en français dans catalogue.js). */
+  function texteAffichableProbleme(p) {
+    switch (p.code) {
+      case 'SPHERE_MANQUANTE':
+        return 'la sphère est obligatoire dès qu\'un autre champ de cet oeil est renseigné.';
+      case 'SPHERE_INVALIDE':
+        return 'la sphère doit être un nombre, par exemple -3,00.';
+      case 'CYLINDRE_INVALIDE':
+        return 'le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.';
+      case 'AXE_INVALIDE':
+        return 'l\'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).';
+      case 'AXE_INCOHERENT_CYLINDRE_NUL':
+        return 'un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n\'a été effectué pour cet oeil.';
+      case 'AXE_MANQUANT':
+        return 'l\'axe est obligatoire dès que le cylindre n\'est pas nul.';
+      case 'DISTANCE_NON_NUMERIQUE':
+        return (LIBELLES_DISTANCE[p.parametre] || 'la distance') + ' doit être un nombre.';
+      case 'DISTANCE_NEGATIVE':
+        return (LIBELLES_DISTANCE[p.parametre] || 'la distance') + ' ne peut pas être négative.';
+      case 'DISTANCE_ABERRANTE':
+        return (LIBELLES_DISTANCE[p.parametre] || 'la distance') + ' dépasse ' + window.LentillesMoteurs.DISTANCE_MM_MAX +
+          ' mm, hors du domaine plausible : vérifier une confusion possible entre millimètres et centimètres.';
+      case 'ROTATION_INSTABLE':
+        return 'la rotation déclarée n\'est pas stable : l\'axe compensé est une indication à vérifier, pas une valeur acquise.';
+      case 'ROTATION_INVALIDE':
+        return 'la rotation observée doit être un nombre, avec un sens choisi dans la liste.';
+      case 'CALCUL_NON_INTERPRETABLE':
+        return 'cette combinaison de puissance et de distance ne peut pas être calculée : vérifier la saisie.';
+      case 'PRESCRIPTION_INVALIDE':
+        return 'la prescription saisie est incohérente ou incomplète pour cet oeil : vérifier sphère, cylindre et axe.';
+      case 'AUCUN_RESULTAT':
+        return 'aucune combinaison ni alternative trouvée dans le catalogue de démonstration pour cette cible.';
+      default:
+        return p.message;
+    }
+  }
+
+  function renderProblemes(liste) {
+    var conteneur = el('div', { class: 'problemes' });
+    liste.forEach(function (p) {
+      var classe = (p.gravite === 'avertissement') ? 'probleme probleme-avert' : 'probleme probleme-erreur';
+      var ligne = el('p', { class: classe });
+      ligne.appendChild(el('span', { class: 'probleme-code', text: p.code }));
+      ligne.appendChild(document.createTextNode(texteAffichableProbleme(p)));
+      conteneur.appendChild(ligne);
+    });
+    return conteneur;
+  }
+
+  function ligneDetail(dl, label, texte) {
+    dl.appendChild(el('dt', { text: label }));
+    dl.appendChild(el('dd', { text: texte }));
+  }
+
+  function detailArrondiTexte(detail) {
+    var s = 'valeur ' + formatD(detail.valeur) + ', voisins ' + formatD(detail.voisinBas) + ' et ' + formatD(detail.voisinHaut);
+    if (detail.egalite) { s += ', exactement entre deux pas'; }
+    return s;
+  }
+
+  function champVide(str) { return (str || '').trim() === ''; }
+
+  function creerProbleme(code, message) {
+    return { code: code, gravite: 'erreur', message: message };
+  }
+
+  /* Lit un triplet sphère/cylindre/axe pour un oeil.
+     - Un oeil entièrement vide (aucun des trois champs rempli) n'est pas une
+       erreur : c'est un oeil que l'opticien n'a pas encore renseigné, et le
+       bloc doit rester silencieux pour cet oeil (étape « vide »).
+     - Un cylindre laissé vide vaut zéro : c'est l'écriture usuelle d'une
+       correction sphérique pure, jamais une valeur manquante.
+     - Un axe renseigné avec un cylindre nul, ou un cylindre non nul sans
+       axe, reste une saisie incohérente (cas du contrat) que
+       normalizePrescription se contenterait sinon soit d'ignorer en silence,
+       soit de refuser avec un message de noyau non destiné à l'écran. */
+  function lireRx(sphRaw, cylRaw, axeRaw) {
+    var sphVide = champVide(sphRaw);
+    var cylVide = champVide(cylRaw);
+    var axeVide = champVide(axeRaw);
+
+    if (sphVide && cylVide && axeVide) {
+      return { etat: 'vide' };
+    }
+
+    if (sphVide) {
+      return { etat: 'erreur', probleme: creerProbleme('SPHERE_MANQUANTE', "la sphère est obligatoire dès qu'un autre champ de cet oeil est renseigné.") };
+    }
+    var sph = parseNombre(sphRaw);
+    if (Number.isNaN(sph)) {
+      return { etat: 'erreur', probleme: creerProbleme('SPHERE_INVALIDE', 'la sphère doit être un nombre, par exemple -3,00.') };
+    }
+
+    var cyl = cylVide ? 0 : parseNombre(cylRaw);
+    if (Number.isNaN(cyl)) {
+      return { etat: 'erreur', probleme: creerProbleme('CYLINDRE_INVALIDE', "le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.") };
+    }
+
+    var axe = axeVide ? null : parseNombre(axeRaw);
+    if (!axeVide && Number.isNaN(axe)) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).") };
+    }
+    /* Domaine de saisie de l'axe : 1..180, 0 lu comme 180 (convention clinique
+       de l'axe torique). normalizeAxis (noyau) replie tout angle par modulo
+       180 et sert aux axes calculés par les moteurs, pas à la saisie brute :
+       une faute de frappe comme 200 ne doit jamais atterrir dans le noyau
+       et en ressortir plausible (20°) sans réserve affichée. */
+    if (!axeVide && (axe < 0 || axe > 180)) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).") };
+    }
+    if (!axeVide && axe === 0) {
+      axe = 180;
+    }
+
+    if (cyl === 0 && !axeVide) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_INCOHERENT_CYLINDRE_NUL', "un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n'a été effectué pour cet oeil.") };
+    }
+    if (cyl !== 0 && axeVide) {
+      return { etat: 'erreur', probleme: creerProbleme('AXE_MANQUANT', "l'axe est obligatoire dès que le cylindre n'est pas nul.") };
+    }
+
+    return { etat: 'ok', entree: { sph: sph, cyl: cyl, axe: axe } };
+  }
+
+  /* ══════════════ BLOC A ══════════════ */
+
+  var dernieresCibles = { od: null, og: null };
+
+  function prefillC(oeil, cible) {
+    if (!cible) { return; }
+    document.getElementById('c-' + oeil + '-sph').value = cible.sph.toFixed(2);
+    document.getElementById('c-' + oeil + '-cyl').value = cible.cyl.toFixed(2);
+    document.getElementById('c-' + oeil + '-axe').value = (cible.axe === null || cible.axe === undefined) ? '' : String(cible.axe);
+  }
+
+  function renderDetailsA(resultat) {
+    var det = el('details', { class: 'detail-calcul' });
+    det.appendChild(el('summary', { text: 'Détails du calcul' }));
+    var dl = el('dl');
+    if (resultat.lunettes) { ligneDetail(dl, 'Lunettes normalisées', formatRx(resultat.lunettes)); }
+    if (resultat.theorique) { ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(resultat.theorique)); }
+    if (resultat.detailArrondi && resultat.detailArrondi.sph) {
+      ligneDetail(dl, 'Arrondi sphère', detailArrondiTexte(resultat.detailArrondi.sph));
+    }
+    if (resultat.detailArrondi && resultat.detailArrondi.cyl) {
+      ligneDetail(dl, 'Arrondi cylindre', detailArrondiTexte(resultat.detailArrondi.cyl));
+    }
+    if (resultat.cible) { ligneDetail(dl, 'Correction cible', formatRx(resultat.cible)); }
+    if (!dl.hasChildNodes()) {
+      ligneDetail(dl, 'Calcul non effectué', 'aucune valeur intermédiaire disponible pour cet oeil');
+    }
+    det.appendChild(dl);
+    return det;
+  }
+
+  function renderResultatA(oeil, entree, resultat) {
+    var out = document.getElementById('a-' + oeil + '-out');
+    vider(out);
+
+    out.appendChild(ligneTier('val-tier-1', 'Saisie ', formatRx(entree) + ', vertex ' + formatMm(entree.vertexMm)));
+
+    if (resultat.problemes && resultat.problemes.length) {
+      out.appendChild(renderProblemes(resultat.problemes));
+    }
+
+    if (resultat.theorique) {
+      out.appendChild(ligneTier('val-tier-2', 'Correction théorique (plan cornéen) ', formatRx(resultat.theorique)));
+    }
+    if (resultat.cible) {
+      out.appendChild(ligneTier('val-tier-3', 'Correction cible (pas 0,25 D) ', formatRx(resultat.cible)));
+      dernieresCibles[oeil] = resultat.cible;
+      prefillC(oeil, resultat.cible);
+    }
+
+    out.appendChild(renderDetailsA(resultat));
+  }
+
+  function calculerA() {
+    ['od', 'og'].forEach(function (oeil) {
+      var sphRaw = val('a-' + oeil + '-sph');
+      var cylRaw = val('a-' + oeil + '-cyl');
+      var axeRaw = val('a-' + oeil + '-axe');
+      var out = document.getElementById('a-' + oeil + '-out');
+
+      var v = lireRx(sphRaw, cylRaw, axeRaw);
+      if (v.etat === 'vide') {
+        vider(out);
+        return;
+      }
+
+      var vertex = parseNombre(val('a-' + oeil + '-vertex'));
+      var entreeAffichage = { sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw), vertexMm: vertex };
+
+      if (v.etat === 'erreur') {
+        renderResultatA(oeil, entreeAffichage, { theorique: null, cible: null, problemes: [v.probleme] });
+        return;
+      }
+
+      var resultat = window.LentillesMoteurs.calculerMoteurA({
+        sph: v.entree.sph, cyl: v.entree.cyl, axe: v.entree.axe, vertexMm: vertex,
+      });
+      renderResultatA(oeil, entreeAffichage, resultat);
+    });
+  }
+
+  document.getElementById('a-calculer').addEventListener('click', calculerA);
+
+  /* ══════════════ BLOC B ══════════════ */
+
+  function renderDetailsB(resultat) {
+    var det = el('details', { class: 'detail-calcul' });
+    det.appendChild(el('summary', { text: 'Détails du calcul' }));
+    var dl = el('dl');
+    if (resultat.axePorte !== null && resultat.axePorte !== undefined) {
+      ligneDetail(dl, 'Axe réellement porté', resultat.axePorte + '°');
+    }
+    if (resultat.theorique) { ligneDetail(dl, 'Correction théorique (combinée)', formatRx(resultat.theorique)); }
+    if (resultat.detailArrondi && resultat.detailArrondi.sph) {
+      ligneDetail(dl, 'Arrondi sphère', detailArrondiTexte(resultat.detailArrondi.sph));
+    }
+    if (resultat.detailArrondi && resultat.detailArrondi.cyl) {
+      ligneDetail(dl, 'Arrondi cylindre', detailArrondiTexte(resultat.detailArrondi.cyl));
+    }
+    if (resultat.cible) { ligneDetail(dl, 'Nouvelle correction cible', formatRx(resultat.cible)); }
+    if (!dl.hasChildNodes()) {
+      ligneDetail(dl, 'Calcul non effectué', 'aucune valeur intermédiaire disponible pour cet oeil');
+    }
+    det.appendChild(dl);
+    return det;
+  }
+
+  function renderResultatB(oeil, saisieTexte, resultat) {
+    var out = document.getElementById('b-' + oeil + '-out');
+    vider(out);
+
+    out.appendChild(ligneTier('val-tier-1', 'Saisie ', saisieTexte));
+
+    if (resultat.problemes && resultat.problemes.length) {
+      out.appendChild(renderProblemes(resultat.problemes));
+    }
+
+    if (resultat.theorique) {
+      out.appendChild(ligneTier('val-tier-2', 'Correction théorique (combinée) ', formatRx(resultat.theorique)));
+    }
+    if (resultat.cible) {
+      out.appendChild(ligneTier('val-tier-3', 'Nouvelle correction cible (pas 0,25 D) ', formatRx(resultat.cible)));
+      dernieresCibles[oeil] = resultat.cible;
+      prefillC(oeil, resultat.cible);
+    }
+
+    out.appendChild(renderDetailsB(resultat));
+  }
+
+  function calculerB() {
+    ['od', 'og'].forEach(function (oeil) {
+      var out = document.getElementById('b-' + oeil + '-out');
+      var lSphRaw = val('b-' + oeil + '-l-sph');
+      var lCylRaw = val('b-' + oeil + '-l-cyl');
+      var lAxeRaw = val('b-' + oeil + '-l-axe');
+
+      /* La lentille portée est le champ qui décide si cet oeil participe au
+         calcul de surréfraction : la laisser vide (état par défaut, aucune
+         valeur pré-remplie) signifie que l'opticien n'a pas encore ouvert
+         ce bloc pour cet oeil, ce qui doit rester silencieux. */
+      var vL = lireRx(lSphRaw, lCylRaw, lAxeRaw);
+      if (vL.etat === 'vide') {
+        vider(out);
+        return;
+      }
+
+      var sSphRaw = val('b-' + oeil + '-s-sph');
+      var sCylRaw = val('b-' + oeil + '-s-cyl');
+      var sAxeRaw = val('b-' + oeil + '-s-axe');
+      var dist = parseNombre(val('b-' + oeil + '-dist'));
+      var rotValeurBrute = parseNombre(val('b-' + oeil + '-rot-valeur'));
+      var rotValeur = (rotValeurBrute === null) ? 0 : rotValeurBrute;
+      var rotSens = val('b-' + oeil + '-rot-sens') || 'gauche';
+      var rotStable = document.getElementById('b-' + oeil + '-rot-stable').checked;
+
+      /* La surréfraction est facultative (champs pré-remplis à zéro) : un
+         oeil qui n'en porte aucune (les trois champs vidés par l'opticien)
+         vaut « aucune surréfraction mesurée », jamais une erreur. */
+      var vS = lireRx(sSphRaw, sCylRaw, sAxeRaw);
+      var surrefractionEntree = (vS.etat === 'ok') ? vS.entree : { sph: 0, cyl: 0, axe: null };
+
+      var saisieTexte = 'lentille portée ' + formatRx({ sph: parseNombre(lSphRaw), cyl: parseNombre(lCylRaw), axe: parseNombre(lAxeRaw) }) +
+        ' ; surréfraction ' + formatRx({ sph: parseNombre(sSphRaw), cyl: parseNombre(sCylRaw), axe: parseNombre(sAxeRaw) }) +
+        ', distance ' + formatMm(dist) +
+        ' ; rotation ' + (Number.isFinite(rotValeur) ? rotValeur : '?') + '° vers la ' + rotSens +
+        (rotStable ? '' : ', déclarée instable');
+
+      var problemesEntree = [];
+      if (vL.etat === 'erreur') { problemesEntree.push(vL.probleme); }
+      if (vS.etat === 'erreur') { problemesEntree.push(vS.probleme); }
+      if (problemesEntree.length) {
+        renderResultatB(oeil, saisieTexte, { theorique: null, cible: null, problemes: problemesEntree });
+        return;
+      }
+
+      var resultat = window.LentillesMoteurs.calculerMoteurB({
+        lentille: vL.entree,
+        surrefraction: surrefractionEntree,
+        distanceSurrefractionMm: dist,
+        rotation: { valeur: rotValeur, sens: rotSens, stable: rotStable },
+      });
+      renderResultatB(oeil, saisieTexte, resultat);
+    });
+  }
+
+  document.getElementById('b-calculer').addEventListener('click', calculerB);
+
+  /* ══════════════ BLOC C ══════════════ */
+
+  function renderErreursCatalogue(erreurs) {
+    var boite = document.getElementById('c-catalogue-erreurs');
+    vider(boite);
+    if (!erreurs.length) {
+      boite.hidden = true;
+      return;
+    }
+    boite.hidden = false;
+    boite.appendChild(el('p', { class: 'probleme-titre', text: 'Catalogue invalide : la recherche fabricant est interrompue.' }));
+    boite.appendChild(renderProblemes(erreurs.map(function (e) {
+      return { code: e.code, gravite: 'erreur', message: e.message };
+    })));
+  }
+
+  function renderDetailsC(cible, resultats) {
+    var det = el('details', { class: 'detail-calcul' });
+    det.appendChild(el('summary', { text: 'Détails du calcul' }));
+    var dl = el('dl');
+    ligneDetail(dl, 'Cible recherchée', formatRx(cible));
+    ligneDetail(dl, 'Candidats retenus', String(resultats.length) + ' (voisinage borné par règle, aucun produit cartésien)');
+    resultats.forEach(function (r, i) {
+      ligneDetail(
+        dl,
+        'Candidat ' + (i + 1),
+        formatRx({ sph: r.sph, cyl: r.cyl, axe: r.axe }) + ', écart optique ' + formatEcart(r.ecart) + ', règle ' + r.rule_id + ', source ' + r.source_id,
+      );
+    });
+    det.appendChild(dl);
+    return det;
+  }
+
+  function renderResultatsC(oeil, cible, resultats, catalogueDemo) {
+    var out = document.getElementById('c-' + oeil + '-out');
+    vider(out);
+
+    out.appendChild(ligneTier('val-tier-1', 'Cible ', formatRx(cible)));
+
+    if (!resultats.length) {
+      out.appendChild(renderProblemes([{
+        code: 'AUCUN_RESULTAT',
+        gravite: 'erreur',
+        message: 'aucune combinaison ni alternative trouvée dans le catalogue de démonstration pour cette cible.',
+      }]));
+      return;
+    }
+
+    resultats.forEach(function (r) {
+      var produit = catalogueDemo.products.filter(function (p) { return p.product_id === r.product_id; })[0];
+      var fabricant = catalogueDemo.manufacturers.filter(function (m) { return m.manufacturer_id === r.manufacturer_id; })[0];
+      var source = catalogueDemo.sources.filter(function (s) { return s.source_id === r.source_id; })[0];
+
+      var carte = el('div', { class: 'resultat-c' });
+      carte.appendChild(ligneTier('val-tier-4', '', 'Paramètre fabricant disponible'));
+      carte.appendChild(el('p', {
+        class: 'resultat-c-statut',
+        text: r.exact ? 'Solution disponible : combinaison exacte' : 'Alternative fabricant',
+      }));
+      carte.appendChild(el('p', {
+        class: 'resultat-c-produit',
+        text: (produit ? produit.name : r.product_id) + ' (' + (fabricant ? fabricant.name : r.manufacturer_id) + ')',
+      }));
+      carte.appendChild(el('p', { text: 'Paramètres proposés : ' + formatRx({ sph: r.sph, cyl: r.cyl, axe: r.axe }) }));
+      carte.appendChild(el('p', { text: 'Écart optique par rapport à la cible : ' + formatEcart(r.ecart) + (r.exact ? ' (nul)' : '') }));
+      carte.appendChild(el('p', {
+        class: 'resultat-c-source',
+        text: 'Provenance : ' + (source ? (source.document_name + ', vérifiée le ' + source.last_checked) : r.source_id),
+      }));
+      out.appendChild(carte);
+    });
+
+    out.appendChild(renderDetailsC(cible, resultats));
+  }
+
+  function chercherC() {
+    var catalogueDemo = window.LentillesCatalogueDemo.catalogueDemo;
+    var erreursCatalogue = window.LentillesCatalogue.validerCatalogue(catalogueDemo);
+    renderErreursCatalogue(erreursCatalogue);
+    if (erreursCatalogue.length) { return; }
+
+    var index = window.LentillesSelection.compilerIndex(catalogueDemo);
+
+    ['od', 'og'].forEach(function (oeil) {
+      var out = document.getElementById('c-' + oeil + '-out');
+      vider(out);
+
+      var sphRaw = val('c-' + oeil + '-sph');
+      var cylRaw = val('c-' + oeil + '-cyl');
+      var axeRaw = val('c-' + oeil + '-axe');
+      var v = lireRx(sphRaw, cylRaw, axeRaw);
+
+      /* Une cible fabrication non renseignée pour cet oeil reste silencieuse :
+         le bloc C est utilisable seul et un oeil laissé de côté n'est pas une
+         erreur (l'output a déjà été vidé au-dessus). */
+      if (v.etat === 'vide') {
+        return;
+      }
+
+      if (v.etat === 'erreur') {
+        out.appendChild(ligneTier('val-tier-1', 'Cible ', formatRx({ sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw) })));
+        out.appendChild(renderProblemes([v.probleme]));
+        return;
+      }
+
+      try {
+        var resultats = window.LentillesSelection.chercherAlternatives(index, v.entree, { limit: 5 });
+        renderResultatsC(oeil, v.entree, resultats, catalogueDemo);
+      } catch (erreur) {
+        out.appendChild(ligneTier('val-tier-1', 'Cible ', formatRx(v.entree)));
+        out.appendChild(renderProblemes([{ code: erreur.code || 'PRESCRIPTION_INVALIDE', gravite: 'erreur', message: erreur.message }]));
+      }
+    });
+  }
+
+  document.getElementById('c-chercher').addEventListener('click', chercherC);
+
+  /* ── Validation du catalogue au chargement : si le catalogue livré était
+     invalide, l'interruption de la recherche (et non une valeur devinée)
+     doit être visible sans même appuyer sur « Chercher ». ── */
+  renderErreursCatalogue(window.LentillesCatalogue.validerCatalogue(window.LentillesCatalogueDemo.catalogueDemo));
+
+  document.getElementById('hdr-sub').textContent = storeName() + ', aide au calcul et à la sélection de paramètres';
+}());
 </script>
 
 <!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
