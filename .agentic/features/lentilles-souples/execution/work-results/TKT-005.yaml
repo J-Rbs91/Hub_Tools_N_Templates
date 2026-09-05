@@ -2,17 +2,14 @@ schema_version: 1
 ticket: TKT-005
 status: candidate_done
 actor: worker
-commit: 035c21a
+commit: 035c21acfae0c5d08ebf403697e89020c9df59a7
 validation:
-- 'npx html-validate@11.5.6 **/*.html : exit 0'
-- 'node tests/navigation-retour.test.mjs : 25 controles passes'
-- 'hygiene (git grep trailing whitespace / CRLF, final newline) : aucune sortie, conforme'
-- 'simulation jsdom des 3 scenarios rejetes (chargement reel du noyau + clics boutons)
-  : cylindre vide calcule sans erreur, oeil OG jamais renseigne reste silencieux sur
-  A/B/C, messages d''erreur desormais en francais sans fragment interne (cyl/sph/vertex)'
+- 'html-validate outils/lentilles-souples/index.html: exit 0, no errors'
+- 'node tests/navigation-retour.test.mjs: 25 controle(s) passe(s)'
+- 'node tests/lentilles-souples.test.mjs: 166 controle(s) passe(s), 0 echec'
 discoveries: []
 recommendation: done
-reported_at: '2026-09-05T12:26:06Z'
+reported_at: '2026-09-05T12:29:57Z'
 routing_evidence:
   sequence: 1
   policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286

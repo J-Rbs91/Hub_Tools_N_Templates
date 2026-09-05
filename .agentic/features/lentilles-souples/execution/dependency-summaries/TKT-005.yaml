@@ -1,17 +1,15 @@
 schema_version: 1
 feature_id: lentilles-souples
 ticket: TKT-005
-commit: 035c21a
+commit: 035c21acfae0c5d08ebf403697e89020c9df59a7
 behavior:
-- 'index.html : lireRx() remplace validerEtNormaliser(). Cylindre vide vaut 0 (spherique
-  pure) au lieu de PRESCRIPTION_INVALIDE. Un oeil entierement vide (A, sous-groupe
-  lentille portee de B, ou C) renvoie etat ''vide'' : bloc silencieux, aucun appel
-  moteur ni erreur. Tout probleme affiche passe par texteAffichableProbleme(code),
-  catalogue de messages francais interne a la page (SPHERE_*, CYLINDRE_INVALIDE, AXE_*,
-  DISTANCE_*, ROTATION_*, CALCUL_NON_INTERPRETABLE, PRESCRIPTION_INVALIDE, AUCUN_RESULTAT),
-  plus jamais le p.message brut du noyau (identifiants internes sans accent). Repli
-  sur p.message reserve aux codes inconnus de cette page (erreurs catalogue.js, hors
-  scope).'
+- 'outils/lentilles-souples/index.html charge moteurs.js/selection.js/catalogue.js/prescription.js
+  par balises script de meme origine ; lireRx(sph,cyl,axe) distingue trois etats (vide/erreur/ok)
+  partages par les blocs A, B et C : un oeil entierement vide reste silencieux, un
+  cylindre vide vaut zero (spherique pur), et toute erreur affichee passe par texteAffichableProbleme
+  (catalogue de messages francais par code) au lieu du message brut du noyau qui nomme
+  ses parametres en interne sans accent ; la surrefraction du bloc B reste facultative
+  (etat vide -> {sph:0,cyl:0,axe:null}).'
 contracts: []
 interfaces: []
 files:
@@ -19,9 +17,9 @@ files:
 migrations: []
 invariants: []
 limitations:
-- catalogue.js (fichier TKT-003, hors scope) produit encore des messages non accentues
-  avec identifiants internes quand le catalogue est invalide ; jamais exerce en usage
-  normal (catalogue demo valide par construction), a revisiter si un futur catalogue
-  reel declenche ce chemin.
+- Correction faite apres refus du Control Plane (parcours Chromium reel) sur cylindre
+  vide, oeil vide affichant une erreur, et message brut non francise ; ces trois points
+  sont corriges et re-valides (html-validate, tests noyau, tests navigation) mais
+  aucun nouveau parcours Chromium reel n'a ete rejoue par ce worker.
 discoveries: []
-reported_at: '2026-09-05T12:26:06Z'
+reported_at: '2026-09-05T12:29:57Z'

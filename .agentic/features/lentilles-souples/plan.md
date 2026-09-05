@@ -203,7 +203,7 @@ id: LS-05
 objective: 'Interface du module : page autonome branchée sur les moteurs réels, trois
   blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite
   des erreurs, conventions du hub.'
-status: in_progress
+status: pending
 dependencies:
 - LS-02
 - LS-04
