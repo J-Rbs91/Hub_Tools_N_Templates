@@ -253,6 +253,41 @@
         </details>
       </li>
 
+      <!-- LENTILLES SOUPLES — bénéfice : le calcul de conversion et le
+           rapprochement avec le catalogue fabricant se font seuls, la
+           décision reste celle de l'opticien. Icône statique (cercle de la
+           lentille, zone optique accentuée au survol par le seul jeton de
+           couleur déjà existant) : aucune animation dédiée, pour ne pas
+           ajouter de nouvelle règle CSS hors du périmètre de ce ticket. -->
+      <li class="tool-card" data-tool="lentilles">
+        <span class="tool-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8.5"/>
+            <circle class="acc" cx="12" cy="12" r="3"/>
+          </svg>
+        </span>
+        <h3 class="tool-card__title">
+          <a class="tool-card__link" href="outils/lentilles-souples/">Lentilles souples</a>
+        </h3>
+        <p class="tool-card__pitch">
+          Convertissez une prescription lunettes en lentille et repérez les paramètres
+          disponibles chez le fabricant, sans faire le calcul à la main.
+        </p>
+        <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+        <details class="tool-card__more">
+          <summary>Ce que fait l'outil</summary>
+          <p>
+            Aide au calcul et à la sélection de paramètres lentilles souples : conversion
+            d'une prescription lunettes (sphère, cylindre, axe, distance vertex) au plan
+            cornéen, combinaison de prescriptions, et confrontation à un catalogue fabricant
+            pour repérer les paramètres disponibles. Ne prescrit pas et ne remplace pas le
+            jugement clinique de l'opticien : le choix final de la lentille lui revient toujours.
+          </p>
+        </details>
+      </li>
+
       <!-- CAMPAGNE E-MAIL — outil terminé mais volontairement non ouvert : la
            carte l'annonce sans y donner accès (aucun lien, donc aucune cible
            au clavier). L'icône reste immobile et atténuée. -->
