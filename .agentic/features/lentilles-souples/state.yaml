@@ -388,7 +388,7 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T12:42:38Z'
+  updated_at: '2026-09-05T12:50:36Z'
 classification:
   profile: critical
   reasons:
@@ -406,13 +406,14 @@ phases:
 integrations:
   uxer:
     applicable: true
-    status: in_progress
+    status: error
     evidence:
     - 'UXER delegated job SPJ-9a10fb9a2116: .agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-9a10fb9a2116.yaml'
     - 'UXER research result SPJ-9a10fb9a2116: .agentic/features/lentilles-souples/specialists/uxer/results/SPJ-9a10fb9a2116.yaml'
     - 'UXER delegated job SPJ-992b682f9ef7: .agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-992b682f9ef7.yaml'
-    notes: 'UXER modified Arcline control-plane state | limitations: specialists may
-      not edit .agentic/ during delegated execution'
+    - 'UXER review result SPJ-992b682f9ef7: .agentic/features/lentilles-souples/specialists/uxer/results/SPJ-992b682f9ef7.yaml'
+    notes: 'UXER violated an inspect-only worktree boundary | limitations: inspection
+      jobs are not allowed to modify project files'
   securix:
     applicable: true
     status: partial
@@ -433,16 +434,16 @@ integrations:
       Elle n a pas ete faite et n est donc pas declaree faite. Statut partial, jamais
       promu.'
 execution:
-  local_checks:
-  - name: ticket-control-plane
-    status: passed
-    evidence: TKT-001=efb47fb713f36863eefdac115cff89116a3f325f; TKT-002=ccee1fc; TKT-003=5976d6b;
-      TKT-004=811ff65; TKT-005=994b01e; TKT-006=8c8b5d1; TKT-007=3ad3358; TKT-008=62bf121
+  local_checks: []
   unexpected_scope: []
-blocking_findings: []
+blocking_findings:
+- FIND-01
+- FIND-02
+- FIND-03
+- FIND-04
 next_action:
   phase: review
-  reason: Complete the review phase and satisfy its gate
+  reason: 'Resolve blocking findings: FIND-01, FIND-02, FIND-03, FIND-04'
 history:
 - from: research
   to: design

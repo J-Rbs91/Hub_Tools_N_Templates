@@ -1,0 +1,103 @@
+I have enough evidence to complete this review. The static-code analysis was thorough (full read of both files, hub token comparison), but a browser-based check for the 360px/accessibility runtime points was attempted and came back unavailable (no Playwright in this environment), so I'm reporting those specific points as code-evidence-only rather than executed/visual evidence.
+
+ARCLINE_UXER_RESULT_BEGIN
+{
+  "status": "partial",
+  "summary": "Revue de code complète des deux fichiers en périmètre (lecture intégrale, comparaison avec les jetons de assets/css/hub.css). Dix constats identifiés sur la hiérarchie à quatre niveaux, le ton des messages, l'accessibilité et la cohérence visuelle. La vérification comportementale/visuelle réelle à 360px (capture d'écran, focus clavier observé, arbre de titres via DOM, live regions, rendu du message d'erreur) n'a pas pu être exécutée : aucun outil d'automatisation navigateur (Playwright) n'est disponible dans cet environnement. html-validate n'a pas non plus pu être exécuté (approbation de commande refusée). Tous les constats ci-dessous sont donc des preuves de code, pas des preuves d'exécution ou visuelles.",
+  "evidence": [
+    "Lecture intégrale de outils/lentilles-souples/index.html (1006 lignes, CSS inline + script inline)",
+    "Lecture de la section carte 'Lentilles souples' dans index.html (lignes 256-289)",
+    "Comparaison des jetons couleur locaux du tool (:root lignes 13-20) avec assets/css/hub.css (:root lignes 17-45)",
+    "grep confirmant l'absence de tiret cadratin (—) dans les deux fichiers en périmètre",
+    "Tentative d'exécution d'un agent d'exploration navigateur (uxer:uxer-browser-explorer) : a confirmé l'absence de Playwright/playwright-cli dans l'environnement, aucune capture ni interaction possible"
+  ],
+  "findings": [
+    {
+      "id": "UX-001",
+      "severity": "high",
+      "blocking": false,
+      "description": "Le niveau 4 (paramètre fabricant disponible), censé être la valeur la plus actionnable pour l'opticien, est visuellement moins proéminent que le niveau 3 (correction cible arrondie). .val-tier-3 (correction cible) est en bleu 16px/700 (le plus grand corps de tout le système de hiérarchie), tandis que .val-tier-4 est en vert 15px/700, plus petit. Pire, .val-tier-4 n'est utilisé que pour un intitulé fixe ('Paramètre fabricant disponible', ligne 928), jamais pour la valeur elle-même : le nom du produit, les paramètres proposés et l'écart optique (les données que l'opticien va réellement commander) sont rendus en <p> ordinaires à 13px (.resultat-c-produit, lignes 933-938), au même poids visuel que du texte de contexte. La hiérarchie voulue (saisie < théorique < cible < paramètre fabricant) n'est donc pas respectée au niveau visuel : le pic de saillance est au niveau 3, pas au niveau 4.",
+      "evidence": "outils/lentilles-souples/index.html lignes 116-119 (CSS .val-tier-3/.val-tier-4), lignes 927-938 (construction de la carte résultat C), ligne 928 (ligneTier('val-tier-4','','Paramètre fabricant disponible') : label vide, texte = intitulé générique et non la valeur)"
+    },
+    {
+      "id": "UX-002",
+      "severity": "medium",
+      "blocking": false,
+      "description": "Codes d'erreur internes affichés tels quels aux opticiens (ex. 'SPHERE_MANQUANTE', 'AXE_INCOHERENT_CYLINDRE_NUL'), en gras, avant chaque phrase française. Ce sont des identifiants techniques (majuscules, underscores) qui ressemblent à un artefact de débogage dans une interface destinée à des employés non techniques en magasin, même si la phrase française qui suit est elle-même bien rédigée et non culpabilisante.",
+      "evidence": "outils/lentilles-souples/index.html lignes 605-606 (probleme-code affiché avant texteAffichableProbleme), ligne 126 (.probleme-code{font-weight:700})"
+    },
+    {
+      "id": "UX-003",
+      "severity": "medium",
+      "blocking": false,
+      "description": "La gravité d'un problème (erreur bloquante vs avertissement consultatif, notamment pour ROTATION_INSTABLE) n'est distinguée que par la couleur de fond/bordure (rouge vs ambre) : aucun mot 'Erreur' ou 'Avertissement' n'est présent dans le DOM. Un utilisateur de lecteur d'écran, ou une personne daltonienne dans un magasin peu éclairé, n'a donc pas de repère textuel fiable pour savoir si un message empêche la suite ou n'est qu'indicatif.",
+      "evidence": "outils/lentilles-souples/index.html lignes 122-125 (CSS .probleme-erreur / .probleme-avert, distinction uniquement par couleur), lignes 600-610 (renderProblemes ne pose aucun texte de gravité)"
+    },
+    {
+      "id": "UX-004",
+      "severity": "medium",
+      "blocking": false,
+      "description": "Aucun des conteneurs de résultat générés dynamiquement (#a-od-out, #a-og-out, #b-od-out, #b-og-out, #c-od-out, #c-og-out) ne porte d'attribut aria-live, role=\"status\" ou role=\"alert\". Un utilisateur de lecteur d'écran cliquant sur un des trois boutons 'Calculer'/'Chercher' n'est pas averti automatiquement qu'un résultat vient d'apparaître plus bas dans la page.",
+      "evidence": "outils/lentilles-souples/index.html : recherche de 'aria-live' dans le fichier, aucune occurrence ; conteneurs de sortie définis lignes 228, 251, 327, 394, 429, 448 sans attribut de live region"
+    },
+    {
+      "id": "UX-005",
+      "severity": "medium",
+      "blocking": false,
+      "description": "Le bloc B ('Surréfraction') n'a aucun élément de titre (h1-h6) : son intitulé n'existe que dans un <summary>, alors que les blocs A et C utilisent un <h2>. La navigation par titres d'un lecteur d'écran (touche H) saute donc entièrement le bloc B, et les <h3> 'OD, oeil droit'/'OG, oeil gauche' qu'il contient (lignes 264, 331) se retrouvent sans <h2> englobant, cassant la structure de titres cohérente établie par les blocs A et C.",
+      "evidence": "outils/lentilles-souples/index.html ligne 205 (<h2>A · Conversion...), ligne 259 (bloc B : <summary>B · Surréfraction... sans aucun <h2>/<h3> de section), ligne 403 (<h2>C · Fabrication)"
+    },
+    {
+      "id": "UX-006",
+      "severity": "low",
+      "blocking": false,
+      "description": "Les champs de saisie et menus déroulants suppriment l'outline de focus par défaut du navigateur et le remplacent uniquement par un changement de couleur de bordure de 1px (var(--blue)) et de fond, sans ombre ni contour renforcé. Sur un écran de magasin (tablette/smartphone), cet indicateur de focus clavier risque d'être moins perceptible qu'un contour natif, bien qu'un changement existe réellement (ce n'est pas une suppression totale du focus visible).",
+      "evidence": "outils/lentilles-souples/index.html lignes 81-85 (.champ input, .champ select : border 1px solid var(--line) par défaut ; :focus{outline:none;border-color:var(--blue);background:#fff})"
+    },
+    {
+      "id": "UX-007",
+      "severity": "low",
+      "blocking": false,
+      "description": "Les couleurs secondaires/de statut redéclarées localement par l'outil divergent des valeurs canoniques de assets/css/hub.css, alors que le bleu d'accent principal correspond exactement. Seul --blue (#1F6FB2) est identique au hub ; les autres jetons de la même famille sont des teintes proches mais différentes.",
+      "evidence": "outils/lentilles-souples/index.html lignes 13-18 : --blue-d:#175A92 (hub: #1A5C95), --green:#1E8E5A / --green-d:#176E46 (hub: --green:#2E8B57 / --green-d:#246B44), --err:#C0271A (hub --red:#B23A2E), --avert:#8A6100 (hub --amber:#9A5B00) — comparé à assets/css/hub.css lignes 19, 37-42"
+    },
+    {
+      "id": "UX-008",
+      "severity": "low",
+      "blocking": false,
+      "description": "En dessous de 640px, la grille de champs est forcée à exactement 2 colonnes quel que soit le nombre de champs du groupe. Pour un groupe à 3 champs (bloc C : sphère/cylindre/axe cible), le troisième champ se retrouve seul sur sa ligne, occupant seulement la moitié gauche de l'écran à 360px, avec un espace vide inutilisé à droite.",
+      "evidence": "outils/lentilles-souples/index.html ligne 98 (@media max-width:640px : .grille-champs{grid-template-columns:repeat(2,1fr)}) appliqué aux 3 champs du bloc C, lignes 415-428"
+    },
+    {
+      "id": "UX-009",
+      "severity": "low",
+      "blocking": false,
+      "description": "Les micro-libellés de regroupement ('Lentille portée', 'Surréfraction mesurée', 'Rotation torique observée') et les libellés de champ sont à 11-12px, en majuscules avec letter-spacing. Rien ne descend en dessous de 11px et le contraste calculé (~5,5:1 sur fond blanc pour le gris utilisé) passe l'AA, mais la densité de ces micro-titres répétés à chaque oeil, à chaque sous-groupe, mérite d'être surveillée pour la lisibilité rapide en magasin sous éclairage peu favorable.",
+      "evidence": "outils/lentilles-souples/index.html lignes 75, 80 (.sous-groupe-titre, .champ label : font-size 11px/12px, color var(--grey) #5A6B7B) ; calcul de contraste manuel #5A6B7B sur blanc ≈ 5.5:1"
+    },
+    {
+      "id": "UX-010",
+      "severity": "low",
+      "blocking": false,
+      "description": "La bannière d'avertissement du catalogue de démonstration (.bandeau-demo, 'Catalogue de démonstration : fabricants, produits et règles fictifs') et le message ROTATION_INSTABLE sont bien tournés (ton factuel, non alarmiste, explique la conséquence sans jargon), mais aucun lien sémantique (ex. aria-describedby) ne rattache l'avertissement de rotation instable aux valeurs de niveau 3/4 qu'il qualifie : une fois affichées, ces valeurs ne portent plus aucune marque visuelle rappelant la réserve exprimée juste au-dessus.",
+      "evidence": "outils/lentilles-souples/index.html lignes 585-586 (texte ROTATION_INSTABLE), lignes 794-814 (renderResultatB : le problème est ajouté avant les tiers 2/3 mais sans lien DOM vers eux), ligne 406-409 (.bandeau-demo)"
+    }
+  ],
+  "limitations": [
+    "Aucune vérification navigateur exécutée : Playwright/playwright-cli indisponible dans cet environnement (confirmé par l'agent uxer:uxer-browser-explorer, qui s'est arrêté sans capture ni interaction plutôt que d'inventer un résultat). Donc non vérifiés par exécution réelle : rendu effectif à 360px, comportement du focus clavier observé à l'écran, apparence réelle du message d'erreur, arbre DOM effectif des titres, présence/absence réelle de live regions au runtime (l'absence a été établie par lecture du code source, pas par exécution).",
+    "html-validate (mirroir CI) non exécuté : la commande a nécessité une approbation qui n'a pas été accordée dans ce contexte d'inspection automatisée ; conformité HTML non vérifiée pour cette revue.",
+    "Le comportement métier exact (quand une rotation instable bloque vs se contente d'avertir, calcul de theorique/cible) dépend de outils/lentilles-souples/noyau/moteurs.js, hors périmètre de fichiers demandé ; les constats se limitent à ce que index.html affiche à partir des objets résultat, pas à la logique de calcul elle-même.",
+    "Contrastes de couleur calculés manuellement (formule WCAG relative luminance) à partir des valeurs hex du CSS, non mesurés par un outil d'audit automatisé."
+  ],
+  "files_examined": [
+    "outils/lentilles-souples/index.html",
+    "index.html",
+    "assets/css/hub.css"
+  ],
+  "capabilities_used": [
+    "ui-review-qa",
+    "responsive-accessibility"
+  ],
+  "changes_made": []
+}
+ARCLINE_UXER_RESULT_END
