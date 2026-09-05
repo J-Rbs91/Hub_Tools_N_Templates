@@ -388,18 +388,18 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T09:55:01Z'
+  updated_at: '2026-09-05T10:01:51Z'
 classification:
   profile: critical
   reasons:
   - Aide au calcul dans un contexte de sante visuelle ; contraintes de confidentialite
     fortes (aucune donnee patient, aucune sortie reseau) ; touche la CI et la CSP
     du Hub ; classification Arcline suggeree = critical
-phase: design
+phase: plan
 phases:
   research: passed
-  design: in_progress
-  plan: pending
+  design: passed
+  plan: in_progress
   execute: pending
   review: pending
   ship: pending
@@ -427,10 +427,14 @@ execution:
   unexpected_scope: []
 blocking_findings: []
 next_action:
-  phase: design
-  reason: Complete the design phase and satisfy its gate
+  phase: plan
+  reason: Complete the plan phase and satisfy its gate
 history:
 - from: research
   to: design
   at: '2026-09-05T09:51:40Z'
   reason: advancing research -> design
+- from: design
+  to: plan
+  at: '2026-09-05T10:00:52Z'
+  reason: advancing design -> plan

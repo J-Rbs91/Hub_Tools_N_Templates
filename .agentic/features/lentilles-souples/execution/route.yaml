@@ -1,0 +1,44 @@
+schema_version: 1
+feature_id: lentilles-souples
+profile: critical
+plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
+route: ticketized
+metrics:
+  tasks: 7
+  dependency_edges: 9
+  safe_parallel_pairs: 0
+reasons:
+- profile critical is configured for ticketization
+- 7 tasks exceed max_direct_tasks=3
+- 9 dependency edges reach threshold=3
+assessed_at: '2026-09-05T10:01:51Z'
+capability_routing:
+  routing_algorithm: capability-v1
+  policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+  planner:
+    requested:
+      capability_tier: strong
+      effort: high
+      context_profile: extended
+    runtime:
+      provider: claude-code
+      requested:
+        capability_tier: strong
+        effort: high
+        context_profile: extended
+      resolved:
+        capability_tier: strong
+        model: opus
+        effort: high
+        context_profile: null
+      support:
+        model_selection: true
+        effort_selection: true
+        context_selection: false
+      enforcement:
+        model: supported
+        effort: supported
+        context: unsupported
+      available: unverified
+      applied: false
+    reason: strong-planner floor plus mission planning complexity

@@ -1,0 +1,1133 @@
+schema_version: 1
+feature_id: lentilles-souples
+roadmap_version: 1
+plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
+execution:
+  strategy: dependency-aware
+  current_wave: 1
+tickets:
+- schema_version: 1
+  id: TKT-001
+  title: 'Noyau de prescription : conventions de cylindre et d''axe, arithmétique
+    entière en millièmes de dioptrie, arrondi centralisé avec détection d''égalité,
+    transposition, normalisation, vecteurs de puissance et combinaison.'
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-01
+  objective: 'Noyau de prescription : conventions de cylindre et d''axe, arithmétique
+    entière en millièmes de dioptrie, arrondi centralisé avec détection d''égalité,
+    transposition, normalisation, vecteurs de puissance et combinaison.'
+  scope:
+    include:
+    - 'Noyau de prescription : conventions de cylindre et d''axe, arithmétique entière
+      en millièmes de dioptrie, arrondi centralisé avec détection d''égalité, transposition,
+      normalisation, vecteurs de puissance et combinaison.'
+    exclude: []
+  files:
+  - outils/lentilles-souples/noyau/prescription.js
+  - tests/lentilles-souples.test.mjs
+  produces: []
+  consumes: []
+  depends_on: []
+  acceptance_criteria:
+  - le fichier s'expose sur globalThis dans un navigateur et sur module.exports sous
+    Node, sans build ni dépendance
+  - normalizeAxis envoie 0 et 360 sur 180, laisse 1..180 inchangé, et ramène tout
+    entier dans ce domaine
+  - transposePrescription est involutive et laisse le vecteur de puissance inchangé
+  - normalizePrescription impose le cylindre négatif, met l'axe à null quand le cylindre
+    est nul, et refuse un cylindre non nul sans axe
+  - prescriptionToPowerVector et powerVectorToPrescription forment un aller-retour
+    exact sur les axes 1, 45, 90, 135, 179 et 180
+  - addPowerVectors et combinePrescriptions donnent le bon résultat pour des axes
+    identiques, orthogonaux et obliques
+  - roundToStep arrondit à l'écart de zéro à égalité exacte, et arrondiDetaille signale
+    l'égalité avec ses deux voisines
+  - estSurLaGrille répond juste sur des valeurs entachées d'erreur flottante, sans
+    epsilon métier
+  - aucune constante métier n'est écrite ailleurs que dans ce fichier
+  tests:
+    required:
+    - unit
+    - round-trip
+    - negative-path
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-SEC-001
+      - SEC-SEC-004
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: uxer
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:0df63c65a322133809fc7e7a8869370e3dc1a9e4b575a44c47ad3a041fcc8acb
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 0
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 1
+        risk: 3
+      reasons:
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: standard
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: standard
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+    wave: 1
+    mode: serial
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with: []
+  parallel_reason: []
+  serial_reason: []
+  blocks:
+  - TKT-002
+  - TKT-003
+  - TKT-004
+- schema_version: 1
+  id: TKT-002
+  title: Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur
+    B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens et
+    stabilité).
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-02
+  objective: Moteur A (conversion lunettes vers plan cornéen et cible lentille) et
+    moteur B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec
+    sens et stabilité).
+  scope:
+    include:
+    - Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur
+      B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens
+      et stabilité).
+    exclude: []
+  files:
+  - outils/lentilles-souples/noyau/moteurs.js
+  - tests/lentilles-souples.test.mjs
+  produces: []
+  consumes: []
+  depends_on:
+  - TKT-001
+  acceptance_criteria:
+  - une distance vertex nulle laisse la correction inchangée
+  - une sphère négative devient moins négative au plan cornéen, une sphère positive
+    devient plus positive
+  - la compensation aller puis retour redonne la valeur de départ à moins d'un millième
+    de dioptrie
+  - en sphéro-cylindrique les deux méridiens principaux sont compensés séparément
+    et l'axe est reconduit inchangé
+  - la distance de surréfraction est un paramètre distinct de la distance vertex du
+    moteur A
+  - une surréfraction sphéro-cylindrique d'axe différent est combinée par vecteurs
+    de puissance et jamais par addition composante à composante
+  - rotation nulle, puis rotation observée avec surréfraction nulle, redonnent la
+    lentille portée
+  - une rotation déclarée instable est signalée dans le résultat sans supprimer la
+    valeur calculée
+  - la valeur théorique et la valeur cible arrondie coexistent dans le résultat, la
+    seconde ne remplace jamais la première
+  - un vertex négatif, aberrant ou non numérique produit un problème identifié et
+    jamais une valeur
+  tests:
+    required:
+    - unit
+    - round-trip
+    - negative-path
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-BIZ-006
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: securix
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:b7ce14126ff8f022ba5b13a780d87146289668782cb3423ae60f06408bb07689
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 2
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 1
+        risk: 3
+      reasons:
+      - dependency contracts
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: standard
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: standard
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+    wave: 2
+    mode: serial
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with: []
+  parallel_reason: []
+  serial_reason:
+  - 'TKT-003: shared files: tests/lentilles-souples.test.mjs'
+  blocks:
+  - TKT-005
+- schema_version: 1
+  id: TKT-003
+  title: Modèle de catalogue fabricant, jeu de données de démonstration explicitement
+    fictif, et validateur déterministe couvrant les douze cas d'échec exigés.
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-03
+  objective: Modèle de catalogue fabricant, jeu de données de démonstration explicitement
+    fictif, et validateur déterministe couvrant les douze cas d'échec exigés.
+  scope:
+    include:
+    - Modèle de catalogue fabricant, jeu de données de démonstration explicitement
+      fictif, et validateur déterministe couvrant les douze cas d'échec exigés.
+    exclude: []
+  files:
+  - outils/lentilles-souples/noyau/catalogue.js
+  - outils/lentilles-souples/donnees/catalogue-demo.js
+  - tests/lentilles-souples.test.mjs
+  produces: []
+  consumes: []
+  depends_on:
+  - TKT-001
+  acceptance_criteria:
+  - le modèle porte manufacturers, products, manufacturing_rules et sources avec les
+    champs du contrat admis
+  - une gamme peut porter plusieurs règles, avec des pas de sphère différents et des
+    modes d'axe différents
+  - le validateur échoue avec un code stable pour chacun des douze cas exigés, un
+    test par code
+  - le validateur accepte le catalogue de démonstration livré
+  - le validateur refuse un catalogue dont un produit actif n'a aucune règle exploitable
+  - les données de démonstration couvrent sphérique, torique régulier, axes irréguliers
+    en LIST, plusieurs pas de sphère, mode RANGE et variations de rayon et de diamètre
+  - chaque fabricant de démonstration est ouvertement fictif, marqué comme tel dans
+    les données, et aucun nom de fabricant réel n'apparaît
+  - chaque règle est rattachée à une source, et le validateur refuse un source_id
+    inexistant
+  tests:
+    required:
+    - unit
+    - negative-path
+    - fixture
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-INJ-016
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: securix
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:d34e645b7b762fc4caa3da9318f241bf3995894e8b927b85dc91ef009c7ae917
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 2
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 3
+        risk: 3
+      reasons:
+      - multi-file context
+      - dependency contracts
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: extended
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: extended
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: extended
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: extended
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: extended
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: extended
+    wave: 2
+    mode: serial
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with: []
+  parallel_reason: []
+  serial_reason:
+  - 'TKT-002: shared files: tests/lentilles-souples.test.mjs'
+  blocks:
+  - TKT-004
+- schema_version: 1
+  id: TKT-004
+  title: Disponibilité exacte d'une combinaison, recherche bornée d'alternatives,
+    score optique par la norme du résidu, et garde-fou de performance.
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-04
+  objective: Disponibilité exacte d'une combinaison, recherche bornée d'alternatives,
+    score optique par la norme du résidu, et garde-fou de performance.
+  scope:
+    include:
+    - Disponibilité exacte d'une combinaison, recherche bornée d'alternatives, score
+      optique par la norme du résidu, et garde-fou de performance.
+    exclude: []
+  files:
+  - outils/lentilles-souples/noyau/selection.js
+  - tests/lentilles-souples.test.mjs
+  produces: []
+  consumes: []
+  depends_on:
+  - TKT-001
+  - TKT-003
+  acceptance_criteria:
+  - isCombinationAvailable renvoie available, matched_rule_id et source_id, et le
+    résultat est reproductible d'une exécution à l'autre
+  - une sphère hors plage, hors pas, un cylindre absent de la liste ou un axe hors
+    mode sont refusés avec une raison identifiée
+  - le mode RANGE et le mode LIST sont tous deux couverts, ainsi que le cas sphérique
+    avec cylindre nul et axe nul
+  - une lentille sphérique et une lentille torique passent par le même moteur de disponibilité
+  - une combinaison exacte, quand elle existe, obtient le meilleur score et la première
+    place
+  - le classement de plusieurs alternatives est cohérent et totalement ordonné, sans
+    dépendre de l'ordre d'itération
+  - la distance d'axe tient compte du repliement à 180 degrés, vérifié sur un couple
+    proche de 180 et 5
+  - la recherche ne construit jamais le produit cartésien, le nombre de candidats
+    évalués par règle est borné
+  - un catalogue synthétique de plusieurs centaines de règles est traité sous un budget
+    de temps mesuré et affiché par le test
+  tests:
+    required:
+    - unit
+    - negative-path
+    - performance-guard
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-BIZ-006
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: securix
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:241487095b9818771b4f03eaa3de0b9e0ad0620015ddc2bf32dfc90baad886c7
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 3
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 1
+        risk: 3
+      reasons:
+      - dependency contracts
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: standard
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: standard
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+    wave: 3
+    mode: serial
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with: []
+  parallel_reason: []
+  serial_reason: []
+  blocks:
+  - TKT-005
+  - TKT-007
+- schema_version: 1
+  id: TKT-005
+  title: 'Interface du module : page autonome branchée sur les moteurs réels, trois
+    blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite
+    des erreurs, conventions du hub.'
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-05
+  objective: 'Interface du module : page autonome branchée sur les moteurs réels,
+    trois blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion
+    explicite des erreurs, conventions du hub.'
+  scope:
+    include:
+    - 'Interface du module : page autonome branchée sur les moteurs réels, trois blocs,
+      hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite
+      des erreurs, conventions du hub.'
+    exclude: []
+  files:
+  - outils/lentilles-souples/index.html
+  produces: []
+  consumes: []
+  depends_on:
+  - TKT-002
+  - TKT-004
+  acceptance_criteria:
+  - la page charge le noyau par des balises script de même origine et ne contient
+    aucune formule optique
+  - les trois blocs sont présents, le bloc surréfraction est facultatif et le bloc
+    fabrication utilisable seul
+  - les quatre niveaux de valeur coexistent à l'écran, aucune étape n'en remplace
+    une autre
+  - la couche Détails du calcul restitue l'enchaînement produit par le noyau, pour
+    la conversion, la surréfraction et le score
+  - les dix cas d'erreur du contrat sont traités et affichés, aucune valeur douteuse
+    n'est produite en silence
+  - le vocabulaire interdit n'apparaît nulle part et le vocabulaire imposé est employé
+  - la responsabilité de l'outil est énoncée dans l'interface
+  - le bandeau signalant des données de démonstration fictives est présent dans le
+    bloc fabrication
+  - CSP identique à celle des outils existants, mention de mesure de fréquentation
+    et script GoatCounter présents
+  - lien retour vers ../../, bouton flottant iOS et détection is-ios présents, aucune
+    couche ouverte donc aucun gestionnaire Couches
+  - responsive réel en dessous de 640 px, la saisie du bloc surréfraction se réagence
+    au lieu de rétrécir
+  - aucune écriture localStorage ni sessionStorage, aucun appel réseau portant une
+    saisie
+  - aucun em-dash dans un texte visible, interface entièrement en français
+  tests:
+    required:
+    - html-validate
+    - navigation-structure
+    - manual-mobile
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-INJ-009
+      - SEC-FE-015
+      - SEC-PRIV-014
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: uxer
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:0407ea2863bbfdd39d574dc134dffd7289900daecb6daa134a50735b0fe445ba
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 3
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 1
+        risk: 3
+      reasons:
+      - dependency contracts
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: standard
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: standard
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+    wave: 4
+    mode: serial
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with: []
+  parallel_reason: []
+  serial_reason: []
+  blocks:
+  - TKT-006
+  - TKT-007
+- schema_version: 1
+  id: TKT-006
+  title: Intégrer le module au hub par une carte dans index.html, cadrée comme un
+    outil d'aide.
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-06
+  objective: Intégrer le module au hub par une carte dans index.html, cadrée comme
+    un outil d'aide.
+  scope:
+    include:
+    - Intégrer le module au hub par une carte dans index.html, cadrée comme un outil
+      d'aide.
+    exclude: []
+  files:
+  - index.html
+  produces: []
+  consumes: []
+  depends_on:
+  - TKT-005
+  acceptance_criteria:
+  - une li.tool-card complète est présente dans ul#tools-grid, avec icône, titre,
+    lien, promesse, chevron et details
+  - le lien est relatif et pointe vers outils/lentilles-souples/
+  - la promesse énonce un bénéfice et cadre l'outil comme une aide, pas comme un raccourci
+    de commande
+  - le style reprend les jetons existants sans en introduire de nouveau
+  - aucun em-dash dans le texte ajouté
+  tests:
+    required:
+    - html-validate
+    - link-check
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-FE-015
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: securix
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:67f375d50d464874e5f68ad9aa95ed1ebaeb7360e7bee03ff86ba66218e1283d
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 2
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 1
+        risk: 3
+      reasons:
+      - dependency contracts
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: standard
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: standard
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+    wave: 5
+    mode: parallel
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with:
+  - TKT-007
+  parallel_reason:
+  - 'TKT-007: no dependency relation; explicit file scopes are disjoint'
+  serial_reason: []
+  blocks: []
+- schema_version: 1
+  id: TKT-007
+  title: Faire exécuter réellement les tests du module et la validation du catalogue
+    par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.
+  status: to_execute
+  origin:
+    type: planned
+    parent: LS-07
+  objective: Faire exécuter réellement les tests du module et la validation du catalogue
+    par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.
+  scope:
+    include:
+    - Faire exécuter réellement les tests du module et la validation du catalogue
+      par la CI existante, de façon minimale et cohérente avec les jobs déjà présents.
+    exclude: []
+  files:
+  - .github/workflows/ci.yml
+  - tests/lentilles-souples.test.mjs
+  produces: []
+  consumes: []
+  depends_on:
+  - TKT-004
+  - TKT-005
+  acceptance_criteria:
+  - un job unique exécute node tests/lentilles-souples.test.mjs, calqué sur le job
+    navigation existant
+  - l'action de checkout est la même, épinglée par le même SHA, avec persist-credentials
+    false
+  - le test échoue avec un code de sortie non nul si le validateur refuse le catalogue
+    livré
+  - aucun job existant n'est modifié, aucune assertion existante n'est affaiblie
+  - actionlint passe sur le workflow modifié
+  tests:
+    required:
+    - ci-lint
+    - unit
+  security:
+    securix:
+      applicable: true
+      requirements:
+      - SEC-SUPPLY-001
+  authority:
+    autonomy: delegated
+    escalation:
+    - material product semantics change
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: securix
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:b143b5617801d7094775277705f13db56b0dcd1316fb5d59fcd6055470d81210
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 3
+        execution_complexity: 1
+        verification_complexity: 3
+        context_complexity: 1
+        risk: 3
+      reasons:
+      - dependency contracts
+      - security-sensitive behavior
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: medium
+            context_profile: standard
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: medium
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: strong
+            effort: max
+            context_profile: standard
+          resolved:
+            capability_tier: strong
+            model: opus
+            effort: max
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: true
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: medium
+          context_profile: standard
+        verifier:
+          capability_tier: strong
+          effort: max
+          context_profile: standard
+    wave: 5
+    mode: parallel
+  commit:
+    policy: one-ticket-one-commit
+  parallel_with:
+  - TKT-006
+  parallel_reason:
+  - 'TKT-006: no dependency relation; explicit file scopes are disjoint'
+  serial_reason: []
+  blocks: []
+updated_at: '2026-09-05T10:01:51Z'
