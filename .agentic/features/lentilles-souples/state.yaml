@@ -388,7 +388,7 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T13:07:39Z'
+  updated_at: '2026-09-05T13:57:57Z'
 classification:
   profile: critical
   reasons:
@@ -437,7 +437,7 @@ integrations:
       HTML non revalidee par l''outil CI, seulement par lecture'
   securix:
     applicable: true
-    status: partial
+    status: blocked
     evidence:
     - 'profil adopte : project-security-profile.yaml (108 regles applicables)'
     - 'selection : .agentic/features/lentilles-souples/specialists/securix/applicable-rules.yaml'
@@ -450,10 +450,16 @@ integrations:
       base sur 66753b46, donc aucune ajoutee par le module'
     - 'squelette de revue CHANGE_REVIEW lie au SHA candidat : specialists/securix/review-skeleton.yaml'
     - 'release_gate.py sur ce squelette : BLOCKED, 108 NOT_VERIFIED, 0 PASS'
-    notes: 'La revue d assurance SECURIX porte sur le depot entier (review_coverage
-      ALL_APPLICABLE) et non sur le seul module : elle couvre les quatre outils preexistants.
-      Elle n a pas ete faite et n est donc pas declaree faite. Statut partial, jamais
-      promu.'
+    - .agentic/features/lentilles-souples/specialists/securix/release-gate.txt
+    notes: 'Revue d assurance complete des 108 regles applicables, a la demande du
+      mainteneur. 90 PASS dont 34 corrobores par une preuve executee, 15 NOT_VERIFIED,
+      3 FAIL. La gate bloque sur : SEC-WEB-003 et SEC-WEB-004 (aucune ligne de base
+      d en-tetes, aucune politique d encadrement, les deux etablis par test sur la
+      reponse de production), SEC-FE-048 (nom et date de naissance du patient sans
+      attribut autocomplete), SEC-DEV-002 (l invariant aucune donnee ne quitte le
+      navigateur n a aucun test dans le depot), et sept PASS contredits par une detection
+      de controle. Aucun de ces points n est dans le perimetre du module lentilles
+      souples.'
 execution:
   local_checks:
   - name: ticket-control-plane

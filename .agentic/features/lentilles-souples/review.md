@@ -120,16 +120,42 @@ Axe exercé, avec un résultat partiellement bloqué qui est reporté tel quel.
   exactement le même nombre que sur la base `66753b46`** avant la mission : le module n'en
   ajoute aucune. C'était l'engagement pris en DESIGN.
 
-**Ce qui n'est pas vérifié, et ne sera pas déclaré comme l'étant :** la revue d'assurance
-SECURIX. `release_gate.py` sur le SHA candidat renvoie **BLOCKED : 108 NOT_VERIFIED, 0 PASS**.
-Cette revue porte sur le dépôt entier (`review_coverage: ALL_APPLICABLE`), donc sur les quatre
-outils préexistants, et pas sur le seul module. Elle dépasse le périmètre admis de la mission.
-Voir « Not run ».
+**La revue d'assurance SECURIX a été menée, sur demande explicite du mainteneur.** Elle porte
+sur le dépôt entier (`review_coverage: ALL_APPLICABLE`), donc bien au-delà du module. Résultat
+sur les 108 règles applicables : **90 PASS, dont 34 corroborés par une preuve exécutée, 15
+NOT_VERIFIED, 3 FAIL**. `release_gate.py` reste **BLOCKED**.
 
-**Constat reporté sans le promouvoir ni le transformer en finding :** `CTRL-PY-DEP-INVENTORY`
-et `CTRL-PY-VULN-ADVISORY` signalent 20 dépendances et 33 avis. Le Hub n'a aucune dépendance
-Python : ces contrôles inspectent l'environnement d'exécution du contrôle, ce que leur propre
-limitation déclarée énonce.
+Cinq campagnes de test ont été jouées pour l'occasion dans Chromium sur l'arbre du commit
+audité, parce qu'un contrat de preuve qui réclame un résultat d'exécution ne se satisfait pas
+d'une lecture de code :
+
+- **XSS adverse.** Quatre charges utiles (`img onerror`, `svg onload`, `href javascript:`,
+  balise `script`) placées dans le profil magasin partagé, puis les cinq pages qui le relisent ;
+  puis les 53 champs de `demande-ordonnance`, dont le nom et la date de naissance du patient.
+  Sur les six passes : compteur d'exécution à 0, aucun élément né de la charge, aucune
+  violation de CSP, et la charge visible en texte littéral, ce qui prouve l'échappement plutôt
+  qu'une suppression silencieuse.
+- **Exfiltration au canari.** `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket` et
+  `EventSource` instrumentés avant tout script de page, marqueur unique semé dans cinq outils.
+  17 requêtes en tout, 5 hors origine et toutes vers `gc.zgo.at/count.js`, **zéro requête
+  portant le marqueur**, zéro appel d'API sortante par le code des pages.
+- **Application effective de la CSP.** Depuis la page livrée, script, image, `fetch`,
+  `WebSocket` et soumission de formulaire vers un hôte non autorisé : six refus émis par le
+  navigateur. La CSP en meta n'est pas décorative.
+- **Encadrement.** Un site tiers encadre `demande-ordonnance` : le cadre se charge, ses 51
+  champs sont rendus, aucun refus. Voir FIND-08.
+- **Injection de panne** sur la seule dépendance externe, la synchronisation JSONP : échec à
+  15 170 ms quand elle ne répond jamais, à 544 ms quand elle refuse, message en français, profil
+  conservé en local, marqueur d'attente posé, et aucun rejeu automatique.
+
+**Trois défauts réels sont sortis de cette revue, tous hors du module** : FIND-08, FIND-09 et
+FIND-10. Un manque bloquant s'y ajoute, FIND-11. Ils ne sont pas corrigés ici : les corriger
+serait étendre le périmètre admis de la mission sans enregistrement d'autorité.
+
+**Constat reporté sans le promouvoir :** `CTRL-PY-DEP-INVENTORY` et `CTRL-PY-VULN-ADVISORY`
+signalent 20 dépendances et 33 avis. Le Hub n'a aucune dépendance Python : ces contrôles
+inspectent l'environnement d'exécution du contrôle, ce que leur propre limitation déclarée
+énonce. Voir FIND-12.
 
 ## Axis: ux
 
@@ -275,26 +301,148 @@ id: FIND-07
 axis: security
 source: securix release_gate.py
 severity: high
+status: resolved
+blocking: false
+description: >-
+  La revue d assurance SECURIX des 108 regles applicables a d abord ete laissee non menee,
+  parce qu elle porte sur le depot entier et depasse le perimetre admis de cette mission. Le
+  mainteneur a explicitement demande qu elle soit conduite. Elle l a ete : 90 PASS dont 34
+  corrobores par une preuve executee, 15 NOT_VERIFIED, 3 FAIL. La gate reste BLOCKED, mais
+  pour des raisons nommees et etablies, plus par absence de verification. Les defauts trouves
+  sont FIND-08 a FIND-11 ; ils sont hors du module et ne sont pas corrigés ici.
+evidence: >-
+  specialists/securix/review.yaml (108 verdicts, un par regle, avec couverture du contrat de
+  preuve) ; specialists/securix/release-gate.txt ; specialists/securix/controls-candidat.yaml.
+```
+
+```yaml agentic:finding
+id: FIND-08
+axis: security
+source: securix SEC-WEB-004, test d encadrement
+severity: high
 status: open
 blocking: false
 description: >-
-  La gate de release SECURIX est BLOCKED sur le SHA candidat : 108 regles NOT_VERIFIED, 0
-  PASS. La revue d assurance porte sur le depot entier et couvre les quatre outils
-  preexistants, pas le seul module. Elle depasse le perimetre admis de cette mission, donc
-  elle n est pas menee ici et n est pas declaree menee. Non bloquant pour le module lui meme,
-  bloquant pour la gate Ship : c est une decision qui appartient a l humain, pas a Arcline.
+  Aucune politique d encadrement n existe sur le site. Pas de frame-ancestors dans les CSP en
+  meta, et la directive y serait de toute facon ignoree par la specification ; pas de
+  X-Frame-Options dans la reponse de production ; pas de garde en JavaScript. Un site tiers
+  encadre donc demande-ordonnance sans aucun refus du navigateur : le test le montre, il ne le
+  suppose pas. La portee est bornee et c est dit exactement : le contenu encadre reste
+  illisible pour l origine encadrante, et le projet n a ni session ni action changeant un etat
+  serveur, donc le detournement de clic n a pas de cible ici. La regle demande neanmoins de
+  definir et d appliquer une politique. Un garde de quelques lignes refusant l affichage quand
+  la page n est pas au sommet fermerait l ecart sans dependre de l hebergeur. Hors perimetre du
+  module : la decision appartient au mainteneur.
 evidence: >-
-  specialists/securix/review-skeleton.yaml ; release_gate.py sur le SHA candidat ;
-  specialists/securix/controls-candidat.yaml.
+  node cadre.mjs sur l arbre audite : le cadre se charge, 51 champs rendus, aucun refus ;
+  curl -I sur https://j-rbs91.github.io/Hub_Tools_N_Templates/ : aucun X-Frame-Options.
+```
+
+```yaml agentic:finding
+id: FIND-09
+axis: security
+source: securix SEC-WEB-003, inspection de la reponse de production
+severity: high
+status: open
+blocking: false
+description: >-
+  Le site ne pose aucune ligne de base d en-tetes de securite et n en documente aucune. La
+  reponse de production porte strict-transport-security et access-control-allow-origin *, poses
+  par GitHub Pages, et ne porte ni X-Content-Type-Options, ni X-Frame-Options, ni
+  Referrer-Policy, ni Permissions-Policy, ni CSP d en-tete. La contrainte est reelle : un site
+  statique publie par GitHub Pages n expose aucune configuration d en-tetes, et le depot
+  compense par une CSP en meta par page, dont l application effective est verifiee. Ce qui
+  reste ouvert n est pas une deduction : nosniff et Referrer-Policy sont absents, ne peuvent
+  pas etre poses depuis le depot, et aucune decision ecrite n acte ce residu. Hors perimetre du
+  module.
+evidence: >-
+  curl -sS -I https://j-rbs91.github.io/Hub_Tools_N_Templates/ ; node csp.mjs (six refus emis
+  par le navigateur, la CSP en meta est bien appliquee).
+```
+
+```yaml agentic:finding
+id: FIND-10
+axis: security
+source: securix SEC-FE-048
+severity: medium
+status: open
+blocking: false
+description: >-
+  L outil demande et ordonnance saisit le nom, le prenom et la date de naissance d un patient
+  dans des champs texte sans attribut autocomplete. Sur un poste partage en magasin, le
+  navigateur retient ces valeurs et les propose au client suivant. Ce n est pas un arbitrage
+  assume mais un oubli : l outil de campagne applique autocomplete=off a dix champs bien moins
+  sensibles, donc le controle est connu du depot et simplement absent la ou il compte le plus.
+  Correction locale et sans effet de bord : autocomplete=off sur les champs patient. Hors
+  perimetre du module.
+evidence: >-
+  outils/demande-ordonnance/index.html, champs data-k="p_nom" et data-k="p_ne" ;
+  outils/campagne-email/index.html, dix champs deja porteurs de autocomplete=off.
+```
+
+```yaml agentic:finding
+id: FIND-11
+axis: security
+source: securix SEC-DEV-002
+severity: high
+status: open
+blocking: false
+description: >-
+  L invariant central du depot, aucune donnee saisie ne quitte le navigateur, n est couvert par
+  aucun test du depot. La page tests/securite porte le titre tests de non-regression securite,
+  mais elle redefinit dans son propre script les fonctions qu elle eprouve, esc, sanitizeProfil,
+  isValidSyncUrl et lienSur, au lieu d executer celles des pages : une regression du code livre
+  la laisserait verte. Et aucun job de ci.yml ne l ouvre. J ai eprouve l invariant pendant cette
+  revue, au canari et a l instrumentation des cinq API sortantes, et il tient ; mais ce sont mes
+  scripts, joues une fois sur ce commit, hors du depot et hors de la CI. Un fait acquis une fois
+  ne se rejoue pas tout seul. Un test qui echouerait a la premiere apparition de fetch,
+  XMLHttpRequest, WebSocket, sendBeacon ou d une ecriture de stockage hors liste blanche
+  tiendrait dans le meme moule que tests/navigation-retour.test.mjs, deja cable en CI. C est le
+  constat le plus utile de cette revue. Hors perimetre du module.
+evidence: >-
+  .github/workflows/ci.yml, aucun job n execute tests/securite ; tests/securite/index.html,
+  fonctions redefinies localement ; node reseau-negatif.mjs et node xss-negatif.mjs, joues par
+  le reviseur, absents du depot.
+```
+
+```yaml agentic:finding
+id: FIND-12
+axis: security
+source: securix release_gate.py, contradictions de controle
+severity: medium
+status: open
+blocking: false
+description: >-
+  Sept verdicts PASS sont contredits par une detection de controle et bloquent la gate, sans
+  qu un defaut du depot soit etabli. Trois familles, nommees separement parce qu elles n ont pas
+  la meme nature. CTRL-PY-DEP-INVENTORY et CTRL-PY-VULN-ADVISORY signalent 20 paquets et 33 avis
+  qui sont ceux de l environnement Python du conteneur, pas du depot audite, lequel n a aucune
+  dependance Python : leur propre limitation declaree dit qu ils lisent l environnement ou ils
+  tournent. CTRL-ADVISORY-CADENCE constate qu aucun workflow n execute le scan d avis SECURIX,
+  ce qui est exact, la seule famille de dependances du depot etant les actions GitHub, couvertes
+  par Dependabot. CTRL-FE-DANGEROUS-SINKS signale 22 sinks, exactement le nombre de la base
+  avant la mission ; les 22 ont ete auditees une a une et eprouvees par test adverse, et le
+  controle se declare lui-meme de confiance basse en precisant que la presence d un sink n est
+  pas une preuve de XSS. SECURIX exige neanmoins un enregistrement d exception explicite pour
+  liberer, et un tel enregistrement releve de l humain.
+evidence: >-
+  specialists/securix/release-gate.txt ; specialists/securix/controls-candidat.yaml ;
+  python3 controls/static/inventory_python_dependencies.py --root . (findings : argcomplete,
+  blinker, cryptography, paquets du conteneur).
 ```
 
 ## Not run
 
 Ce qui n'a pas été exécuté est nommé ici plutôt que compté comme propre.
 
-- **Revue d'assurance SECURIX, 108 règles.** `NOT_VERIFIED` sur les 108. Portée dépôt entier,
-  hors périmètre de la mission. Voir FIND-07.
-- **`CTRL-SECRET-HISTORY`** : `NOT_RUN`, rapporté tel quel par SECURIX.
+- **Correction des défauts FIND-08 à FIND-11.** Ils sont établis, localisés et chacun est
+  accompagné de sa correction ; aucun n'est corrigé ici. Ils portent sur `index.html`,
+  `outils/demande-ordonnance/`, `tests/` et la configuration d'hébergement, c'est-à-dire hors
+  du périmètre admis de la mission. Les corriger sans enregistrement d'autorité serait
+  exactement l'extension de périmètre cachée dans l'implémentation que le contrat interdit.
+- **`CTRL-SECRET-HISTORY`** : `NOT_RUN`, faute de `gitleaks` installé dans la session. Rapporté
+  tel quel : un scan qui n'a pas eu lieu ne se lit jamais comme un scan sans trouvaille.
+  `gitleaks` tourne bien en CI, sur l'historique complet, mais cela n'a pas été observé ici.
 - **Verdict UXER exploitable.** UXER s'est déclaré `partial` : sa session n'avait pas
   d'automatisation navigateur, donc rendu réel à 360 px, focus clavier observé, arbre de titres
   via le DOM et live regions n'ont pas été constatés par lui. J'ai exécuté ces vérifications

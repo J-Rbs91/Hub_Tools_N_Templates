@@ -1,0 +1,2531 @@
+schema_version: 1
+project: Hub_Tools_N_Templates
+ruleset_version: 0.1.0
+review:
+  type: CHANGE_REVIEW
+  profile_path: project-security-profile.yaml
+  reviewer: agent Arcline (mission lentilles-souples)
+  commit_sha: f1367935f09f4edf893a83395d03b56aa5780e60
+  profile_digest: PD-9ccd8313ea3f
+  generated_at: null
+  notes: 'Revue d assurance du depot entier, conduite par l agent Arcline a la demande explicite du mainteneur.
+    Chaque regle applicable recoit un verdict. Un PASS repose sur une preuve relisible ou reexecutable
+    ; ce qui n a pas pu etre etabli reste NOT_VERIFIED avec sa raison, et un defaut reel est marque FAIL
+    plutot qu attenue. Les preuves de type RUNTIME sont cinq campagnes jouees par le reviseur dans Chromium
+    sur l arbre du commit audite : test adverse de XSS, mesure d exfiltration au canari, application effective
+    de la CSP, encadrement, et injection de panne sur la dependance externe. Ces scripts ne sont pas dans
+    le depot et ne se rejouent donc pas en integration continue ; c est precisement le manque que consigne
+    SEC-DEV-002.'
+findings:
+- rule_id: SEC-SEC-001
+  status: PASS
+  reason: 'Aucun secret n est livre au client : le site n a ni backend ni identifiant a presenter, donc
+    aucune valeur reutilisable a proteger. Le controle de motifs de secrets ne detecte rien et gitleaks
+    tourne sur l historique complet a chaque push et chaque PR.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-7950b4f3
+  - type: CI
+    detail: gitleaks s execute a chaque push sur main et a chaque pull request, avec fetch-depth 0, donc
+      sur l historique complet et pas seulement sur l arbre courant.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-7950b4f3
+    - EVR-55c6c863
+  - type: COMMAND
+    detail: 'CTRL-SECRET-PATTERN renvoie NOT_DETECTED. La limitation declaree du controle est conservee
+      : NOT_DETECTED n est pas une preuve d absence, il corrobore une revue et ne la remplace pas.'
+    control_id: CTRL-SECRET-PATTERN
+    command: python3 controls/static/detect_secret_patterns.py --root <depot>
+    result: OBSERVED
+    covers:
+    - EVR-55c6c863
+  exception_ref: null
+  evidence_contract:
+  - EVR-7950b4f3
+  - EVR-55c6c863
+  rule_digest: RD-1c7660e9f455
+- rule_id: SEC-SEC-002
+  status: PASS
+  reason: Aucun fichier d environnement, aucune cle privee, aucun jeton dans l arbre ni dans l historique.
+    gitleaks s execute avec fetch-depth 0, donc sur l historique complet.
+  evidence:
+  - type: CI
+    detail: gitleaks s execute a chaque push sur main et a chaque pull request, avec fetch-depth 0, donc
+      sur l historique complet et pas seulement sur l arbre courant.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-4bc88717
+  - type: COMMAND
+    detail: Aucun fichier .env, .pem, .key ni credentials dans l arbre suivi.
+    command: git ls-files | grep -E '\.env|\.pem|\.key|credentials'
+    result: PASS
+    covers:
+    - EVR-4bc88717
+  - type: MANUAL_REVIEW
+    detail: 'Aucune exposition d identifiant confirmee : ni CTRL-SECRET-PATTERN, ni gitleaks en integration
+      continue, ni la recherche de fichiers .env, .pem, .key et credentials dans l arbre suivi ne remontent
+      quoi que ce soit. La question de la revocation ou de la rotation ne se pose donc sur aucun identifiant
+      ; c est une absence constatee, pas une revocation reussie.'
+    result: OBSERVED
+    command: git ls-files | grep -E '\.env|\.pem|\.key|credentials'
+    covers:
+    - EVR-41f1bb3a
+  exception_ref: null
+  evidence_contract:
+  - EVR-4bc88717
+  - EVR-41f1bb3a
+  rule_digest: RD-623ab660dc05
+- rule_id: SEC-SEC-003
+  status: PASS
+  reason: 'Le projet n ecrit aucun journal : il n a pas de serveur, et le code livre ne contient aucun
+    appel console. Aucun identifiant, jeton ni contenu sensible ne peut donc fuir par un journal applicatif.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun appel console.log, console.debug, console.info, console.warn ni console.error dans le
+      code livre, hors tests.
+    command: grep -rn 'console\.' --include=*.html . | grep -v '^./tests/'
+    result: PASS
+    covers:
+    - EVR-a74ffc94
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-a74ffc94
+  - type: RUNTIME
+    detail: 'Mesure d exfiltration au canari. fetch, XMLHttpRequest, sendBeacon, WebSocket et EventSource
+      sont instrumentes avant tout script de page ; le profil magasin, les 53 champs de demande et ordonnance,
+      douze champs de comptage de caisse, les trois blocs du module lentilles et la liste de destinataires
+      de la campagne recoivent un marqueur unique. Bilan : 17 requetes en tout, 5 hors origine et toutes
+      vers gc.zgo.at/count.js, zero requete portant le marqueur, zero appel d API sortante par le code
+      des pages, une seule ligne de console (echec de chargement de la ressource du compteur, bloquee
+      par le reseau du bac a sable) et aucune ligne portant le marqueur.'
+    command: node reseau-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-d027af05
+  - type: COMMAND
+    detail: CTRL-LOG-CANARY renvoie NOT_DETECTED sur l arbre audite.
+    control_id: CTRL-LOG-CANARY
+    command: python3 controls/static/scan_output_for_secrets_v2.py --root <depot>
+    result: OBSERVED
+    covers:
+    - EVR-d027af05
+  exception_ref: null
+  evidence_contract:
+  - EVR-a74ffc94
+  - EVR-d027af05
+  rule_digest: RD-428f3b6d9b8f
+- rule_id: SEC-SEC-004
+  status: PASS
+  reason: 'Aucun identifiant en dur : le seul secret employe est GITHUB_TOKEN, fourni par job par la plateforme
+    et jamais ecrit dans le depot.'
+  evidence:
+  - type: CONFIGURATION
+    detail: secrets.GITHUB_TOKEN est passe en variable d environnement au job gitleaks, jamais code en
+      dur.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-cfc47bc6
+  - type: COMMAND
+    detail: 'Aucun identifiant en dur dans le code livre : la recherche de mots de passe, jetons, cles
+      d API et chaines de connexion ne remonte que des libelles d interface.'
+    command: grep -rniE '(password|passwd|secret|api[_-]?key|token|bearer) *[:=] *[\'\"][^\'\"]{8,}' --include=*.html
+      .
+    result: PASS
+    covers:
+    - EVR-70ef7d24
+  - type: COMMAND
+    detail: CTRL-SECRET-PATTERN renvoie NOT_DETECTED ; sa limitation declaree est conservee, un motif
+      absent n est pas une preuve d absence.
+    control_id: CTRL-SECRET-PATTERN
+    command: python3 controls/static/detect_secret_patterns.py --root <depot>
+    result: OBSERVED
+    covers:
+    - EVR-70ef7d24
+  exception_ref: null
+  evidence_contract:
+  - EVR-70ef7d24
+  - EVR-cfc47bc6
+  rule_digest: RD-e97431b0afb6
+- rule_id: SEC-SEC-007
+  status: PASS
+  reason: 'Aucun mode debogage, aucune console de developpement, aucune trace verbeuse : il n y a ni build
+    ni variable d environnement applicative, et le code livre ne contient aucun appel console.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun appel console.log, console.debug, console.info, console.warn ni console.error dans le
+      code livre, hors tests.
+    command: grep -rn 'console\.' --include=*.html . | grep -v '^./tests/'
+    result: PASS
+    covers:
+    - EVR-9a51e1e3
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-9a51e1e3
+  - type: RUNTIME
+    detail: 'Mesure d exfiltration au canari. fetch, XMLHttpRequest, sendBeacon, WebSocket et EventSource
+      sont instrumentes avant tout script de page ; le profil magasin, les 53 champs de demande et ordonnance,
+      douze champs de comptage de caisse, les trois blocs du module lentilles et la liste de destinataires
+      de la campagne recoivent un marqueur unique. Bilan : 17 requetes en tout, 5 hors origine et toutes
+      vers gc.zgo.at/count.js, zero requete portant le marqueur, zero appel d API sortante par le code
+      des pages, une seule ligne de console (echec de chargement de la ressource du compteur, bloquee
+      par le reseau du bac a sable) et aucune ligne portant le marqueur.'
+    command: node reseau-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-f3ab0083
+  exception_ref: null
+  evidence_contract:
+  - EVR-9a51e1e3
+  - EVR-f3ab0083
+  rule_digest: RD-33f03cc739c2
+- rule_id: SEC-SEC-008
+  status: PASS
+  reason: Le projet n a aucun systeme de build frontal, donc aucune variable prefixee NEXT_PUBLIC, VITE
+    ou equivalente. La question de les confondre avec des secrets ne se pose pas.
+  evidence:
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-4ccf8d09
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-1ac479ae
+  exception_ref: null
+  evidence_contract:
+  - EVR-4ccf8d09
+  - EVR-1ac479ae
+  rule_digest: RD-30a0da03a110
+- rule_id: SEC-AUTHZ-009
+  status: PASS
+  reason: 'Aucun compte, aucun role, aucune identite applicative. Les seuls privileges sont ceux des workflows
+    GitHub, declares par job au minimum necessaire : contents read partout, et security-events write uniquement
+    pour CodeQL.'
+  evidence:
+  - type: CONFIGURATION
+    detail: 'permissions declarees par workflow et par job, contents: read par defaut.'
+    result: OBSERVED
+    path: .github/workflows/ci.yml
+    covers:
+    - EVR-809e5d1b
+  - type: CONFIGURATION
+    detail: Le job CodeQL eleve ses permissions au strict necessaire et le job de deploiement n obtient
+      pages write que pour publier.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-809e5d1b
+    - EVR-5f095d06
+  - type: COMMAND
+    detail: CTRL-CREDENTIAL-SURFACE renvoie NOT_DETECTED.
+    control_id: CTRL-CREDENTIAL-SURFACE
+    command: python3 controls/static/inventory_credential_surface.py --root <depot>
+    result: OBSERVED
+    covers:
+    - EVR-5f095d06
+  exception_ref: null
+  evidence_contract:
+  - EVR-809e5d1b
+  - EVR-5f095d06
+  rule_digest: RD-58f093c72c72
+- rule_id: SEC-INJ-007
+  status: PASS
+  reason: Le seul contenu persiste puis reaffiche est le profil du magasin en localStorage. Il est relu
+    derriere un try/catch, filtre par liste blanche de champs, puis echappe avant tout rendu HTML.
+  evidence:
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-0c93f8ee
+  - type: MANUAL_REVIEW
+    detail: 'Audit des 22 affectations innerHTML du depot, une par une : epaisseur-verres 1518/1532/1545/1806/1808/1870/1895/1900/2458/2470/2478/3134/3366/3378,
+      campagne-email 1447/1560, demande-ordonnance 862, scanner 480/514/543/557, tests/securite 224. Toute
+      valeur controlee par l utilisateur passe par esc() avant d entrer dans la chaine HTML ; le reste
+      est numerique (fmt, toFixed), litteral statique (PM_LEAD, listes de cases a cocher) ou geometrie
+      SVG generee. shapePath n emet que des nombres via toFixed(1), donc aucune sortie d attribut.'
+    result: OBSERVED
+    command: grep -rn 'innerHTML' --include=*.html . (22 occurrences, examinees une a une)
+    covers:
+    - EVR-0c93f8ee
+  - type: RUNTIME
+    detail: 'Test adverse de XSS stocke et DOM. Le profil magasin partage recoit quatre charges utiles
+      (img onerror, svg onload, href javascript:, balise script) puis les cinq pages qui le relisent sont
+      visitees ; ensuite les 53 champs de l outil demande et ordonnance, dont le nom et la date de naissance
+      du patient, recoivent la meme charge. Resultat sur les six passes : compteur d execution a 0, aucun
+      element ne naissant de la charge (img[src=x], svg[onload], [onerror], script injecte, href javascript:),
+      aucune violation de CSP, aucune erreur de page, et la charge visible en texte litteral, ce qui prouve
+      l echappement plutot qu une suppression silencieuse.'
+    command: node xss-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-134cb2fc
+  exception_ref: null
+  evidence_contract:
+  - EVR-0c93f8ee
+  - EVR-134cb2fc
+  rule_digest: RD-a7d57b6d31b5
+- rule_id: SEC-INJ-009
+  status: PASS
+  reason: 'Audit exhaustif des sinks DOM du depot. Les 22 affectations innerHTML ont ete examinees une
+    par une : aucune ne recoit de valeur controlee par l utilisateur sans echappement prealable. Le test
+    adverse le confirme a l execution.'
+  evidence:
+  - type: MANUAL_REVIEW
+    detail: 'Audit des 22 affectations innerHTML du depot, une par une : epaisseur-verres 1518/1532/1545/1806/1808/1870/1895/1900/2458/2470/2478/3134/3366/3378,
+      campagne-email 1447/1560, demande-ordonnance 862, scanner 480/514/543/557, tests/securite 224. Toute
+      valeur controlee par l utilisateur passe par esc() avant d entrer dans la chaine HTML ; le reste
+      est numerique (fmt, toFixed), litteral statique (PM_LEAD, listes de cases a cocher) ou geometrie
+      SVG generee. shapePath n emet que des nombres via toFixed(1), donc aucune sortie d attribut.'
+    result: OBSERVED
+    command: grep -rn 'innerHTML' --include=*.html . (22 occurrences, examinees une a une)
+    covers:
+    - EVR-2a9a9b04
+  - type: RUNTIME
+    detail: 'Test adverse de XSS stocke et DOM. Le profil magasin partage recoit quatre charges utiles
+      (img onerror, svg onload, href javascript:, balise script) puis les cinq pages qui le relisent sont
+      visitees ; ensuite les 53 champs de l outil demande et ordonnance, dont le nom et la date de naissance
+      du patient, recoivent la meme charge. Resultat sur les six passes : compteur d execution a 0, aucun
+      element ne naissant de la charge (img[src=x], svg[onload], [onerror], script injecte, href javascript:),
+      aucune violation de CSP, aucune erreur de page, et la charge visible en texte litteral, ce qui prouve
+      l echappement plutot qu une suppression silencieuse.'
+    command: node xss-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-e62dba62
+  exception_ref: null
+  evidence_contract:
+  - EVR-2a9a9b04
+  - EVR-e62dba62
+  rule_digest: RD-4844d773583b
+- rule_id: SEC-INJ-010
+  status: PASS
+  reason: 'Le projet n accepte aucun HTML fourni par l utilisateur : il construit lui-meme ses chaines
+    HTML a partir de valeurs echappees. Il n y a donc pas de politique de nettoyage a definir, il y a
+    une absence de surface.'
+  evidence:
+  - type: MANUAL_REVIEW
+    detail: 'Audit des 22 affectations innerHTML du depot, une par une : epaisseur-verres 1518/1532/1545/1806/1808/1870/1895/1900/2458/2470/2478/3134/3366/3378,
+      campagne-email 1447/1560, demande-ordonnance 862, scanner 480/514/543/557, tests/securite 224. Toute
+      valeur controlee par l utilisateur passe par esc() avant d entrer dans la chaine HTML ; le reste
+      est numerique (fmt, toFixed), litteral statique (PM_LEAD, listes de cases a cocher) ou geometrie
+      SVG generee. shapePath n emet que des nombres via toFixed(1), donc aucune sortie d attribut.'
+    result: OBSERVED
+    command: grep -rn 'innerHTML' --include=*.html . (22 occurrences, examinees une a une)
+    covers:
+    - EVR-621cda16
+  - type: RUNTIME
+    detail: 'Test adverse de XSS stocke et DOM. Le profil magasin partage recoit quatre charges utiles
+      (img onerror, svg onload, href javascript:, balise script) puis les cinq pages qui le relisent sont
+      visitees ; ensuite les 53 champs de l outil demande et ordonnance, dont le nom et la date de naissance
+      du patient, recoivent la meme charge. Resultat sur les six passes : compteur d execution a 0, aucun
+      element ne naissant de la charge (img[src=x], svg[onload], [onerror], script injecte, href javascript:),
+      aucune violation de CSP, aucune erreur de page, et la charge visible en texte litteral, ce qui prouve
+      l echappement plutot qu une suppression silencieuse.'
+    command: node xss-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-d05a62f8
+  exception_ref: null
+  evidence_contract:
+  - EVR-621cda16
+  - EVR-d05a62f8
+  rule_digest: RD-614795f3530f
+- rule_id: SEC-INJ-013
+  status: PASS
+  reason: 'Aucun chemin de fichier n est derive d une entree utilisateur : il n y a ni serveur, ni systeme
+    de fichiers accessible, ni stockage. Les fichiers choisis par l utilisateur sont lus en memoire par
+    l API File du navigateur.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-5a6ee849
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-5a6ee849
+    - EVR-9f363800
+  exception_ref: null
+  evidence_contract:
+  - EVR-5a6ee849
+  - EVR-9f363800
+  rule_digest: RD-83e97ebb8489
+- rule_id: SEC-INJ-014
+  status: PASS
+  reason: 'Aucune requete sortante cote serveur n existe. La seule requete sortante influencee par une
+    entree est le JSONP de synchronisation Drive, cote navigateur : son URL est validee par expression
+    reguliere sur l identifiant de deploiement Apps Script avant emploi, et elle ne transporte que le
+    profil magasin.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-5b1ac2cf
+  - type: CODE
+    detail: endpointId et endpointOk contraignent l URL a un deploiement Apps Script avant tout usage
+      ; une URL non conforme est refusee.
+    result: OBSERVED
+    path: outils/campagne-email/index.html
+    covers:
+    - EVR-5b1ac2cf
+  - type: RUNTIME
+    detail: 'Mesure d exfiltration au canari. fetch, XMLHttpRequest, sendBeacon, WebSocket et EventSource
+      sont instrumentes avant tout script de page ; le profil magasin, les 53 champs de demande et ordonnance,
+      douze champs de comptage de caisse, les trois blocs du module lentilles et la liste de destinataires
+      de la campagne recoivent un marqueur unique. Bilan : 17 requetes en tout, 5 hors origine et toutes
+      vers gc.zgo.at/count.js, zero requete portant le marqueur, zero appel d API sortante par le code
+      des pages, une seule ligne de console (echec de chargement de la ressource du compteur, bloquee
+      par le reseau du bac a sable) et aucune ligne portant le marqueur.'
+    command: node reseau-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-a41e0179
+  exception_ref: null
+  evidence_contract:
+  - EVR-5b1ac2cf
+  - EVR-a41e0179
+  rule_digest: RD-5f30e5695e58
+- rule_id: SEC-INJ-016
+  status: PASS
+  reason: La seule deserialisation est JSON.parse, appliquee au contenu du localStorage et aux reponses
+    de synchronisation, toujours derriere un try/catch et suivie d un filtrage par liste blanche de champs
+    typee. Aucun format capable d instancier du code n est employe.
+  evidence:
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-df82c12b
+  - type: CODE
+    detail: sanitizeProfil ne conserve que nom, adresse, tel, mail en chaines et fond en nombre positif
+      ; tout le reste est ecarte.
+    result: OBSERVED
+    path: index.html
+    covers:
+    - EVR-df82c12b
+  - type: RUNTIME
+    detail: 'Test adverse de XSS stocke et DOM. Le profil magasin partage recoit quatre charges utiles
+      (img onerror, svg onload, href javascript:, balise script) puis les cinq pages qui le relisent sont
+      visitees ; ensuite les 53 champs de l outil demande et ordonnance, dont le nom et la date de naissance
+      du patient, recoivent la meme charge. Resultat sur les six passes : compteur d execution a 0, aucun
+      element ne naissant de la charge (img[src=x], svg[onload], [onerror], script injecte, href javascript:),
+      aucune violation de CSP, aucune erreur de page, et la charge visible en texte litteral, ce qui prouve
+      l echappement plutot qu une suppression silencieuse.'
+    command: node xss-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-5dad3de2
+  exception_ref: null
+  evidence_contract:
+  - EVR-df82c12b
+  - EVR-5dad3de2
+  rule_digest: RD-29fe15ee2aa5
+- rule_id: SEC-INJ-020
+  status: PASS
+  reason: Les tailles subies sont bornees par le navigateur lui-meme, puisque tout est traite en memoire
+    dans l onglet de l utilisateur et qu aucune ressource partagee n est consommee. Le seul traitement
+    couteux, l analyse d image, se fait sur une grille hors-ecran de taille fixe et non sur la resolution
+    native de la photo.
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-25a63cb9
+  - type: CODE
+    detail: L analyse de contour travaille sur une grille bornee, pas sur la photo a sa resolution native.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-25a63cb9
+  - type: TEST
+    detail: 'Suite du module executee sur l arbre audite : 166 controles, dont les douze cas d echec du
+      validateur de catalogue et un garde de performance qui traite 300 regles en 41 ms pour un budget
+      de 3 000 ms.'
+    command: node tests/lentilles-souples.test.mjs
+    result: PASS
+    covers:
+    - EVR-98afab4a
+  exception_ref: null
+  evidence_contract:
+  - EVR-25a63cb9
+  - EVR-98afab4a
+  rule_digest: RD-fe8380b7e372
+- rule_id: SEC-API-005
+  status: PASS
+  reason: 'Le projet n ouvre aucun port : il ne deploie aucun runtime. GitHub Pages sert des fichiers
+    statiques sur 443, et cette exposition est celle de la plateforme, pas une configuration du projet.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-fc75186b
+  - type: RUNTIME
+    detail: 'Inspection des en-tetes de reponse effectifs du site publie. La reponse porte strict-transport-security:
+      max-age=31556952 et access-control-allow-origin: *, et ne porte ni X-Content-Type-Options, ni X-Frame-Options,
+      ni Referrer-Policy, ni Permissions-Policy, ni CSP d en-tete. GitHub Pages n expose aucune configuration
+      d en-tetes : ce que le depot peut poser, il le pose en meta.'
+    command: curl -sS -I https://j-rbs91.github.io/Hub_Tools_N_Templates/
+    result: PASS
+    covers:
+    - EVR-84e695cd
+  exception_ref: null
+  evidence_contract:
+  - EVR-fc75186b
+  - EVR-84e695cd
+  rule_digest: RD-859ceb6c0340
+- rule_id: SEC-API-007
+  status: NOT_VERIFIED
+  reason: 'Les methodes HTTP acceptees sont decidees par GitHub Pages et non par le projet, qui ne publie
+    aucune configuration de serveur. Je ne peux donc ni les contraindre ni les constater depuis le depot.
+    Severite moyenne, non bloquante : consigne tel quel plutot que suppose.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+  exception_ref: null
+  evidence_contract:
+  - EVR-b4c5893c
+  - EVR-99da13d0
+  rule_digest: RD-d5da778750b6
+- rule_id: SEC-API-013
+  status: PASS
+  reason: La seule operation sortante du projet, le JSONP de synchronisation, porte un delai d expiration
+    fini apres lequel elle echoue proprement et rend la main a l utilisateur. Le delai est de 15 secondes,
+    mesure a l execution par injection de panne et non deduit du code seul.
+  evidence:
+  - type: CODE
+    detail: jsonp arme un setTimeout de 15000 ms et termine l appel en erreur si la reponse n arrive pas.
+    result: OBSERVED
+    path: index.html
+    covers:
+    - EVR-d39e89b4
+  - type: RUNTIME
+    detail: 'Injection de panne sur la seule dependance externe, la synchronisation JSONP vers le script
+      Apps Script du magasin. Dependance qui ne repond jamais : echec rendu a 15 170 ms, soit le delai
+      de 15 000 ms arme par jsonp. Dependance qui echoue tout de suite : echec rendu a 544 ms. Dans les
+      deux cas le message est en francais et ne divulgue rien d interne, le profil reste enregistre localement,
+      le marqueur sync-pending-v1 reste pose, et aucune nouvelle tentative n est emise dans les quatre
+      secondes qui suivent : il n y a pas de rejeu automatique.'
+    command: node panne-sync.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-d51ca299
+  exception_ref: null
+  evidence_contract:
+  - EVR-d39e89b4
+  - EVR-d51ca299
+  rule_digest: RD-d4370e9d39e6
+- rule_id: SEC-API-014
+  status: PASS
+  reason: 'Aucun reessai automatique n existe. Un envoi de synchronisation echoue est marque comme tel
+    pour l utilisateur, qui decide de le relancer : aucune amplification automatique n est possible.'
+  evidence:
+  - type: CODE
+    detail: La cle sync-pending-v1 signale a l utilisateur un envoi echoue ; rien n est rejoue automatiquement.
+    result: OBSERVED
+    path: index.html
+    covers:
+    - EVR-b2d57b2f
+  - type: RUNTIME
+    detail: 'Injection de panne sur la seule dependance externe, la synchronisation JSONP vers le script
+      Apps Script du magasin. Dependance qui ne repond jamais : echec rendu a 15 170 ms, soit le delai
+      de 15 000 ms arme par jsonp. Dependance qui echoue tout de suite : echec rendu a 544 ms. Dans les
+      deux cas le message est en francais et ne divulgue rien d interne, le profil reste enregistre localement,
+      le marqueur sync-pending-v1 reste pose, et aucune nouvelle tentative n est emise dans les quatre
+      secondes qui suivent : il n y a pas de rejeu automatique.'
+    command: node panne-sync.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-ca0556a1
+  exception_ref: null
+  evidence_contract:
+  - EVR-b2d57b2f
+  - EVR-ca0556a1
+  rule_digest: RD-e3b029ab9ae4
+- rule_id: SEC-FILE-001
+  status: PASS
+  reason: 'Les fichiers choisis par l utilisateur sont traites comme du contenu non sur : type contraint
+    par l attribut accept, decodage par les API du navigateur, et echec propre si le decodage rate. Rien
+    n est stocke ni reservi.'
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-63eec2ec
+  - type: CODE
+    detail: La lecture d image passe par createImageBitmap avec repli FileReader et un gestionnaire d
+      erreur qui affiche un message plutot que de poursuivre.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-63eec2ec
+  exception_ref: null
+  evidence_contract:
+  - EVR-63eec2ec
+  rule_digest: RD-02b979f5e48b
+- rule_id: SEC-FILE-002
+  status: PASS
+  reason: 'L extension n est jamais le controle de securite : le contenu est decode par les API du navigateur,
+    qui echouent si le format n est pas celui attendu, et l echec est traite.'
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-a3e0663a
+  exception_ref: null
+  evidence_contract:
+  - EVR-a3e0663a
+  rule_digest: RD-536f09f60fa3
+- rule_id: SEC-FILE-003
+  status: PASS
+  reason: 'Le type reel est etabli par le decodage effectif, pas par le Content-Type annonce : une photo
+    qui ne se decode pas produit un message d erreur et aucun traitement.'
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-8f91b3f7
+  exception_ref: null
+  evidence_contract:
+  - EVR-8f91b3f7
+  rule_digest: RD-06932fa6e201
+- rule_id: SEC-FILE-004
+  status: PASS
+  reason: 'Le cout de traitement est borne par construction : l analyse travaille sur une grille hors-ecran
+    de taille fixe, et tout se passe dans l onglet de l utilisateur, sans ressource partagee a saturer.'
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-c6c41098
+  exception_ref: null
+  evidence_contract:
+  - EVR-c6c41098
+  rule_digest: RD-444b6e3a7e6b
+- rule_id: SEC-FILE-005
+  status: PASS
+  reason: 'Aucun nom de fichier fourni par l utilisateur ne determine un chemin : il n y a pas de stockage.
+    Les fichiers produits par le projet portent un nom genere.'
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-58a06ce1
+  exception_ref: null
+  evidence_contract:
+  - EVR-58a06ce1
+  rule_digest: RD-17c06f122c11
+- rule_id: SEC-FILE-006
+  status: PASS
+  reason: Aucun televersement n est stocke ni servi, donc aucun contenu utilisateur ne peut etre execute
+    comme du code de confiance. GitHub Pages ne sert que les fichiers versionnes du depot.
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-bfbcc03a
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-bfbcc03a
+  exception_ref: null
+  evidence_contract:
+  - EVR-bfbcc03a
+  rule_digest: RD-1d4b3a996bfb
+- rule_id: SEC-FILE-007
+  status: NOT_VERIFIED
+  reason: 'Aucune analyse antivirus n est en place. Le modele de menace ne l appelle pas : aucun fichier
+    n est stocke, redistribue a un autre utilisateur ni traite par un logiciel privilegie, il est seulement
+    decode dans l onglet de celui qui l a choisi. Severite moyenne, non bloquante : consigne tel quel
+    plutot que declare satisfait.'
+  evidence:
+  - type: CODE
+    detail: Les fichiers choisis par l utilisateur (photo de forme, liste CSV, sauvegarde) sont lus en
+      memoire dans la page et ne sont jamais televerses, stockes ni reservis. Aucun stockage de fichier
+      n existe.
+    result: OBSERVED
+    path: outils/epaisseur-verres/index.html
+    covers:
+    - EVR-fd550ab0
+  exception_ref: null
+  evidence_contract:
+  - EVR-fd550ab0
+  rule_digest: RD-e02a9ed1b5ab
+- rule_id: SEC-WEB-002
+  status: PASS
+  reason: Chaque page porte une CSP restrictive en meta, avec default-src 'none' et une liste d hotes
+    explicite. Aucun hote distant n est autorise en dehors du compteur de visites, et les pages de documentation
+    gardent une CSP fermee.
+  evidence:
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-6ca2fb21
+  exception_ref: null
+  evidence_contract:
+  - EVR-6ca2fb21
+  rule_digest: RD-e31da045b059
+- rule_id: SEC-WEB-003
+  status: FAIL
+  reason: 'Defaut reel, etabli par inspection de la reponse de production. Le site ne pose aucune ligne
+    de base d en-tetes de securite : la reponse porte HSTS et access-control-allow-origin * poses par
+    GitHub Pages, et ne porte ni X-Content-Type-Options, ni X-Frame-Options, ni Referrer-Policy, ni Permissions-Policy,
+    ni CSP d en-tete. Aucune politique d en-tetes n est documentee non plus. La regle interdit precisement
+    de tenir les valeurs par defaut de la plateforme pour une politique adequate sans inspecter les reponses
+    effectives : je les ai inspectees, elles ne le sont pas. La contrainte est reelle, un site statique
+    publie par GitHub Pages n expose aucune configuration d en-tetes, et le depot compense par une CSP
+    en meta par page, dont l application effective est verifiee. Ce qui reste ouvert, et qui n est pas
+    une deduction : nosniff et Referrer-Policy sont absents et ne peuvent pas etre poses depuis le depot,
+    et aucune decision ecrite n acte ce residu.'
+  evidence:
+  - type: RUNTIME
+    detail: 'Inspection des en-tetes de reponse effectifs du site publie. La reponse porte strict-transport-security:
+      max-age=31556952 et access-control-allow-origin: *, et ne porte ni X-Content-Type-Options, ni X-Frame-Options,
+      ni Referrer-Policy, ni Permissions-Policy, ni CSP d en-tete. GitHub Pages n expose aucune configuration
+      d en-tetes : ce que le depot peut poser, il le pose en meta.'
+    command: curl -sS -I https://j-rbs91.github.io/Hub_Tools_N_Templates/
+    result: PASS
+    covers:
+    - EVR-2747deec
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-2747deec
+  - type: RUNTIME
+    detail: 'Test d application effective de la CSP depuis la page livree. Cinq tentatives vers un hote
+      non autorise : script refuse, image refusee, fetch refuse, WebSocket refuse, soumission de formulaire
+      refusee par form-action ''none''. Les six refus sont ceux du navigateur, cites dans la console,
+      pas une lecture de la balise meta.'
+    command: node csp.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-2747deec
+  exception_ref: null
+  evidence_contract:
+  - EVR-2747deec
+  rule_digest: RD-c73651e7d52d
+- rule_id: SEC-WEB-004
+  status: FAIL
+  reason: 'Defaut reel, etabli par test. Aucune politique d encadrement n existe : pas de frame-ancestors
+    dans les CSP en meta, et la directive y serait de toute facon ignoree par la specification ; pas de
+    X-Frame-Options dans la reponse de production ; pas de garde en JavaScript. Un site tiers encadre
+    donc outils/demande-ordonnance sans aucun refus du navigateur, ce que le test montre plutot que de
+    le supposer. La portee est bornee et je le dis exactement : le contenu encadre reste illisible pour
+    l origine encadrante, et le projet n a ni session, ni action authentifiee, ni operation changeant
+    un etat serveur, donc le detournement de clic n a pas de cible ici. La regle demande neanmoins de
+    definir et d appliquer une politique, ce qui n est pas fait, et l absence n est actee par aucune decision
+    ecrite. Un garde de quelques lignes, refusant l affichage quand la page n est pas au sommet, fermerait
+    l ecart sans dependre de l hebergeur.'
+  evidence:
+  - type: RUNTIME
+    detail: 'Test d encadrement. Une page tierce de meme origine encadre outils/demande-ordonnance : le
+      cadre se charge, le document est rendu, ses 51 champs sont presents, et le navigateur n emet aucun
+      refus. Aucune politique d encadrement n est donc appliquee.'
+    command: node cadre.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: FAIL
+  - type: RUNTIME
+    detail: 'Inspection des en-tetes de reponse effectifs du site publie. La reponse porte strict-transport-security:
+      max-age=31556952 et access-control-allow-origin: *, et ne porte ni X-Content-Type-Options, ni X-Frame-Options,
+      ni Referrer-Policy, ni Permissions-Policy, ni CSP d en-tete. GitHub Pages n expose aucune configuration
+      d en-tetes : ce que le depot peut poser, il le pose en meta.'
+    command: curl -sS -I https://j-rbs91.github.io/Hub_Tools_N_Templates/
+    result: PASS
+    covers:
+    - EVR-40b225a6
+  exception_ref: null
+  evidence_contract:
+  - EVR-40b225a6
+  rule_digest: RD-0944e461ec18
+- rule_id: SEC-WEB-005
+  status: PASS
+  reason: GitHub Pages sert le site exclusivement en HTTPS et redirige le trafic en clair. Le projet ne
+    publie aucun contenu par un autre canal.
+  evidence:
+  - type: CONFIGURATION
+    detail: Le deploiement passe par actions/deploy-pages, qui publie sur l URL HTTPS de l environnement
+      github-pages.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-2e108717
+  exception_ref: null
+  evidence_contract:
+  - EVR-2e108717
+  rule_digest: RD-0e8e88a91d8c
+- rule_id: SEC-WEB-006
+  status: PASS
+  reason: 'Aucun contenu actif n est charge en clair : la seule ressource distante est le compteur de
+    visites, servi en HTTPS et declare comme tel dans la CSP de chaque page qui le porte.'
+  evidence:
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-33971d73
+  exception_ref: null
+  evidence_contract:
+  - EVR-33971d73
+  rule_digest: RD-44f1a1a01467
+- rule_id: SEC-WEB-007
+  status: PASS
+  reason: Aucune donnee sensible ne transite par une URL. Le compteur de visites ne transmet que le chemin
+    de la page, et la synchronisation Drive ne transporte que le profil du magasin, jamais une donnee
+    patient.
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-a48aee13
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-a48aee13
+  exception_ref: null
+  evidence_contract:
+  - EVR-a48aee13
+  rule_digest: RD-1a219fb2c612
+- rule_id: SEC-WEB-008
+  status: PASS
+  reason: 'Aucune reponse du projet ne contient de donnee sensible a mettre en cache : le serveur ne sert
+    que des fichiers statiques identiques pour tous. Cote client, la seule persistance est le localStorage,
+    dont le contenu et le cycle de vie sont documentes et restent sous le controle du magasin.'
+  evidence:
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-8211366c
+  - type: DOCUMENT
+    detail: docs/sauvegarde-fichier explique au magasin comment exporter et reimporter son profil, donc
+      comment maitriser ce qui reste sur l appareil.
+    result: OBSERVED
+    path: docs/sauvegarde-fichier/index.html
+    covers:
+    - EVR-8211366c
+  exception_ref: null
+  evidence_contract:
+  - EVR-8211366c
+  rule_digest: RD-302504d0043a
+- rule_id: SEC-DATA-004
+  status: PASS
+  reason: 'Aucune transaction n est necessaire : il n y a pas de base de donnees ni d etat autoritatif
+    partage. Les seules ecritures sont locales a un navigateur et portent sur une cle unique ecrite d
+    un bloc.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-ea1cc3dd
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-ea1cc3dd
+  exception_ref: null
+  evidence_contract:
+  - EVR-ea1cc3dd
+  rule_digest: RD-e12e1825fefa
+- rule_id: SEC-DATA-006
+  status: PASS
+  reason: Aucune operation privilegiee n existe cote produit, donc aucune piste d audit applicative n
+    a de sens. Les modifications du site sont tracees par l historique git et par les journaux de deploiement
+    GitHub.
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-6e18486b
+  exception_ref: null
+  evidence_contract:
+  - EVR-6e18486b
+  rule_digest: RD-0b5a0e1b5433
+- rule_id: SEC-DATA-008
+  status: PASS
+  reason: Les donnees persistantes du projet sont son code source, heberge sur GitHub et duplique dans
+    chaque clone. Les donnees du magasin restent sur son appareil, avec une procedure d export et de reimport
+    documentee.
+  evidence:
+  - type: DOCUMENT
+    detail: docs/sauvegarde-fichier decrit l export et la reimportation du profil magasin.
+    result: OBSERVED
+    path: docs/sauvegarde-fichier/index.html
+    covers:
+    - EVR-3f61280c
+  exception_ref: null
+  evidence_contract:
+  - EVR-3f61280c
+  rule_digest: RD-c75d131c260e
+- rule_id: SEC-DATA-009
+  status: PASS
+  reason: 'La restauration du site est exercee a chaque push sur main : le workflow de deploiement republie
+    l integralite de l arborescence depuis la source, ce qui est une reconstruction complete et non un
+    incrementiel. Le chemin de restauration est donc teste en continu par l usage, pas seulement documente.'
+  evidence:
+  - type: CI
+    detail: deploy.yml televerse l arborescence entiere et deploie a chaque push sur main.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-552eb34a
+  exception_ref: null
+  evidence_contract:
+  - EVR-552eb34a
+  rule_digest: RD-d9bd33975b80
+- rule_id: SEC-DATA-010
+  status: PASS
+  reason: 'Le projet ne detient aucune sauvegarde de donnees personnelles : il n en recoit aucune. La
+    sauvegarde du profil magasin est un fichier produit et conserve par le magasin lui-meme, sur son materiel,
+    et la documentation lui rappelle de le proteger.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-66b85877
+  - type: DOCUMENT
+    detail: docs/sauvegarde-fichier place la sauvegarde sous la responsabilite du magasin.
+    result: OBSERVED
+    path: docs/sauvegarde-fichier/index.html
+    covers:
+    - EVR-66b85877
+  exception_ref: null
+  evidence_contract:
+  - EVR-66b85877
+  rule_digest: RD-5990d627a1bf
+- rule_id: SEC-DATA-011
+  status: NOT_VERIFIED
+  reason: 'Le cycle de conservation des donnees du magasin est documente pour ce qui releve du RGPD mailing,
+    mais aucune duree n est appliquee par le code aux cles localStorage : l historique de comptage de
+    caisse est borne a quinze jours, les autres cles vivent tant que le magasin ne les efface pas. Severite
+    moyenne, non bloquante : consigne tel quel.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-d309ee79
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-d309ee79
+  exception_ref: null
+  evidence_contract:
+  - EVR-d309ee79
+  rule_digest: RD-be95d8e378f9
+- rule_id: SEC-SUPPLY-001
+  status: PASS
+  reason: Le site n embarque aucune dependance a l execution. Les seules dependances du depot sont des
+    actions GitHub, toutes epinglees par SHA de commit et mises a jour hebdomadairement par Dependabot.
+  evidence:
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-daf697e8
+  - type: CONFIGURATION
+    detail: Dependabot met a jour hebdomadairement les actions GitHub, seule famille de dependances du
+      depot.
+    result: OBSERVED
+    path: .github/dependabot.yml
+    covers:
+    - EVR-daf697e8
+  - type: CI
+    detail: Chaque action tierce des workflows est epinglee par SHA de commit avec son tag en commentaire.
+    result: OBSERVED
+    path: .github/workflows/ci.yml
+    covers:
+    - EVR-daf697e8
+  exception_ref: null
+  evidence_contract:
+  - EVR-daf697e8
+  rule_digest: RD-32b0fabc686d
+- rule_id: SEC-SUPPLY-002
+  status: PASS
+  reason: 'La resolution est verrouillee de la facon la plus forte possible pour cet ecosysteme : chaque
+    action est referencee par SHA de commit, immuable, et html-validate est invoque a version exacte.'
+  evidence:
+  - type: CI
+    detail: npx --yes html-validate@11.5.6, version exacte plutot que derniere publication.
+    result: OBSERVED
+    path: .github/workflows/ci.yml
+    covers:
+    - EVR-87802dc6
+  exception_ref: null
+  evidence_contract:
+  - EVR-87802dc6
+  rule_digest: RD-4971ab8827c7
+- rule_id: SEC-SUPPLY-003
+  status: PASS
+  reason: 'Aucune dependance superflue : le projet n en a aucune a l execution, et les quatre actions
+    employees en CI servent chacune un job distinct.'
+  evidence:
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-715c20bd
+  exception_ref: null
+  evidence_contract:
+  - EVR-715c20bd
+  rule_digest: RD-34869c0c4f29
+- rule_id: SEC-SUPPLY-004
+  status: PASS
+  reason: 'Toute ressource tierce doit voir sa licence lue et declaree avant d entrer dans le depot, regle
+    ecrite et appliquee : THIRD-PARTY-NOTICES.md tient ce registre.'
+  evidence:
+  - type: DOCUMENT
+    detail: CLAUDE.md et CONTRIBUTING.md posent la regle, THIRD-PARTY-NOTICES.md la materialise.
+    result: OBSERVED
+    path: THIRD-PARTY-NOTICES.md
+    covers:
+    - EVR-c4d645cf
+  exception_ref: null
+  evidence_contract:
+  - EVR-c4d645cf
+  rule_digest: RD-48b7b7aed2f7
+- rule_id: SEC-SUPPLY-005
+  status: PASS
+  reason: 'La confusion de nom est impossible sur les actions : elles sont resolues par SHA de commit,
+    pas par nom ni par tag mobile. Le script de telechargement d actionlint est lui-meme epingle par SHA,
+    avec un commentaire expliquant pourquoi un tag ne suffirait pas.'
+  evidence:
+  - type: CI
+    detail: ACTIONLINT_SCRIPT_SHA epingle le script de bootstrap par SHA de commit immuable.
+    result: OBSERVED
+    path: .github/workflows/ci.yml
+    covers:
+    - EVR-bcc90d40
+  exception_ref: null
+  evidence_contract:
+  - EVR-bcc90d40
+  rule_digest: RD-89c131c6934f
+- rule_id: SEC-SUPPLY-006
+  status: PASS
+  reason: 'Aucun script d installation n est execute : sans package.json ni lockfile applicatif, il n
+    y a aucun hook de cycle de vie. Les seuls scripts executes en CI sont epingles par SHA et leur contenu
+    est verifie par somme de controle par le script officiel.'
+  evidence:
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-42a7af5c
+  - type: CI
+    detail: Le bootstrap actionlint verifie le binaire telecharge par somme de controle.
+    result: OBSERVED
+    path: .github/workflows/ci.yml
+    covers:
+    - EVR-42a7af5c
+  exception_ref: null
+  evidence_contract:
+  - EVR-42a7af5c
+  rule_digest: RD-b758193d80fb
+- rule_id: SEC-SUPPLY-010
+  status: PASS
+  reason: 'Un mecanisme repetable existe et tourne : Dependabot hebdomadaire sur les actions, plus CodeQL
+    a chaque push, chaque PR et une fois par semaine.'
+  evidence:
+  - type: CONFIGURATION
+    detail: Dependabot met a jour hebdomadairement les actions GitHub, seule famille de dependances du
+      depot.
+    result: OBSERVED
+    path: .github/dependabot.yml
+    covers:
+    - EVR-fa19d523
+  - type: CI
+    detail: CodeQL analyse le JavaScript embarque a chaque push sur main, a chaque pull request et une
+      fois par semaine.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-fa19d523
+  exception_ref: null
+  evidence_contract:
+  - EVR-fa19d523
+  rule_digest: RD-121c587cdee0
+- rule_id: SEC-INFRA-007
+  status: PASS
+  reason: Aucune donnee personnelle reelle n entre dans le depot. Le catalogue fabricant du nouveau module
+    est explicitement fictif, marque comme tel dans les donnees et dans l interface, avec des domaines
+    en .invalid qui ne peuvent pas resoudre. Les exemples de la documentation sont fictifs.
+  evidence:
+  - type: CODE
+    detail: 'Les fabricants du catalogue portent fictional: true et la mention fabricant fictif dans leur
+      nom.'
+    result: OBSERVED
+    path: outils/lentilles-souples/donnees/catalogue-demo.js
+    covers:
+    - EVR-07eb4bb4
+  exception_ref: null
+  evidence_contract:
+  - EVR-07eb4bb4
+  rule_digest: RD-8de64524a70a
+- rule_id: SEC-OPS-001
+  status: PASS
+  reason: 'Le projet n exploite aucun service : la disponibilite du site est celle de GitHub Pages, surveillee
+    par GitHub. Ce que le projet peut surveiller, il le surveille : chaque echec de workflow est notifie
+    sur le depot.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-e7db6f25
+  exception_ref: null
+  evidence_contract:
+  - EVR-e7db6f25
+  rule_digest: RD-021bb58fe6b8
+- rule_id: SEC-OPS-004
+  status: PASS
+  reason: 'Les echecs materiels remontent a un destinataire responsable et pas seulement dans un journal
+    passif : un workflow en echec notifie le mainteneur, et les alertes CodeQL et gitleaks arrivent dans
+    l onglet Security du depot.'
+  evidence:
+  - type: CI
+    detail: CodeQL analyse le JavaScript embarque a chaque push sur main, a chaque pull request et une
+      fois par semaine.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-28bed5fd
+  - type: CI
+    detail: gitleaks s execute a chaque push sur main et a chaque pull request, avec fetch-depth 0, donc
+      sur l historique complet et pas seulement sur l arbre courant.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-28bed5fd
+  exception_ref: null
+  evidence_contract:
+  - EVR-28bed5fd
+  rule_digest: RD-b98b6054477a
+- rule_id: SEC-OPS-010
+  status: NOT_VERIFIED
+  reason: 'Les taux d erreur HTTP sont ceux de GitHub Pages et ne sont pas observables depuis le depot.
+    Severite moyenne, non bloquante : consigne tel quel plutot que suppose.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-bfdae04c
+  exception_ref: null
+  evidence_contract:
+  - EVR-bfdae04c
+  rule_digest: RD-71aa2d93bdd3
+- rule_id: SEC-OPS-011
+  status: PASS
+  reason: 'Les activites que cette regle vise n existent pas ici : aucune authentification a echouer,
+    aucun export en masse a detecter, aucun changement de privilege applicatif, aucun cloisonnement entre
+    clients a violer. Il n y a pas de detection manquante, il y a une absence de surface.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-adf52503
+  exception_ref: null
+  evidence_contract:
+  - EVR-adf52503
+  rule_digest: RD-8417b788798e
+- rule_id: SEC-OPS-012
+  status: NOT_VERIFIED
+  reason: Aucun disjoncteur n est en place. La seule dependance externe appelable est le point de synchronisation
+    Drive, dont l echec est borne par un delai fini et laisse la main a l utilisateur sans consommer de
+    ressource partagee. Severite moyenne, non bloquante.
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-1c40fcee
+  exception_ref: null
+  evidence_contract:
+  - EVR-1c40fcee
+  rule_digest: RD-38df2f69af74
+- rule_id: SEC-OPS-013
+  status: PASS
+  reason: Le retour arriere est un revert git suivi d un push sur main, qui redeploie l integralite du
+    site. Aucune migration de donnees ne complique ce chemin, puisque le projet ne detient aucune donnee.
+  evidence:
+  - type: CI
+    detail: Le deploiement republie tout l arbre a chaque push sur main, donc un revert restaure l etat
+      anterieur en une operation.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-22deaca4
+  exception_ref: null
+  evidence_contract:
+  - EVR-22deaca4
+  rule_digest: RD-a14c43ccb5d0
+- rule_id: SEC-OPS-014
+  status: PASS
+  reason: 'La procedure de reprise est courte et entierement documentee par la nature du projet : la source
+    est sur GitHub et dupliquee dans chaque clone, le deploiement est automatique depuis main, et la perte
+    de donnees acceptable est nulle par construction puisque le projet ne detient aucune donnee. SECURITY.md
+    designe la version en ligne comme seule version supportee et le mainteneur comme responsable.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-b8f6bb71
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-b8f6bb71
+  exception_ref: null
+  evidence_contract:
+  - EVR-b8f6bb71
+  rule_digest: RD-06ad9c0a57ed
+- rule_id: SEC-ERR-001
+  status: PASS
+  reason: 'Aucune trace interne n atteint l utilisateur : le projet n a pas de serveur, n ecrit aucun
+    journal, et ses messages d erreur sont des phrases francaises redigees, accompagnees d un code stable
+    destine au support. Aucun chemin de fichier, aucune pile d appel, aucune requete n est affichee.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun appel console.log, console.debug, console.info, console.warn ni console.error dans le
+      code livre, hors tests.
+    command: grep -rn 'console\.' --include=*.html . | grep -v '^./tests/'
+    result: PASS
+    covers:
+    - EVR-992870cf
+  - type: CODE
+    detail: Les problemes affiches portent un libelle Erreur ou Avertissement, un code stable et une phrase
+      francaise, jamais une exception brute.
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-992870cf
+  exception_ref: null
+  evidence_contract:
+  - EVR-992870cf
+  rule_digest: RD-a9850b1de061
+- rule_id: SEC-ERR-002
+  status: NOT_VERIFIED
+  reason: 'Les en-tetes de reponse revelant la technologie sont ceux de GitHub Pages et ne sont pas maitrisables
+    depuis le depot. Le contenu servi, lui, n expose aucune version ni topologie interne. Severite moyenne,
+    non bloquante : la partie non maitrisable est consignee plutot que declaree satisfaite.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-51e41f47
+  exception_ref: null
+  evidence_contract:
+  - EVR-51e41f47
+  rule_digest: RD-31dd00caab91
+- rule_id: SEC-PRIV-001
+  status: PASS
+  reason: 'La collecte est minimale par construction : le projet ne collecte rien. Ce que l utilisateur
+    saisit reste sur son appareil, n est transmis a personne, et n est persiste que pour le profil du
+    magasin, qui ne contient aucune donnee de personne physique tierce.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-4e737a76
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-4e737a76
+  exception_ref: null
+  evidence_contract:
+  - EVR-4e737a76
+  rule_digest: RD-b49ba709208e
+- rule_id: SEC-PRIV-002
+  status: PASS
+  reason: 'La finalite de chaque traitement est enoncee la ou il a lieu : chaque outil dit ce qu il fait
+    des valeurs saisies, et docs/rgpd-mailing traite explicitement la finalite de la prospection commerciale,
+    seul traitement portant sur des tiers.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-d8a9611c
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-d8a9611c
+  exception_ref: null
+  evidence_contract:
+  - EVR-d8a9611c
+  rule_digest: RD-8bbd19ea59f0
+- rule_id: SEC-PRIV-003
+  status: PASS
+  reason: 'La base legale n est pas rabattue sur le consentement par defaut : docs/rgpd-mailing distingue
+    les situations et indique quand le consentement est requis et quand il ne l est pas.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-80759ff8
+  exception_ref: null
+  evidence_contract:
+  - EVR-80759ff8
+  rule_digest: RD-7f2123d2bc8b
+- rule_id: SEC-PRIV-004
+  status: PASS
+  reason: 'La documentation demande au magasin de conserver la trace du consentement quand c est sur lui
+    qu il s appuie : date, support, formulation employee, sans collecter de preuve superflue.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-6f1a56ca
+  exception_ref: null
+  evidence_contract:
+  - EVR-6f1a56ca
+  rule_digest: RD-9b286466ce3c
+- rule_id: SEC-PRIV-005
+  status: PASS
+  reason: 'Le retrait est traite : la documentation impose d informer la personne qu elle peut s opposer,
+    et l outil de campagne gere une liste d exclusion persistante pour honorer ce retrait.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-cb24ef3e
+  - type: CODE
+    detail: La cle campagne-exclusion-v1 porte la liste d exclusion.
+    result: OBSERVED
+    path: outils/campagne-email/index.html
+    covers:
+    - EVR-cb24ef3e
+  exception_ref: null
+  evidence_contract:
+  - EVR-cb24ef3e
+  rule_digest: RD-d6b500e4b23e
+- rule_id: SEC-PRIV-006
+  status: PASS
+  reason: 'Le magasin detient ses donnees sur son appareil et peut les exporter integralement : la procedure
+    de sauvegarde produit un fichier lisible qui repond a une demande d acces. Le projet, lui, ne detient
+    aucune donnee a restituer.'
+  evidence:
+  - type: DOCUMENT
+    detail: docs/sauvegarde-fichier decrit l export complet.
+    result: OBSERVED
+    path: docs/sauvegarde-fichier/index.html
+    covers:
+    - EVR-4a79f099
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-4a79f099
+  exception_ref: null
+  evidence_contract:
+  - EVR-4a79f099
+  rule_digest: RD-fefbc18b39b9
+- rule_id: SEC-PRIV-007
+  status: PASS
+  reason: 'La rectification est immediate : toute donnee saisie est modifiable dans l interface qui l
+    a recue, et le profil du magasin est reeditable a tout moment depuis la page d accueil.'
+  evidence:
+  - type: CODE
+    detail: La modale Mon magasin reedite le profil.
+    result: OBSERVED
+    path: index.html
+    covers:
+    - EVR-a1912d0d
+  exception_ref: null
+  evidence_contract:
+  - EVR-a1912d0d
+  rule_digest: RD-707e4d59050a
+- rule_id: SEC-PRIV-008
+  status: PASS
+  reason: 'L effacement est reel et sous le controle du magasin : les listes sont supprimables dans l
+    outil, et rien n a ete replique ailleurs puisque rien n a ete transmis. Il n existe ni copie serveur,
+    ni index de recherche, ni systeme aval.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-0e402442
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-0e402442
+  exception_ref: null
+  evidence_contract:
+  - EVR-0e402442
+  rule_digest: RD-b9bb633fdbc7
+- rule_id: SEC-PRIV-009
+  status: NOT_VERIFIED
+  reason: 'L export du profil magasin existe dans un format structure, mais les listes de contacts de
+    l outil de campagne s importent en CSV sans fonction d export symetrique : la portabilite repose alors
+    sur le fichier source du magasin. Severite moyenne, non bloquante : consigne tel quel plutot que declare
+    satisfait.'
+  evidence:
+  - type: DOCUMENT
+    detail: docs/sauvegarde-fichier couvre le profil, pas les listes de contacts.
+    result: OBSERVED
+    path: docs/sauvegarde-fichier/index.html
+    covers:
+    - EVR-da23fbbe
+  exception_ref: null
+  evidence_contract:
+  - EVR-da23fbbe
+  rule_digest: RD-1fbe8d6ca72b
+- rule_id: SEC-PRIV-010
+  status: PASS
+  reason: 'La conservation est bornee la ou le projet la maitrise : l historique de comptage de caisse
+    est limite a quinze jours par le code. Pour le reste, la duree appartient au magasin sur son propre
+    appareil, et la documentation lui indique comment la fixer.'
+  evidence:
+  - type: CODE
+    detail: HISTORY_DAYS borne l historique de caisse a quinze jours.
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-89678d53
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-89678d53
+  exception_ref: null
+  evidence_contract:
+  - EVR-89678d53
+  rule_digest: RD-3b775ea4ecc5
+- rule_id: SEC-PRIV-011
+  status: PASS
+  reason: 'Une suppression dans l interface est une suppression reelle : il n existe ni base primaire,
+    ni cache serveur, ni index, ni systeme aval ou une copie pourrait subsister. L interface ne peut donc
+    pas laisser croire a un effacement qui n aurait pas lieu.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-8f747fd8
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-8f747fd8
+  exception_ref: null
+  evidence_contract:
+  - EVR-8f747fd8
+  rule_digest: RD-7330cdd55f73
+- rule_id: SEC-PRIV-012
+  status: PASS
+  reason: 'Les destinataires externes sont inventories et peu nombreux : GoatCounter, qui ne recoit que
+    le chemin de la page, et le point Apps Script deploye par le magasin lui-meme, qui ne recoit que le
+    profil magasin. Les deux sont nommes dans SECURITY.md et dans le profil de securite, avec leur finalite
+    et leur categorie de donnees.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-40396d22
+  - type: CONFIGURATION
+    detail: Les frontieres de confiance du profil de securite nomment les deux destinataires, leur finalite
+      et ce qui transite.
+    result: OBSERVED
+    path: project-security-profile.yaml
+    covers:
+    - EVR-40396d22
+  exception_ref: null
+  evidence_contract:
+  - EVR-40396d22
+  rule_digest: RD-81f0fb0a68b9
+- rule_id: SEC-PRIV-013
+  status: PASS
+  reason: Le seul transfert hors de l appareil qui ne soit pas du seul fait du magasin est le chemin de
+    page envoye au compteur de visites, qui ne contient aucune donnee personnelle. La synchronisation
+    Drive est mise en place par le magasin, vers son propre espace, sous sa responsabilite.
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-9cbbb668
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-9cbbb668
+  exception_ref: null
+  evidence_contract:
+  - EVR-9cbbb668
+  rule_digest: RD-c6700d9c4069
+- rule_id: SEC-PRIV-014
+  status: PASS
+  reason: 'Les donnees sensibles, en particulier l information de sante d un courrier de demande ou d
+    ordonnance, ne sont ni persistees, ni transmises, ni journalisees : elles vivent dans le formulaire
+    et disparaissent avec l onglet. C est la protection la plus forte disponible pour ce type de donnee.
+    Une reserve est portee separement en SEC-FE-048 : les champs patient de l outil demande et ordonnance
+    ne desactivent pas la saisie semi-automatique du navigateur, ce qui laisse une retention hors du controle
+    de l outil sur un poste partage.'
+  evidence:
+  - type: CODE
+    detail: 'Aucune ecriture localStorage des champs patient : l outil ne lit que le profil du magasin.'
+    result: OBSERVED
+    path: outils/demande-ordonnance/index.html
+    covers:
+    - EVR-d8188699
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-d8188699
+  - type: COMMAND
+    detail: 'Aucun appel reseau portant une saisie dans tout le depot : la recherche ne renvoie aucune
+      occurrence de fetch, XMLHttpRequest, WebSocket ni sendBeacon hors du JSONP de synchronisation Drive,
+      explicitement limite au profil magasin.'
+    command: grep -rnE 'fetch\(|XMLHttpRequest|WebSocket|sendBeacon' --include=*.html .
+    result: PASS
+    covers:
+    - EVR-d8188699
+  exception_ref: null
+  evidence_contract:
+  - EVR-d8188699
+  rule_digest: RD-6cbd83128358
+- rule_id: SEC-PRIV-015
+  status: PASS
+  reason: 'Aucune donnee personnelle ne peut atteindre un journal : le projet n en ecrit aucun et le code
+    livre ne contient aucun appel console.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun appel console.log, console.debug, console.info, console.warn ni console.error dans le
+      code livre, hors tests.
+    command: grep -rn 'console\.' --include=*.html . | grep -v '^./tests/'
+    result: PASS
+    covers:
+    - EVR-94440eb0
+  exception_ref: null
+  evidence_contract:
+  - EVR-94440eb0
+  rule_digest: RD-c921ae83f323
+- rule_id: SEC-PRIV-016
+  status: PASS
+  reason: 'La seule mesure d audience recoit le chemin de la page et rien d autre : ni cookie, ni localStorage,
+    ni saisie, ni photo. La regle est enoncee dans SECURITY.md et materialisee par la CSP, qui n autorise
+    le compteur que sur les pages qui le portent.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-cc02185b
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-cc02185b
+  exception_ref: null
+  evidence_contract:
+  - EVR-cc02185b
+  rule_digest: RD-105acf98313e
+- rule_id: SEC-PRIV-017
+  status: NOT_VERIFIED
+  reason: Le registre des traitements est une obligation du magasin, et docs/rgpd-mailing lui indique
+    de le tenir en s appuyant sur le modele simplifie de la CNIL. Le depot ne tient pas de registre pour
+    son propre compte, ce qui se defend puisqu il n est pas responsable de traitement, mais je ne peux
+    pas constater qu un registre existe cote magasin. Severite moyenne, non bloquante.
+  evidence:
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-8c77eb83
+  exception_ref: null
+  evidence_contract:
+  - EVR-8c77eb83
+  rule_digest: RD-86ef64356335
+- rule_id: SEC-PRIV-018
+  status: PASS
+  reason: 'La minimisation est une decision d architecture et non un correctif : le projet est concu sans
+    backend precisement pour qu aucune donnee ne quitte l appareil. Pour le module livre par cette mission,
+    l absence de persistance et l absence de dossier patient sont des contraintes admises avant l ecriture
+    du code, tracees dans le contrat de mission.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-fb18d197
+  - type: DOCUMENT
+    detail: Le contrat de mission exclut explicitement dossier patient, historique et stockage de donnees
+      personnelles, avant conception.
+    result: OBSERVED
+    path: .agentic/missions/lentilles-souples/constraints.yaml
+    covers:
+    - EVR-fb18d197
+  exception_ref: null
+  evidence_contract:
+  - EVR-fb18d197
+  rule_digest: RD-26abe362f74a
+- rule_id: SEC-PRIV-019
+  status: PASS
+  reason: 'Un processus existe et couvre la chaine demandee. Detection et escalade : SECURITY.md ouvre
+    un canal de signalement prive et classe toute rupture de l isolement local comme vulnerabilite prioritaire.
+    Confinement : le correctif part sur main et se deploie automatiquement. Analyse de notification :
+    docs/rgpd-mailing enonce au magasin, qui est le responsable de traitement, l obligation d informer
+    la CNIL sous 72 heures quand un risque existe pour les personnes.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-4afb6ebe
+  - type: DOCUMENT
+    detail: 'docs/rgpd-mailing expose au magasin, qui est le responsable de traitement, ses obligations
+      : base legale, information a la collecte, registre des traitements, duree de conservation, droits
+      des personnes, protection du fichier, et signalement d une fuite a la CNIL sous 72 heures.'
+    result: OBSERVED
+    path: docs/rgpd-mailing/index.html
+    covers:
+    - EVR-4afb6ebe
+  exception_ref: null
+  evidence_contract:
+  - EVR-4afb6ebe
+  rule_digest: RD-ea4d7c40971c
+- rule_id: SEC-BIZ-006
+  status: PASS
+  reason: 'Aucun calcul de securite n est delegue au client : il n y a ni tarification, ni droit d acces,
+    ni eligibilite, ni permission a calculer. Le calcul optique du module est un calcul d aide dont le
+    destinataire est un professionnel qui le relit, et c est precisement pourquoi la couche Details du
+    calcul est obligatoire et non optionnelle : elle rend le calcul verifiable par celui qui en repond.'
+  evidence:
+  - type: CODE
+    detail: La page enonce que l outil aide au calcul, ne prescrit pas et ne se substitue pas au jugement
+      clinique.
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-a513da1e
+  - type: CODE
+    detail: Details du calcul restitue l enchainement complet, y compris les deux voisines de chaque arrondi.
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-a513da1e
+  exception_ref: null
+  evidence_contract:
+  - EVR-a513da1e
+  rule_digest: RD-a214ac67f8d8
+- rule_id: SEC-DEV-001
+  status: PASS
+  reason: 'Le code de cette mission est genere par agent et a ete traite comme une contribution non fiable
+    : recoupement numerique independant des moteurs plutot que relecture des tests du worker, parcours
+    reels joues dans Chromium, et deux refus successifs du Control Plane avant acceptation. Le contrat
+    interdit explicitement au worker de declarer son propre ticket termine.'
+  evidence:
+  - type: MANUAL_REVIEW
+    detail: Deux refus documentes du candidat TKT-005, avec leur raison exacte, avant acceptation ; findings
+      UXER transformes en tickets de remediation et non corriges en silence.
+    result: OBSERVED
+    path: .agentic/features/lentilles-souples/execution/work-results
+    covers:
+    - EVR-1a864289
+  - type: DOCUMENT
+    detail: La revue enonce les recoupements independants, axe par axe.
+    result: OBSERVED
+    path: .agentic/features/lentilles-souples/review.md
+    covers:
+    - EVR-1a864289
+  exception_ref: null
+  evidence_contract:
+  - EVR-1a864289
+  rule_digest: RD-c94b1357f2b8
+- rule_id: SEC-DEV-002
+  status: NOT_VERIFIED
+  reason: 'Des tests de chemins negatifs existent et sont serieux : le validateur de catalogue est eprouve
+    sur ses douze cas d echec, et une corruption du catalogue livre fait sortir la suite en code 1. Le
+    depot porte aussi une page tests/securite intitulee tests de non-regression securite. Deux limites
+    la privent de la valeur attendue ici, et ce sont des constats de lecture : elle redefinit dans son
+    propre script les fonctions qu elle eprouve, esc, sanitizeProfil, isValidSyncUrl et lienSur, au lieu
+    d executer celles des pages, donc une regression du code livre la laisserait verte ; et aucun job
+    de .github/workflows/ci.yml ne l ouvre, elle ne se joue qu a la main. Surtout, l invariant central
+    du depot, aucune donnee saisie ne quitte le navigateur, n est couvert par aucun test du depot. Je
+    l ai bel et bien eprouve pendant cette revue, au canari et a l instrumentation des cinq API sortantes,
+    et il tient ; mais ce sont mes scripts, joues une fois sur ce commit, hors du depot et hors de la
+    CI. Un fait acquis une fois ne se rejoue pas tout seul, et c est exactement ce que cette regle demande.
+    Severite haute, donc bloquante, et c est le constat le plus utile de cette revue : un test qui echouerait
+    a la premiere apparition de fetch, XMLHttpRequest, WebSocket, sendBeacon ou d une ecriture de stockage
+    hors liste blanche serait peu couteux, tiendrait dans le meme moule que tests/navigation-retour.test.mjs
+    deja cable en CI, et protegerait exactement ce que SECURITY.md promet au magasin.'
+  evidence:
+  - type: TEST
+    detail: 'Suite du module executee sur l arbre audite : 166 controles, dont les douze cas d echec du
+      validateur de catalogue et un garde de performance qui traite 300 regles en 41 ms pour un budget
+      de 3 000 ms.'
+    command: node tests/lentilles-souples.test.mjs
+    result: PASS
+    covers:
+    - EVR-2a4a7156
+  - type: CI
+    detail: 'Aucun job n execute tests/securite : la CI joue navigation-retour, le noyau lentilles, html-validate
+      et lychee.'
+    result: OBSERVED
+    path: .github/workflows/ci.yml
+    covers:
+    - EVR-2a4a7156
+  - type: CODE
+    detail: tests/securite/index.html redefinit localement esc, sanitizeProfil, isValidSyncUrl et lienSur
+      au lieu d importer le code des pages.
+    result: OBSERVED
+    path: tests/securite/index.html
+    covers:
+    - EVR-2a4a7156
+  - type: RUNTIME
+    detail: 'Mesure d exfiltration au canari. fetch, XMLHttpRequest, sendBeacon, WebSocket et EventSource
+      sont instrumentes avant tout script de page ; le profil magasin, les 53 champs de demande et ordonnance,
+      douze champs de comptage de caisse, les trois blocs du module lentilles et la liste de destinataires
+      de la campagne recoivent un marqueur unique. Bilan : 17 requetes en tout, 5 hors origine et toutes
+      vers gc.zgo.at/count.js, zero requete portant le marqueur, zero appel d API sortante par le code
+      des pages, une seule ligne de console (echec de chargement de la ressource du compteur, bloquee
+      par le reseau du bac a sable) et aucune ligne portant le marqueur.'
+    command: node reseau-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-2a4a7156
+  - type: RUNTIME
+    detail: 'Test adverse de XSS stocke et DOM. Le profil magasin partage recoit quatre charges utiles
+      (img onerror, svg onload, href javascript:, balise script) puis les cinq pages qui le relisent sont
+      visitees ; ensuite les 53 champs de l outil demande et ordonnance, dont le nom et la date de naissance
+      du patient, recoivent la meme charge. Resultat sur les six passes : compteur d execution a 0, aucun
+      element ne naissant de la charge (img[src=x], svg[onload], [onerror], script injecte, href javascript:),
+      aucune violation de CSP, aucune erreur de page, et la charge visible en texte litteral, ce qui prouve
+      l echappement plutot qu une suppression silencieuse.'
+    command: node xss-negatif.mjs (Chromium 1194, arbre du commit audite servi en local)
+    result: PASS
+    covers:
+    - EVR-2a4a7156
+  exception_ref: null
+  evidence_contract:
+  - EVR-2a4a7156
+  rule_digest: RD-f09eab2a446f
+- rule_id: SEC-DEV-005
+  status: PASS
+  reason: 'L analyse statique tourne et couvre la classe de defauts pertinente : CodeQL sur le JavaScript
+    embarque, a chaque push, chaque PR et une fois par semaine. La revue conserve explicitement la limitation
+    des controles heuristiques plutot que de traiter leur silence comme une preuve.'
+  evidence:
+  - type: CI
+    detail: CodeQL analyse le JavaScript embarque a chaque push sur main, a chaque pull request et une
+      fois par semaine.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-b28bc616
+  exception_ref: null
+  evidence_contract:
+  - EVR-b28bc616
+  rule_digest: RD-34695b5e6978
+- rule_id: SEC-DEV-006
+  status: PASS
+  reason: 'Le balayage de secrets est repetable et automatise : gitleaks a chaque push et chaque PR, sur
+    l historique complet.'
+  evidence:
+  - type: CI
+    detail: gitleaks s execute a chaque push sur main et a chaque pull request, avec fetch-depth 0, donc
+      sur l historique complet et pas seulement sur l arbre courant.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-be9aa880
+  exception_ref: null
+  evidence_contract:
+  - EVR-be9aa880
+  rule_digest: RD-0ad2d6a0beab
+- rule_id: SEC-DEV-007
+  status: PASS
+  reason: 'La revue des signaux de vulnerabilite est continue et pas seulement initiale : Dependabot hebdomadaire
+    et CodeQL sur planning hebdomadaire en plus des declenchements par changement.'
+  evidence:
+  - type: CONFIGURATION
+    detail: Dependabot met a jour hebdomadairement les actions GitHub, seule famille de dependances du
+      depot.
+    result: OBSERVED
+    path: .github/dependabot.yml
+    covers:
+    - EVR-f16feafb
+  - type: CI
+    detail: CodeQL analyse le JavaScript embarque a chaque push sur main, a chaque pull request et une
+      fois par semaine.
+    result: OBSERVED
+    path: .github/workflows/security.yml
+    covers:
+    - EVR-f16feafb
+  exception_ref: null
+  evidence_contract:
+  - EVR-f16feafb
+  rule_digest: RD-5d8620482d4d
+- rule_id: SEC-DEV-009
+  status: PASS
+  reason: 'Un modele de menace exploitable existe et il est ecrit. SECURITY.md nomme les actifs et l invariant
+    central. Le profil de securite du depot nomme les frontieres de confiance une par une : compteur de
+    visites, point Apps Script du magasin, contenu relu depuis le localStorage, fichier choisi par l utilisateur,
+    actions GitHub tierces.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-d81ffaac
+  - type: CONFIGURATION
+    detail: Cinq frontieres de confiance declarees, chacune avec ce qui transite et pourquoi elle est
+      non fiable.
+    result: OBSERVED
+    path: project-security-profile.yaml
+    covers:
+    - EVR-d81ffaac
+  exception_ref: null
+  evidence_contract:
+  - EVR-d81ffaac
+  rule_digest: RD-46b9705e2a03
+- rule_id: SEC-DEV-010
+  status: PASS
+  reason: 'La mission a explicitement refuse d assimiler un fonctionnement nominal a une preuve de securite
+    : le candidat de l interface a ete refuse deux fois alors que ses tests passaient, parce que les tests
+    portaient sur le noyau et pas sur la lecture des champs. C est cette distinction qui a fait apparaitre
+    le refus d une correction purement spherique et le repliement silencieux d un axe hors domaine.'
+  evidence:
+  - type: MANUAL_REVIEW
+    detail: Refus documentes du candidat TKT-005 malgre une suite de tests verte, sur des defauts trouves
+      par parcours reel et non par les tests.
+    result: OBSERVED
+    path: .agentic/features/lentilles-souples/execution/work-results
+    covers:
+    - EVR-f07c2f7a
+  - type: DOCUMENT
+    detail: La revue distingue les preuves d execution des preuves de code, axe par axe.
+    result: OBSERVED
+    path: .agentic/features/lentilles-souples/review.md
+    covers:
+    - EVR-f07c2f7a
+  exception_ref: null
+  evidence_contract:
+  - EVR-f07c2f7a
+  rule_digest: RD-0567508e27be
+- rule_id: SEC-FE-001
+  status: PASS
+  reason: 'Aucune source map n est publiee : le projet n a pas de build, donc pas de carte de sources
+    a exposer.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun fichier .map dans le depot.
+    command: find . -name '*.map' -not -path './.git/*'
+    result: PASS
+    covers:
+    - EVR-793ba4b2
+  exception_ref: null
+  evidence_contract:
+  - EVR-793ba4b2
+  rule_digest: RD-7c6f78df92d4
+- rule_id: SEC-FE-004
+  status: PASS
+  reason: 'Rien de sensible n est cache par le CSS ou par un etat DOM masque : le projet n a pas d autorisation
+    a appliquer et ne recoit aucune donnee d un serveur. Ce qui est a l ecran est ce que l utilisateur
+    vient de saisir.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-0fb9e5c8
+  exception_ref: null
+  evidence_contract:
+  - EVR-0fb9e5c8
+  rule_digest: RD-d6dea37e631f
+- rule_id: SEC-FE-005
+  status: NOT_VERIFIED
+  reason: 'Le projet n a pas de mecanisme de drapeaux de fonctionnalite, donc rien a exposer par ce canal.
+    Severite moyenne, non bloquante : consigne comme absence de surface plutot que comme controle satisfait.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-e9348b0b
+  exception_ref: null
+  evidence_contract:
+  - EVR-e9348b0b
+  rule_digest: RD-50061a2df7e3
+- rule_id: SEC-FE-006
+  status: NOT_VERIFIED
+  reason: Les seuls points distants nommes dans le code sont le compteur de visites et le domaine Apps
+    Script, tous deux destines au client et declares dans la CSP. Aucun nom de service interne, de preproduction
+    ni d administration n apparait. Severite moyenne, non bloquante.
+  evidence:
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-f04a1279
+  exception_ref: null
+  evidence_contract:
+  - EVR-f04a1279
+  rule_digest: RD-8880997889dd
+- rule_id: SEC-FE-011
+  status: PASS
+  reason: 'Aucune ouverture de fenetre externe n existe : ni window.open, ni lien target=_blank sans rel.
+    La question de l isolation de l ouvreur ne se pose donc pas.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun window.open dans le depot.
+    command: grep -rn 'window.open' --include=*.html .
+    result: PASS
+    covers:
+    - EVR-4910e96f
+  - type: COMMAND
+    detail: Aucun lien target=_blank sans attribut rel.
+    command: grep -rnoE '<a [^>]*target="_blank"[^>]*>' --include=*.html . | grep -v 'rel='
+    result: PASS
+    covers:
+    - EVR-4910e96f
+  exception_ref: null
+  evidence_contract:
+  - EVR-4910e96f
+  rule_digest: RD-3888527ef101
+- rule_id: SEC-FE-013
+  status: PASS
+  reason: 'La seule destination controlee par l utilisateur est l URL de synchronisation Drive, contrainte
+    par expression reguliere a un deploiement Apps Script avant tout usage : un schema dangereux ne passe
+    pas ce filtre.'
+  evidence:
+  - type: CODE
+    detail: endpointId et endpointOk imposent la forme attendue avant emploi.
+    result: OBSERVED
+    path: outils/campagne-email/index.html
+    covers:
+    - EVR-09a8dbec
+  exception_ref: null
+  evidence_contract:
+  - EVR-09a8dbec
+  rule_digest: RD-3a6718050444
+- rule_id: SEC-FE-014
+  status: PASS
+  reason: 'Le projet ne lit aucun parametre d URL : ni query, ni fragment, ni route. Il n y a donc aucune
+    entree de ce canal a valider.'
+  evidence:
+  - type: COMMAND
+    detail: Aucune lecture de location.search, location.hash ni URLSearchParams.
+    command: grep -rnE 'location\.(search|hash)|URLSearchParams' --include=*.html .
+    result: PASS
+    covers:
+    - EVR-5648f9e3
+  exception_ref: null
+  evidence_contract:
+  - EVR-5648f9e3
+  rule_digest: RD-532ece3c0a4a
+- rule_id: SEC-FE-015
+  status: PASS
+  reason: 'Les 22 affectations innerHTML du depot ont ete auditees une par une. Toute valeur controlee
+    par l utilisateur passe par esc() avant d entrer dans la chaine ; le reste est numerique, litteral
+    statique ou geometrie SVG generee. Le module livre par cette mission n en ajoute aucune : il construit
+    son DOM par createElement et textContent.'
+  evidence:
+  - type: MANUAL_REVIEW
+    detail: 'Audit des 22 affectations innerHTML du depot, une par une : epaisseur-verres 1518/1532/1545/1806/1808/1870/1895/1900/2458/2470/2478/3134/3366/3378,
+      campagne-email 1447/1560, demande-ordonnance 862, scanner 480/514/543/557, tests/securite 224. Toute
+      valeur controlee par l utilisateur passe par esc() avant d entrer dans la chaine HTML ; le reste
+      est numerique (fmt, toFixed), litteral statique (PM_LEAD, listes de cases a cocher) ou geometrie
+      SVG generee. shapePath n emet que des nombres via toFixed(1), donc aucune sortie d attribut.'
+    result: OBSERVED
+    command: grep -rn 'innerHTML' --include=*.html . (22 occurrences, examinees une a une)
+    covers:
+    - EVR-05e32805
+  - type: CODE
+    detail: 'Le module lentilles souples n emploie aucun innerHTML : construction par createElement et
+      textContent.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-05e32805
+  exception_ref: null
+  evidence_contract:
+  - EVR-05e32805
+  rule_digest: RD-51a274ea5b2a
+- rule_id: SEC-FE-016
+  status: PASS
+  reason: Aucun framework n est employe, donc aucune fonctionnalite equivalente a dangerouslySetInnerHTML
+    n existe dans le projet.
+  evidence:
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-3171cea4
+  exception_ref: null
+  evidence_contract:
+  - EVR-3171cea4
+  rule_digest: RD-4274fadbe0d5
+- rule_id: SEC-FE-019
+  status: PASS
+  reason: Aucun SVG fourni par l utilisateur n est rendu. Les SVG du site sont ecrits dans les pages,
+    et le seul SVG genere l est a partir de coordonnees numeriques calculees.
+  evidence:
+  - type: MANUAL_REVIEW
+    detail: 'Audit des 22 affectations innerHTML du depot, une par une : epaisseur-verres 1518/1532/1545/1806/1808/1870/1895/1900/2458/2470/2478/3134/3366/3378,
+      campagne-email 1447/1560, demande-ordonnance 862, scanner 480/514/543/557, tests/securite 224. Toute
+      valeur controlee par l utilisateur passe par esc() avant d entrer dans la chaine HTML ; le reste
+      est numerique (fmt, toFixed), litteral statique (PM_LEAD, listes de cases a cocher) ou geometrie
+      SVG generee. shapePath n emet que des nombres via toFixed(1), donc aucune sortie d attribut.'
+    result: OBSERVED
+    command: grep -rn 'innerHTML' --include=*.html . (22 occurrences, examinees une a une)
+    covers:
+    - EVR-822151a9
+  exception_ref: null
+  evidence_contract:
+  - EVR-822151a9
+  rule_digest: RD-a018b10720b8
+- rule_id: SEC-FE-020
+  status: NOT_VERIFIED
+  reason: 'Le code emploie getElementById et des references locales plutot que des globales nommees par
+    le DOM, mais je n ai pas conduit d analyse exhaustive du clobbering sur l ensemble des pages. Severite
+    moyenne, non bloquante : consigne comme non verifie plutot que suppose sur.'
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-1c838c40
+  rule_digest: RD-efbc1ec6c38f
+- rule_id: SEC-FE-021
+  status: NOT_VERIFIED
+  reason: Les selecteurs construits dynamiquement le sont a partir de cles internes fixes, non de valeurs
+    saisies. Je n ai pas verifie chaque construction de selecteur du depot. Severite moyenne, non bloquante.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-6588a0dd
+  rule_digest: RD-8446af2e5e26
+- rule_id: SEC-FE-022
+  status: PASS
+  reason: 'Le localStorage ne contient aucun jeton d authentification ni secret : il n y a pas d authentification.
+    Il contient le profil du magasin et des reglages d outils, et aucune donnee patient n y est jamais
+    ecrite, ce qui est verifiable par l inventaire des cles.'
+  evidence:
+  - type: CODE
+    detail: 'Inventaire des cles localStorage : profil du magasin, reglages d outils, historique de comptage
+      de caisse, formes personnalisees, marqueurs d intro. Aucune ne contient de donnee patient. Le profil
+      est relu derriere un try/catch et filtre par liste blanche de champs (sanitizeProfil).'
+    result: OBSERVED
+    path: outils/cloture-caisse/index.html
+    covers:
+    - EVR-68c74c89
+  - type: CODE
+    detail: L outil demande et ordonnance ne lit que le profil et n ecrit aucune cle.
+    result: OBSERVED
+    path: outils/demande-ordonnance/index.html
+    covers:
+    - EVR-68c74c89
+  exception_ref: null
+  evidence_contract:
+  - EVR-68c74c89
+  rule_digest: RD-45158c46bc39
+- rule_id: SEC-FE-023
+  status: PASS
+  reason: Le sessionStorage ne porte qu un marqueur de lecture d animation, sans aucune donnee. Le module
+    livre par cette mission n ecrit ni l un ni l autre, ce qui a ete constate en execution.
+  evidence:
+  - type: CODE
+    detail: La cle hub-intro-v1 marque une lecture d animation dans la session.
+    result: OBSERVED
+    path: index.html
+    covers:
+    - EVR-7b167461
+  - type: MANUAL_REVIEW
+    detail: Apres un parcours complet du module dans Chromium, Object.keys(localStorage) et Object.keys(sessionStorage)
+      sont vides.
+    result: OBSERVED
+    command: node reseau-negatif.mjs (Chromium 1194, parcours complet)
+    covers:
+    - EVR-7b167461
+  exception_ref: null
+  evidence_contract:
+  - EVR-7b167461
+  rule_digest: RD-c3e1228a47b8
+- rule_id: SEC-FE-024
+  status: PASS
+  reason: Aucune base IndexedDB n est employee par le projet.
+  evidence:
+  - type: COMMAND
+    detail: Aucune occurrence d indexedDB dans le depot.
+    command: grep -rn 'indexedDB' --include=*.html .
+    result: PASS
+    covers:
+    - EVR-454cc329
+  exception_ref: null
+  evidence_contract:
+  - EVR-454cc329
+  rule_digest: RD-025183d84c38
+- rule_id: SEC-FE-037
+  status: PASS
+  reason: 'Un seul script tiers est charge, le compteur de visites, et son inclusion est justifiee et
+    bornee : il ne transmet que le chemin de la page, sans cookie ni stockage. Les pages de documentation
+    et les pages de maintenance ne le portent pas.'
+  evidence:
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-0bebd050
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-0bebd050
+  exception_ref: null
+  evidence_contract:
+  - EVR-0bebd050
+  rule_digest: RD-c0ee967526f8
+- rule_id: SEC-FE-038
+  status: PASS
+  reason: 'La compromission du script tiers est traitee comme une compromission de meme origine, et c
+    est pourquoi sa surface est reduite au minimum : il ne recoit aucune saisie, la CSP interdit tout
+    autre hote, et les pages qui manipulent le plus de donnees sensibles hors outils, c est-a-dire les
+    pages de documentation et de maintenance, ne le chargent pas du tout.'
+  evidence:
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-b2f5f59d
+  - type: DOCUMENT
+    detail: 'SECURITY.md enonce le modele : aucune donnee saisie ne quitte le navigateur, aucun cookie,
+      aucun traceur, une seule ressource externe. Il classe toute rupture de l isolement local comme vulnerabilite
+      prioritaire et ouvre un canal de signalement prive.'
+    result: OBSERVED
+    path: SECURITY.md
+    covers:
+    - EVR-b2f5f59d
+  exception_ref: null
+  evidence_contract:
+  - EVR-b2f5f59d
+  rule_digest: RD-3070fc47ee16
+- rule_id: SEC-FE-039
+  status: NOT_VERIFIED
+  reason: 'Le script du compteur de visites ne porte pas d attribut integrity. C est le cas ou la regle
+    reconnait elle-meme que l integrite de sous-ressource ne s applique pas utilement : count.js est un
+    script mis a jour par son editeur, une empreinte figee le casserait a la premiere mise a jour. La
+    CSP borne le risque en n autorisant que cet hote. Severite moyenne, non bloquante : consigne tel quel
+    plutot que declare satisfait.'
+  evidence:
+  - type: CODE
+    detail: 'Chaque page porte une CSP en meta : default-src ''none'', script-src ''self'' ''unsafe-inline''
+      plus les hotes explicitement autorises, base-uri ''none'', form-action ''none'', object-src ''none''.
+      Les pages docs et les pages de maintenance gardent une CSP fermee sans hote distant.'
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-efcdc688
+  exception_ref: null
+  evidence_contract:
+  - EVR-efcdc688
+  rule_digest: RD-7979c38b6cb1
+- rule_id: SEC-FE-045
+  status: PASS
+  reason: 'Aucune reponse d API n atteint le client : il n y a pas d API. Les seuls champs personnels
+    affiches sont ceux que l utilisateur vient de saisir sur le meme ecran.'
+  evidence:
+  - type: CODE
+    detail: Le depot ne contient aucun code serveur. Le site est un ensemble de fichiers statiques publies
+      par GitHub Pages ; .github/workflows/deploy.yml ne fait que televerser l arborescence, sans build
+      ni runtime applicatif.
+    result: OBSERVED
+    path: .github/workflows/deploy.yml
+    covers:
+    - EVR-dc80a4d2
+  exception_ref: null
+  evidence_contract:
+  - EVR-dc80a4d2
+  rule_digest: RD-32d73237fb82
+- rule_id: SEC-FE-046
+  status: PASS
+  reason: 'Aucun jeu de donnees protege n est telecharge : le catalogue fabricant du module est un jeu
+    de demonstration public et fictif, versionne avec l outil, sans aucune autorisation a appliquer.'
+  evidence:
+  - type: CODE
+    detail: Catalogue de demonstration, fabricants fictifs marques comme tels.
+    result: OBSERVED
+    path: outils/lentilles-souples/donnees/catalogue-demo.js
+    covers:
+    - EVR-e362eefa
+  exception_ref: null
+  evidence_contract:
+  - EVR-e362eefa
+  rule_digest: RD-3fa29acc839d
+- rule_id: SEC-FE-047
+  status: PASS
+  reason: Aucune recherche confidentielle n existe. La recherche du module porte sur le catalogue de demonstration
+    public, qui n a pas de corpus protege a exposer.
+  evidence:
+  - type: CODE
+    detail: La recherche d alternatives porte sur le catalogue de demonstration fictif.
+    result: OBSERVED
+    path: outils/lentilles-souples/noyau/selection.js
+    covers:
+    - EVR-b5df07ca
+  exception_ref: null
+  evidence_contract:
+  - EVR-b5df07ca
+  rule_digest: RD-667ce7bc3ba4
+- rule_id: SEC-FE-048
+  status: FAIL
+  reason: 'Defaut reel, trouve par cette revue. L outil demande et ordonnance saisit le nom, le prenom
+    et la date de naissance d un patient dans des champs texte sans attribut autocomplete : sur un poste
+    partage en magasin, le navigateur retient ces valeurs et les propose au client suivant. Ce n est pas
+    un arbitrage assume, c est un oubli : l outil de campagne applique autocomplete=off sur dix champs
+    bien moins sensibles. Le module livre par cette mission ne saisit aucune donnee nominative et n est
+    pas concerne. Correction attendue : autocomplete off sur les champs patient de demande et ordonnance,
+    et revue des autres champs libres.'
+  evidence:
+  - type: CODE
+    detail: input type=text data-k=p_nom et data-k=p_ne, sans attribut autocomplete.
+    result: OBSERVED
+    path: outils/demande-ordonnance/index.html
+    covers:
+    - EVR-9d95014c
+  - type: CODE
+    detail: autocomplete=off applique a dix champs de l outil de campagne, ce qui montre que le controle
+      est connu du depot et simplement absent la ou il compte le plus.
+    result: OBSERVED
+    path: outils/campagne-email/index.html
+    covers:
+    - EVR-9d95014c
+  exception_ref: null
+  evidence_contract:
+  - EVR-9d95014c
+  rule_digest: RD-0d0be15c14ce
+- rule_id: SEC-FE-049
+  status: NOT_VERIFIED
+  reason: La copie vers le presse-papiers est deliberee, declenchee par un bouton explicite, et porte
+    le courrier que l utilisateur vient de rediger, donc rien qu il ne connaisse deja. Elle peut contenir
+    une information de sante, ce qui est sa raison d etre puisque le courrier part chez un medecin. Je
+    ne peux pas etablir depuis le depot ce que devient le presse-papiers sur le poste. Severite moyenne,
+    non bloquante.
+  evidence:
+  - type: CODE
+    detail: La copie passe par ClipboardItem sur une action explicite de l utilisateur.
+    result: OBSERVED
+    path: outils/demande-ordonnance/index.html
+    covers:
+    - EVR-2da97e33
+  exception_ref: null
+  evidence_contract:
+  - EVR-2da97e33
+  rule_digest: RD-e65ec2de247b
+- rule_id: SEC-FE-051
+  status: PASS
+  reason: 'Aucun apercu, attribut ou metadonnee ne transporte d information non prevue : les attributs
+    title et aria-label du projet contiennent des libelles d interface, et le module livre construit ses
+    libelles accessibles a partir des memes valeurs que celles affichees.'
+  evidence:
+  - type: CODE
+    detail: Les libelles accessibles reprennent les valeurs deja visibles, sans ajouter de donnee.
+    result: OBSERVED
+    path: outils/lentilles-souples/index.html
+    covers:
+    - EVR-731aada0
+  exception_ref: null
+  evidence_contract:
+  - EVR-731aada0
+  rule_digest: RD-7abcaf9c53db
+- rule_id: SEC-FE-056
+  status: PASS
+  reason: 'Aucune surface de debogage n existe en production : pas de framework, pas de superposition
+    de developpement, pas de metadonnee interne, et aucun appel console dans le code livre.'
+  evidence:
+  - type: COMMAND
+    detail: Aucun appel console.log, console.debug, console.info, console.warn ni console.error dans le
+      code livre, hors tests.
+    command: grep -rn 'console\.' --include=*.html . | grep -v '^./tests/'
+    result: PASS
+    covers:
+    - EVR-dacbfa86
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-dacbfa86
+  exception_ref: null
+  evidence_contract:
+  - EVR-dacbfa86
+  rule_digest: RD-dd8dc638b252
+- rule_id: SEC-FE-057
+  status: PASS
+  reason: 'Aucun composant d interface tiers n est employe : ni editeur riche, ni bibliotheque de graphiques,
+    ni composant de televersement, ni calendrier. Tout est ecrit dans le depot, ce qui supprime cette
+    surface plutot que de la reviser.'
+  evidence:
+  - type: CODE
+    detail: 'Aucun package.json, aucun lockfile applicatif, aucun node_modules : le site n embarque aucune
+      dependance a l execution. Node n est employe qu en CI pour html-validate et les tests, via npx a
+      version epinglee.'
+    result: OBSERVED
+    path: CONTRIBUTING.md
+    covers:
+    - EVR-73948d18
+  exception_ref: null
+  evidence_contract:
+  - EVR-73948d18
+  rule_digest: RD-aa3a392200f5
