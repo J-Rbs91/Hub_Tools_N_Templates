@@ -22,6 +22,7 @@ const cheminNoyau = join(racine, 'outils/lentilles-souples/noyau/prescription.js
 const cheminMoteurs = join(racine, 'outils/lentilles-souples/noyau/moteurs.js');
 const cheminCatalogue = join(racine, 'outils/lentilles-souples/noyau/catalogue.js');
 const cheminCatalogueDemo = join(racine, 'outils/lentilles-souples/donnees/catalogue-demo.js');
+const cheminSelection = join(racine, 'outils/lentilles-souples/noyau/selection.js');
 
 const echecs = [];
 let passes = 0;
@@ -771,6 +772,260 @@ verifier(
   CD.catalogueDemo.manufacturing_rules.every(
     (r) => CD.catalogueDemo.sources.some((s) => s.source_id === r.source_id),
   ),
+);
+
+/* ── Moteur de selection (outils/lentilles-souples/noyau/selection.js) ──── */
+
+const S = require(cheminSelection);
+
+verifier('module.exports (selection) expose les fonctions attendues', [
+  'distanceAxe', 'ecartOptique', 'compilerProduit', 'compilerIndex',
+  'isCombinationAvailable', 'chercherAlternatives',
+].every((nom) => typeof S[nom] === 'function'));
+
+const contexteNavigateurSelection = vm.createContext({});
+vm.runInContext(readFileSync(cheminNoyau, 'utf8'), contexteNavigateurSelection, { filename: cheminNoyau });
+vm.runInContext(readFileSync(cheminSelection, 'utf8'), contexteNavigateurSelection, { filename: cheminSelection });
+const SNavigateur = contexteNavigateurSelection.LentillesSelection;
+
+verifier(
+  'selection.js s\'expose sur globalThis dans un contexte sans module/require (navigateur)',
+  SNavigateur && typeof SNavigateur.isCombinationAvailable === 'function',
+);
+verifier(
+  'la branche navigateur de selection.js calcule comme la branche Node',
+  SNavigateur && SNavigateur.distanceAxe(180, 5) === S.distanceAxe(180, 5),
+);
+
+/* -- distanceAxe : repliement a 180 degres -- */
+
+verifier(
+  'distanceAxe replie a 180 degres : un axe pres de 180 et un axe pres de 5 sont proches (distance 5, pas 175)',
+  S.distanceAxe(180, 5) === 5,
+);
+verifier(
+  'distanceAxe replie a 180 degres, symetrique',
+  S.distanceAxe(5, 180) === 5,
+);
+verifier(
+  'distanceAxe sans repliement se comporte comme un ecart absolu',
+  S.distanceAxe(90, 100) === 10,
+);
+verifier(
+  'distanceAxe est nulle pour un axe identique',
+  S.distanceAxe(37, 37) === 0,
+);
+
+/* -- compilerProduit / isCombinationAvailable : produit spherique (RANGE, cyl=0, axe=null) -- */
+
+function reglesDuCatalogue(produitId) {
+  return CD.catalogueDemo.manufacturing_rules.filter((r) => r.product_id === produitId);
+}
+
+const produitSpherique = CD.catalogueDemo.products.find((p) => p.product_id === 'PRD-DEMO-SPH-001');
+const compileSpherique = S.compilerProduit(produitSpherique, reglesDuCatalogue('PRD-DEMO-SPH-001'));
+
+const disponibiliteSphereExacte = S.isCombinationAvailable(compileSpherique, -6, 0, null);
+verifier(
+  'isCombinationAvailable (spherique, RANGE) : une combinaison exacte est disponible et identifie sa regle et sa source',
+  disponibiliteSphereExacte.available === true
+    && disponibiliteSphereExacte.matched_rule_id === 'RUL-DEMO-001'
+    && disponibiliteSphereExacte.source_id === 'SRC-DEMO-001',
+  JSON.stringify(disponibiliteSphereExacte),
+);
+verifier(
+  'isCombinationAvailable : le cas spherique passe par cylindre nul et axe null',
+  S.isCombinationAvailable(compileSpherique, -6, 0, null).available === true,
+);
+
+verifier(
+  'isCombinationAvailable : une sphere hors plage est refusee avec SPHERE_HORS_PLAGE',
+  S.isCombinationAvailable(compileSpherique, 50, 0, null).raisons.includes('SPHERE_HORS_PLAGE'),
+);
+verifier(
+  'isCombinationAvailable : une sphere hors pas est refusee avec SPHERE_HORS_PAS',
+  S.isCombinationAvailable(compileSpherique, -6.1, 0, null).raisons.includes('SPHERE_HORS_PAS'),
+);
+verifier(
+  'isCombinationAvailable : un cylindre absent de la liste est refuse avec CYLINDRE_ABSENT',
+  S.isCombinationAvailable(compileSpherique, -6, -0.5, null).raisons.includes('CYLINDRE_ABSENT'),
+);
+
+/* -- isCombinationAvailable : produit torique, mode RANGE puis mode LIST -- */
+
+const produitTorique = CD.catalogueDemo.products.find((p) => p.product_id === 'PRD-DEMO-TOR-001');
+const compileTorique = S.compilerProduit(produitTorique, reglesDuCatalogue('PRD-DEMO-TOR-001'));
+const regleRange = reglesDuCatalogue('PRD-DEMO-TOR-001').find((r) => r.axis_mode === 'RANGE');
+const regleList = reglesDuCatalogue('PRD-DEMO-TOR-001').find((r) => r.axis_mode === 'LIST');
+
+verifier(
+  'isCombinationAvailable (torique, RANGE) : une combinaison exacte sur la grille d\'axe est disponible',
+  S.isCombinationAvailable(compileTorique, regleRange.sph_min, regleRange.cyl_values[0], regleRange.axis_min).available === true,
+);
+verifier(
+  'isCombinationAvailable (torique, RANGE) : un axe hors du pas de la regle est refuse avec AXE_HORS_MODE',
+  S.isCombinationAvailable(compileTorique, regleRange.sph_min, regleRange.cyl_values[0], regleRange.axis_min + 1).raisons.includes('AXE_HORS_MODE'),
+);
+verifier(
+  'isCombinationAvailable (torique, LIST) : une combinaison exacte sur une valeur d\'axe explicite est disponible',
+  S.isCombinationAvailable(compileTorique, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0]).matched_rule_id === regleList.rule_id,
+);
+verifier(
+  'isCombinationAvailable (torique, LIST) : un axe absent de la liste explicite est refuse avec AXE_HORS_MODE',
+  S.isCombinationAvailable(compileTorique, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0] + 1).raisons.includes('AXE_HORS_MODE'),
+);
+verifier(
+  'isCombinationAvailable : une lentille spherique et une lentille torique passent par le meme moteur de disponibilite',
+  typeof S.isCombinationAvailable(compileSpherique, -6, 0, null).available === 'boolean'
+    && typeof S.isCombinationAvailable(compileTorique, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0]).available === 'boolean',
+);
+
+/* -- Reproductibilite : meme resultat d'un appel a l'autre, independamment de l'ordre des regles -- */
+
+const appel1 = S.isCombinationAvailable(compileTorique, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0]);
+const appel2 = S.isCombinationAvailable(compileTorique, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0]);
+verifier(
+  'isCombinationAvailable : le resultat est reproductible d\'une execution a l\'autre',
+  JSON.stringify(appel1) === JSON.stringify(appel2),
+);
+
+const reglesInversees = reglesDuCatalogue('PRD-DEMO-TOR-001').slice().reverse();
+const compileToriqueInverse = S.compilerProduit(produitTorique, reglesInversees);
+verifier(
+  'compilerProduit trie les regles par rule_id : le resultat ne depend pas de l\'ordre d\'entree des regles',
+  S.isCombinationAvailable(compileToriqueInverse, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0]).matched_rule_id
+    === S.isCombinationAvailable(compileTorique, regleList.sph_min, regleList.cyl_values[0], regleList.axis_values[0]).matched_rule_id,
+);
+
+/* -- Aucune regle exploitable -- */
+
+const compileSansRegle = S.compilerProduit(produitSpherique, []);
+verifier(
+  'isCombinationAvailable : un produit sans regle active est refuse et l\'identifie',
+  S.isCombinationAvailable(compileSansRegle, -6, 0, null).available === false
+    && S.isCombinationAvailable(compileSansRegle, -6, 0, null).raisons.includes('AUCUNE_REGLE_EXPLOITABLE'),
+);
+
+/* -- chercherAlternatives : une combinaison exacte obtient le meilleur score (nul) et la premiere place -- */
+
+const indexDemo = S.compilerIndex(CD.catalogueDemo);
+verifier(
+  'CANDIDATS_MAX_PAR_REGLE documente bien le plafond de 5 spheres x 3 cylindres x 3 axes',
+  S.CANDIDATS_MAX_PAR_REGLE === 45,
+);
+
+const cibleSphereExacte = { sph: -6, cyl: 0, axe: null };
+const alternativesSphereExacte = S.chercherAlternatives(indexDemo, cibleSphereExacte, { limit: 5 });
+verifier(
+  'chercherAlternatives : une combinaison spherique exacte obtient un ecart nul et la premiere place',
+  alternativesSphereExacte.length > 0
+    && alternativesSphereExacte[0].ecart === 0
+    && alternativesSphereExacte[0].exact === true
+    && alternativesSphereExacte[0].sph === -6 && alternativesSphereExacte[0].cyl === 0 && alternativesSphereExacte[0].axe === null,
+  JSON.stringify(alternativesSphereExacte),
+);
+
+const cibleToriqueExacte = { sph: -8, cyl: -1.25, axe: 70 };
+const alternativesToriqueExacte = S.chercherAlternatives(indexDemo, cibleToriqueExacte, { limit: 5 });
+verifier(
+  'chercherAlternatives : une combinaison torique exacte (mode LIST) obtient un ecart nul et la premiere place',
+  alternativesToriqueExacte.length > 0
+    && alternativesToriqueExacte[0].ecart === 0
+    && alternativesToriqueExacte[0].exact === true
+    && alternativesToriqueExacte[0].rule_id === 'RUL-DEMO-003',
+  JSON.stringify(alternativesToriqueExacte),
+);
+verifier(
+  'chercherAlternatives : l\'ecart n\'est jamais negatif',
+  alternativesToriqueExacte.every((c) => c.ecart >= 0) && alternativesSphereExacte.every((c) => c.ecart >= 0),
+);
+
+/* -- Classement coherent et totalement ordonne, independant de l'ordre d'iteration -- */
+
+const cibleProche = { sph: -8.1, cyl: -1.1, axe: 68 };
+const alternativesA = S.chercherAlternatives(indexDemo, cibleProche, { limit: 5 });
+const indexMelange = indexDemo.slice().reverse();
+const alternativesB = S.chercherAlternatives(indexMelange, cibleProche, { limit: 5 });
+verifier(
+  'chercherAlternatives : le classement est identique quel que soit l\'ordre d\'iteration des entrees de l\'index',
+  JSON.stringify(alternativesA) === JSON.stringify(alternativesB),
+  JSON.stringify({ alternativesA, alternativesB }),
+);
+verifier(
+  'chercherAlternatives : le classement est un ordre total, les ecarts sont ranges en ordre croissant',
+  alternativesA.every((c, i) => i === 0 || c.ecart >= alternativesA[i - 1].ecart),
+  JSON.stringify(alternativesA),
+);
+
+/* -- Garde-fou de performance : plusieurs centaines de regles, pas de produit cartesien -- */
+
+function catalogueSynthetique(nombreRegles) {
+  const manufacturers = [{
+    manufacturer_id: 'MFR-PERF',
+    name: 'Synthetique Perf (fabricant fictif, donnees de test de performance)',
+    official_website: 'https://synthetique-perf.invalid/',
+    active: true,
+    fictional: true,
+  }];
+  const sources = [{
+    source_id: 'SRC-PERF',
+    manufacturer_id: 'MFR-PERF',
+    source_type: 'MANUAL_ENTRY',
+    url: 'https://synthetique-perf.invalid/fiche-technique',
+    document_name: 'Fiche synthetique de test de performance',
+    document_date: '2026-01-01',
+    last_checked: '2026-01-01',
+    content_hash: 'perf-0001',
+  }];
+  const products = [];
+  const rules = [];
+  const axisValuesCompletes = Array.from({ length: 180 }, (_, k) => k + 1);
+  for (let i = 0; i < nombreRegles; i += 1) {
+    const productId = 'PRD-PERF-' + i;
+    products.push({
+      product_id: productId,
+      manufacturer_id: 'MFR-PERF',
+      name: 'Produit synthetique ' + i,
+      lens_type: 'TORIC',
+      active: true,
+    });
+    rules.push({
+      rule_id: 'RUL-PERF-' + i,
+      product_id: productId,
+      sph_min: -20,
+      sph_max: 20,
+      sph_step: 0.01,
+      cyl_values: [-0.25, -0.5, -0.75, -1, -1.25, -1.5, -1.75, -2, -2.25, -2.5],
+      axis_mode: i % 2 === 0 ? 'RANGE' : 'LIST',
+      axis_min: 1,
+      axis_max: 180,
+      axis_step: 1,
+      axis_values: axisValuesCompletes,
+      bc_values: [8.6],
+      dia_values: [14.5],
+      source_id: 'SRC-PERF',
+      verified_at: '2026-01-01',
+      active: true,
+    });
+  }
+  return { manufacturers, products, manufacturing_rules: rules, sources };
+}
+
+const catalogueVolumineux = catalogueSynthetique(300);
+const indexVolumineux = S.compilerIndex(catalogueVolumineux);
+const budgetMs = 3000;
+const debutPerf = Date.now();
+const alternativesVolumineuses = S.chercherAlternatives(indexVolumineux, { sph: -3.37, cyl: -1.1, axe: 47 }, { limit: 5 });
+const dureeMs = Date.now() - debutPerf;
+console.log(`garde-fou de performance (selection.js) : ${indexVolumineux.length} regles traitees en ${dureeMs} ms (budget ${budgetMs} ms)`);
+verifier(
+  `garde-fou de performance : ${indexVolumineux.length} regles synthetiques traitees en ${dureeMs} ms, sous le budget de ${budgetMs} ms`,
+  dureeMs < budgetMs,
+  `duree mesuree : ${dureeMs} ms`,
+);
+verifier(
+  'chercherAlternatives respecte la limite demandee meme sur un tres grand catalogue',
+  alternativesVolumineuses.length <= 5,
 );
 
 /* ── Bilan ─────────────────────────────────────────────────────────────── */
