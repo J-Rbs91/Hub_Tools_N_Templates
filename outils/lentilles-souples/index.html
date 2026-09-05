@@ -41,32 +41,39 @@
   }
   .role-note strong{color:var(--blue-d)}
 
-  /* ── blocs ── */
-  .bloc{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 18px;background:#fff}
-  .bloc h2{font-size:15px;color:var(--ink);margin-bottom:3px}
-  .bloc .sous-titre{font-size:12px;color:var(--grey);margin-bottom:10px}
-
-  details.bloc-b{border:1px solid var(--line);border-radius:10px;margin:0 0 18px;background:#fff;overflow:hidden}
-  details.bloc-b > summary{
-    cursor:pointer;list-style:none;padding:16px 18px;font-size:15px;font-weight:700;
-    color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:10px;
+  /* ── onglets : les trois modules sont independants, on n'en montre qu'un ── */
+  .onglets{
+    display:flex;gap:4px;margin:0 0 16px;padding:4px;
+    background:var(--light);border-radius:10px;
   }
-  details.bloc-b > summary h2{font:inherit;color:inherit;margin:0}
-  details.bloc-b > summary::-webkit-details-marker{display:none}
-  details.bloc-b > summary::marker{content:''}
-  details.bloc-b > summary::after{content:'▾';color:var(--blue);font-size:12px}
-  details.bloc-b[open] > summary{border-bottom:1px solid var(--line)}
-  details.bloc-b[open] > summary::after{content:'▴'}
-  .bloc-b-corps{padding:14px 18px 18px}
-  .bloc-b-corps .sous-titre{font-size:12px;color:var(--grey);margin:0 0 12px}
+  .onglets button{
+    flex:1;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+    color:var(--grey);background:none;border:0;border-radius:7px;
+    padding:9px 10px;line-height:1.25;transition:.12s;
+  }
+  .onglets button:hover{color:var(--ink)}
+  .onglets button[aria-selected="true"]{
+    background:var(--white);color:var(--blue-d);
+    box-shadow:0 1px 3px rgba(26,42,58,.12);
+  }
+  .onglets button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+
+  /* ── blocs ── */
+  .bloc{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0;background:#fff}
+  .bloc h2{font-size:15px;color:var(--ink);margin-bottom:3px}
+  .bloc .sous-titre{font-size:12px;color:var(--grey);margin-bottom:12px}
+  .bloc[hidden]{display:none}
 
   .bandeau-demo{
     background:#FFF6E5;border:1px solid var(--avert-line);color:var(--avert);
     border-radius:6px;padding:10px 12px;font-size:13px;font-weight:600;margin:0 0 14px;
   }
 
-  /* ── groupes par oeil ── */
-  .oeil-groupe{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 12px}
+  /* ── groupes par oeil : cote a cote des qu'il y a la place, l'oeil droit et
+        l'oeil gauche se lisent ensemble et la page tient sur un ecran ── */
+  .oeils{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 14px}
+  @media (max-width:860px){ .oeils{grid-template-columns:1fr} }
+  .oeil-groupe{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0}
   .oeil-groupe h3{
     font-size:12px;color:var(--blue-d);text-transform:uppercase;letter-spacing:.5px;
     margin-bottom:8px;font-weight:700;
@@ -84,7 +91,9 @@
     border-radius:6px;padding:8px 8px;background:#FBFDFE;width:100%;
   }
   .champ input:focus, .champ select:focus{outline:none;border-color:var(--blue);background:#fff}
-  .champ-case{flex-direction:row;align-items:center;gap:8px}
+  .oeils .grille-champs{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
+  .champ-case{flex-direction:row;align-items:center;gap:8px;grid-column:1/-1}
+  .oeils .champ-large{grid-column:span 2}
   .champ-case input{width:auto;accent-color:var(--blue)}
   .champ-case label{font-size:12px;color:var(--ink);font-weight:500}
 
@@ -92,11 +101,10 @@
     body{padding:14px 10px 20px}
     header{padding:12px 16px}
     .body{padding:16px 16px 20px}
-    .bloc, details.bloc-b{padding:0}
     .bloc{padding:14px 14px}
-    details.bloc-b > summary{padding:14px 14px}
-    .bloc-b-corps{padding:12px 14px 14px}
     .grille-champs{grid-template-columns:repeat(2,1fr)}
+    .onglets{gap:2px;padding:3px}
+    .onglets button{font-size:12px;padding:8px 4px}
   }
 
   /* ── boutons ── */
@@ -282,16 +290,24 @@
 
   <div class="body">
     <p class="role-note">
-      <strong>Cet outil aide au calcul et à la sélection de paramètres fabricant disponibles.</strong>
-      Il ne prescrit pas et ne se substitue pas au jugement clinique de l'opticien : la décision
-      finale, y compris le choix final d'une lentille, lui appartient toujours.
+      <strong>Outil d'aide au calcul.</strong> Il ne prescrit pas : la décision finale,
+      y compris le choix de la lentille, revient à l'opticien.
     </p>
 
-    <!-- ══════════════ BLOC A ══════════════ -->
-    <section class="bloc" id="bloc-a">
-      <h2>A · Conversion lunettes vers lentille</h2>
-      <p class="sous-titre">Sphère, cylindre, axe et distance vertex par oeil ; correction théorique au plan cornéen puis correction cible arrondie au pas clinique.</p>
+    <!-- Les trois modules sont independants : chacun se suffit a lui-meme et
+         aucun n'attend la sortie d'un autre. On n'en montre qu'un a la fois. -->
+    <nav class="onglets" role="tablist" aria-label="Modules de calcul">
+      <button type="button" role="tab" id="ong-a" aria-controls="bloc-a" aria-selected="true">Lunettes vers lentille</button>
+      <button type="button" role="tab" id="ong-b" aria-controls="bloc-b" aria-selected="false" tabindex="-1">Surréfraction</button>
+      <button type="button" role="tab" id="ong-c" aria-controls="bloc-c" aria-selected="false" tabindex="-1">Recherche catalogue</button>
+    </nav>
 
+    <!-- ══════════════ MODULE 1 ══════════════ -->
+    <section class="bloc" id="bloc-a" role="tabpanel" aria-labelledby="ong-a" tabindex="0">
+      <h2>Lunettes vers lentille</h2>
+      <p class="sous-titre">Sphère, cylindre, axe et DVO par oeil ; correction théorique au plan cornéen puis correction cible arrondie au pas clinique.</p>
+
+      <div class="oeils">
       <div class="oeil-groupe">
         <h3>OD, oeil droit</h3>
         <div class="grille-champs">
@@ -305,11 +321,11 @@
           </div>
           <div class="champ">
             <label for="a-od-axe">Axe (°)</label>
-            <input type="text" inputmode="numeric" id="a-od-axe" placeholder="si cylindre non nul" aria-label="OD axe lunettes">
+            <input type="text" inputmode="numeric" id="a-od-axe" placeholder="si cyl ≠ 0" aria-label="OD axe lunettes">
           </div>
           <div class="champ">
-            <label for="a-od-vertex">Distance vertex (mm)</label>
-            <input type="text" inputmode="decimal" id="a-od-vertex" value="0" aria-label="OD distance vertex">
+            <label for="a-od-vertex">DVO (mm)</label>
+            <input type="text" inputmode="decimal" id="a-od-vertex" value="0" aria-label="OD distance verre-oeil en millimètres">
           </div>
         </div>
         <div class="sortie" id="a-od-out" role="status" aria-live="polite"></div>
@@ -328,25 +344,26 @@
           </div>
           <div class="champ">
             <label for="a-og-axe">Axe (°)</label>
-            <input type="text" inputmode="numeric" id="a-og-axe" placeholder="si cylindre non nul" aria-label="OG axe lunettes">
+            <input type="text" inputmode="numeric" id="a-og-axe" placeholder="si cyl ≠ 0" aria-label="OG axe lunettes">
           </div>
           <div class="champ">
-            <label for="a-og-vertex">Distance vertex (mm)</label>
-            <input type="text" inputmode="decimal" id="a-og-vertex" value="0" aria-label="OG distance vertex">
+            <label for="a-og-vertex">DVO (mm)</label>
+            <input type="text" inputmode="decimal" id="a-og-vertex" value="0" aria-label="OG distance verre-oeil en millimètres">
           </div>
         </div>
         <div class="sortie" id="a-og-out" role="status" aria-live="polite"></div>
+      </div>
       </div>
 
       <button type="button" class="action" id="a-calculer">Calculer la conversion</button>
     </section>
 
-    <!-- ══════════════ BLOC B (facultatif) ══════════════ -->
-    <details class="bloc-b" id="bloc-b">
-      <summary><h2>B · Surréfraction (facultatif)</h2></summary>
-      <div class="bloc-b-corps">
-        <p class="sous-titre">Utile seulement si une surréfraction a été mesurée sur la lentille déjà portée. Laisser replié si la première adaptation se limite au bloc A.</p>
+    <!-- ══════════════ MODULE 2 ══════════════ -->
+    <section class="bloc" id="bloc-b" role="tabpanel" aria-labelledby="ong-b" tabindex="0" hidden>
+      <h2>Surréfraction</h2>
+      <p class="sous-titre">Lentille portée et surréfraction mesurée par oeil ; nouvelle correction cible, rotation torique prise en compte.</p>
 
+      <div class="oeils">
         <div class="oeil-groupe">
           <h3>OD, oeil droit</h3>
 
@@ -363,7 +380,7 @@
               </div>
               <div class="champ">
                 <label for="b-od-l-axe">Axe (°)</label>
-                <input type="text" inputmode="numeric" id="b-od-l-axe" placeholder="si cylindre non nul" aria-label="OD axe lentille portée">
+                <input type="text" inputmode="numeric" id="b-od-l-axe" placeholder="si cyl ≠ 0" aria-label="OD axe lentille portée">
               </div>
             </div>
           </div>
@@ -381,11 +398,11 @@
               </div>
               <div class="champ">
                 <label for="b-od-s-axe">Axe (°)</label>
-                <input type="text" inputmode="numeric" id="b-od-s-axe" placeholder="si cylindre non nul" aria-label="OD axe surréfraction">
+                <input type="text" inputmode="numeric" id="b-od-s-axe" placeholder="si cyl ≠ 0" aria-label="OD axe surréfraction">
               </div>
               <div class="champ">
-                <label for="b-od-dist">Distance verre de surréfraction (mm)</label>
-                <input type="text" inputmode="decimal" id="b-od-dist" value="0" aria-label="OD distance verre de surréfraction">
+                <label for="b-od-dist">DVO (mm)</label>
+                <input type="text" inputmode="decimal" id="b-od-dist" value="0" aria-label="OD distance verre-oeil de la surréfraction en millimètres">
               </div>
             </div>
           </div>
@@ -394,10 +411,10 @@
             <div class="sous-groupe-titre">Rotation torique observée</div>
             <div class="grille-champs">
               <div class="champ">
-                <label for="b-od-rot-valeur">Rotation observée (°)</label>
+                <label for="b-od-rot-valeur">Rotation (°)</label>
                 <input type="text" inputmode="decimal" id="b-od-rot-valeur" value="0" aria-label="OD rotation observée">
               </div>
-              <div class="champ">
+              <div class="champ champ-large">
                 <label for="b-od-rot-sens">Sens</label>
                 <select id="b-od-rot-sens" aria-label="OD sens de la rotation">
                   <option value="gauche">Vers la gauche (praticien)</option>
@@ -406,7 +423,7 @@
               </div>
               <div class="champ champ-case">
                 <input type="checkbox" id="b-od-rot-stable" checked>
-                <label for="b-od-rot-stable">Rotation stable (résultat reproductible)</label>
+                <label for="b-od-rot-stable">Rotation reproductible</label>
               </div>
             </div>
           </div>
@@ -430,7 +447,7 @@
               </div>
               <div class="champ">
                 <label for="b-og-l-axe">Axe (°)</label>
-                <input type="text" inputmode="numeric" id="b-og-l-axe" placeholder="si cylindre non nul" aria-label="OG axe lentille portée">
+                <input type="text" inputmode="numeric" id="b-og-l-axe" placeholder="si cyl ≠ 0" aria-label="OG axe lentille portée">
               </div>
             </div>
           </div>
@@ -448,11 +465,11 @@
               </div>
               <div class="champ">
                 <label for="b-og-s-axe">Axe (°)</label>
-                <input type="text" inputmode="numeric" id="b-og-s-axe" placeholder="si cylindre non nul" aria-label="OG axe surréfraction">
+                <input type="text" inputmode="numeric" id="b-og-s-axe" placeholder="si cyl ≠ 0" aria-label="OG axe surréfraction">
               </div>
               <div class="champ">
-                <label for="b-og-dist">Distance verre de surréfraction (mm)</label>
-                <input type="text" inputmode="decimal" id="b-og-dist" value="0" aria-label="OG distance verre de surréfraction">
+                <label for="b-og-dist">DVO (mm)</label>
+                <input type="text" inputmode="decimal" id="b-og-dist" value="0" aria-label="OG distance verre-oeil de la surréfraction en millimètres">
               </div>
             </div>
           </div>
@@ -461,10 +478,10 @@
             <div class="sous-groupe-titre">Rotation torique observée</div>
             <div class="grille-champs">
               <div class="champ">
-                <label for="b-og-rot-valeur">Rotation observée (°)</label>
+                <label for="b-og-rot-valeur">Rotation (°)</label>
                 <input type="text" inputmode="decimal" id="b-og-rot-valeur" value="0" aria-label="OG rotation observée">
               </div>
-              <div class="champ">
+              <div class="champ champ-large">
                 <label for="b-og-rot-sens">Sens</label>
                 <select id="b-og-rot-sens" aria-label="OG sens de la rotation">
                   <option value="gauche">Vers la gauche (praticien)</option>
@@ -473,22 +490,22 @@
               </div>
               <div class="champ champ-case">
                 <input type="checkbox" id="b-og-rot-stable" checked>
-                <label for="b-og-rot-stable">Rotation stable (résultat reproductible)</label>
+                <label for="b-og-rot-stable">Rotation reproductible</label>
               </div>
             </div>
           </div>
 
           <div class="sortie" id="b-og-out" role="status" aria-live="polite"></div>
         </div>
-
-        <button type="button" class="action" id="b-calculer">Calculer la surréfraction</button>
       </div>
-    </details>
 
-    <!-- ══════════════ BLOC C ══════════════ -->
-    <section class="bloc" id="bloc-c">
-      <h2>C · Fabrication</h2>
-      <p class="sous-titre">Utilisable seul, indépendamment des blocs A et B : combinaisons exactes, paramètres compatibles, meilleures alternatives et provenance de la règle.</p>
+      <button type="button" class="action" id="b-calculer">Calculer la surréfraction</button>
+    </section>
+
+    <!-- ══════════════ MODULE 3 ══════════════ -->
+    <section class="bloc" id="bloc-c" role="tabpanel" aria-labelledby="ong-c" tabindex="0" hidden>
+      <h2>Recherche catalogue</h2>
+      <p class="sous-titre">Correction cible par oeil ; combinaisons exactes, paramètres compatibles, meilleures alternatives et provenance de la règle.</p>
 
       <p class="bandeau-demo">
         Catalogue de démonstration : fabricants, produits et règles fictifs. À ne jamais
@@ -497,6 +514,7 @@
 
       <div class="catalogue-erreurs" id="c-catalogue-erreurs" role="status" aria-live="polite" hidden></div>
 
+      <div class="oeils">
       <div class="oeil-groupe">
         <h3>OD, oeil droit</h3>
         <div class="grille-champs">
@@ -510,7 +528,7 @@
           </div>
           <div class="champ">
             <label for="c-od-axe">Axe cible (°)</label>
-            <input type="text" inputmode="numeric" id="c-od-axe" placeholder="si cylindre non nul" aria-label="OD axe cible fabrication">
+            <input type="text" inputmode="numeric" id="c-od-axe" placeholder="si cyl ≠ 0" aria-label="OD axe cible fabrication">
           </div>
         </div>
         <div class="sortie" id="c-od-out" role="status" aria-live="polite"></div>
@@ -529,10 +547,11 @@
           </div>
           <div class="champ">
             <label for="c-og-axe">Axe cible (°)</label>
-            <input type="text" inputmode="numeric" id="c-og-axe" placeholder="si cylindre non nul" aria-label="OG axe cible fabrication">
+            <input type="text" inputmode="numeric" id="c-og-axe" placeholder="si cyl ≠ 0" aria-label="OG axe cible fabrication">
           </div>
         </div>
         <div class="sortie" id="c-og-out" role="status" aria-live="polite"></div>
+      </div>
       </div>
 
       <button type="button" class="action" id="c-chercher">Chercher les paramètres fabricant disponibles</button>
@@ -707,15 +726,18 @@
 
   /* Un "problème" affiché ici est toujours l'un des dix cas du contrat :
      axe absent avec cylindre non nul, cylindre nul avec axe incompatible,
-     valeur non numérique, vertex négatif, vertex aberrant, axe hors plage,
+     valeur non numérique, DVO négative, DVO aberrante, axe hors plage,
      catalogue invalide, produit sans règle, rotation torique instable,
      calcul non interprétable. Chaque code affiché ici est un code réel,
      produit par le noyau ou par la vérification d'entrée qui le précède
      immédiatement (jamais une valeur devinée à sa place). */
 
   var LIBELLES_DISTANCE = {
-    vertex: 'la distance vertex',
-    distanceSurrefraction: 'la distance du verre de surréfraction',
+    /* Clé = identifiant interne du noyau ; valeur = le mot employé au comptoir.
+       Les opticiens disent DVO, pour distance verre-oeil ; « vertex » ne sort
+       jamais à l'écran. */
+    vertex: 'la DVO',
+    distanceSurrefraction: 'la DVO de surréfraction',
   };
 
   /* Le noyau (moteurs.js) est écrit sans accent et nomme ses paramètres par
@@ -885,7 +907,7 @@
     var out = document.getElementById('a-' + oeil + '-out');
     vider(out);
 
-    out.appendChild(ligneTier('val-tier-1', 'Saisie ', formatRx(entree) + ', vertex ' + formatMm(entree.vertexMm)));
+    out.appendChild(ligneTier('val-tier-1', 'Saisie ', formatRx(entree) + ', DVO ' + formatMm(entree.vertexMm)));
 
     if (resultat.problemes && resultat.problemes.length) {
       out.appendChild(renderProblemes(resultat.problemes));
@@ -1013,7 +1035,7 @@
 
       var saisieTexte = 'lentille portée ' + formatRx({ sph: parseNombre(lSphRaw), cyl: parseNombre(lCylRaw), axe: parseNombre(lAxeRaw) }) +
         ' ; surréfraction ' + formatRx({ sph: parseNombre(sSphRaw), cyl: parseNombre(sCylRaw), axe: parseNombre(sAxeRaw) }) +
-        ', distance ' + formatMm(dist) +
+        ', DVO ' + formatMm(dist) +
         ' ; rotation ' + (Number.isFinite(rotValeur) ? rotValeur : '?') + '° vers la ' + rotSens +
         (rotStable ? '' : ', déclarée instable');
 
@@ -1159,6 +1181,41 @@
   renderErreursCatalogue(window.LentillesCatalogue.validerCatalogue(window.LentillesCatalogueDemo.catalogueDemo));
 
   document.getElementById('hdr-sub').textContent = storeName() + ', aide au calcul et à la sélection de paramètres';
+
+  /* ── Onglets ─────────────────────────────────────────────────────────────
+     Les trois modules sont independants : aucun n'attend la sortie d'un autre,
+     et chacun se suffit a lui-meme. Les empiler faisait deux ecrans et demi de
+     defilement pour trois calculs qu'on ne fait jamais en meme temps. On n'en
+     montre donc qu'un.
+
+     Ce n'est volontairement pas une couche Couches : une couche se referme au
+     geste retour d'Android, et refermer un onglet ne veut rien dire. Le geste
+     retour doit quitter la page, comme pour n'importe quel outil du hub. Rien
+     n'est ecrit dans l'historique pour la meme raison : sinon il faudrait trois
+     gestes retour pour sortir de l'outil. */
+  (function () {
+    var onglets = [].slice.call(document.querySelectorAll('.onglets [role="tab"]'));
+
+    function activer(onglet, donnerLeFocus) {
+      onglets.forEach(function (autre) {
+        var actif = autre === onglet;
+        autre.setAttribute('aria-selected', actif ? 'true' : 'false');
+        autre.tabIndex = actif ? 0 : -1;
+        document.getElementById(autre.getAttribute('aria-controls')).hidden = !actif;
+      });
+      if (donnerLeFocus) { onglet.focus(); }
+    }
+
+    onglets.forEach(function (onglet, i) {
+      onglet.addEventListener('click', function () { activer(onglet, false); });
+      onglet.addEventListener('keydown', function (evenement) {
+        var pas = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: onglets.length - 1 - i }[evenement.key];
+        if (pas === undefined) { return; }
+        evenement.preventDefault();
+        activer(onglets[(i + pas + onglets.length) % onglets.length], true);
+      });
+    });
+  }());
 }());
 </script>
 

@@ -457,7 +457,32 @@ refusé en français, code juste accepté à la touche Entrée, outil fonctionne
 persistant après rechargement, et poste neuf verrouillé. Aucune erreur JavaScript. Pas de
 débordement horizontal à 360 px ni à 1280 px, sur la page comme sur le hub.
 
-**Ce changement n'est pas couvert par la revue SECURIX**, dont le verdict reste attaché au commit
+Le mainteneur, qui exerce le métier, a ensuite corrigé trois choses (`DEC-0009`) :
+
+- **La surréfraction n'est pas une option.** Elle était repliée dans un `<details>` marqué
+  « facultatif », ce qui la donnait pour un supplément au module A. C'est un calcul à part
+  entière, employé seul. Le repli est supprimé.
+- **L'interface était lourde.** Les trois modules empilés faisaient 2241 px, soit deux écrans et
+  demi de défilement et 35 champs à l'écran pour trois calculs qu'on ne fait jamais en même
+  temps. Ils passent en onglets, un seul module visible, les deux yeux côte à côte dès qu'il y a
+  la place : **845 px** pour le premier module au lieu de 2241 pour l'ensemble. Les préfixes
+  « A · », « B · », « C · » disparaissent, c'était du vocabulaire interne.
+- **On dit DVO, pas vertex.** Distance verre-oeil. Tout le texte lu par l'opticien emploie DVO, y
+  compris les dix messages d'erreur et les lignes de résultat. L'identifiant interne du noyau
+  reste `vertexMm` : c'est un nom de code, jamais montré, et le renommer casserait l'API que les
+  tests éprouvent sans rien apporter à l'opticien.
+
+Les onglets ne sont pas des couches `Couches`, pour la même raison que l'écran de code : une
+couche se referme au geste retour d'Android, et refermer un onglet ne veut rien dire. Rien n'est
+écrit dans l'historique, sinon il faudrait trois gestes retour pour sortir de l'outil.
+
+Vérifié : navigation souris et clavier (flèches, Origine, Fin, bouclage), les trois modules
+calculent, les dix cas d'erreur rejoués disent tous « la DVO », aucun débordement à 360 px ni à
+1100 px, aucune erreur JavaScript. Le test adverse de XSS et la mesure au canari ont été rejoués
+sur la page modifiée : 0 exécution, 18 requêtes dont 5 vers le compteur et **0 portant le
+marqueur**.
+
+**Ces deux changements ne sont pas couverts par la revue SECURIX**, dont le verdict reste attaché au commit
 `f1367935f09f4edf893a83395d03b56aa5780e60`. La revue précède ce changement ; elle ne le valide
 pas et ne le contredit pas.
 
