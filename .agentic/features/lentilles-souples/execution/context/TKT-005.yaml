@@ -302,7 +302,7 @@ sources:
   ref: roadmap:index#TKT-005
   digest: sha256:33fb98f19155b4dfe590c479a5f6afc70043bcdbdf40992ced42904715700e98
 source_digest: sha256:fdc9dc87671a3a59fb345fb9139d90258c94cd2936fd7d34b208fb9258c649b4
-compiled_at: '2026-09-05T12:18:30Z'
+compiled_at: '2026-09-05T12:28:28Z'
 metrics:
   bytes: 11616
   sources: 12

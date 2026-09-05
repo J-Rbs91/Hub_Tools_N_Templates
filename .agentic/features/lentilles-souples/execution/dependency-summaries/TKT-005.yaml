@@ -1,20 +1,17 @@
 schema_version: 1
 feature_id: lentilles-souples
 ticket: TKT-005
-commit: 6ab8c62
+commit: 035c21a
 behavior:
-- outils/lentilles-souples/index.html charge desormais le noyau reel par <script src>
-  (prescription.js, moteurs.js, selection.js, catalogue.js, donnees/catalogue-demo.js
-  dans cet ordre) et expose trois blocs operationnels (A id=bloc-a, B id=bloc-b en
-  <details>, C id=bloc-c) ; aucune modale/couche Couches n'est ouverte (uniquement
-  des <details> natifs), donc TKT-006 (carte hub) et TKT-007 (CI tests) n'ont rien
-  a ajuster cote navigation arriere pour ce fichier.
-- 'Les 10 cas d''erreur du contrat sont routes vers les codes reels du noyau (PRESCRIPTION_INVALIDE,
-  DISTANCE_NEGATIVE/ABERRANTE/NON_NUMERIQUE, ROTATION_INSTABLE, CALCUL_NON_INTERPRETABLE,
-  plus les codes du validateur catalogue AXE_HORS_PLAGE/PRODUIT_SANS_REGLE_EXPLOITABLE/CATALOGUE_INVALIDE)
-  sauf un cas non couvert par le noyau (cylindre nul avec axe renseigne, que normalizePrescription
-  ignore en silence) : ce cas est intercepte cote UI par un code local AXE_INCOHERENT_CYLINDRE_NUL
-  avant tout appel au noyau, a documenter si un futur ticket touche a nouveau ce fichier.'
+- 'index.html : lireRx() remplace validerEtNormaliser(). Cylindre vide vaut 0 (spherique
+  pure) au lieu de PRESCRIPTION_INVALIDE. Un oeil entierement vide (A, sous-groupe
+  lentille portee de B, ou C) renvoie etat ''vide'' : bloc silencieux, aucun appel
+  moteur ni erreur. Tout probleme affiche passe par texteAffichableProbleme(code),
+  catalogue de messages francais interne a la page (SPHERE_*, CYLINDRE_INVALIDE, AXE_*,
+  DISTANCE_*, ROTATION_*, CALCUL_NON_INTERPRETABLE, PRESCRIPTION_INVALIDE, AUCUN_RESULTAT),
+  plus jamais le p.message brut du noyau (identifiants internes sans accent). Repli
+  sur p.message reserve aux codes inconnus de cette page (erreurs catalogue.js, hors
+  scope).'
 contracts: []
 interfaces: []
 files:
@@ -22,16 +19,9 @@ files:
 migrations: []
 invariants: []
 limitations:
-- 'Les messages d''erreur affiches (issus de prescription.js/moteurs.js/catalogue.js)
-  sont restitues verbatim et ne portent pas tous les accents francais (ex. ''valeur
-  numerique invalide pour sph'') : choix assume pour ne pas reecrire une donnee produite
-  par le noyau hors scope de ce ticket (noyau/*.js n''est pas dans le perimetre assigne
-  outils/lentilles-souples/index.html).'
-- Le chemin catalogue invalide (cas 6/7/8, ecran de blocage de la recherche fabricant)
-  n'a pu etre exerce qu'en substituant temporairement un catalogue casse pendant le
-  smoke test ; avec le catalogue-demo.js reellement livre (valide), ce chemin ne s'affichera
-  jamais en usage normal.
-- 'manual-mobile reste NOT_RUN : aucune verification sur telephone reel n''a ete effectuee
-  dans cet environnement.'
+- catalogue.js (fichier TKT-003, hors scope) produit encore des messages non accentues
+  avec identifiants internes quand le catalogue est invalide ; jamais exerce en usage
+  normal (catalogue demo valide par construction), a revisiter si un futur catalogue
+  reel declenche ce chemin.
 discoveries: []
-reported_at: '2026-09-05T12:13:24Z'
+reported_at: '2026-09-05T12:26:06Z'
