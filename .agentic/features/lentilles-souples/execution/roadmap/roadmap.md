@@ -4,11 +4,16 @@ This file is generated from `index.yaml`. The index is authoritative.
 
 ## Wave 1
 
-- **TKT-001 — Noyau de prescription : conventions de cylindre et d'axe, arithmétique entière en millièmes de dioptrie, arrondi centralisé avec détection d'égalité, transposition, normalisation, vecteurs de puissance et combinaison.** — `to_execute`, actor `uxer`, depends on: none
+- **TKT-001 — Noyau de prescription : conventions de cylindre et d'axe, arithmétique entière en millièmes de dioptrie, arrondi centralisé avec détection d'égalité, transposition, normalisation, vecteurs de puissance et combinaison.** — `done`, actor `uxer`, depends on: none
+  - parallel with: TKT-008
+  - why: TKT-008: no dependency relation; explicit file scopes are disjoint
+- **TKT-008 — Page de l'outil : squelette conforme au contrat de navigation du hub** — `to_execute`, actor `implementer`, depends on: none
+  - parallel with: TKT-001
+  - why: TKT-001: no dependency relation; explicit file scopes are disjoint
 
 ## Wave 2
 
-- **TKT-002 — Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens et stabilité).** — `to_execute`, actor `securix`, depends on: TKT-001
+- **TKT-002 — Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens et stabilité).** — `to_execute`, actor `securix`, depends on: TKT-001, TKT-008
   - serial because: TKT-003: shared files: tests/lentilles-souples.test.mjs
 - **TKT-003 — Modèle de catalogue fabricant, jeu de données de démonstration explicitement fictif, et validateur déterministe couvrant les douze cas d'échec exigés.** — `to_execute`, actor `securix`, depends on: TKT-001
   - serial because: TKT-002: shared files: tests/lentilles-souples.test.mjs

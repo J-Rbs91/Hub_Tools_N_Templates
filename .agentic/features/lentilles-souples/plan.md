@@ -19,79 +19,95 @@ chose à mesurer et à exécuter.
 
 ```yaml agentic:task
 id: LS-01
-objective: >-
-  Noyau de prescription : conventions de cylindre et d'axe, arithmétique entière en millièmes de
-  dioptrie, arrondi centralisé avec détection d'égalité, transposition, normalisation, vecteurs de
-  puissance et combinaison.
-status: pending
+objective: 'Noyau de prescription : conventions de cylindre et d''axe, arithmétique
+  entière en millièmes de dioptrie, arrondi centralisé avec détection d''égalité,
+  transposition, normalisation, vecteurs de puissance et combinaison.'
+status: done
 dependencies: []
 files:
-  - outils/lentilles-souples/noyau/prescription.js
-  - tests/lentilles-souples.test.mjs
+- outils/lentilles-souples/noyau/prescription.js
+- tests/lentilles-souples.test.mjs
 acceptance_criteria:
-  - le fichier s'expose sur globalThis dans un navigateur et sur module.exports sous Node, sans build ni dépendance
-  - normalizeAxis envoie 0 et 360 sur 180, laisse 1..180 inchangé, et ramène tout entier dans ce domaine
-  - transposePrescription est involutive et laisse le vecteur de puissance inchangé
-  - normalizePrescription impose le cylindre négatif, met l'axe à null quand le cylindre est nul, et refuse un cylindre non nul sans axe
-  - prescriptionToPowerVector et powerVectorToPrescription forment un aller-retour exact sur les axes 1, 45, 90, 135, 179 et 180
-  - addPowerVectors et combinePrescriptions donnent le bon résultat pour des axes identiques, orthogonaux et obliques
-  - roundToStep arrondit à l'écart de zéro à égalité exacte, et arrondiDetaille signale l'égalité avec ses deux voisines
-  - estSurLaGrille répond juste sur des valeurs entachées d'erreur flottante, sans epsilon métier
-  - aucune constante métier n'est écrite ailleurs que dans ce fichier
+- le fichier s'expose sur globalThis dans un navigateur et sur module.exports sous
+  Node, sans build ni dépendance
+- normalizeAxis envoie 0 et 360 sur 180, laisse 1..180 inchangé, et ramène tout entier
+  dans ce domaine
+- transposePrescription est involutive et laisse le vecteur de puissance inchangé
+- normalizePrescription impose le cylindre négatif, met l'axe à null quand le cylindre
+  est nul, et refuse un cylindre non nul sans axe
+- prescriptionToPowerVector et powerVectorToPrescription forment un aller-retour exact
+  sur les axes 1, 45, 90, 135, 179 et 180
+- addPowerVectors et combinePrescriptions donnent le bon résultat pour des axes identiques,
+  orthogonaux et obliques
+- roundToStep arrondit à l'écart de zéro à égalité exacte, et arrondiDetaille signale
+  l'égalité avec ses deux voisines
+- estSurLaGrille répond juste sur des valeurs entachées d'erreur flottante, sans epsilon
+  métier
+- aucune constante métier n'est écrite ailleurs que dans ce fichier
 tests:
-  - unit
-  - round-trip
-  - negative-path
+- unit
+- round-trip
+- negative-path
 security_requirements:
   securix_rules:
-    - SEC-SEC-001
-    - SEC-SEC-004
-  notes: >-
-    Module purement calculatoire : aucun secret, aucune entrée réseau, aucune écriture de stockage.
+  - SEC-SEC-001
+  - SEC-SEC-004
+  notes: 'Module purement calculatoire : aucun secret, aucune entrée réseau, aucune
+    écriture de stockage.'
 evidence_required:
-  - exécution de node tests/lentilles-souples.test.mjs
-  - sortie exacte du compteur de contrôles
+- exécution de node tests/lentilles-souples.test.mjs
+- sortie exacte du compteur de contrôles
 risks:
-  - une convention de signe inversée produit une valeur plausible ; les tests de réciprocité sont là pour cela
+- une convention de signe inversée produit une valeur plausible ; les tests de réciprocité
+  sont là pour cela
 ```
 
 ```yaml agentic:task
 id: LS-02
-objective: >-
-  Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur B (surréfraction
-  sphérique et sphéro-cylindrique, rotation torique avec sens et stabilité).
+objective: Moteur A (conversion lunettes vers plan cornéen et cible lentille) et moteur
+  B (surréfraction sphérique et sphéro-cylindrique, rotation torique avec sens et
+  stabilité).
 status: pending
 dependencies:
-  - LS-01
+- LS-01
 files:
-  - outils/lentilles-souples/noyau/moteurs.js
-  - tests/lentilles-souples.test.mjs
+- outils/lentilles-souples/noyau/moteurs.js
+- tests/lentilles-souples.test.mjs
 acceptance_criteria:
-  - une distance vertex nulle laisse la correction inchangée
-  - une sphère négative devient moins négative au plan cornéen, une sphère positive devient plus positive
-  - la compensation aller puis retour redonne la valeur de départ à moins d'un millième de dioptrie
-  - en sphéro-cylindrique les deux méridiens principaux sont compensés séparément et l'axe est reconduit inchangé
-  - la distance de surréfraction est un paramètre distinct de la distance vertex du moteur A
-  - une surréfraction sphéro-cylindrique d'axe différent est combinée par vecteurs de puissance et jamais par addition composante à composante
-  - rotation nulle, puis rotation observée avec surréfraction nulle, redonnent la lentille portée
-  - une rotation déclarée instable est signalée dans le résultat sans supprimer la valeur calculée
-  - la valeur théorique et la valeur cible arrondie coexistent dans le résultat, la seconde ne remplace jamais la première
-  - un vertex négatif, aberrant ou non numérique produit un problème identifié et jamais une valeur
+- une distance vertex nulle laisse la correction inchangée
+- une sphère négative devient moins négative au plan cornéen, une sphère positive
+  devient plus positive
+- la compensation aller puis retour redonne la valeur de départ à moins d'un millième
+  de dioptrie
+- en sphéro-cylindrique les deux méridiens principaux sont compensés séparément et
+  l'axe est reconduit inchangé
+- la distance de surréfraction est un paramètre distinct de la distance vertex du
+  moteur A
+- une surréfraction sphéro-cylindrique d'axe différent est combinée par vecteurs de
+  puissance et jamais par addition composante à composante
+- rotation nulle, puis rotation observée avec surréfraction nulle, redonnent la lentille
+  portée
+- une rotation déclarée instable est signalée dans le résultat sans supprimer la valeur
+  calculée
+- la valeur théorique et la valeur cible arrondie coexistent dans le résultat, la
+  seconde ne remplace jamais la première
+- un vertex négatif, aberrant ou non numérique produit un problème identifié et jamais
+  une valeur
 tests:
-  - unit
-  - round-trip
-  - negative-path
+- unit
+- round-trip
+- negative-path
 security_requirements:
   securix_rules:
-    - SEC-BIZ-006
-  notes: >-
-    Le calcul est côté client par nature ; la contrepartie exigée est qu'il soit intégralement
-    restituable, ce que la structure de résultat rend possible.
+  - SEC-BIZ-006
+  notes: Le calcul est côté client par nature ; la contrepartie exigée est qu'il soit
+    intégralement restituable, ce que la structure de résultat rend possible.
 evidence_required:
-  - exécution de node tests/lentilles-souples.test.mjs
-  - sortie exacte du compteur de contrôles
+- exécution de node tests/lentilles-souples.test.mjs
+- sortie exacte du compteur de contrôles
 risks:
-  - confondre la distance vertex du moteur A et celle de la surréfraction fausserait silencieusement le moteur B
+- confondre la distance vertex du moteur A et celle de la surréfraction fausserait
+  silencieusement le moteur B
 ```
 
 ```yaml agentic:task

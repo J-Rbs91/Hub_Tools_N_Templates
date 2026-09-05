@@ -1,0 +1,22 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-001
+commit: efb47fb713f36863eefdac115cff89116a3f325f
+behavior:
+- LentillesPrescription (outils/lentilles-souples/noyau/prescription.js) expose normalizeAxis,
+  transposePrescription, normalizePrescription, prescriptionToPowerVector, powerVectorToPrescription,
+  addPowerVectors, combinePrescriptions, roundToStep, arrondiDetaille, estSurLaGrille
+  via module.exports (Node) et globalThis.LentillesPrescription (navigateur) ; cylindre
+  toujours negatif et axe null ssi cyl=0 apres normalizePrescription ; arithmetique
+  entiere en milliemes de dioptrie, aucun epsilon metier ; c'est la seule source des
+  constantes metier (echelle milliemes, domaine d'axe 1..180).
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/noyau/prescription.js
+- tests/lentilles-souples.test.mjs
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T11:00:35Z'
