@@ -1,0 +1,41 @@
+schema_version: 1
+id: DEC-0006
+mission: lentilles-souples
+phase: design
+category: implementation
+statement: Toute question d'appartenance a une grille et tout arrondi se calculent
+  en entiers de milliemes de dioptrie ; a egalite exacte l'arrondi s'ecarte de zero
+  et les deux valeurs voisines sont affichees.
+status: accepted
+authority:
+  actor: arcline
+  level: B
+  delegated: true
+  delegated_levels:
+  - A
+  - B
+  - C
+options_considered:
+- flottants avec un epsilon de comparaison unique
+- entiers en centiemes de dioptrie
+- entiers en milliemes de dioptrie
+chosen: Toute question d'appartenance a une grille et tout arrondi se calculent en
+  entiers de milliemes de dioptrie ; a egalite exacte l'arrondi s'ecarte de zero et
+  les deux valeurs voisines sont affichees.
+rationale:
+- 'Un epsilon unique est toujours trop grand quelque part et trop petit ailleurs.
+  Les centiemes ne peuvent pas representer le milieu d''un pas de 0,25 D : -7.125
+  deviendrait -7.13 et l''egalite disparaitrait au moment meme ou il faut la detecter.
+  Le millieme represente exactement 125, donc l''egalite est detectable. Sur la politique
+  d''egalite : arrondir vers le haut est asymetrique en signe et difficile a expliquer
+  ; arrondir vers la valeur la moins forte est une recommandation clinique, et l''appliquer
+  ferait decider l''outil a la place de l''opticien. L''ecart de zero est symetrique
+  et reproductible, et rendre l''egalite visible laisse la decision a l''opticien.'
+evidence:
+- 'prototype verifie : arrondi(-7.125, 0.25) detecte l''egalite et renvoie -7.25 avec
+  les voisines -7.25 et -7.00'
+- 'prototype verifie : (0.1+0.2) teste sur une grille de 0.1 renvoie vrai en entiers,
+  la ou un modulo flottant echoue'
+reversibility: easy
+requires_user_approval: false
+created_at: '2026-09-05T09:57:42Z'

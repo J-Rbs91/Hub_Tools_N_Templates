@@ -1,0 +1,46 @@
+schema_version: 1
+id: DEC-0004
+mission: lentilles-souples
+phase: design
+category: architecture_departure
+statement: 'Exception locale et bornee a la convention « un outil = un seul fichier
+  » : le noyau metier du module vit dans outils/lentilles-souples/noyau/*.js, charge
+  par <script src> de meme origine, avec un double export globalThis / module.exports.'
+status: accepted
+authority:
+  actor: arcline
+  level: C
+  delegated: true
+  delegated_levels:
+  - A
+  - B
+  - C
+options_considered:
+- tout en ligne dans index.html, tests par extraction de bloc et node:vm
+- modules ES importes par la page et par les tests
+- fichiers JSON charges par fetch
+- scripts classiques de meme origine a double export
+chosen: 'Exception locale et bornee a la convention « un outil = un seul fichier »
+  : le noyau metier du module vit dans outils/lentilles-souples/noyau/*.js, charge
+  par <script src> de meme origine, avec un double export globalThis / module.exports.'
+rationale:
+- 'CON-003 (un outil = un fichier) et CON-022 (les tests executent le meme code metier
+  que l''interface, sans dupliquer une formule) ne peuvent pas etre vraies ensemble
+  sans un mecanisme d''extraction. L''extraction par marqueurs rend le contrat de
+  test dependant d''un commentaire : deplacer un marqueur casse les tests sans changer
+  une ligne de logique. Les modules ES et fetch cassent l''ouverture directe du fichier
+  documentee dans CONTRIBUTING.md (CORS sur file://). Un script classique de meme
+  origine est deja autorise par script-src ''self'' dans la CSP en vigueur, fonctionne
+  en file://, et se charge sous Node par createRequire puisque le depot n''a pas de
+  package.json. La portee est strictement locale : quatre fichiers dans le dossier
+  de cet outil, aucun import entre outils, aucune bibliotheque tierce, aucun build,
+  aucune modification de la CSP ni de la structure du hub.'
+evidence:
+- CONTRIBUTING.md:37-50 « Outils autonomes »
+- 'outils/cloture-caisse/index.html:7 : script-src ''self'' deja present dans la CSP'
+- 'grep -rn "fetch(|XMLHttpRequest|import(" --include=*.html . : aucun resultat, le
+  hub ne charge rien dynamiquement'
+- 'absence de package.json : Node traite un .js comme CommonJS sans configuration'
+reversibility: medium
+requires_user_approval: false
+created_at: '2026-09-05T09:57:42Z'

@@ -1,0 +1,43 @@
+schema_version: 1
+ticket: TKT-008
+status: candidate_done
+actor: worker
+commit: 62bf121
+validation:
+- 'npx --yes html-validate@11.5.6 "**/*.html" : aucune erreur'
+- 'node tests/navigation-retour.test.mjs : 25 controles passes'
+- 'git grep trailing whitespace / CRLF / em-dash sur le fichier livre : aucune sortie
+  ; fin de fichier avec saut de ligne verifiee'
+discoveries: []
+recommendation: done
+reported_at: '2026-09-05T11:15:59Z'
+routing_evidence:
+  sequence: 1
+  policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+  runtime:
+    provider: claude-code
+    requested:
+      capability_tier: economy
+      effort: low
+      context_profile: standard
+    resolved:
+      capability_tier: economy
+      model: sonnet
+      effort: low
+      context_profile: null
+    support:
+      model_selection: true
+      effort_selection: true
+      context_selection: false
+    enforcement:
+      model: supported
+      effort: supported
+      context: unsupported
+    available: unverified
+    applied: false
+    argv:
+    - claude
+    - --model
+    - sonnet
+    - --effort
+    - low

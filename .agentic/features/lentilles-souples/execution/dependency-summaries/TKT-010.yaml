@@ -1,0 +1,17 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-010
+commit: 6c33ed84c351d25bd06b18b23e200dc9705e9c50
+behavior:
+- role=status aria-live=polite poses sur les six conteneurs .sortie et sur la boite
+  d'erreurs catalogue de outils/lentilles-souples/index.html; contenu du correctif
+  inchange depuis 6bc7aec, seul le prefixe du message de commit a change (HF-010 ->
+  HF-099) pour lever une collision de numero
+contracts: []
+interfaces: []
+files: []
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T12:58:21Z'

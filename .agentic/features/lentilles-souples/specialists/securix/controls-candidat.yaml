@@ -1,0 +1,159 @@
+schema_version: 1
+project: Hub_Tools_N_Templates
+ruleset_version: 0.1.0
+project_root: /home/user/Hub_Tools_N_Templates
+commit_sha: f1367935f09f4edf893a83395d03b56aa5780e60
+applicable_rules: 108
+rules_with_a_control_run: 13
+rules_covered:
+- SEC-AUTHZ-009
+- SEC-DEV-006
+- SEC-DEV-007
+- SEC-FE-015
+- SEC-FE-016
+- SEC-FE-019
+- SEC-SEC-001
+- SEC-SEC-002
+- SEC-SEC-003
+- SEC-SEC-004
+- SEC-SUPPLY-001
+- SEC-SUPPLY-006
+- SEC-SUPPLY-010
+runs:
+- control_id: CTRL-SECRET-PATTERN
+  kind: RULE_CONTROL
+  declared_confidence: LOW
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/detect_secret_patterns.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 0
+  result: NOT_DETECTED
+  confidence: LOW
+  limitations: Heuristic pattern scan; NOT_DETECTED is not proof of absence and matches
+    may be false positives.
+  findings_count: 0
+- control_id: CTRL-SECRET-HISTORY
+  kind: RULE_CONTROL
+  declared_confidence: MEDIUM
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/scan_secret_history.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 0
+  result: NOT_RUN
+  confidence: MEDIUM
+  limitations: gitleaks is not installed, so no history-aware scan ran. Install it
+    (pinned and checksum-verified, as .github/workflows/ci.yml does) or supply --gitleaks.
+    This control reports NOT_RUN rather than NOT_DETECTED because a scan that did
+    not happen must never read as a scan that found nothing.
+  findings_count: 0
+- control_id: CTRL-PY-DEP-INVENTORY
+  kind: RULE_CONTROL
+  declared_confidence: MEDIUM
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/inventory_python_dependencies.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 1
+  result: DETECTED
+  confidence: MEDIUM
+  limitations: Reads declared requirements and the metadata of the environment it
+    runs in. It queries no vulnerability database, so it establishes nothing about
+    known vulnerabilities or end-of-support status, and a dated disposition of those
+    remains separate work. Wheel provenance shows that no install-time hook executed;
+    it says nothing about what the package does once imported, and nothing about build
+    hooks run earlier by whoever produced the wheel.
+  findings_count: 20
+- control_id: CTRL-PY-VULN-ADVISORY
+  kind: RULE_CONTROL
+  declared_confidence: MEDIUM
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/scan_dependency_advisories.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 1
+  result: DETECTED
+  confidence: MEDIUM
+  limitations: 'Queries the OSV.dev aggregate advisory database for the resolved distribution
+    set. The result is dated rather than commit-bound: it is stale the moment a new
+    advisory is published against a version already installed, so it is a point-in-time
+    disposition and never a continuous signal. NOT_DETECTED reflects what OSV knew
+    when the query ran; an unreported, embargoed or misattributed vulnerability is
+    invisible to it, and it establishes nothing about exploitability in this project''s
+    context, which remains human triage. It reads only Python distributions, so any
+    dependency outside the Python ecosystem is out of scope.'
+  findings_count: 33
+- control_id: CTRL-ADVISORY-CADENCE
+  kind: RULE_CONTROL
+  declared_confidence: MEDIUM
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/verify_advisory_cadence.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 1
+  result: DETECTED
+  confidence: MEDIUM
+  limitations: 'Reads workflow definitions in the scanned tree. It establishes that
+    the advisory scan is configured to run on both the change axis and the time axis,
+    and never that a scheduled run actually fired: from inside the tree a cron that
+    fires is indistinguishable from one that does not, which is exactly how this repository''s
+    correctly configured Dependabot produced nothing for days without any file being
+    wrong. Confirming the scheduled arm really runs is human work against the repository''s
+    run history. The cadence estimate is conservative rather than exact: it reads
+    the day-of-month, day-of-week and month cron fields to bound the gap between firings,
+    and does not evaluate every field combination.'
+  findings_count: 1
+- control_id: CTRL-LOG-CANARY
+  kind: RULE_CONTROL
+  declared_confidence: MEDIUM
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/scan_output_for_secrets_v2.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 0
+  result: NOT_DETECTED
+  confidence: MEDIUM
+  limitations: Exercises the commands this repository defines, with canary values
+    in credential-named environment variables and in malformed input files, and reads
+    their standard output and standard error. It covers the logging sinks SECURIX
+    has; it establishes nothing about a consumer project's application logging, and
+    nothing about sinks that are not these two streams. Entrypoint completeness is
+    checked separately by scripts/validate_log_canary_coverage.py, so adding a Python
+    executable without either exercising it here or selecting it through run_controls.py
+    turns CI red. It still reads what a program printed on the inputs it was given,
+    not what it could print on an input nobody supplied.
+  findings_count: 0
+- control_id: CTRL-CREDENTIAL-SURFACE
+  kind: RULE_CONTROL
+  declared_confidence: MEDIUM
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/static/inventory_credential_surface.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 0
+  result: NOT_DETECTED
+  confidence: MEDIUM
+  limitations: 'Reads the audited tree only. A GitHub Actions secret, an organisation
+    secret, a deploy key and a personal access token live in platform settings and
+    leave no trace in any file here, so this control cannot see any of them: a completely
+    clean tree is consistent with an organisation secret that never expires. Answering
+    that half is human work against the repository and organisation settings, and
+    this result must not be read as covering it. Within the tree, it recognises the
+    credential-bearing shapes listed in its source; a credential stored under an unremarkable
+    name, or fetched at run time from somewhere else, is invisible to it. It reports
+    where a credential is used or could sit, never how long any of them is valid for.'
+  findings_count: 0
+- control_id: CTRL-FE-DANGEROUS-SINKS
+  kind: RULE_CONTROL
+  declared_confidence: LOW
+  source: /home/user/securix/controls/registry.yaml
+  command: /usr/local/bin/python3 /home/user/securix/controls/frontend/detect_dangerous_sinks.py
+    --root /home/user/Hub_Tools_N_Templates
+  returncode: 1
+  result: SUSPECTED
+  confidence: LOW
+  limitations: Presence is not proof of XSS; absence is not proof of safe rendering.
+    Review data flow and sanitization context.
+  findings_count: 22
+not_selected:
+- control_id: CTRL-TENANT-NEGATIVE
+  reason: covers no rule applicable to this profile
+- control_id: CTRL-DOCKER-RISKS
+  reason: covers no rule applicable to this profile
+caveat: 'A recorded run proves a control executed and what it reported. It does not
+  establish compliance: NOT_DETECTED is not proof of absence, and a LOW-confidence
+  result never supports a PASS on its own.'

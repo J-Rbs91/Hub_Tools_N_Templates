@@ -1,0 +1,1004 @@
+schema_version: 1
+project: Hub_Tools_N_Templates
+ruleset_version: 0.1.0
+review:
+  type: CHANGE_REVIEW
+  profile_path: project-security-profile.yaml
+  reviewer: agent Arcline (mission lentilles-souples)
+  commit_sha: f1367935f09f4edf893a83395d03b56aa5780e60
+  profile_digest: PD-9ccd8313ea3f
+  generated_at: null
+  notes: Skeleton only. NOT_VERIFIED is intentional until direct evidence is attached.
+    Each finding lists the evidence_required keys its evidence must cover; read them
+    with scripts/select_rules.py --detail.
+findings:
+- rule_id: SEC-SEC-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-7950b4f3
+  - EVR-55c6c863
+  rule_digest: RD-1c7660e9f455
+- rule_id: SEC-SEC-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-4bc88717
+  - EVR-41f1bb3a
+  rule_digest: RD-623ab660dc05
+- rule_id: SEC-SEC-003
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-a74ffc94
+  - EVR-d027af05
+  rule_digest: RD-428f3b6d9b8f
+- rule_id: SEC-SEC-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-70ef7d24
+  - EVR-cfc47bc6
+  rule_digest: RD-e97431b0afb6
+- rule_id: SEC-SEC-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-9a51e1e3
+  - EVR-f3ab0083
+  rule_digest: RD-33f03cc739c2
+- rule_id: SEC-SEC-008
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-4ccf8d09
+  - EVR-1ac479ae
+  rule_digest: RD-30a0da03a110
+- rule_id: SEC-AUTHZ-009
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-809e5d1b
+  - EVR-5f095d06
+  rule_digest: RD-58f093c72c72
+- rule_id: SEC-INJ-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-0c93f8ee
+  - EVR-134cb2fc
+  rule_digest: RD-a7d57b6d31b5
+- rule_id: SEC-INJ-009
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-2a9a9b04
+  - EVR-e62dba62
+  rule_digest: RD-4844d773583b
+- rule_id: SEC-INJ-010
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-621cda16
+  - EVR-d05a62f8
+  rule_digest: RD-614795f3530f
+- rule_id: SEC-INJ-013
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-5a6ee849
+  - EVR-9f363800
+  rule_digest: RD-83e97ebb8489
+- rule_id: SEC-INJ-014
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-5b1ac2cf
+  - EVR-a41e0179
+  rule_digest: RD-5f30e5695e58
+- rule_id: SEC-INJ-016
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-df82c12b
+  - EVR-5dad3de2
+  rule_digest: RD-29fe15ee2aa5
+- rule_id: SEC-INJ-020
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-25a63cb9
+  - EVR-98afab4a
+  rule_digest: RD-fe8380b7e372
+- rule_id: SEC-API-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-fc75186b
+  - EVR-84e695cd
+  rule_digest: RD-859ceb6c0340
+- rule_id: SEC-API-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-b4c5893c
+  - EVR-99da13d0
+  rule_digest: RD-d5da778750b6
+- rule_id: SEC-API-013
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-d39e89b4
+  - EVR-d51ca299
+  rule_digest: RD-d4370e9d39e6
+- rule_id: SEC-API-014
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-b2d57b2f
+  - EVR-ca0556a1
+  rule_digest: RD-e3b029ab9ae4
+- rule_id: SEC-FILE-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-63eec2ec
+  rule_digest: RD-02b979f5e48b
+- rule_id: SEC-FILE-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-a3e0663a
+  rule_digest: RD-536f09f60fa3
+- rule_id: SEC-FILE-003
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-8f91b3f7
+  rule_digest: RD-06932fa6e201
+- rule_id: SEC-FILE-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-c6c41098
+  rule_digest: RD-444b6e3a7e6b
+- rule_id: SEC-FILE-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-58a06ce1
+  rule_digest: RD-17c06f122c11
+- rule_id: SEC-FILE-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-bfbcc03a
+  rule_digest: RD-1d4b3a996bfb
+- rule_id: SEC-FILE-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-fd550ab0
+  rule_digest: RD-e02a9ed1b5ab
+- rule_id: SEC-WEB-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-6ca2fb21
+  rule_digest: RD-e31da045b059
+- rule_id: SEC-WEB-003
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-2747deec
+  rule_digest: RD-c73651e7d52d
+- rule_id: SEC-WEB-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-40b225a6
+  rule_digest: RD-0944e461ec18
+- rule_id: SEC-WEB-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-2e108717
+  rule_digest: RD-0e8e88a91d8c
+- rule_id: SEC-WEB-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-33971d73
+  rule_digest: RD-44f1a1a01467
+- rule_id: SEC-WEB-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-a48aee13
+  rule_digest: RD-1a219fb2c612
+- rule_id: SEC-WEB-008
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-8211366c
+  rule_digest: RD-302504d0043a
+- rule_id: SEC-DATA-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-ea1cc3dd
+  rule_digest: RD-e12e1825fefa
+- rule_id: SEC-DATA-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-6e18486b
+  rule_digest: RD-0b5a0e1b5433
+- rule_id: SEC-DATA-008
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-3f61280c
+  rule_digest: RD-c75d131c260e
+- rule_id: SEC-DATA-009
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-552eb34a
+  rule_digest: RD-d9bd33975b80
+- rule_id: SEC-DATA-010
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-66b85877
+  rule_digest: RD-5990d627a1bf
+- rule_id: SEC-DATA-011
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-d309ee79
+  rule_digest: RD-be95d8e378f9
+- rule_id: SEC-SUPPLY-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-daf697e8
+  rule_digest: RD-32b0fabc686d
+- rule_id: SEC-SUPPLY-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-87802dc6
+  rule_digest: RD-4971ab8827c7
+- rule_id: SEC-SUPPLY-003
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-715c20bd
+  rule_digest: RD-34869c0c4f29
+- rule_id: SEC-SUPPLY-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-c4d645cf
+  rule_digest: RD-48b7b7aed2f7
+- rule_id: SEC-SUPPLY-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-bcc90d40
+  rule_digest: RD-89c131c6934f
+- rule_id: SEC-SUPPLY-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-42a7af5c
+  rule_digest: RD-b758193d80fb
+- rule_id: SEC-SUPPLY-010
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-fa19d523
+  rule_digest: RD-121c587cdee0
+- rule_id: SEC-INFRA-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-07eb4bb4
+  rule_digest: RD-8de64524a70a
+- rule_id: SEC-OPS-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-e7db6f25
+  rule_digest: RD-021bb58fe6b8
+- rule_id: SEC-OPS-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-28bed5fd
+  rule_digest: RD-b98b6054477a
+- rule_id: SEC-OPS-010
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-bfdae04c
+  rule_digest: RD-71aa2d93bdd3
+- rule_id: SEC-OPS-011
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-adf52503
+  rule_digest: RD-8417b788798e
+- rule_id: SEC-OPS-012
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-1c40fcee
+  rule_digest: RD-38df2f69af74
+- rule_id: SEC-OPS-013
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-22deaca4
+  rule_digest: RD-a14c43ccb5d0
+- rule_id: SEC-OPS-014
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-b8f6bb71
+  rule_digest: RD-06ad9c0a57ed
+- rule_id: SEC-ERR-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-992870cf
+  rule_digest: RD-a9850b1de061
+- rule_id: SEC-ERR-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-51e41f47
+  rule_digest: RD-31dd00caab91
+- rule_id: SEC-PRIV-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-4e737a76
+  rule_digest: RD-b49ba709208e
+- rule_id: SEC-PRIV-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-d8a9611c
+  rule_digest: RD-8bbd19ea59f0
+- rule_id: SEC-PRIV-003
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-80759ff8
+  rule_digest: RD-7f2123d2bc8b
+- rule_id: SEC-PRIV-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-6f1a56ca
+  rule_digest: RD-9b286466ce3c
+- rule_id: SEC-PRIV-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-cb24ef3e
+  rule_digest: RD-d6b500e4b23e
+- rule_id: SEC-PRIV-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-4a79f099
+  rule_digest: RD-fefbc18b39b9
+- rule_id: SEC-PRIV-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-a1912d0d
+  rule_digest: RD-707e4d59050a
+- rule_id: SEC-PRIV-008
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-0e402442
+  rule_digest: RD-b9bb633fdbc7
+- rule_id: SEC-PRIV-009
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-da23fbbe
+  rule_digest: RD-1fbe8d6ca72b
+- rule_id: SEC-PRIV-010
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-89678d53
+  rule_digest: RD-3b775ea4ecc5
+- rule_id: SEC-PRIV-011
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-8f747fd8
+  rule_digest: RD-7330cdd55f73
+- rule_id: SEC-PRIV-012
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-40396d22
+  rule_digest: RD-81f0fb0a68b9
+- rule_id: SEC-PRIV-013
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-9cbbb668
+  rule_digest: RD-c6700d9c4069
+- rule_id: SEC-PRIV-014
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-d8188699
+  rule_digest: RD-6cbd83128358
+- rule_id: SEC-PRIV-015
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-94440eb0
+  rule_digest: RD-c921ae83f323
+- rule_id: SEC-PRIV-016
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-cc02185b
+  rule_digest: RD-105acf98313e
+- rule_id: SEC-PRIV-017
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-8c77eb83
+  rule_digest: RD-86ef64356335
+- rule_id: SEC-PRIV-018
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-fb18d197
+  rule_digest: RD-26abe362f74a
+- rule_id: SEC-PRIV-019
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-4afb6ebe
+  rule_digest: RD-ea4d7c40971c
+- rule_id: SEC-BIZ-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-a513da1e
+  rule_digest: RD-a214ac67f8d8
+- rule_id: SEC-DEV-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-1a864289
+  rule_digest: RD-c94b1357f2b8
+- rule_id: SEC-DEV-002
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-2a4a7156
+  rule_digest: RD-f09eab2a446f
+- rule_id: SEC-DEV-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-b28bc616
+  rule_digest: RD-34695b5e6978
+- rule_id: SEC-DEV-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-be9aa880
+  rule_digest: RD-0ad2d6a0beab
+- rule_id: SEC-DEV-007
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-f16feafb
+  rule_digest: RD-5d8620482d4d
+- rule_id: SEC-DEV-009
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-d81ffaac
+  rule_digest: RD-46b9705e2a03
+- rule_id: SEC-DEV-010
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-f07c2f7a
+  rule_digest: RD-0567508e27be
+- rule_id: SEC-FE-001
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-793ba4b2
+  rule_digest: RD-7c6f78df92d4
+- rule_id: SEC-FE-004
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-0fb9e5c8
+  rule_digest: RD-d6dea37e631f
+- rule_id: SEC-FE-005
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-e9348b0b
+  rule_digest: RD-50061a2df7e3
+- rule_id: SEC-FE-006
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-f04a1279
+  rule_digest: RD-8880997889dd
+- rule_id: SEC-FE-011
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-4910e96f
+  rule_digest: RD-3888527ef101
+- rule_id: SEC-FE-013
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-09a8dbec
+  rule_digest: RD-3a6718050444
+- rule_id: SEC-FE-014
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-5648f9e3
+  rule_digest: RD-532ece3c0a4a
+- rule_id: SEC-FE-015
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-05e32805
+  rule_digest: RD-51a274ea5b2a
+- rule_id: SEC-FE-016
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-3171cea4
+  rule_digest: RD-4274fadbe0d5
+- rule_id: SEC-FE-019
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-822151a9
+  rule_digest: RD-a018b10720b8
+- rule_id: SEC-FE-020
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-1c838c40
+  rule_digest: RD-efbc1ec6c38f
+- rule_id: SEC-FE-021
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-6588a0dd
+  rule_digest: RD-8446af2e5e26
+- rule_id: SEC-FE-022
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-68c74c89
+  rule_digest: RD-45158c46bc39
+- rule_id: SEC-FE-023
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-7b167461
+  rule_digest: RD-c3e1228a47b8
+- rule_id: SEC-FE-024
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-454cc329
+  rule_digest: RD-025183d84c38
+- rule_id: SEC-FE-037
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-0bebd050
+  rule_digest: RD-c0ee967526f8
+- rule_id: SEC-FE-038
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-b2f5f59d
+  rule_digest: RD-3070fc47ee16
+- rule_id: SEC-FE-039
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-efcdc688
+  rule_digest: RD-7979c38b6cb1
+- rule_id: SEC-FE-045
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-dc80a4d2
+  rule_digest: RD-32d73237fb82
+- rule_id: SEC-FE-046
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-e362eefa
+  rule_digest: RD-3fa29acc839d
+- rule_id: SEC-FE-047
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-b5df07ca
+  rule_digest: RD-667ce7bc3ba4
+- rule_id: SEC-FE-048
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-9d95014c
+  rule_digest: RD-0d0be15c14ce
+- rule_id: SEC-FE-049
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-2da97e33
+  rule_digest: RD-e65ec2de247b
+- rule_id: SEC-FE-051
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-731aada0
+  rule_digest: RD-7abcaf9c53db
+- rule_id: SEC-FE-056
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-dacbfa86
+  rule_digest: RD-dd8dc638b252
+- rule_id: SEC-FE-057
+  status: NOT_VERIFIED
+  reason: Applicable rule selected by SECURIX; direct verification evidence has not
+    yet been recorded.
+  evidence: []
+  exception_ref: null
+  evidence_contract:
+  - EVR-73948d18
+  rule_digest: RD-aa3a392200f5

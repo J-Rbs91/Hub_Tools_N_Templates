@@ -1,0 +1,20 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-012
+commit: 0a77a1a
+behavior:
+- val-tier-4 passe de 15px a 17px (>= val-tier-3 a 16px) et affiche desormais formatRx(parametres
+  proposes) comme valeur au lieu d'un intitule fixe ; la ligne p redondante 'Parametres
+  proposes' est supprimee.
+contracts: []
+interfaces: []
+files: []
+migrations: []
+invariants: []
+limitations:
+- Pas de navigateur/emulateur mobile disponible dans ce bac a sable pour un rendu
+  reel a 360px ; verifie par lecture du CSS (aucun white-space:nowrap ni largeur fixe
+  sur .val-tier/.resultat-c, comportement d'enveloppement identique aux niveaux 1-3
+  existants qui passent deja a cette largeur).
+discoveries: []
+reported_at: '2026-09-05T13:02:18Z'

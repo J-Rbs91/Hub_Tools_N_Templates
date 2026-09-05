@@ -1,0 +1,29 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-003
+commit: 5976d6b
+behavior:
+- 'LentillesCatalogue (outils/lentilles-souples/noyau/catalogue.js) expose validerCatalogue(catalogue)
+  via module.exports (Node) et globalThis.LentillesCatalogue (navigateur) ; ne leve
+  jamais, renvoie un tableau d''erreurs {code, message, ...contexte} (vide si valide)
+  ; depend uniquement de prescription.js pour le domaine d''axe 1..180 (normalizeAxis),
+  aucune dependance vers moteurs.js ; LentillesCatalogueDemo (outils/lentilles-souples/donnees/catalogue-demo.js)
+  expose catalogueDemo {manufacturers, products, manufacturing_rules, sources} avec
+  2 fabricants explicitement fictifs (fictional: true, nom marque ''fictif'', domaine
+  .invalid), couvrant spherique/torique regulier RANGE/torique LIST a axes irreguliers/plusieurs
+  pas de sphere/variations bc_values et dia_values ; validerCatalogue(catalogueDemo)
+  renvoie [].'
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/noyau/catalogue.js
+- outils/lentilles-souples/donnees/catalogue-demo.js
+- tests/lentilles-souples.test.mjs
+migrations: []
+invariants: []
+limitations:
+- produit exploitable au sens du validateur = active===true ET aucune erreur propre
+  a la regle ; TKT-004 (selection.js) peut reutiliser ce meme critere plutot que le
+  reimplementer.
+discoveries: []
+reported_at: '2026-09-05T11:44:57Z'

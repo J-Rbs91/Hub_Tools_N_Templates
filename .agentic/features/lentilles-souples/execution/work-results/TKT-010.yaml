@@ -1,0 +1,40 @@
+schema_version: 1
+ticket: TKT-010
+status: candidate_done
+actor: worker
+commit: 6c33ed84c351d25bd06b18b23e200dc9705e9c50
+validation:
+- 'html-validate 11.5.6 sur outils/lentilles-souples/index.html : aucune erreur'
+discoveries: []
+recommendation: done
+reported_at: '2026-09-05T12:58:21Z'
+routing_evidence:
+  sequence: 1
+  policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+  runtime:
+    provider: claude-code
+    requested:
+      capability_tier: balanced
+      effort: high
+      context_profile: extended
+    resolved:
+      capability_tier: balanced
+      model: sonnet
+      effort: high
+      context_profile: null
+    support:
+      model_selection: true
+      effort_selection: true
+      context_selection: false
+    enforcement:
+      model: supported
+      effort: supported
+      context: unsupported
+    available: unverified
+    applied: false
+    argv:
+    - claude
+    - --model
+    - sonnet
+    - --effort
+    - high

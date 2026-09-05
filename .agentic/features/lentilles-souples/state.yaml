@@ -1,0 +1,492 @@
+schema_version: 1
+feature:
+  id: lentilles-souples
+  title: 'Module Lentilles souples : moteurs optiques, catalogue fabricant local et
+    interface Hub'
+  request: 'MISSION ARCLINE - CONSTRUIRE LE MODULE « LENTILLES SOUPLES » DANS HUB_TOOLS_N_TEMPLATES
+
+
+    0. REPOSITORIES D''AUTORITÉ
+
+
+    Repository produit : "J-Rbs91/Hub_Tools_N_Templates"
+
+    Repository d''orchestration : "J-Rbs91/Arcline"
+
+    Spécialistes externes à utiliser lorsqu''ARCLINE les juge applicables :
+
+    - "UXER" pour l''UX/UI ;
+
+    - "SECURIX" pour les exigences et preuves de sécurité.
+
+
+    La mission doit être exécutée selon le workflow ARCLINE réel présent dans le repository
+    "Arcline". Ne reproduis pas ARCLINE manuellement dans la conversation. Utilise
+    ses commandes, ses artefacts ".agentic/", ses gates, son mécanisme de décision,
+    son complexity routing et, si sélectionné, son moteur de tickets.
+
+
+    1. OBJECTIF
+
+
+    Construire dans "Hub_Tools_N_Templates" une V1 professionnelle d''un nouvel outil
+    destiné aux opticiens : Calculateur et moteur d''aide à la sélection de lentilles
+    souples sphériques et toriques. Le résultat doit être réellement intégré au Hub
+    existant et non développé comme une application parallèle.
+
+
+    Le module doit être : mathématiquement testable ; compréhensible ; maintenable
+    ; cohérent avec le Hub ; utilisable desktop et mobile ; respectueux des contraintes
+    de confidentialité du Hub ; suffisamment traçable pour qu''un opticien puisse
+    comprendre les calculs réalisés.
+
+
+    2. RÈGLE DE REPRISE ABSOLUE
+
+
+    Ne fais confiance à aucun état fourni dans ce prompt sans le revalider. Vérifier
+    le HEAD réel, les branches et PR actives, CLAUDE.md, README.md, CONTRIBUTING.md,
+    SECURITY.md, index.html, assets/css/hub.css, plusieurs outils existants, tests/,
+    les workflows CI, les règles de navigation mobile, et l''existence d''un état
+    .agentic/. État observé à considérer uniquement comme indice : Hub_Tools_N_Templates/main
+    sur 66753b46103dcd427b88056c6410630bc9b5bb96.
+
+
+    3. UTILISER ARCLINE RÉELLEMENT
+
+
+    Pour une mission fraîche, commencer par INTAKE. Ne saute pas directement à PLAN
+    ou EXECUTE. Si le repository produit n''a pas encore été initialisé pour ARCLINE,
+    utiliser la commande canonique d''initialisation supportée par la version réellement
+    installée. Ne crée pas manuellement de faux fichiers ".agentic/". INTAKE : Discover,
+    Clarify, Decide, Record, Gate, Promote. Classifier explicitement en INTENT, OUTCOME,
+    CONSTRAINT, PROHIBITION, PREFERENCE, HYPOTHESIS, IMPLEMENTATION_HINT, ACCEPTANCE_CRITERION,
+    UNKNOWN. Ne pas transformer mes suggestions de chemins ou d''architecture en contraintes
+    tant que le repository ne les justifie pas.
+
+
+    4. AUTONOMIE ET DÉCISIONS
+
+
+    Je délègue à ARCLINE les niveaux A et B. Je délègue également les décisions de
+    niveau C strictement nécessaires à la réalisation de ce module lorsqu''elles concernent
+    : l''organisation interne du code du module ; la manière de rendre les moteurs
+    optiques unit-testables ; l''organisation du catalogue statique ; une exception
+    locale et strictement limitée au principe « un outil = un seul fichier » si cette
+    exception est démontrée nécessaire pour obtenir à la fois maintenabilité, traçabilité
+    des données et tests sérieux. Toute décision C doit être explicitement identifiée,
+    justifiée par les contraintes réelles du repository, consignée dans un "DEC-*".
+
+
+    Restent humains obligatoires : modification du sens métier de l''outil ; extension
+    aux multifocales ; choix transformant l''outil d''aide en outil de prescription
+    automatique ; stockage de données patient ; affaiblissement d''une gate ; exception
+    de sécurité ; toute décision ARCLINE classée D. Ne m''interromps pas pour une
+    information découvrable dans les repositories.
+
+
+    5. CONTRAINTE D''INTÉGRATION FONDAMENTALE
+
+
+    Le repository existant est l''autorité concernant son architecture : Hub GitHub
+    Pages en HTML, CSS, JavaScript natif, sans framework frontend, sans package manager
+    applicatif, sans backend, sans base distante, sans build applicatif. N''introduis
+    PAS React, Vue, Svelte, Vite, Webpack, TypeScript, npm runtime, Zod ou une nouvelle
+    architecture applicative uniquement parce que le cahier des charges initial les
+    suggérait. Une dépendance ou une nouvelle infrastructure n''est acceptable que
+    si RESEARCH + DESIGN démontrent qu''elle est réellement nécessaire. Le défaut
+    doit être : architecture du Hub, puis adaptation du module.
+
+
+    6. CONVENTIONS DU HUB À PRÉSERVER
+
+
+    Interface entièrement en français ; chemins relatifs compatibles GitHub Pages
+    ; intégration dans index.html comme nouvelle carte ; retour "../../" ; responsive
+    mobile ; comportement iOS du bouton Retour ; gestion du bouton/gesture Retour
+    Android pour les modales, sheets ou assistants ; gestionnaire "Couches" conforme
+    au contrat existant ; design cohérent avec les tokens ; aucune police distante
+    ; aucune bibliothèque CDN ; aucune ressource tierce sans licence vérifiée ; maintien
+    du mécanisme GoatCounter ; CSP conforme ; aucune donnée saisie envoyée sur le
+    réseau ; aucun em-dash dans les textes visibles ; conventions de commits "HF-XXX".
+
+
+    7. PÉRIMÈTRE STRICT DE LA V1
+
+
+    Uniquement : lentilles souples sphériques ; lentilles souples toriques / sphéro-cylindriques.
+    Exclus : multifocales ; toriques multifocales ; orthokératologie ; lentilles rigides
+    ; calcul kératométrique ; dossier patient ; historique patient ; historique de
+    corrections ; suivi clinique nominatif ; stockage de données personnelles ou médicales.
+    Tous les calculs sont éphémères.
+
+
+    8. PRINCIPE MÉTIER FONDAMENTAL
+
+
+    CORRECTION D''ENTRÉE → CORRECTION OPTIQUE THÉORIQUE → CORRECTION CIBLE → GRILLE
+    DE FABRICATION → PARAMÈTRES FABRICANT DISPONIBLES. Une contrainte fabricant ne
+    doit JAMAIS modifier rétrospectivement le calcul optique théorique.
+
+
+    9. MOTEUR A - Lunettes vers correction cible lentille
+
+
+    Entrées OD/OG : sphère, cylindre, axe, distance vertex en mm (modifiable, valeur
+    par défaut, indépendante de la distance de surréfraction). Sphérique : F'' = F
+    / (1 - dF), d en mètres, gestion correcte des signes, formule et convention validées
+    pendant RESEARCH. Sphéro-cylindrique : ne jamais compenser uniquement la sphère
+    ; utiliser M1 = S et M2 = S + C, compenser séparément puis reconstruire sphère/cylindre/axe
+    ; une compensation de vertex ne modifie pas l''axe. Sorties : correction théorique
+    au plan cornéen ; correction cible lentille arrondie au pas clinique 0,25 D. L''arrondi
+    ne doit jamais écraser la valeur théorique interne.
+
+
+    10. CONVENTION DE PRESCRIPTION
+
+
+    Convention interne unique, préférence cylindre négatif. Fonctions pures transposePrescription(),
+    normalizePrescription(), normalizeAxis(). Saisie en cylindre positif transposable.
+    Axe normalisé sur 1°..180°. Tester le passage 180°/0°.
+
+
+    11-14. MOTEUR B - SURRÉFRACTION ET ROTATION
+
+
+    Saisie de la lentille actuellement portée par œil : SPH, CYL, AXE, surréfraction
+    sphérique ou sphéro-cylindrique, distance verre de surréfraction/œil (distincte
+    du vertex du moteur A), rotation torique, sens, stabilité. Surréfraction sphérique
+    : compenser au plan cornéen si nécessaire, combiner, conserver la valeur théorique,
+    produire une nouvelle correction cible au pas de 0,25 D. Ne jamais afficher «
+    lentille à commander » ni « puissance à commander » ; employer « Nouvelle correction
+    cible ». Surréfraction sphéro-cylindrique : interdiction d''additionner naïvement
+    SPH+SPH et CYL+CYL quand les axes diffèrent ; utiliser une représentation vectorielle
+    M/J0/J45 avec prescriptionToPowerVector(), powerVectorToPrescription(), addPowerVectors(),
+    combinePrescriptions(), convention documentée et tests exhaustifs. Rotation torique
+    : rotation observée, sens, stabilité ; compensation isolée dans une fonction testable,
+    jamais dans le code UI ; convention de signe documentée ; si rotation instable,
+    information claire, pas de présentation automatique de l''axe compensé comme fiable,
+    formulation professionnelle et non alarmiste.
+
+
+    15. ARRONDIS ET CALCUL NUMÉRIQUE
+
+
+    Centraliser tous les arrondis, helper roundToStep(value, step). Éviter les comparaisons
+    flottantes naïves ; ne pas utiliser value % 0.25 === 0 comme preuve d''appartenance
+    à une grille. DESIGN doit choisir une stratégie numérique déterministe. Aucune
+    constante numérique métier cachée dans l''UI.
+
+
+    16-17. MOTEUR C - CATALOGUE ET DISPONIBILITÉ FABRICANT
+
+
+    Catalogue local au repository, versionné Git, exploitable sans backend, indépendant
+    de Google Drive/Sheets/Apps Script et de Contaguide. Interdictions absolues :
+    Google Sheet, Google Drive, Apps Script, base distante, scraping Contaguide, requête
+    Contaguide, donnée provenant de Contaguide. Données réelles uniquement de sources
+    officielles fabricants ou saisie manuelle rattachée à ces sources. RESEARCH puis
+    DESIGN doivent trancher entre catalogue intégré au fichier de l''outil et fichiers
+    de données statiques locaux, en évaluant cohérence avec le Hub, GitHub Pages,
+    hors connexion, testabilité, taille future, lisibilité des diffs, validation,
+    CSP, absence de fuite réseau. Si une exception locale à la convention « fichier
+    unique » est nécessaire, la consigner en DEC. Ne pas transformer cette exception
+    en refonte générale du Hub.
+
+
+    18-22. MODÈLE DE DONNÉES
+
+
+    Manufacturer : manufacturer_id, name, official_website, active. IDs stables, indépendants
+    du libellé, utilisables comme clés. Product : product_id, manufacturer_id, name,
+    lens_type (SPHERICAL, TORIC), active ; champs complémentaires possibles sans polluer
+    le moteur optique. Règles de fabrication compactes : rule_id, product_id, sph_min,
+    sph_max, sph_step, cyl_values, axis_mode, axis_min, axis_max, axis_step, axis_values,
+    bc_values, dia_values, source_id, verified_at, active. Une gamme peut avoir plusieurs
+    règles. SPH : plage et appartenance réelle au pas. CYL : valeurs autorisées explicites,
+    pas de pas régulier supposé. AXE : RANGE ou LIST. BC/DIA dépendants de la règle.
+    Lentille sphérique : même moteur de disponibilité, CYL = 0 et AXIS = null. Sources
+    : source_id, manufacturer_id, source_type, url, document_name, document_date,
+    last_checked, content_hash ; types OFFICIAL_PRODUCT_PAGE, OFFICIAL_PDF, FITTING_GUIDE,
+    CATALOG, MANUAL_ENTRY ; provenance attachée au niveau le plus précis possible.
+
+
+    23-27. VALIDATEUR, DISPONIBILITÉ, ALTERNATIVES, SCORE, PERFORMANCE
+
+
+    Validateur déterministe sans framework lourd, compatible avec la stack réelle,
+    réellement exécuté en CI ou dans une gate locale équivalente. Doit échouer notamment
+    pour manufacturer_id inexistant, product_id inexistant, doublon d''identifiant,
+    source_id inexistant, sph_min > sph_max, sph_step <= 0, cylindre non numérique,
+    axe hors plage, RANGE sans step, LIST sans values, produit actif sans règle exploitable,
+    incohérence SPHERICAL/TORIC. Disponibilité : isCombinationAvailable(product, sphere,
+    cylinder, axis) renvoyant available, matched_rule_id, source_id, de façon déterministe.
+    Alternatives : rechercher les paramètres disponibles, identifier les solutions
+    proches, retourner un Top 3 ou Top 5 ; ne pas appeler la première solution « lentille
+    à commander » mais « Paramètre fabricant disponible », « Solution disponible »,
+    « Alternative fabricant », « Paramètres proposés » ; la décision finale reste
+    celle de l''opticien. Score optique : réutiliser M/J0/J45, fonction de scoring
+    indépendante, formule documentée, déterministe, unit-testée ; une combinaison
+    exacte obtient le meilleur score ; formule non masquée dans l''affichage. Performance
+    : pas de produit cartésien naïf ; sélectionner les règles plausibles, générer
+    les valeurs pertinentes autour de la cible, scorer, conserver les meilleures ;
+    rester raisonnable avec plusieurs centaines de gammes ; benchmark déterministe
+    ou garde-fou simple.
+
+
+    28. DONNÉES DE DÉMONSTRATION V1
+
+
+    Ne pas remplir le catalogue réel complet. Créer quelques fabricants/produits explicitement
+    fictifs couvrant sphérique, torique régulier, torique à axes irréguliers, plusieurs
+    pas de sphère, RANGE, LIST, variations BC/DIA. Données clairement marquées DÉMONSTRATION
+    / FICTIVES. Ne jamais inventer une caractéristique réelle d''un fabricant existant.
+
+
+    29-31. INTERFACE UTILISATEUR
+
+
+    UXER doit être consulté/routé par ARCLINE. Interface conçue pour un opticien,
+    éviter l''apparence d''une calculatrice scientifique brute. Trois blocs : A -
+    Conversion lunettes (SPH, CYL, AXE, distance vertex ; afficher correction théorique
+    au plan cornéen et correction cible lentille) ; B - Surréfraction (lentille portée,
+    surréfraction, distance, rotation, sens, stabilité ; afficher nouvelle correction
+    cible) ; C - Fabrication (combinaisons exactes, paramètres compatibles, meilleures
+    alternatives, provenance de la règle). Hiérarchie visuelle : Valeur saisie → Valeur
+    théorique → Valeur cible arrondie → Valeur fabricant disponible ; aucune étape
+    ne remplace silencieusement la précédente. Zone « Détails du calcul » permettant
+    à un opticien de comprendre comment le résultat a été obtenu, pour la conversion,
+    la surréfraction et le scoring.
+
+
+    32-33. ERREURS ET RESPONSABILITÉ
+
+
+    Traiter explicitement : axe absent avec cylindre non nul ; cylindre nul avec axe
+    incompatible ; valeur non numérique ; vertex négatif ; vertex aberrant ; axe hors
+    plage ; catalogue invalide ; produit sans règle ; rotation torique instable ;
+    calcul non interprétable. Ne jamais produire silencieusement une valeur douteuse.
+    Présenter le module comme un outil d''aide au calcul et à la sélection de paramètres
+    disponibles, et non comme un système de prescription autonome, un moteur décidant
+    d''une lentille à commander, ou un substitut au jugement de l''opticien.
+
+
+    34-36. TESTABILITÉ ET TESTS
+
+
+    Le Hub n''a pas de framework de tests applicatif. Ne pas ajouter automatiquement
+    npm/Vitest/Jest. Trouver la solution la plus légère permettant de tester réellement
+    les fonctions pures. Piste acceptable non imposée : isoler le noyau métier, permettre
+    à un test Node ".mjs" de le charger de manière déterministe, séparer strictement
+    noyau métier et DOM. Point non négociable : les tests doivent exécuter le même
+    code métier que l''interface ; ne pas dupliquer les formules dans les tests. Tests
+    unitaires obligatoires : vertex sphérique (vertex 0, faible puissance, forte puissance
+    positive, forte puissance négative, vertex standard) ; vertex sphéro-cylindrique
+    (cylindre nul, deux méridiens élevés, correction mixte) ; transposition (positif→négatif,
+    négatif→positif, round-trip) ; power vectors (prescription→M/J0/J45, vecteur→prescription,
+    round-trip) ; addition (axes identiques, orthogonaux, obliques, proche de 0/180)
+    ; rotation torique (0°, positive, négative, wrap 180°) ; arrondi (positif, négatif,
+    exactement entre deux pas, problèmes flottants connus, politique d''égalité documentée)
+    ; fabrication (combinaison exacte, sphère hors plage, mauvais pas, cylindre absent,
+    RANGE, LIST, sphérique, torique, source/règle retournée) ; alternatives (exacte
+    = meilleur score, classement cohérent, axe proche de 180°). Tests d''intégration/UI
+    : carte présente sur le Hub, lien relatif correct, outil utilisable depuis GitHub
+    Pages, retour vers Hub, responsive, iOS back, Android back par couche, aucune
+    erreur console, saisie OD/OG, moteur A → cible, surréfraction → nouvelle cible,
+    cible → disponibilité fabricant, détails de calcul, catalogue invalide, comportement
+    sans données patient. Si une automatisation navigateur exige une infrastructure
+    disproportionnée, effectuer les validations manuelles prévues et enregistrer exactement
+    ce qui a été testé. "NOT_RUN" ne devient jamais "PASS".
+
+
+    37. CI
+
+
+    La CI existante est l''autorité. Revalider et exécuter localement npx --yes html-validate@11.5.6
+    "**/*.html", node tests/navigation-retour.test.mjs et les vérifications d''hygiène.
+    Ajouter les nouveaux tests métier à la CI existante de façon minimale et cohérente,
+    idéalement dans .github/workflows/ci.yml. Ne désactive aucune règle pour obtenir
+    du vert. Ne modifie pas les assertions existantes.
+
+
+    38. SÉCURITÉ / CONFIDENTIALITÉ
+
+
+    Laisser ARCLINE sélectionner les obligations SECURIX applicables. Invariants :
+    aucune donnée utilisateur envoyée à un fabricant ou à une API distante ; aucun
+    patient enregistré ; aucun historique patient ; aucune télémétrie contenant les
+    corrections saisies ; catalogue statique uniquement ; CSP cohérente ; aucune nouvelle
+    dépendance tierce injustifiée ; aucune donnée catalogue récupérée dynamiquement.
+    Le compteur de visites existant reste limité au mécanisme déjà autorisé et ne
+    doit jamais recevoir les données de calcul. Si SECURIX est requis par le profil/gate
+    ARCLINE, l''exécuter sur le SHA candidat réel.
+
+
+    39. RESEARCH OPTIQUE
+
+
+    Les formules ne doivent pas être considérées correctes parce qu''elles figurent
+    dans ce prompt. Vérifier les formules optiques critiques, documenter les conventions
+    de signe, vérifier les power vectors, la transposition, la logique de rotation
+    torique, distinguer convention mathématique et recommandation clinique. Utiliser
+    des références suffisamment autoritatives. Le catalogue fabricant reste soumis
+    à la règle : source officielle fabricant ou saisie manuelle issue de celle-ci.
+
+
+    40-42. PLAN, COMPLEXITY GATE, EXÉCUTION
+
+
+    Produire le PLAN ARCLINE, rendre chaque agentic:task exécutable (objectif, scope,
+    fichiers attendus, dépendances, acceptance criteria, tests, preuves), exécuter
+    la complexity assessment canonique. Ne pas décider manuellement que la mission
+    est trop grosse ou assez petite : la sortie de roadmap assess fait autorité. Si
+    ticketized : compile, DAG, waves. Le découpage probable (contrat métier, noyau
+    prescription, vertex, power vectors, rotation, tests optiques, modèle catalogue,
+    validateur, disponibilité, scoring, UX/UI, intégration Hub, tests/CI, review,
+    remédiations) doit émerger du PLAN, pas être forcé. Pour chaque ticket : scope
+    explicite, tests ciblés, un commit final livrable, résultat worker candidate_done/partial_execution/blocked.
+    Un worker ne déclare jamais DONE. Le Control Plane revalide et accepte. Prérequis
+    découvert : discovered ticket. Extension produit : DEC/ARB.
+
+
+    43-45. COMMITS, REVIEW, SHIP
+
+
+    Respecter la convention réelle HF-XXX, ne pas réutiliser un numéro existant, concilier
+    avec un ticket = un commit final livrable. REVIEW selon ARCLINE : exactitude mathématique,
+    séparation théorie/cible/fabrication, architecture, testabilité, UX opticien,
+    responsive, accessibilité, confidentialité, sécurité, qualité catalogue, performances,
+    conformité Hub, cohérence des textes. Tout finding bloquant devient un remediation
+    ticket ; ne pas corriger silencieusement dans REVIEW. SHIP seulement avec preuves
+    réelles (moteurs testés, catalogue validé, UI branchée, intégration Hub, responsive,
+    navigation arrière, HTML validation, tests Node, hygiène, liens, CodeQL/sécurité,
+    aucune donnée patient, aucune dépendance Contaguide, détails de calcul, responsabilités
+    formulées). Une preuve absente reste NOT_RUN, PARTIAL, BLOCKED ou UNKNOWN, jamais
+    PASS par inférence.
+
+
+    46-48. LIVRABLE ET OBJECTIF D''EXÉCUTION
+
+
+    La restitution finale doit indiquer SHA de départ, branche, feature/mission, DEC,
+    ARB, route, roadmap, tickets et états, fichiers créés/modifiés, architecture,
+    exception locale éventuelle, fonctions optiques, conventions (cylindre, axe, rotation,
+    arrondi), format catalogue, données fictives, validateur, moteur disponibilité,
+    formule de scoring, tests, commandes exécutées, résultats exacts, CI, résultats
+    UXER/SECURIX, findings et remédiations, limites de la V1, SHA candidat final,
+    URL de PR. Ne pas écrire « terminé » si une gate nécessaire n''a pas été satisfaite.
+    Poursuivre automatiquement DISCOVER → INTAKE → RESEARCH → DESIGN → PLAN → ROUTE
+    → EXECUTE → TEST → CORRIGER → RETESTER → ACCEPT → REVIEW → REMEDIATE → SHIP jusqu''au
+    maximum techniquement atteignable. Ne solliciter l''utilisateur que pour un arbitrage
+    humain obligatoire, une impossibilité externe réelle, ou une décision dépassant
+    l''autorité déléguée.
+
+
+    Le succès n''est pas « une page Lentilles existe ». Le succès est : le Hub possède
+    un nouveau module Lentilles cohérent avec son architecture, dont les moteurs optiques
+    sont séparés, testés et explicables, dont le catalogue fabricant est local, versionné
+    et validable, dont l''interface respecte les conventions du Hub et dont les preuves
+    ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
+  created_at: '2026-09-05T09:38:30Z'
+  updated_at: '2026-09-05T13:57:57Z'
+classification:
+  profile: critical
+  reasons:
+  - Aide au calcul dans un contexte de sante visuelle ; contraintes de confidentialite
+    fortes (aucune donnee patient, aucune sortie reseau) ; touche la CI et la CSP
+    du Hub ; classification Arcline suggeree = critical
+phase: review
+phases:
+  research: passed
+  design: passed
+  plan: passed
+  execute: passed
+  review: in_progress
+  ship: pending
+integrations:
+  uxer:
+    applicable: true
+    status: passed
+    evidence:
+    - 'UXER delegated job SPJ-9a10fb9a2116: .agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-9a10fb9a2116.yaml'
+    - 'UXER research result SPJ-9a10fb9a2116: .agentic/features/lentilles-souples/specialists/uxer/results/SPJ-9a10fb9a2116.yaml'
+    - 'UXER delegated job SPJ-992b682f9ef7: .agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-992b682f9ef7.yaml'
+    - 'UXER review result SPJ-992b682f9ef7: .agentic/features/lentilles-souples/specialists/uxer/results/SPJ-992b682f9ef7.yaml'
+    - 'UXER delegated job SPJ-e7c66e22cbf5: .agentic/features/lentilles-souples/specialists/uxer/jobs/SPJ-e7c66e22cbf5.yaml'
+    - 'UXER review result SPJ-e7c66e22cbf5: .agentic/features/lentilles-souples/specialists/uxer/results/SPJ-e7c66e22cbf5.yaml'
+    - outils/lentilles-souples/index.html:608 span.probleme-label avec texte 'Avertissement'/'Erreur'
+      selon p.gravite
+    - outils/lentilles-souples/index.html:230,253,329,396,413,431,450 role="status"
+      aria-live="polite" sur les 7 zones de sortie (a-od-out, a-og-out, b-od-out,
+      b-og-out, c-catalogue-erreurs, c-od-out, c-og-out)
+    - outils/lentilles-souples/index.html:261 <summary><h2>B · Surréfraction (facultatif)</h2></summary>,
+      reset CSS neutre ligne 54
+    - outils/lentilles-souples/index.html:119-120 .val-tier-4{font-size:17px} sans
+      override de font-size sur .val-tier-4 .val-tier-lab, donc heritage vers le label
+      et le noeud texte de la valeur ajoute par ligneTier() (538-544) ; usage reel
+      ligne 932
+    notes: 'Les 4 remediations bloquantes precedentes sont bien presentes dans le
+      code : libelle textuel Erreur/Avertissement, role=status+aria-live=polite sur
+      les 7 zones de resultat, h2 dans le summary du bloc B, niveau 4 a 17px (label
+      et valeur, par heritage CSS). Aucune regression relevee sur le perimetre lu.
+      | limitations: Aucun navigateur/outil Playwright disponible dans l''environnement
+      : pas de verification par execution ni de capture visuelle du rendu (message
+      d''erreur reellement affiche a l''ecran, attributs ARIA post-rendu, ouverture
+      effective du details, taille de police calculee via getComputedStyle); npx html-validate@11.5.6
+      non execute (demande d''approbation non resolue dans ce contexte) : conformite
+      HTML non revalidee par l''outil CI, seulement par lecture'
+  securix:
+    applicable: true
+    status: blocked
+    evidence:
+    - 'profil adopte : project-security-profile.yaml (108 regles applicables)'
+    - 'selection : .agentic/features/lentilles-souples/specialists/securix/applicable-rules.yaml'
+    - 'controles automatises sur 66753b46 : .agentic/features/lentilles-souples/specialists/securix/controls-66753b46.yaml'
+    - 'profil adopte : project-security-profile.yaml, 108 regles applicables sur 252
+      (144 exclues par les capacites declarees)'
+    - 'controles automatises executes sur le SHA candidat f1367935f09f4edf893a83395d03b56aa5780e60
+      : specialists/securix/controls-candidat.yaml, 7 executes, 1 non lance (CTRL-SECRET-HISTORY)'
+    - 'CTRL-FE-DANGEROUS-SINKS : 22 occurrences suspectes, identique a la mesure de
+      base sur 66753b46, donc aucune ajoutee par le module'
+    - 'squelette de revue CHANGE_REVIEW lie au SHA candidat : specialists/securix/review-skeleton.yaml'
+    - 'release_gate.py sur ce squelette : BLOCKED, 108 NOT_VERIFIED, 0 PASS'
+    - .agentic/features/lentilles-souples/specialists/securix/release-gate.txt
+    notes: 'Revue d assurance complete des 108 regles applicables, a la demande du
+      mainteneur. 90 PASS dont 34 corrobores par une preuve executee, 15 NOT_VERIFIED,
+      3 FAIL. La gate bloque sur : SEC-WEB-003 et SEC-WEB-004 (aucune ligne de base
+      d en-tetes, aucune politique d encadrement, les deux etablis par test sur la
+      reponse de production), SEC-FE-048 (nom et date de naissance du patient sans
+      attribut autocomplete), SEC-DEV-002 (l invariant aucune donnee ne quitte le
+      navigateur n a aucun test dans le depot), et sept PASS contredits par une detection
+      de controle. Aucun de ces points n est dans le perimetre du module lentilles
+      souples.'
+execution:
+  local_checks:
+  - name: ticket-control-plane
+    status: passed
+    evidence: TKT-001=efb47fb713f36863eefdac115cff89116a3f325f; TKT-002=ccee1fc; TKT-003=5976d6b;
+      TKT-004=811ff65; TKT-005=994b01e; TKT-006=8c8b5d1; TKT-007=3ad3358; TKT-008=62bf121;
+      TKT-009=e065aed9eabaf539d04e3eda327c4d81d4be29eb; TKT-010=6c33ed84c351d25bd06b18b23e200dc9705e9c50;
+      TKT-011=b70e0138054dca6eaaa1ac10a88d007145508db6; TKT-012=0a77a1a
+  unexpected_scope: []
+blocking_findings: []
+next_action:
+  phase: review
+  reason: Complete the review phase and satisfy its gate
+history:
+- from: research
+  to: design
+  at: '2026-09-05T09:51:40Z'
+  reason: advancing research -> design
+- from: design
+  to: plan
+  at: '2026-09-05T10:00:52Z'
+  reason: advancing design -> plan
+- from: plan
+  to: execute
+  at: '2026-09-05T12:40:26Z'
+  reason: advancing plan -> execute
+- from: execute
+  to: review
+  at: '2026-09-05T12:40:32Z'
+  reason: advancing execute -> review

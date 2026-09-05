@@ -1,0 +1,21 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-008
+commit: 62bf121
+behavior:
+- outils/lentilles-souples/index.html existe desormais avec CSP alignee sur les autres
+  outils, lien retour ../../, bouton flottant iOS + detection is-ios, mention .mesure-note,
+  script GoatCounter, responsive ; aucun des trois blocs de calcul (conversion/surrefraction/fabrication)
+  n'est present, ils restent a livrer par un ticket ulterieur (ex. TKT-005) et l'integration
+  carte index.html reste hors scope (ex. TKT-002).
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/index.html
+migrations: []
+invariants: []
+limitations:
+- Page volontairement vide de logique metier (squelette seul) conformement au scope
+  du ticket ; pas de carte ajoutee dans index.html (hors fichiers scopes).
+discoveries: []
+reported_at: '2026-09-05T11:15:59Z'

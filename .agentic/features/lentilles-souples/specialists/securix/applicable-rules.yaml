@@ -1,0 +1,569 @@
+project: Hub_Tools_N_Templates
+ruleset_version: 0.1.0
+features:
+- backup
+- ci-cd
+- deserialization
+- development-environment
+- environment-credentials
+- external-services
+- file-upload
+- frontend
+- outbound-http
+- persistent-state
+- personal-data
+- production-environment
+- public-internet
+- sensitive-data
+- stored-untrusted-content
+- third-party-script
+- third-party-static-resource
+- url-fetch
+- user-html
+- web
+applicable_rules_total: 108
+reading_filter_only: false
+not_reviewable: []
+applicable_rules:
+- id: SEC-SEC-001
+  title: Prevent client-side secret exposure
+  severity: critical
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SEC-002
+  title: Prevent secrets from entering version control
+  severity: critical
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SEC-003
+  title: Prevent secrets from leaking through logs
+  severity: critical
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SEC-004
+  title: Prohibit hard-coded credentials
+  severity: critical
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SEC-007
+  title: Keep development configuration out of production
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SEC-008
+  title: Do not treat public client environment variables as secrets
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-AUTHZ-009
+  title: Apply least privilege across trust domains
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-007
+  title: Prevent stored XSS
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-009
+  title: Prevent DOM XSS
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-010
+  title: Sanitize allowed user HTML
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-013
+  title: Prevent path traversal
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-014
+  title: Prevent SSRF
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-016
+  title: Avoid unsafe deserialization
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-INJ-020
+  title: Limit input size and resource amplification
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-API-005
+  title: Expose only required ports
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-API-007
+  title: Disable unnecessary HTTP methods
+  severity: medium
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-API-013
+  title: Apply timeouts to external and blocking operations
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-API-014
+  title: Bound retries with backoff and failure policy
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-001
+  title: Validate uploaded files as untrusted content
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-002
+  title: Do not trust filename extensions
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-003
+  title: Verify file content type beyond claimed MIME metadata
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-004
+  title: Bound upload size and processing cost
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-005
+  title: Replace or constrain user-controlled filenames
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-006
+  title: Keep uploads out of executable locations
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FILE-007
+  title: Apply malware scanning when the threat model requires it
+  severity: medium
+  requirement_level: SHOULD
+  verification: CONTEXTUAL
+- id: SEC-WEB-002
+  title: Define a restrictive Content Security Policy where applicable
+  severity: high
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-WEB-003
+  title: Configure security-relevant HTTP response headers
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-WEB-004
+  title: Prevent unauthorized framing and clickjacking
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-WEB-005
+  title: Enforce HTTPS for production web traffic
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-WEB-006
+  title: Prevent mixed active content
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-WEB-007
+  title: Keep sensitive data out of URLs
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-WEB-008
+  title: Prevent sensitive browser caching
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-DATA-004
+  title: Use transactions for atomic multi-step state changes
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-DATA-006
+  title: Maintain audit trails for security-relevant operations
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-DATA-008
+  title: Maintain recoverable backups where data loss is unacceptable
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-DATA-009
+  title: Test backup restoration
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-DATA-010
+  title: Protect backups with confidentiality controls
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-DATA-011
+  title: Define data retention and deletion lifecycle
+  severity: medium
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-SUPPLY-001
+  title: Maintain supported dependencies and remediate known vulnerabilities
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SUPPLY-002
+  title: Lock dependency resolution for reproducibility
+  severity: medium
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-SUPPLY-003
+  title: Remove unnecessary dependencies
+  severity: medium
+  requirement_level: SHOULD
+  verification: MANUAL
+- id: SEC-SUPPLY-004
+  title: Review provenance and maintenance of new packages
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-SUPPLY-005
+  title: Defend against dependency name confusion and typosquatting
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-SUPPLY-006
+  title: Treat install and build scripts as executable code
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-SUPPLY-010
+  title: Scan dependencies for known vulnerabilities
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-INFRA-007
+  title: Keep real personal data out of lower-trust development when avoidable
+  severity: high
+  requirement_level: SHOULD
+  verification: MANUAL
+- id: SEC-OPS-001
+  title: Monitor critical service health
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-OPS-004
+  title: Alert on critical failures
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-OPS-010
+  title: Detect anomalous HTTP error patterns
+  severity: medium
+  requirement_level: SHOULD
+  verification: CONTEXTUAL
+- id: SEC-OPS-011
+  title: Detect security-relevant anomalous activity
+  severity: high
+  requirement_level: SHOULD
+  verification: CONTEXTUAL
+- id: SEC-OPS-012
+  title: Use circuit breaking or equivalent dependency isolation when needed
+  severity: medium
+  requirement_level: SHOULD
+  verification: CONTEXTUAL
+- id: SEC-OPS-013
+  title: Maintain a tested rollback path for deployments
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-OPS-014
+  title: Define recovery objectives and recovery procedure
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-ERR-001
+  title: Do not expose internal exception detail to untrusted clients
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-ERR-002
+  title: Minimize unnecessary internal technology disclosure
+  severity: medium
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-PRIV-001
+  title: Minimize collection of personal data
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-002
+  title: Define purpose for personal-data processing
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-PRIV-003
+  title: Do not default every processing activity to consent
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-PRIV-004
+  title: Make consent evidence auditable when consent is the basis
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-005
+  title: Support withdrawal where consent is the basis
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-006
+  title: Support data access requests where applicable
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-007
+  title: Support rectification where applicable
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-008
+  title: Support erasure where applicable
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-009
+  title: Support data portability where applicable
+  severity: medium
+  requirement_level: SHOULD
+  verification: CONTEXTUAL
+- id: SEC-PRIV-010
+  title: Enforce bounded retention
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-011
+  title: Make deletion real across relevant systems
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-012
+  title: Inventory processors and external data recipients
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-013
+  title: Evaluate international personal-data transfers
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-PRIV-014
+  title: Apply enhanced safeguards to sensitive personal data
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-015
+  title: Minimize personal data in logs
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-016
+  title: Minimize personal data sent to analytics
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-PRIV-017
+  title: Maintain records of processing when required
+  severity: medium
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-PRIV-018
+  title: Apply privacy by design before implementation
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-PRIV-019
+  title: Maintain a personal-data breach response process
+  severity: critical
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-BIZ-006
+  title: Keep critical calculations out of untrusted clients
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-DEV-001
+  title: Review AI-generated code as untrusted contribution
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-DEV-002
+  title: Include security tests for security-relevant behavior
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-DEV-005
+  title: Use static analysis where it provides justified coverage
+  severity: medium
+  requirement_level: SHOULD
+  verification: MANUAL
+- id: SEC-DEV-006
+  title: Scan repositories for accidental secrets
+  severity: high
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-DEV-007
+  title: Continuously review dependency vulnerability signals
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-DEV-009
+  title: Maintain an actionable threat model
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-DEV-010
+  title: Never equate functional correctness with security
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-001
+  title: Limit production source-map exposure according to risk
+  severity: medium
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-FE-004
+  title: Do not treat CSS or hidden DOM state as protection
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-005
+  title: Avoid exposing sensitive feature flags to clients
+  severity: medium
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-006
+  title: Minimize disclosure of internal endpoint topology
+  severity: medium
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-FE-011
+  title: Protect external blank-window navigation
+  severity: medium
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-FE-013
+  title: Constrain user-controlled navigation schemes
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-014
+  title: Treat URL parameters as untrusted input
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-015
+  title: Avoid innerHTML for untrusted content
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-016
+  title: Constrain dangerouslySetInnerHTML
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-019
+  title: Treat user SVG as active content
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-020
+  title: Avoid DOM clobbering assumptions
+  severity: medium
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-021
+  title: Constrain user input used in selectors or DOM queries
+  severity: medium
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-022
+  title: Avoid sensitive data in localStorage
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-023
+  title: Minimize sensitive data in sessionStorage
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-024
+  title: Govern sensitive IndexedDB storage
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-037
+  title: Minimize third-party scripts
+  severity: high
+  requirement_level: SHOULD
+  verification: MANUAL
+- id: SEC-FE-038
+  title: Treat third-party script compromise as same-origin compromise
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-039
+  title: Use Subresource Integrity where it materially protects static third-party
+    assets
+  severity: medium
+  requirement_level: SHOULD
+  verification: SEMIAUTOMATED
+- id: SEC-FE-045
+  title: Fetch only necessary personal fields to the client
+  severity: high
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-046
+  title: Do not download unauthorized datasets and filter them client-side
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-047
+  title: Do not implement confidential search by shipping the corpus to the browser
+  severity: critical
+  requirement_level: MUST
+  verification: CONTEXTUAL
+- id: SEC-FE-048
+  title: Disable browser autocomplete for fields where retention risk justifies it
+  severity: medium
+  requirement_level: SHOULD
+  verification: MANUAL
+- id: SEC-FE-049
+  title: Minimize sensitive clipboard operations
+  severity: medium
+  requirement_level: SHOULD
+  verification: MANUAL
+- id: SEC-FE-051
+  title: Prevent hidden previews and metadata from leaking private data
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+- id: SEC-FE-056
+  title: Disable framework debug surfaces in production
+  severity: high
+  requirement_level: MUST
+  verification: SEMIAUTOMATED
+- id: SEC-FE-057
+  title: Include UI packages in supply-chain review
+  severity: high
+  requirement_level: MUST
+  verification: MANUAL
+

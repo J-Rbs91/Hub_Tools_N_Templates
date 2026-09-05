@@ -1,0 +1,15 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-009
+commit: e065aed9eabaf539d04e3eda327c4d81d4be29eb
+behavior:
+- Commit message prefix corrected from duplicate HF-009 to free HF-090 via git commit
+  --amend (message only, code diff unchanged)
+contracts: []
+interfaces: []
+files: []
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T12:55:09Z'

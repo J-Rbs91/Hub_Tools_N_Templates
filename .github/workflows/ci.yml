@@ -96,6 +96,22 @@ jobs:
       - name: Contrôles de navigation
         run: node tests/navigation-retour.test.mjs
 
+  lentilles-souples:
+    name: Noyau lentilles souples
+    runs-on: ubuntu-latest
+    container: node:22
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Garde-fous du module lentilles souples (prescription, moteurs, catalogue,
+      # selection) : chaque assertion porte sur le vrai module, deux branches du
+      # double export (Node et navigateur via node:vm), catalogue de demonstration
+      # valide par le meme validateur que la production.
+      - name: Contrôles du noyau et du catalogue
+        run: node tests/lentilles-souples.test.mjs
+
   html-validate:
     name: Validation HTML
     runs-on: ubuntu-latest

@@ -1,0 +1,41 @@
+schema_version: 1
+id: DEC-0003
+mission: lentilles-souples
+phase: research
+category: architecture
+statement: Adopter un profil de securite SECURIX cure a la racine du depot (project-security-profile.yaml)
+  afin que SECURIX puisse selectionner ses obligations.
+status: accepted
+authority:
+  actor: arcline
+  level: B
+  delegated: true
+  delegated_levels:
+  - A
+  - B
+  - C
+options_considered:
+- adopter un profil cure, chaque capacite tranchee avec motif ecrit
+- laisser la proposition derive_profile.py telle quelle
+- declarer SECURIX indisponible
+chosen: Adopter un profil de securite SECURIX cure a la racine du depot (project-security-profile.yaml)
+  afin que SECURIX puisse selectionner ses obligations.
+rationale:
+- 'config/integrations.yaml d''Arcline attend deja ce chemin exact (securix.profile_path).
+  SECURIX echoue ferme sur une proposition non adoptee : sans profil, aucune obligation
+  ne peut etre selectionnee, et ''indisponible'' serait faux puisque SECURIX_HOME
+  est charge. Chacune des 97 capacites du vocabulaire canonique a ete tranchee contre
+  le contenu reel du depot, avec le motif ecrit dans le fichier ; sur-declarer forcerait
+  a produire des preuves pour des regles inapplicables, sous-declarer retirerait des
+  regles sans finding. La revue est signee comme conduite par un agent et non par
+  un humain.'
+evidence:
+- 'derive_profile.py : 2 capacites detectees, 94 non tranchees, derived.proposal true'
+- select_rules.py refuse une proposition non adoptee (fail closed)
+- 'select_rules.py sur le profil cure : 108 regles applicables (19 critical, 69 high,
+  20 medium)'
+- 'run_controls.py sur 66753b46 : 8 controles, 13/108 regles couvertes, CTRL-FE-DANGEROUS-SINKS
+  SUSPECTED (22 occurrences preexistantes)'
+reversibility: easy
+requires_user_approval: false
+created_at: '2026-09-05T09:51:06Z'

@@ -1,0 +1,20 @@
+schema_version: 1
+id: SPJ-9a10fb9a2116
+specialist: uxer
+feature_id: lentilles-souples
+phase: research
+objective: Cadrer l'interface d'un module opticien de calcul et de selection de lentilles
+  souples spheriques et toriques, integre au hub statique existant (outils/, index.html,
+  assets/css/hub.css), en francais, utilisable sur smartphone en magasin.
+scope:
+  ticket: null
+  files: []
+requested_capabilities:
+- uxer-orchestrator
+- ux-request-clarifier
+- ux-resource-researcher
+- product-pattern-research
+- ux-navigation-audit
+profile: deep
+mode: inspect
+created_at: '2026-09-05T09:48:06Z'

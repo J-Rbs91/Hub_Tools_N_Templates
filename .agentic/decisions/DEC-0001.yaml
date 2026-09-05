@@ -1,0 +1,33 @@
+schema_version: 1
+id: DEC-0001
+mission: lentilles-souples
+phase: intake
+category: architecture
+statement: Retenir le profil de risque 'critical' pour cette mission plutot que 'feature'.
+status: accepted
+authority:
+  actor: arcline
+  level: B
+  delegated: true
+  delegated_levels:
+  - A
+  - B
+  - C
+options_considered:
+- critical
+- feature
+chosen: Retenir le profil de risque 'critical' pour cette mission plutot que 'feature'.
+rationale:
+- agentic classify suggere critical. Le module produit des valeurs utilisees dans
+  un acte de sante visuelle, touche la CSP et la CI du depot, et porte des invariants
+  de confidentialite forts. Le profil critical rend SECURIX obligatoire a la gate
+  SHIP et ajoute l'axe securite en REVIEW ; desescalader vers feature retirerait ces
+  exigences sans raison.
+evidence:
+- 'agentic classify --request ... -> suggested profile: critical (signals: infrastructure,
+  ci)'
+- 'config/risk-profiles.yaml : critical => securix.gate_required true, review_axes
+  + security, ship_checks + security_evidence'
+reversibility: medium
+requires_user_approval: false
+created_at: '2026-09-05T09:38:24Z'

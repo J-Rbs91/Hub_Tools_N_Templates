@@ -1,0 +1,9 @@
+schema_version: 1
+mission_id: lentilles-souples
+mission_ref: .agentic/missions/lentilles-souples/mission.yaml
+constraints_ref: .agentic/missions/lentilles-souples/constraints.yaml
+decision_refs:
+- .agentic/decisions/DEC-0001.yaml
+- .agentic/decisions/DEC-0002.yaml
+contract_digest: sha256:a796218e51d43b748d014f62d9cc6b73bc1134e6891250d98fd25643af2fbd83
+promoted_at: '2026-09-05T09:38:30Z'
