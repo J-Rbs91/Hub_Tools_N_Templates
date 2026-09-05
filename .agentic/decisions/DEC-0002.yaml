@@ -1,0 +1,38 @@
+schema_version: 1
+id: DEC-0002
+mission: lentilles-souples
+phase: intake
+category: implementation
+statement: Conserver tels quels les noms de fonctions cites dans la demande (transposePrescription,
+  normalizePrescription, normalizeAxis, prescriptionToPowerVector, powerVectorToPrescription,
+  addPowerVectors, combinePrescriptions, roundToStep, isCombinationAvailable) pour
+  l'API du noyau metier.
+status: accepted
+authority:
+  actor: arcline
+  level: A
+  delegated: true
+  delegated_levels:
+  - A
+  - B
+  - C
+options_considered:
+- noms anglais cites dans la demande
+- noms francais coherents avec Couches/fermerJusqua
+chosen: Conserver tels quels les noms de fonctions cites dans la demande (transposePrescription,
+  normalizePrescription, normalizeAxis, prescriptionToPowerVector, powerVectorToPrescription,
+  addPowerVectors, combinePrescriptions, roundToStep, isCombinationAvailable) pour
+  l'API du noyau metier.
+rationale:
+- Le depot melange deja identifiants francais et anglais (loadProfil, sanitizeProfil,
+  openModal, renderHeader). Reprendre les noms cites cree une tracabilite directe
+  entre le contrat admis et le code, sans cout de coherence. Les textes visibles par
+  l'utilisateur restent integralement en francais, ce qui est la contrainte reelle
+  du depot.
+evidence:
+- 'outils/cloture-caisse/index.html : loadProfil, sanitizeProfil, openModal, closeModal,
+  renderHeader'
+- 'CLAUDE.md : la regle de langue porte sur les textes utilisateur, pas sur les identifiants'
+reversibility: easy
+requires_user_approval: false
+created_at: '2026-09-05T09:38:24Z'

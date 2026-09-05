@@ -1,0 +1,251 @@
+# Profil de sécurité SECURIX du Hub d'outils internes.
+#
+# Ce fichier déclare ce que le dépôt est réellement, afin que SECURIX puisse
+# sélectionner les règles applicables. Il ne décide rien sur le produit : il
+# décrit une surface, et c'est cette description qui fixe le périmètre d'audit.
+#
+# Chemin attendu par Arcline : config/integrations.yaml -> securix.profile_path.
+#
+# Revue d'applicabilité : effectuée par l'agent Arcline à partir du contenu du
+# dépôt (voir capability_review.evidence). Chaque capacité du vocabulaire
+# canonique SECURIX a été examinée. Les capacités absentes le sont parce que le
+# dépôt ne les porte pas, jamais parce qu'elles n'ont pas été regardées. Une
+# relecture humaine reste souhaitable et invalidera cette attestation si elle
+# corrige une ligne : les deux empreintes ci-dessous la rendront périmée dès que
+# la liste change.
+schema_version: 1
+project:
+  name: Hub_Tools_N_Templates
+  ruleset_version: 0.1.0
+  ruleset_digest: 0128763d41113e0acb46d6e935d9dc95350aa8b98304b7de5051f4af861df4e8
+  owner: J-Rbs91
+  repository: https://github.com/J-Rbs91/Hub_Tools_N_Templates
+  environment: production
+
+# Capacités réellement portées par le dépôt.
+#
+#   backup                       export/import du profil magasin (docs/sauvegarde-fichier)
+#   ci-cd                        .github/workflows/{ci,security,deploy}.yml
+#   deserialization              JSON.parse du localStorage et des réponses JSONP
+#   development-environment      prévisualisation locale documentée (CONTRIBUTING.md)
+#   environment-credentials      secrets.GITHUB_TOKEN fourni aux jobs Actions
+#   external-services            Apps Script déployé par le magasin, GoatCounter
+#   file-upload                  <input type="file"> : photo de forme, liste CSV
+#   frontend                     tout le code applicatif s'exécute dans le navigateur
+#   outbound-http                count.js et JSONP vers l'endpoint Apps Script
+#   persistent-state             clés localStorage (profil-magasin-v1, cloture-caisse-v1, ...)
+#   personal-data                nom/adresse/téléphone/e-mail du magasin, contacts d'une campagne
+#   production-environment       GitHub Pages sert la version en ligne aux magasins
+#   public-internet              dépôt public, site public
+#   sensitive-data               un courrier de demande/ordonnance porte une information de santé
+#   stored-untrusted-content     contenu saisi puis relu depuis localStorage et réaffiché
+#   third-party-script           count.js de GoatCounter, réponse JSONP d'Apps Script
+#   third-party-static-resource  https://gc.zgo.at/count.js
+#   url-fetch                    l'URL de l'endpoint Apps Script est fournie par le magasin
+#   user-html                    l'export presse-papiers construit du HTML à partir des saisies
+#   web                          livré par navigateur
+features:
+  - backup
+  - ci-cd
+  - deserialization
+  - development-environment
+  - environment-credentials
+  - external-services
+  - file-upload
+  - frontend
+  - outbound-http
+  - persistent-state
+  - personal-data
+  - production-environment
+  - public-internet
+  - sensitive-data
+  - stored-untrusted-content
+  - third-party-script
+  - third-party-static-resource
+  - url-fetch
+  - user-html
+  - web
+
+# Capacités examinées et écartées, avec le motif. Cette liste existe pour que
+# l'omission soit une décision lisible et non un oubli.
+#
+#   admin-interface, authentication, authorization, cookie-session, jwt, ldap,
+#   oauth, oidc, password-auth, password-recovery, privileged-accounts,
+#   public-oauth-client, roles, session-management, token-auth, policy-engine
+#     -> aucun compte, aucune identité, aucune session : le site ne connaît
+#        personne.
+#   api, backend, graphql, hybrid-framework, server-actions, server-templates,
+#   ssr, webhook, websocket, worker, os-command-execution
+#     -> aucun code serveur : GitHub Pages sert des fichiers statiques.
+#   database, mysql, nosql, postgresql, redis, rls, service-role, sql, sqlite,
+#   object-storage, message-queue
+#     -> aucune base ni stockage distant ; la seule persistance est le
+#        localStorage du navigateur, déjà déclaré via persistent-state.
+#   docker, infrastructure, orchestration, self-hosted, ssh, distributed-system,
+#   microservices
+#     -> aucune infrastructure opérée par le projet.
+#   payments, pricing, commerce
+#     -> aucun mouvement d'argent n'est initié, enregistré ni confirmé.
+#        La clôture de caisse note un comptage d'espèces dans le navigateur ;
+#        ce n'est pas un flux de paiement.
+#   multitenant -> chaque magasin utilise son propre navigateur ; aucune
+#        infrastructure partagée ne sert les données d'un magasin à un autre.
+#   regulated-data -> le projet ne transmet, n'héberge ni ne traite de donnée de
+#        santé sur une infrastructure qu'il contrôle ; ce qu'un opticien saisit
+#        reste sur son appareil. sensitive-data est déclaré, lui, parce que la
+#        donnée transite bien par le code de la page.
+#   llm, rag, agentic-ai -> aucun modèle de langage.
+#   mobile, desktop, pwa -> aucune application distribuée, aucun service worker.
+#   browser-permissions -> aucune demande de caméra, micro, géolocalisation ni
+#        notification ; un <input type="file"> n'est pas une permission.
+#   iframe, postmessage, third-party-widget, tag-manager, external-cdn
+#     -> aucun cadre tiers, aucun échange postMessage, aucun gestionnaire de
+#        balises ; la seule ressource distante est count.js, déjà déclarée.
+#   file-access -> aucun fichier stocké n'est servi ni téléchargé : les exports
+#        sont fabriqués en mémoire à partir de ce que l'utilisateur vient de
+#        saisir.
+#   audit-log, notifications, email-identity, email-recovery, backup excepté
+#     -> aucun journal de sécurité, aucune notification envoyée, aucune identité
+#        par e-mail.
+#   long-lived-credentials -> GITHUB_TOKEN est délivré par job et expire avec lui.
+#   multiple-environments, staging-environment -> une seule cible réelle
+#        (GitHub Pages depuis main) ; la prévisualisation locale sert les mêmes
+#        fichiers sans configuration ni secret distinct.
+#   redirects -> aucune redirection pilotée par une donnée de requête.
+#   deserialization excepté, rich-text, xml, xml-query, xpath -> aucun éditeur
+#        riche, aucun document XML.
+#   retryable-writes -> sync-pending-v1 signale un envoi échoué à l'utilisateur ;
+#        aucune écriture n'est rejouée automatiquement.
+capability_review:
+  registry_digest: CF-60687d12f5ca1dffef342547a0ecb751e48358aa24d41a7678c933764501f506
+  features_digest: FS-b925cb0a50a1991fa12397a9b290a75ef2f0515195ee8230e4ffc8b47fb71585
+  reviewed_on: '2026-09-05'
+  reviewer: agent Arcline (mission lentilles-souples, DEC-0003)
+  basis: >-
+    Revue du vocabulaire canonique SECURIX complet (97 capacités) contre le
+    contenu réel du dépôt au commit 66753b46103dcd427b88056c6410630bc9b5bb96.
+    Chaque capacité écartée l'est avec un motif écrit dans le commentaire qui
+    précède ce bloc. Revue conduite par un agent, pas par un humain : elle est
+    vérifiable ligne à ligne et doit être confirmée par le mainteneur.
+  evidence:
+    - type: DOCUMENT
+      detail: >-
+        Gouvernance du dépôt : site statique, aucune donnée saisie ne quitte le
+        navigateur, aucune ressource externe hors le compteur de visites.
+      path: CLAUDE.md
+    - type: DOCUMENT
+      detail: >-
+        Modèle de sécurité et de confidentialité déclaré par le dépôt.
+      path: SECURITY.md
+    - type: DOCUMENT
+      detail: >-
+        Règles de contribution : outils autonomes, aucun package manager,
+        aucune dépendance applicative.
+      path: CONTRIBUTING.md
+    - type: CODE
+      detail: >-
+        Page d'accueil : profil magasin en localStorage, import/export de
+        sauvegarde, synchronisation Drive optionnelle en JSONP vers une URL
+        fournie par le magasin.
+      path: index.html
+    - type: CODE
+      detail: >-
+        Outil campagne e-mail : import CSV côté client, construction de HTML à
+        partir de saisies, appel JSONP vers l'endpoint du magasin.
+      path: outils/campagne-email/index.html
+    - type: CODE
+      detail: >-
+        Outil clôture de caisse : historique de comptage en localStorage,
+        aucun mouvement d'argent.
+      path: outils/cloture-caisse/index.html
+    - type: CODE
+      detail: >-
+        Outil demande/ordonnance : courrier au médecin, information de santé
+        saisie puis exportée en presse-papiers ou en PDF, jamais envoyée.
+      path: outils/demande-ordonnance/index.html
+    - type: CODE
+      detail: >-
+        Outil épaisseur de verres : lecture d'une photo choisie par
+        l'utilisateur, analyse canvas locale, photo jamais stockée.
+      path: outils/epaisseur-verres/index.html
+    - type: CI
+      detail: >-
+        Qualité et hygiène : actionlint, hygiène des fichiers, validation HTML,
+        vérification des liens. Actions tierces épinglées par SHA.
+      path: .github/workflows/ci.yml
+    - type: CI
+      detail: >-
+        Sécurité : CodeQL sur le JavaScript embarqué et gitleaks. Le seul
+        secret employé est GITHUB_TOKEN, fourni par job.
+      path: .github/workflows/security.yml
+    - type: CI
+      detail: >-
+        Déploiement GitHub Pages depuis main, sans build applicatif.
+      path: .github/workflows/deploy.yml
+    - type: DOCUMENT
+      detail: >-
+        Procédure de synchronisation Drive : script Apps Script déployé par le
+        magasin, seul le profil magasin transite.
+      path: docs/sync-drive/index.html
+    - type: COMMAND
+      detail: >-
+        Inventaire des clés localStorage et des appels réseau du dépôt.
+      command: "grep -rhoP \"(?<=')[a-z0-9-]+-v1(?=')\" --include=*.html ."
+
+facts:
+  application_runtime: client-only
+  deploys_application_runtime: true
+  handles_end_user_data: true
+  multi_tenant: false
+  processes_payments: false
+  repository_role: application
+  uses_llm: false
+
+exceptions_path: security/exceptions
+
+# Aucun fait non établi à ce jour. Une ligne ajoutée ici bloque la gate, et c'est
+# voulu : mieux vaut une release bloquée qu'une applicabilité devinée.
+unknowns: []
+
+trust_boundaries:
+  - from: navigateur du magasin
+    to: gc.zgo.at (GoatCounter)
+    trust: UNTRUSTED
+    notes: >-
+      count.js s'exécute dans le contexte de la page et transmet le chemin de
+      la page. Aucune saisie utilisateur ne doit jamais atteindre ce script.
+  - from: navigateur du magasin
+    to: endpoint Apps Script déployé par le magasin
+    trust: UNTRUSTED
+    notes: >-
+      URL fournie par le magasin, appelée en JSONP. La réponse s'exécute dans
+      la page ; seul le profil magasin transite, jamais une donnée patient.
+  - from: localStorage
+    to: code de la page
+    trust: UNTRUSTED
+    notes: >-
+      Contenu réinjecté au chargement. Il est filtré par liste blanche de
+      champs avant usage (sanitizeProfil).
+  - from: fichier choisi par l'utilisateur (photo, CSV, sauvegarde)
+    to: code de la page
+    trust: UNTRUSTED
+    notes: >-
+      Décodé et analysé côté client uniquement. Aucun envoi réseau.
+  - from: actions GitHub tierces
+    to: workflows du dépôt
+    trust: UNTRUSTED
+    notes: >-
+      Épinglées par SHA de commit, permissions déclarées par job.
+
+release_policy:
+  review_coverage: ALL_APPLICABLE
+  require_review_for: [critical, high]
+  evidence_required_for: [critical, high]
+  allow_exceptions_for: [high, medium, low, informational]
+  block_on_unknowns: true
+  block_on:
+    critical: [FAIL, NOT_VERIFIED, EXCEPTION]
+    high: [FAIL, NOT_VERIFIED]
+    medium: [FAIL]
+    low: []
+    informational: []

@@ -1,0 +1,52 @@
+# Agentic Delivery -- project configuration
+#
+# Written by `agentic init`, then edited by a human. Every `present` below
+# must point at something that actually exists: `agentic` never upgrades a
+# `missing` foundation on its own.
+schema_version: 1
+
+project:
+  name: Hub_Tools_N_Templates
+  kind: web-app
+  # Drives the design-system foundation and UXER routing.
+  has_ui: true
+  description: >-
+    Hub d'outils internes pour magasins d'optique. Site statique
+    HTML/CSS/JS servi par GitHub Pages, sans build, sans package manager,
+    sans backend. Aucune donnee utilisateur ne quitte le navigateur.
+
+foundation:
+  prd: missing
+  stories: missing
+  stories_review: missing
+  architecture: present
+  design_system: present
+  # Paths or URLs backing every `present` entry above.
+  references:
+    - CLAUDE.md
+    - README.md
+    - CONTRIBUTING.md
+    - SECURITY.md
+    - assets/css/hub.css
+    - docs/navigation-retour.md
+
+defaults:
+  profile: feature
+
+# Commands a human or an agent runs. Nothing here is ever executed
+# automatically by a hook.
+verification:
+  tests: "node tests/navigation-retour.test.mjs"
+  lint: "npx --yes html-validate@11.5.6 \"**/*.html\""
+  typecheck: ""
+  build: ""
+  smoke: ""
+
+integrations:
+  uxer:
+    enabled: auto
+    home_env: UXER_HOME
+  securix:
+    enabled: auto
+    home_env: SECURIX_HOME
+    profile_path: project-security-profile.yaml

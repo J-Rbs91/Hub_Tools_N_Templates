@@ -1,0 +1,220 @@
+schema_version: 1
+mission_id: lentilles-souples
+constraints:
+- id: CON-001
+  kind: policy
+  statement: 'Site statique pur : HTML/CSS/JS natif, aucun build, aucun package manager applicatif, aucun
+    backend, aucune base de donnees.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md « What this is » ; CONTRIBUTING.md « Prerequis »
+  impact: critical
+- id: CON-002
+  kind: policy
+  statement: 'Confidentialite absolue : aucune donnee saisie ne quitte le navigateur ; aucun cookie ;
+    aucune ressource externe hors le compteur GoatCounter deja autorise.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: SECURITY.md « Modele de securite » ; CLAUDE.md
+  impact: critical
+- id: CON-003
+  kind: policy
+  statement: Un outil vit dans outils/<nom>/index.html, en un seul fichier, CSS et JS inline, sans bibliotheque
+    tierce ni import partage.
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CONTRIBUTING.md « Outils autonomes » ; CLAUDE.md « Architecture »
+  impact: critical
+  resolution: 'Point de tension avec l''exigence « les tests executent le meme code metier que l''interface
+    » (mission §34) et avec un catalogue diffable (mission §17). Exception locale eventuelle : niveau
+    C explicitement delegue, a trancher en DESIGN et a consigner en DEC.'
+- id: CON-004
+  kind: policy
+  statement: Interface et textes utilisateur entierement en francais.
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md ; CONTRIBUTING.md
+  impact: high
+- id: CON-005
+  kind: policy
+  statement: Aucun em-dash dans un texte lisible par un employe du magasin, titres <title> et extraits
+    de code affiches inclus.
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md « No em-dash in user-visible text »
+  impact: high
+- id: CON-006
+  kind: policy
+  statement: 'Chemins et liens relatifs : le site vit sous un sous-chemin GitHub Pages. Chaque outil porte
+    un lien retour vers ../../.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md ; tests/navigation-retour.test.mjs
+  impact: high
+- id: CON-007
+  kind: policy
+  statement: 'Contrat de navigation arriere : bloc Couches recopie a l''identique, toute fermeture routee
+    par Couches.fermer(), bouton flottant .ios-back et detection body.is-ios.'
+  status: confirmed
+  source:
+    type: code
+    reference: docs/navigation-retour.md ; tests/navigation-retour.test.mjs
+  impact: critical
+- id: CON-008
+  kind: policy
+  statement: 'Chaque page d''outil porte le compteur GoatCounter : deux hotes dans la CSP, mention .mesure-note,
+    script data-goatcounter avant </body>.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md « Adding a new tool » point 9
+  impact: high
+- id: CON-009
+  kind: policy
+  statement: 'CSP par page alignee sur celle des outils existants : default-src ''none'' ; script-src
+    ''self'' ''unsafe-inline'' https://gc.zgo.at ; connect-src ''self'' https://j-rbs-hub.goatcounter.com.'
+  status: confirmed
+  source:
+    type: code
+    reference: outils/cloture-caisse/index.html ligne 7
+  impact: critical
+- id: CON-010
+  kind: policy
+  statement: 'Responsive obligatoire : meta viewport et regles @media (max-width: 640px) ; les outils
+    sont utilises sur smartphone.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md « Adding a new tool » point 6
+  impact: high
+- id: CON-011
+  kind: policy
+  statement: 'Identite magasin jamais codee en dur : lecture de la cle localStorage partagee profil-magasin-v1
+    avec repli neutre.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md « Shared store profile »
+  impact: medium
+- id: CON-012
+  kind: policy
+  statement: 'Hygiene des fichiers : aucun espace en fin de ligne hors Markdown, LF uniquement, newline
+    finale sur tout fichier non binaire, UTF-8, indentation 2 espaces.'
+  status: confirmed
+  source:
+    type: code
+    reference: .editorconfig ; .github/workflows/ci.yml job hygiene
+  impact: high
+- id: CON-013
+  kind: policy
+  statement: 'Combler le trou plutot que changer l''etiquette : une erreur html-validate se corrige dans
+    le HTML, jamais par une regle desactivee, un commentaire html-validate-disable ou une exclusion de
+    glob ; un test de tests/ qui tombe signale un defaut de l''outil.'
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md ; CONTRIBUTING.md
+  impact: critical
+- id: CON-014
+  kind: policy
+  statement: Toute ressource tierce exige la lecture de sa licence et sa declaration dans THIRD-PARTY-NOTICES.md.
+  status: confirmed
+  source:
+    type: repository_policy
+    reference: CLAUDE.md ; CONTRIBUTING.md
+  impact: high
+- id: CON-015
+  kind: policy
+  statement: Convention de commits HF-XXX suivie d'une description en francais ; HF-048 est le dernier
+    numero utilise.
+  status: confirmed
+  source:
+    type: code
+    reference: CLAUDE.md « Conventions » ; git log --all
+  impact: medium
+- id: CON-016
+  kind: policy
+  statement: Aucun workflow GitHub Actions nouveau n'est necessaire ; la CI existante (ci.yml, security.yml,
+    deploy.yml) est l'autorite et doit executer les nouveaux tests de facon minimale.
+  status: confirmed
+  source:
+    type: code
+    reference: .github/workflows/ci.yml ; mission.raw_request §37
+  impact: high
+- id: CON-017
+  kind: explicit
+  statement: Une contrainte fabricant ne doit jamais modifier retrospectivement le calcul optique theorique.
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §8
+  impact: critical
+- id: CON-018
+  kind: explicit
+  statement: 'Interdiction absolue : Google Sheets, Google Drive, Apps Script, base distante ou Contaguide
+    comme source du catalogue ; aucune requete ni scraping Contaguide.'
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §16
+  impact: critical
+- id: CON-019
+  kind: explicit
+  statement: Les donnees catalogue reelles ne peuvent venir que d'une source officielle fabricant ou d'une
+    saisie manuelle rattachee a celle-ci ; la V1 ne contient que des donnees explicitement fictives.
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §22, §28
+  impact: critical
+- id: CON-020
+  kind: explicit
+  statement: Ne jamais afficher « lentille a commander » ni « puissance a commander » ; employer « Nouvelle
+    correction cible », « Parametre fabricant disponible », « Solution disponible », « Alternative fabricant
+    », « Parametres proposes ».
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §12, §25
+  impact: critical
+- id: CON-021
+  kind: explicit
+  statement: Aucune constante numerique metier cachee dans l'UI ; tous les arrondis centralises ; aucune
+    comparaison flottante naive comme preuve d'appartenance a une grille.
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §15
+  impact: high
+- id: CON-022
+  kind: explicit
+  statement: Les tests doivent executer le meme code metier que l'interface ; aucune formule dupliquee
+    dans les tests.
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §34
+  impact: critical
+- id: CON-023
+  kind: explicit
+  statement: Une preuve absente reste NOT_RUN, PARTIAL, BLOCKED ou UNKNOWN ; jamais PASS par inference.
+  status: confirmed
+  source:
+    type: user
+    reference: mission.raw_request §36, §45
+  impact: critical
+- id: CON-024
+  kind: policy
+  statement: Aucun workflow GitHub Actions ne doit etre ajoute avant septembre 2026 dans Arcline ; cette
+    regle appartient a Arcline et non au Hub, dont la CI Actions est active et gratuite (depot public).
+  status: discovered
+  source:
+    type: code
+    reference: Arcline CLAUDE.md vs Hub .github/workflows/*.yml
+  impact: low
