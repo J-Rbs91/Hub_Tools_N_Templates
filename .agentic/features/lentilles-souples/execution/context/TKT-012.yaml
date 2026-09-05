@@ -1,0 +1,200 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-012
+mission:
+  id: lentilles-souples
+  contract_digest: sha256:a796218e51d43b748d014f62d9cc6b73bc1134e6891250d98fd25643af2fbd83
+  mission_ref: .agentic/missions/lentilles-souples/mission.yaml
+  constraints_ref: .agentic/missions/lentilles-souples/constraints.yaml
+role: isolated_ticket_worker
+assignment:
+  branch: arc/lentilles-souples/TKT-012
+  worktree: /home/user/wt/TKT-012
+  actor: WKR-TKT-012
+  scope:
+  - outils/lentilles-souples/index.html
+execution:
+  wave: 1
+  mode: serial
+contract:
+  schema_version: 1
+  id: TKT-012
+  title: Remediate FIND-04
+  origin:
+    type: remediation
+    source_review: review.md
+    finding: FIND-04
+    parent_ticket: null
+    blocking_ship: true
+  objective: 'Le niveau 4, parametre fabricant disponible, est visuellement moins
+    proeminent que le niveau 3, correction cible arrondie : 15 px contre 16 px, et
+    le niveau 4 ne sert qu a un intitule fixe. La demande fixe une progression saisie,
+    theorique, cible, parametre disponible ou aucune etape n en remplace une autre
+    ; une hierarchie qui decroit sur la derniere etape la contredit.'
+  scope:
+    include:
+    - 'Le niveau 4, parametre fabricant disponible, est visuellement moins proeminent
+      que le niveau 3, correction cible arrondie : 15 px contre 16 px, et le niveau
+      4 ne sert qu a un intitule fixe. La demande fixe une progression saisie, theorique,
+      cible, parametre disponible ou aucune etape n en remplace une autre ; une hierarchie
+      qui decroit sur la derniere etape la contredit.'
+    exclude:
+    - unapproved product-scope expansion
+  files: []
+  produces: []
+  consumes: []
+  depends_on: []
+  acceptance_criteria:
+  - the stated blocker/remediation is resolved without widening approved product scope
+  tests:
+    required:
+    - targeted regression
+  security:
+    securix:
+      applicable: false
+      requirements: []
+  authority:
+    autonomy: delegated
+    escalation:
+    - scope expansion
+    - product semantics
+    - security exception
+    - irreversible data loss
+  execution:
+    preferred_actor: implementer
+    capability_route:
+      routing_algorithm: capability-v1
+      sequence: 1
+      contract_digest: sha256:e65903c6259b44d793d063a991b00d8b25278003b4f7110856eb9f9a90333b46
+      policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+      profile:
+        planning_complexity: 2
+        execution_complexity: 2
+        verification_complexity: 0
+        context_complexity: 3
+        risk: 0
+      reasons:
+      - file scope is unknown
+      executor:
+        requested:
+          capability_tier: balanced
+          effort: high
+          context_profile: extended
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: balanced
+            effort: high
+            context_profile: extended
+          resolved:
+            capability_tier: balanced
+            model: sonnet
+            effort: high
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+      verifier:
+        requested:
+          capability_tier: economy
+          effort: low
+          context_profile: extended
+        runtime:
+          provider: claude-code
+          requested:
+            capability_tier: economy
+            effort: low
+            context_profile: extended
+          resolved:
+            capability_tier: economy
+            model: sonnet
+            effort: low
+            context_profile: null
+          support:
+            model_selection: true
+            effort_selection: true
+            context_selection: false
+          enforcement:
+            model: supported
+            effort: supported
+            context: unsupported
+          available: unverified
+          applied: false
+        independent: false
+      escalation:
+        max_steps: 2
+        steps: 0
+        triggers:
+        - CONTRACT_CONTRADICTION
+        - SCOPE_EXPANSION
+        - UNKNOWN_DEPENDENCY
+        - ARCHITECTURAL_DISCOVERY
+        - SECURITY_AMBIGUITY
+        - REPEATED_VALIDATION_FAILURE
+        - INSUFFICIENT_CONTEXT
+        - INSUFFICIENT_CAPABILITY
+        - RUNTIME_MODEL_UNAVAILABLE
+        - EFFORT_CONTROL_UNSUPPORTED
+      history:
+      - sequence: 1
+        trigger: INITIAL_CLASSIFICATION
+        reason: deterministic ticket classification
+        executor:
+          capability_tier: balanced
+          effort: high
+          context_profile: extended
+        verifier:
+          capability_tier: economy
+          effort: low
+          context_profile: extended
+    wave: 1
+    mode: serial
+  commit:
+    policy: one-ticket-one-commit
+  blocks: []
+governance:
+- ref: CLAUDE.md
+  digest: sha256:79835976319a0c3856303dd50bfd5480452c41af6870ce00e5aaa4114e23b753
+- ref: .agentic/project.yaml
+  digest: sha256:645a123600cd4e2f39e223f10d7e43d8028a8892cd98ed0e67bbd122631f8487
+decisions: []
+dependencies: []
+sources:
+- kind: assignment
+  ref: roadmap:index#TKT-012.assignment
+  digest: sha256:99d25f0f50bc48b62c7c845fc382d431f6bab6b18588bd413bd9e3744a1d0279
+- kind: constraints
+  ref: .agentic/missions/lentilles-souples/constraints.yaml
+  digest: sha256:54a39f7878f82a3f1b5972714d507f57b60ef0d1a6cbe5ae2c0402c2c46093a0
+- kind: execution-route
+  ref: execution/route.yaml
+  digest: sha256:4730bdf1698ad62b347a8f33b52bc3365a42869de4822e9a9ed477a688430050
+- kind: governance
+  ref: .agentic/project.yaml
+  digest: sha256:645a123600cd4e2f39e223f10d7e43d8028a8892cd98ed0e67bbd122631f8487
+- kind: governance
+  ref: CLAUDE.md
+  digest: sha256:79835976319a0c3856303dd50bfd5480452c41af6870ce00e5aaa4114e23b753
+- kind: intake
+  ref: .agentic/features/lentilles-souples/intake.yaml
+  digest: sha256:7ed1aa9892e50266906402f28dcac269ee6fb50024d8274772b137285a34216e
+- kind: mission
+  ref: .agentic/missions/lentilles-souples/mission.yaml
+  digest: sha256:f4fea9807fd13ac80d27fdcda5d8c651c40bc013facb06f75d448ba87d035f68
+- kind: ticket-contract
+  ref: roadmap:index#TKT-012
+  digest: sha256:200488244a5e3c488335e6f08629e9ae3f526aa68a413e82ce90bc4704d459ca
+source_digest: sha256:61ebaf50d38be7149f52a43548f264cb31d0cb8d56b03257871f9465ce66cb6c
+compiled_at: '2026-09-05T13:00:39Z'
+metrics:
+  bytes: 5860
+  sources: 8
+  dependency_summaries: 0
+  available_artifacts: 54

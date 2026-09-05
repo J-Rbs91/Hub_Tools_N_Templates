@@ -1,0 +1,17 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-011
+commit: b70e0138054dca6eaaa1ac10a88d007145508db6
+behavior:
+- Bloc B (surrefraction) summary now wraps its label in an h2 (blocs A/C already use
+  h2), giving screen-reader heading nav a level for bloc B and an enclosing h2 for
+  its h3 OD/OG; details/summary collapse behavior and visual style unchanged via a
+  font/color/margin reset rule on 'details.bloc-b > summary h2'.
+contracts: []
+interfaces: []
+files: []
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T13:00:06Z'
