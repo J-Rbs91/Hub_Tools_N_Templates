@@ -190,9 +190,9 @@ sources:
   ref: roadmap:index#TKT-010
   digest: sha256:aef70106a79892ef1b8d89e95f179aa5288a95b4ffc6f175ae81360aec8ddd37
 source_digest: sha256:47310f9d4e5bdbc92babe20ee000b1437a2f5fad48b5bc9786855660b69f03a2
-compiled_at: '2026-09-05T12:55:34Z'
+compiled_at: '2026-09-05T12:57:47Z'
 metrics:
   bytes: 5714
   sources: 8
   dependency_summaries: 0
-  available_artifacts: 50
+  available_artifacts: 52

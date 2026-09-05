@@ -1,0 +1,18 @@
+schema_version: 1
+feature_id: lentilles-souples
+ticket: TKT-010
+commit: 6bc7aec5661c399974e9cb994cf3432e5fada50a
+behavior:
+- Les 6 conteneurs .sortie (a-od-out, a-og-out, b-od-out, b-og-out, c-od-out, c-og-out)
+  et c-catalogue-erreurs portent desormais role="status" aria-live="polite"; tout
+  futur conteneur de resultat ajoute a cet outil doit suivre le meme pattern pour
+  rester coherent avec le reste du hub.
+contracts: []
+interfaces: []
+files:
+- outils/lentilles-souples/index.html
+migrations: []
+invariants: []
+limitations: []
+discoveries: []
+reported_at: '2026-09-05T12:57:09Z'
