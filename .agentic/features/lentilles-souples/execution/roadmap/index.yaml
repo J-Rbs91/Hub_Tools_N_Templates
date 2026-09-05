@@ -4,7 +4,7 @@ roadmap_version: 2
 plan_digest: sha256:c21fbedf5f538c5ae4b8df7abc7bb947e8530d2393f7a5f4a49ea19a285be389
 execution:
   strategy: dependency-aware
-  current_wave: 4
+  current_wave: 5
 tickets:
 - schema_version: 1
   id: TKT-001
@@ -874,7 +874,7 @@ tickets:
   title: 'Interface du module : page autonome branchée sur les moteurs réels, trois
     blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite
     des erreurs, conventions du hub.'
-  status: to_execute
+  status: done
   origin:
     type: planned
     parent: LS-05
@@ -1035,6 +1035,7 @@ tickets:
     mode: serial
   commit:
     policy: one-ticket-one-commit
+    sha: 994b01e
   parallel_with: []
   parallel_reason: []
   serial_reason: []
@@ -1111,6 +1112,15 @@ tickets:
       de -45,00 D est calculee sans reserve, ce cas ne figure pas dans les dix du
       contrat. Les codes internes affiches avant la phrase francaise sont voulus,
       ne pas les retirer.'
+  - from: to_execute
+    to: done
+    at: '2026-09-05T12:35:38Z'
+    reason: candidate result passed orchestrator acceptance
+  completion:
+    commit: 994b01e
+    completed_at: '2026-09-05T12:35:38Z'
+    actor: worker
+    accepted_by: orchestrator
 - schema_version: 1
   id: TKT-006
   title: Intégrer le module au hub par une carte dans index.html, cadrée comme un
@@ -1613,4 +1623,4 @@ tickets:
     to: done
     at: '2026-09-05T11:24:52Z'
     reason: candidate result passed orchestrator acceptance
-updated_at: '2026-09-05T12:30:51Z'
+updated_at: '2026-09-05T12:35:38Z'

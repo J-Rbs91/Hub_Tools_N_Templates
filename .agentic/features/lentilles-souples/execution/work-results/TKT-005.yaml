@@ -2,14 +2,18 @@ schema_version: 1
 ticket: TKT-005
 status: candidate_done
 actor: worker
-commit: 035c21acfae0c5d08ebf403697e89020c9df59a7
+commit: 994b01e
 validation:
-- 'html-validate outils/lentilles-souples/index.html: exit 0, no errors'
-- 'node tests/navigation-retour.test.mjs: 25 controle(s) passe(s)'
-- 'node tests/lentilles-souples.test.mjs: 166 controle(s) passe(s), 0 echec'
+- 'html-validate 11.5.6 sur outils/lentilles-souples/index.html : aucune erreur'
+- 'hygiene fichier (trailing whitespace, CRLF, newline final, em-dash) : conforme'
+- 'parcours reel Chromium/Playwright : axe=200, axe=270 et axe=-5 -> AXE_INVALIDE
+  affiche, aucun calcul, sur les blocs A, B et C ; axe=0 lu comme 180 et calcule normalement
+  ; axe=180 accepte ; regressions du refus precedent (correction spherique pure OD,
+  oeil OG jamais rempli reste silencieux) toujours correctes ; grille bloc B en 2
+  colonnes a 375px'
 discoveries: []
 recommendation: done
-reported_at: '2026-09-05T12:29:57Z'
+reported_at: '2026-09-05T12:34:35Z'
 routing_evidence:
   sequence: 1
   policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286

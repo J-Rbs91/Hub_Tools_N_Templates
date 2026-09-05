@@ -388,7 +388,7 @@ feature:
     et validable, dont l''interface respecte les conventions du Hub et dont les preuves
     ARCLINE permettent de démontrer que la V1 satisfait réellement le contrat admis.'
   created_at: '2026-09-05T09:38:30Z'
-  updated_at: '2026-09-05T12:30:51Z'
+  updated_at: '2026-09-05T12:35:39Z'
 classification:
   profile: critical
   reasons:

@@ -1,25 +1,18 @@
 schema_version: 1
 feature_id: lentilles-souples
 ticket: TKT-005
-commit: 035c21acfae0c5d08ebf403697e89020c9df59a7
+commit: 994b01e
 behavior:
-- 'outils/lentilles-souples/index.html charge moteurs.js/selection.js/catalogue.js/prescription.js
-  par balises script de meme origine ; lireRx(sph,cyl,axe) distingue trois etats (vide/erreur/ok)
-  partages par les blocs A, B et C : un oeil entierement vide reste silencieux, un
-  cylindre vide vaut zero (spherique pur), et toute erreur affichee passe par texteAffichableProbleme
-  (catalogue de messages francais par code) au lieu du message brut du noyau qui nomme
-  ses parametres en interne sans accent ; la surrefraction du bloc B reste facultative
-  (etat vide -> {sph:0,cyl:0,axe:null}).'
+- lireRx() (lecture sph/cyl/axe partagee par les blocs A, B, C dans outils/lentilles-souples/index.html)
+  valide desormais le domaine de saisie de l'axe a 1..180 avec 0 lu comme 180 ; toute
+  valeur hors domaine produit AXE_INVALIDE et bloque le calcul pour cet oeil avant
+  tout appel au noyau (normalizeAxis reste reserve aux axes calcules par les moteurs).
 contracts: []
 interfaces: []
 files:
 - outils/lentilles-souples/index.html
 migrations: []
 invariants: []
-limitations:
-- Correction faite apres refus du Control Plane (parcours Chromium reel) sur cylindre
-  vide, oeil vide affichant une erreur, et message brut non francise ; ces trois points
-  sont corriges et re-valides (html-validate, tests noyau, tests navigation) mais
-  aucun nouveau parcours Chromium reel n'a ete rejoue par ce worker.
+limitations: []
 discoveries: []
-reported_at: '2026-09-05T12:29:57Z'
+reported_at: '2026-09-05T12:34:35Z'
