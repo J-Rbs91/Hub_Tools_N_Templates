@@ -1,0 +1,46 @@
+schema_version: 1
+id: DEC-0009
+mission: lentilles-souples
+phase: review
+category: product_semantics
+statement: Presenter les trois modules comme independants et de meme rang, un seul
+  visible a la fois, et employer DVO plutot que vertex dans tout ce que l opticien
+  lit.
+status: accepted
+authority:
+  actor: human
+  level: D
+  delegated: false
+  delegated_levels: []
+  approval_ref: 'Retour du mainteneur, opticien, en session : « l''interface est très
+    lourde je trouve / et je ne comprends pas pourquoi sur refraction et en facultatif.
+    c''est juste une autre fonctionnalités de calcul. les trois modules sont indépendants
+    [...] le mot vertex n''est pas utilisé on parle de DVO (pour Distance Verre-Oeil)
+    »'
+options_considered: []
+chosen: Presenter les trois modules comme independants et de meme rang, un seul visible
+  a la fois, et employer DVO plutot que vertex dans tout ce que l opticien lit.
+rationale:
+- 'Trois corrections demandees par le mainteneur, qui exerce le metier. Premiere :
+  la surrefraction n est pas une option. Elle etait repliee dans un details marque
+  facultatif, ce qui la donnait pour un supplement au module A alors que c est un
+  calcul a part entiere, employe seul. Le repli est supprime. Deuxieme : les trois
+  modules empiles faisaient 2241 px, soit deux ecrans et demi de defilement et 35
+  champs a l ecran pour trois calculs qu on ne fait jamais en meme temps. Ils passent
+  en onglets, un seul module visible, et les deux yeux se lisent cote a cote des qu
+  il y a la place : 845 px pour le premier module au lieu de 2241 pour l ensemble.
+  Les prefixes A, B et C disparaissent, c etait du vocabulaire interne. Troisieme
+  : au comptoir on dit DVO, distance verre-oeil, jamais vertex. Tout le texte lu par
+  l opticien emploie DVO, y compris les dix messages d erreur et les lignes de resultat.
+  L identifiant interne du noyau reste vertexMm : c est un nom de code, jamais montre,
+  et le renommer casserait l API que les tests eprouvent sans rien apporter a l opticien.
+  Les onglets ne sont pas des couches Couches : une couche se referme au geste retour
+  d Android, et refermer un onglet ne veut rien dire ; rien n est ecrit dans l historique,
+  sinon il faudrait trois gestes retour pour sortir de l outil.'
+evidence:
+- outils/lentilles-souples/index.html ; index.html ; node onglets.mjs et node onglets2.mjs
+  (navigation souris et clavier, calcul des trois modules) ; node qa-erreurs.mjs (les
+  dix cas d erreur rejoues, chacun disant DVO) ; node mobile.mjs (360 px, aucun debordement).
+reversibility: easy
+requires_user_approval: true
+created_at: '2026-09-05T17:29:40Z'
