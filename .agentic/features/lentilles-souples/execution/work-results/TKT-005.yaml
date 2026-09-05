@@ -1,0 +1,59 @@
+schema_version: 1
+ticket: TKT-005
+status: candidate_done
+actor: worker
+commit: 6ab8c62
+validation:
+- 'html-validate 11.5.6 sur **/*.html : 0 erreur (PASS reel, commande executee).'
+- 'node tests/navigation-retour.test.mjs : 25/25 controles passes (PASS reel, commande
+  executee).'
+- 'Hygiene fichier (espaces fin de ligne, CRLF, newline finale, em-dash) sur le fichier
+  modifie : aucune sortie, propre (PASS reel).'
+- 'Smoke test fonctionnel hors-navigateur : le noyau reel (prescription.js/moteurs.js/selection.js/catalogue.js/catalogue-demo.js)
+  a ete charge dans un contexte vm Node via un stub DOM minimal ecrit pour ce controle,
+  et les 10 cas d''erreur du contrat ont ete declenches un par un (axe absent, cylindre
+  nul+axe incoherent, valeur non numerique sph/axe/vertex, vertex negatif, vertex
+  aberrant, axe hors plage catalogue, catalogue invalide, produit sans regle, rotation
+  instable, calcul non interpretable) : chacun produit le code et le message reels
+  du noyau, affiches par l''interface. Un bug reel a ete trouve et corrige pendant
+  ce controle (formatRx affichait axe null au lieu d un espace reserve quand l axe
+  est absent).'
+- 'manual-mobile : NOT_RUN. Aucun telephone reel disponible dans cet environnement
+  d''execution ; le CSS a ete ecrit avec une grille qui se reagence (grid-template-columns:repeat(auto-fit,...)
+  puis regle @media max-width:640px qui passe a deux colonnes) plutot qu''un tableau
+  qui retrecit, mais cela n''a pas ete constate sur un appareil reel.'
+- 'Aucune ecriture localStorage/sessionStorage et aucun fetch/XMLHttpRequest/sendBeacon/WebSocket
+  dans le fichier : verifie par grep statique (PASS reel).'
+discoveries: []
+recommendation: done
+reported_at: '2026-09-05T12:13:24Z'
+routing_evidence:
+  sequence: 1
+  policy_digest: sha256:5b3ff959c347759d3a00e8a0395cc40ad3fd9c8e78ab32e6a1755a31334c2286
+  runtime:
+    provider: claude-code
+    requested:
+      capability_tier: balanced
+      effort: medium
+      context_profile: standard
+    resolved:
+      capability_tier: balanced
+      model: sonnet
+      effort: medium
+      context_profile: null
+    support:
+      model_selection: true
+      effort_selection: true
+      context_selection: false
+    enforcement:
+      model: supported
+      effort: supported
+      context: unsupported
+    available: unverified
+    applied: false
+    argv:
+    - claude
+    - --model
+    - sonnet
+    - --effort
+    - medium

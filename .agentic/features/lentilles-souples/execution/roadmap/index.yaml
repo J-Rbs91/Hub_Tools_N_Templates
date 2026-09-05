@@ -874,7 +874,7 @@ tickets:
   title: 'Interface du module : page autonome branchée sur les moteurs réels, trois
     blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite
     des erreurs, conventions du hub.'
-  status: to_execute
+  status: partial_execution
   origin:
     type: planned
     parent: LS-05
@@ -1076,6 +1076,21 @@ tickets:
       - sonnet
       - --effort
       - medium
+  history:
+  - from: to_execute
+    to: partial_execution
+    at: '2026-09-05T12:17:59Z'
+    reason: 'Candidat refuse par le Control Plane apres parcours reel dans Chromium.
+      Trois defauts, les deux premiers bloquants. 1) Une prescription purement spherique
+      est refusee : cylindre laisse vide, l interface renvoie PRESCRIPTION_INVALIDE
+      valeur numerique invalide pour cyl. Un champ cylindre vide vaut zero, c est
+      l ecriture normale d une correction spherique et le cas le plus frequent en
+      lentilles souples ; le noyau la gere, seule la lecture de la saisie est en cause.
+      2) Un oeil jamais renseigne affiche une erreur avant toute action de l utilisateur
+      : un bloc non rempli doit rester silencieux. 3) Le message affiche est un code
+      interne suivi d un fragment sans accents nommant un champ interne (cyl, sph)
+      : CON-004 impose du francais utilisateur. Les tests du ticket ne couvrent aucun
+      de ces cas parce qu ils portent sur le noyau et pas sur la lecture des champs.'
 - schema_version: 1
   id: TKT-006
   title: Intégrer le module au hub par une carte dans index.html, cadrée comme un
@@ -1578,4 +1593,4 @@ tickets:
     to: done
     at: '2026-09-05T11:24:52Z'
     reason: candidate result passed orchestrator acceptance
-updated_at: '2026-09-05T11:57:28Z'
+updated_at: '2026-09-05T12:17:59Z'

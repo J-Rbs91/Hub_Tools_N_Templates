@@ -24,7 +24,7 @@ This file is generated from `index.yaml`. The index is authoritative.
 
 ## Wave 4
 
-- **TKT-005 — Interface du module : page autonome branchée sur les moteurs réels, trois blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite des erreurs, conventions du hub.** — `to_execute`, actor `uxer`, depends on: TKT-002, TKT-004
+- **TKT-005 — Interface du module : page autonome branchée sur les moteurs réels, trois blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite des erreurs, conventions du hub.** — `partial_execution`, actor `uxer`, depends on: TKT-002, TKT-004
 
 ## Wave 5
 

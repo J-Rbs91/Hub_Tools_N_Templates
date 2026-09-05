@@ -200,49 +200,59 @@ risks:
 
 ```yaml agentic:task
 id: LS-05
-objective: >-
-  Interface du module : page autonome branchée sur les moteurs réels, trois blocs, hiérarchie des
-  quatre niveaux de valeur, détails du calcul, gestion explicite des erreurs, conventions du hub.
-status: pending
+objective: 'Interface du module : page autonome branchée sur les moteurs réels, trois
+  blocs, hiérarchie des quatre niveaux de valeur, détails du calcul, gestion explicite
+  des erreurs, conventions du hub.'
+status: in_progress
 dependencies:
-  - LS-02
-  - LS-04
+- LS-02
+- LS-04
 files:
-  - outils/lentilles-souples/index.html
+- outils/lentilles-souples/index.html
 acceptance_criteria:
-  - la page charge le noyau par des balises script de même origine et ne contient aucune formule optique
-  - les trois blocs sont présents, le bloc surréfraction est facultatif et le bloc fabrication utilisable seul
-  - les quatre niveaux de valeur coexistent à l'écran, aucune étape n'en remplace une autre
-  - la couche Détails du calcul restitue l'enchaînement produit par le noyau, pour la conversion, la surréfraction et le score
-  - les dix cas d'erreur du contrat sont traités et affichés, aucune valeur douteuse n'est produite en silence
-  - le vocabulaire interdit n'apparaît nulle part et le vocabulaire imposé est employé
-  - la responsabilité de l'outil est énoncée dans l'interface
-  - le bandeau signalant des données de démonstration fictives est présent dans le bloc fabrication
-  - CSP identique à celle des outils existants, mention de mesure de fréquentation et script GoatCounter présents
-  - lien retour vers ../../, bouton flottant iOS et détection is-ios présents, aucune couche ouverte donc aucun gestionnaire Couches
-  - responsive réel en dessous de 640 px, la saisie du bloc surréfraction se réagence au lieu de rétrécir
-  - aucune écriture localStorage ni sessionStorage, aucun appel réseau portant une saisie
-  - aucun em-dash dans un texte visible, interface entièrement en français
+- la page charge le noyau par des balises script de même origine et ne contient aucune
+  formule optique
+- les trois blocs sont présents, le bloc surréfraction est facultatif et le bloc fabrication
+  utilisable seul
+- les quatre niveaux de valeur coexistent à l'écran, aucune étape n'en remplace une
+  autre
+- la couche Détails du calcul restitue l'enchaînement produit par le noyau, pour la
+  conversion, la surréfraction et le score
+- les dix cas d'erreur du contrat sont traités et affichés, aucune valeur douteuse
+  n'est produite en silence
+- le vocabulaire interdit n'apparaît nulle part et le vocabulaire imposé est employé
+- la responsabilité de l'outil est énoncée dans l'interface
+- le bandeau signalant des données de démonstration fictives est présent dans le bloc
+  fabrication
+- CSP identique à celle des outils existants, mention de mesure de fréquentation et
+  script GoatCounter présents
+- lien retour vers ../../, bouton flottant iOS et détection is-ios présents, aucune
+  couche ouverte donc aucun gestionnaire Couches
+- responsive réel en dessous de 640 px, la saisie du bloc surréfraction se réagence
+  au lieu de rétrécir
+- aucune écriture localStorage ni sessionStorage, aucun appel réseau portant une saisie
+- aucun em-dash dans un texte visible, interface entièrement en français
 tests:
-  - html-validate
-  - navigation-structure
-  - manual-mobile
+- html-validate
+- navigation-structure
+- manual-mobile
 security_requirements:
   securix_rules:
-    - SEC-INJ-009
-    - SEC-FE-015
-    - SEC-PRIV-014
-  notes: >-
-    Tout affichage passe par textContent ; aucune saisie n'est concaténée dans du HTML ; rien
-    n'est persisté ni envoyé.
+  - SEC-INJ-009
+  - SEC-FE-015
+  - SEC-PRIV-014
+  notes: Tout affichage passe par textContent ; aucune saisie n'est concaténée dans
+    du HTML ; rien n'est persisté ni envoyé.
 evidence_required:
-  - sortie de npx --yes html-validate@11.5.6 sur l'ensemble des pages
-  - sortie de node tests/navigation-retour.test.mjs
-  - recherche mécanique confirmant l'absence de fetch, XMLHttpRequest, WebSocket, sendBeacon, localStorage et sessionStorage dans le dossier du module
-  - relevé exact de ce qui a été vérifié à la main et de ce qui ne l'a pas été
+- sortie de npx --yes html-validate@11.5.6 sur l'ensemble des pages
+- sortie de node tests/navigation-retour.test.mjs
+- recherche mécanique confirmant l'absence de fetch, XMLHttpRequest, WebSocket, sendBeacon,
+  localStorage et sessionStorage dans le dossier du module
+- relevé exact de ce qui a été vérifié à la main et de ce qui ne l'a pas été
 risks:
-  - une page riche peut devenir illisible sur un écran de 320 px
-  - un affichage qui simplifierait la hiérarchie des valeurs détruirait l'objet même du module
+- une page riche peut devenir illisible sur un écran de 320 px
+- un affichage qui simplifierait la hiérarchie des valeurs détruirait l'objet même
+  du module
 ```
 
 ```yaml agentic:task
