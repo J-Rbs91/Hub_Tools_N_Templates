@@ -40,6 +40,9 @@ d'aplomb dans la photo : son inclinaison est mesurée sur le trait et corrigée 
   forme, et cela ne se rattrape pas — c'est le seul défaut réellement rédhibitoire.
 - Le verre doit **remplir une bonne part de l'image** (viser au moins 10 % de la surface) : la
   précision du contour se joue là.
+- **Cadrer sur la feuille**, plateau de table et sol hors champ autant que possible. Le scanner
+  sait isoler la feuille et travaille à l'intérieur, mais un fond très texturé qui occupe un quart
+  de l'image lui coûte de la marge pour rien.
 - Ombres et lumière ambiante : sans importance, le seuillage s'y adapte.
 - **Reflets sur le chant** : c'est le vrai piège. Un verre qui accroche la lumière sur sa tranche
   donne une bande claire prise pour du fond, et le contour rentre dans la matière — un angle
@@ -52,23 +55,38 @@ d'aplomb dans la photo : son inclinaison est mesurée sur le trait et corrigée 
 
 Ouvrir `scanner.html`, déposer la photo. Le scanner enchaîne :
 
-1. **Seuillage** verre / fond, choisi par balayage : on retient le palier où l'aire détectée ne
-   bouge plus. En dessous le verre se disloque, au-dessus il avale les ombres.
-2. **Ouverture morphologique**, qui efface le trait tracé sans entamer le verre.
-3. **Mesure de l'angle du trait** par analyse en composantes principales sur les pixels sombres
-   situés hors du verre, resserrée par paliers autour de l'axe trouvé. Le N est sombre et hors du
-   verre lui aussi : il est écarté dès le premier resserrage, sans quoi il tire l'horizontale de un
-   à deux degrés — et fait sortir tout le gabarit tourné d'autant.
-4. **Repérage du N**, la tache compacte écartée du trait : son extrémité donne le côté nasal.
-5. **Balayage radial** du contour dans le repère redressé, de l'extérieur vers l'intérieur.
-6. **Réparation des morsures de reflet** par enveloppe convexe : un verre taillé a un contour
+1. **Repérage de la feuille** : la plus grande plage claire, refermée sur les repères tracés (qui
+   sont sombres, donc absents de cette plage) mais sans annexer une autre plage claire voisine,
+   par exemple un reflet vif sur le plateau. Tout le reste du relevé se fait à l'intérieur.
+2. **Détourage du verre**, par l'une de deux voies, choisies automatiquement :
+   - **par la masse**, pour un verre teinté : seuillage verre / fond choisi par balayage, on
+     retient le palier où l'aire détectée ne bouge plus. En dessous le verre se disloque,
+     au-dessus il avale les ombres. Puis une **ouverture morphologique**, qui efface le trait
+     tracé sans entamer le verre.
+   - **par le chant**, pour un verre incolore : sur une feuille blanche, un tel verre n'est pas
+     plus sombre qu'elle et le seuillage ne voit rien. Seul son chant marque, en variation
+     locale. On part donc du **dégradé** (Sobel après un léger flou), on **referme** le tour du
+     verre, et on **remplit** ce qu'il enferme. Le trait est refermé lui aussi et laisse un
+     éperon hors du verre : l'ouverture finale l'efface, et son rayon est augmenté jusqu'au
+     palier où la composante remplit enfin sa boîte.
+3. **Tri des repères tracés** : le trait est long et mince, le N et la flèche sont des taches
+   ramassées. Un tri sur la forme (rapport des moments, longueur) ne garde que le premier. C'est
+   ce qui permet d'écarter la flèche, qui pèse presque autant de pixels que le trait et lui est
+   perpendiculaire.
+4. **Mesure de l'angle du trait** : d'abord un balayage, en angle et en décalage, des droites qui
+   traversent encore le verre — la note étant la **longueur** de noir suivie, jamais le nombre de
+   pixels : une tache compacte se ramasse d'un coup mais ne s'étire sur rien. Puis affinage par
+   analyse en composantes principales, resserrée par paliers autour de l'axe trouvé.
+5. **Repérage du N**, la tache compacte écartée du trait : son extrémité donne le côté nasal.
+6. **Balayage radial** du contour dans le repère redressé, de l'extérieur vers l'intérieur.
+7. **Réparation des morsures de reflet** par enveloppe convexe : un verre taillé a un contour
    convexe, donc toute rentrée est un artefact. Au-delà de 9 % d'écart le relevé est conservé,
    car il s'agit alors d'une concavité voulue (goutte nasale d'un aviateur).
-7. **Lissage** par série de Fourier tronquée (16 harmoniques) : ôte le grain du seuillage sans
+8. **Lissage** par série de Fourier tronquée (16 harmoniques) : ôte le grain du seuillage sans
    toucher aux méplats ni aux angles, puis échantillonnage en 72 points.
 
-Réglages disponibles : sens du haut, côte A, seuil manuel si le contour décroche, et
-désactivation de la réparation convexe.
+Réglages disponibles : sens du haut, **voie de détourage** (automatique, masse, chant), côte A,
+seuil manuel si le contour décroche, et désactivation de la réparation convexe.
 
 ---
 
@@ -83,7 +101,11 @@ Le scanner affiche une liste de contrôles. Tous doivent être au vert avant d'i
 - [ ] Le rapport A/B est supérieur à 1 : un verre plus haut que large n'existe pas sur une
       monture, et signale presque toujours un mauvais réglage du haut.
 - [ ] La part de contour reprise sur l'enveloppe convexe reste modérée. Beaucoup = reflets
-      marqués, donc contour à contrôler à l'œil.
+      marqués, donc contour à contrôler à l'œil. **Sur un verre détouré par son chant, comptez
+      qu'elle sorte haute** (70 % environ) : le chant n'a pas partout la même netteté, si bien que
+      le contour brut rentre par endroits de 1 à 8 % avant d'être rattrapé. Le rattrapage est
+      légitime — un verre taillé est convexe — mais il ne dispense pas du contrôle à l'œil ; là,
+      c'est le contour vert qui tranche, et lui seul.
 - [ ] Le contour est **étoilé depuis le centre-boîte** : c'est l'hypothèse dont dépendent
       `frameRadius` et `inContour` dans l'outil. Une rentrée trop profonde fausserait le calcul.
 - [ ] Les côtes tombent dans les bornes de l'outil (A de 28 à 70 mm, B de 14 à 60 mm).
@@ -127,7 +149,12 @@ git grep -lIP '\r$' -- .           # aucune sortie attendue
   réfléchit rien ; le scanner détoure alors la ligne au lieu du verre, avec le même protocole de
   repères.
 - **Verre solaire dégradé.** Le seuillage ne capte que la partie sombre du dégradé. Photographier
-  plutôt sur fond noir, ou passer par le tracé au crayon.
+  plutôt sur fond noir, ou passer par le tracé au crayon. À défaut, forcer le détourage **par le
+  chant**, qui ne regarde plus la teinte du tout.
+- **Verre incolore.** Ce n'est plus un piège : le détourage par le chant est fait pour lui et
+  l'automatique y bascule seul. Deux précautions quand même, le chant étant tout ce dont dispose
+  le scanner — lumière diffuse, et le verre bien propre : une trace de doigt sur la tranche vaut
+  une morsure de reflet.
 
 ---
 
