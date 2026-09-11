@@ -46,23 +46,34 @@
     display:flex;gap:4px;margin:0 0 16px;padding:4px;
     background:var(--light);border-radius:10px;
   }
+  /* Sans fond ni bord, les deux onglets non selectionnes passaient pour du
+     texte gris : l'action n'etait decouvrable qu'au survol, qui n'existe pas
+     au tactile. Ils portent donc un bord permanent. L'onglet actif se
+     distingue par quatre signaux (fond blanc, bord bleu, trait bas epais,
+     libelle bleu) plutot que par la seule nuance blanc sur gris tres clair. */
   .onglets button{
     flex:1;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
-    color:var(--grey);background:none;border:0;border-radius:7px;
-    padding:9px 10px;line-height:1.25;transition:.12s;
+    color:var(--grey);background:transparent;
+    border:1px solid var(--line);border-bottom:3px solid var(--line);
+    border-radius:7px;min-height:42px;
+    padding:8px 10px;line-height:1.25;transition:.12s;
   }
-  .onglets button:hover{color:var(--ink)}
+  .onglets button:hover{color:var(--ink);background:var(--white)}
   .onglets button[aria-selected="true"]{
     background:var(--white);color:var(--blue-d);
+    border-color:var(--blue);border-bottom-color:var(--blue-d);
     box-shadow:0 1px 3px rgba(26,42,58,.12);
   }
-  .onglets button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+  .onglets button:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
 
   /* ── blocs ── */
   .bloc{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0;background:#fff}
   .bloc h2{font-size:15px;color:var(--ink);margin-bottom:3px}
   .bloc .sous-titre{font-size:12px;color:var(--grey);margin-bottom:12px}
   .bloc[hidden]{display:none}
+  /* Le panneau recoit le focus quand on y arrive depuis un autre module :
+     le contour doit etre celui de l'outil, pas celui du navigateur. */
+  .bloc:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
 
   .bandeau-demo{
     background:#FFF6E5;border:1px solid var(--avert-line);color:var(--avert);
@@ -91,11 +102,34 @@
     border-radius:6px;padding:8px 8px;background:#FBFDFE;width:100%;
   }
   .champ input:focus, .champ select:focus{outline:none;border-color:var(--blue);background:#fff}
+  /* Au clavier, un changement de bord seul ne dit pas ou l'on se trouve. */
+  .champ input:focus-visible, .champ select:focus-visible{outline:2px solid var(--blue-d);outline-offset:1px}
+  /* Le message reste dans la sortie de l'oeil ; le champ en cause se voit
+     sans avoir a le lire, et redevient neutre des qu'on le corrige. */
+  .champ input[aria-invalid="true"], .champ select[aria-invalid="true"]{
+    border-color:var(--err);background:var(--err-bg);
+  }
+  .champ.est-invalide label{color:var(--err-ink)}
+  .req{color:var(--err);font-weight:700}
+  .champ .req{margin-left:1px}
   .oeils .grille-champs{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
-  .champ-case{flex-direction:row;align-items:center;gap:8px;grid-column:1/-1}
+  /* Une case a cocher native mesure environ 13 px de cote, sous le minimum de
+     24 x 24 px du critere WCAG 2.5.8. On l'agrandit, et on donne au libelle la
+     meme hauteur puisqu'il est lui aussi une cible (attribut for). */
+  .champ-case{flex-direction:row;align-items:center;gap:10px;grid-column:1/-1;min-height:32px}
   .oeils .champ-large{grid-column:span 2}
-  .champ-case input{width:auto;accent-color:var(--blue)}
-  .champ-case label{font-size:12px;color:var(--ink);font-weight:500}
+  .champ-case input{width:24px;height:24px;flex:0 0 auto;accent-color:var(--blue);cursor:pointer}
+  .champ-case label{
+    font-size:12px;color:var(--ink);font-weight:500;cursor:pointer;
+    display:flex;align-items:center;min-height:24px;
+  }
+  /* Un controle sans effet ne doit pas promettre qu'il en a un : le sens et la
+     stabilite ne s'appliquent qu'a partir d'une rotation non nulle. La note du
+     sous-groupe dit a quelle condition ils reprennent. */
+  .champ-case input:disabled{cursor:not-allowed;opacity:.5}
+  .champ-case input:disabled + label{cursor:not-allowed;color:var(--grey)}
+  .champ select:disabled{background:var(--light);color:var(--grey);cursor:not-allowed}
+  .sous-groupe-note{font-size:11px;color:var(--grey);line-height:1.35;margin:-2px 0 6px}
 
   @media (max-width:640px){
     body{padding:14px 10px 20px}
@@ -114,6 +148,39 @@
   }
   button.action:hover{background:var(--blue-d)}
   button.action:active{transform:translateY(1px)}
+  button.action:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
+
+  /* Ce que le bouton vient de faire, affiche la ou on a appuye. Les sorties
+     par oeil sont au-dessus du bouton, donc hors de vue sur telephone : sans
+     cette ligne, un calcul lance sur deux yeux vides ne repondait rien. */
+  .suite{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    margin-top:12px;padding:10px 12px;border-radius:8px;
+    border:1px solid var(--line);background:var(--light);
+    font-size:13px;color:var(--ink);
+  }
+  .suite[hidden], .provenance[hidden]{display:none}
+  .suite-texte, .provenance-texte{flex:1 1 200px;min-width:0}
+
+  /* Un champ rempli par un autre module doit dire d'ou il vient. */
+  .provenance{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    margin:0 0 14px;padding:10px 12px;border-radius:8px;
+    border:1px solid var(--line);background:var(--light);
+    font-size:13px;color:var(--ink);
+  }
+
+  .btn-second{
+    font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+    color:var(--blue-d);background:var(--white);
+    border:1px solid var(--blue);border-radius:8px;padding:9px 14px;min-height:38px;
+  }
+  .btn-second:hover{background:var(--light);border-color:var(--blue-d)}
+  .btn-second:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
+
+  /* Ce qui est obligatoire et ce que vaut une valeur pre-remplie : sans cette
+     ligne, les deux ne se decouvraient qu'apres un message d'erreur. */
+  .aide-saisie{font-size:12px;color:var(--grey);margin:0 0 12px;line-height:1.45}
 
   /* ── hiérarchie à quatre niveaux ── */
   .sortie{margin-top:12px}
@@ -165,6 +232,7 @@
     padding:7px 14px;border-radius:8px;transition:.15s;
   }
   .back-link:hover{background:var(--light)}
+  .back-link:focus-visible, .ios-back:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
 
   /* bouton retour flottant (iOS : pas de bouton retour navigateur) */
   .ios-back{
@@ -216,18 +284,22 @@
     font-size:15px;font-weight:700;padding:12px 16px;
   }
   .verrou-valider:hover{background:var(--blue-d)}
+  .verrou-valider:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
   .verrou-erreur{
     margin:14px 0 0;font-size:13px;font-weight:700;color:var(--err-ink);
     background:var(--err-bg);border:1px solid var(--err-line);
     border-radius:8px;padding:9px 12px;
   }
   .verrou-erreur[hidden]{display:none}
+  /* Souligne et sans bord, ce bouton se lisait comme un lien : il ne mene
+     nulle part, il referme l'outil. */
   .reverrouiller{
     display:inline-block;margin-left:auto;font-size:12px;font-weight:700;
-    color:var(--grey);background:none;border:0;cursor:pointer;padding:7px 10px;
-    text-decoration:underline;
+    color:var(--grey);background:var(--white);border:1px solid var(--line);
+    cursor:pointer;padding:7px 12px;border-radius:8px;
   }
-  .reverrouiller:hover{color:var(--ink)}
+  .reverrouiller:hover{color:var(--ink);background:var(--light)}
+  .reverrouiller:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
   .topbar{display:flex;align-items:center;gap:10px}
 
   /* Etat par defaut : verrouille. La classe est posee tres tot par un script
@@ -292,6 +364,8 @@
     <p class="role-note">
       <strong>Outil d'aide au calcul.</strong> Il ne prescrit pas : la décision finale,
       y compris le choix de la lentille, revient à l'opticien.
+      <br>Trois modules indépendants, un seul affiché à la fois : passer de l'un à
+      l'autre ne perd aucune saisie.
     </p>
 
     <!-- Les trois modules sont independants : chacun se suffit a lui-meme et
@@ -306,18 +380,24 @@
     <section class="bloc" id="bloc-a" role="tabpanel" aria-labelledby="ong-a" tabindex="0">
       <h2>Lunettes vers lentille</h2>
       <p class="sous-titre">Sphère, cylindre, axe et DVO par oeil ; correction théorique au plan cornéen puis correction cible arrondie au pas clinique.</p>
+      <p class="aide-saisie" id="a-aide">
+        <span class="req">*</span> Sphère obligatoire dès qu'un champ de l'oeil est
+        renseigné ; cylindre et axe à laisser vides si la correction est sphérique pure.
+        Un oeil entièrement vide est ignoré, sans erreur.
+        DVO : distance verre-oeil en millimètres, 0 laisse la correction inchangée.
+      </p>
 
       <div class="oeils">
       <div class="oeil-groupe">
         <h3>OD, oeil droit</h3>
         <div class="grille-champs">
           <div class="champ">
-            <label for="a-od-sph">Sphère (D)</label>
+            <label for="a-od-sph">Sphère (D) <span class="req" aria-hidden="true">*</span></label>
             <input type="text" inputmode="decimal" id="a-od-sph" placeholder="ex. -3,00" aria-label="OD sphère lunettes">
           </div>
           <div class="champ">
             <label for="a-od-cyl">Cylindre (D)</label>
-            <input type="text" inputmode="decimal" id="a-od-cyl" placeholder="ex. -1,00 ou 0" aria-label="OD cylindre lunettes">
+            <input type="text" inputmode="decimal" id="a-od-cyl" placeholder="ex. -1,00" aria-label="OD cylindre lunettes">
           </div>
           <div class="champ">
             <label for="a-od-axe">Axe (°)</label>
@@ -325,7 +405,7 @@
           </div>
           <div class="champ">
             <label for="a-od-vertex">DVO (mm)</label>
-            <input type="text" inputmode="decimal" id="a-od-vertex" value="0" aria-label="OD distance verre-oeil en millimètres">
+            <input type="text" inputmode="decimal" id="a-od-vertex" aria-describedby="a-aide" value="0" aria-label="OD distance verre-oeil en millimètres">
           </div>
         </div>
         <div class="sortie" id="a-od-out" role="status" aria-live="polite"></div>
@@ -335,12 +415,12 @@
         <h3>OG, oeil gauche</h3>
         <div class="grille-champs">
           <div class="champ">
-            <label for="a-og-sph">Sphère (D)</label>
+            <label for="a-og-sph">Sphère (D) <span class="req" aria-hidden="true">*</span></label>
             <input type="text" inputmode="decimal" id="a-og-sph" placeholder="ex. -3,00" aria-label="OG sphère lunettes">
           </div>
           <div class="champ">
             <label for="a-og-cyl">Cylindre (D)</label>
-            <input type="text" inputmode="decimal" id="a-og-cyl" placeholder="ex. -1,00 ou 0" aria-label="OG cylindre lunettes">
+            <input type="text" inputmode="decimal" id="a-og-cyl" placeholder="ex. -1,00" aria-label="OG cylindre lunettes">
           </div>
           <div class="champ">
             <label for="a-og-axe">Axe (°)</label>
@@ -348,7 +428,7 @@
           </div>
           <div class="champ">
             <label for="a-og-vertex">DVO (mm)</label>
-            <input type="text" inputmode="decimal" id="a-og-vertex" value="0" aria-label="OG distance verre-oeil en millimètres">
+            <input type="text" inputmode="decimal" id="a-og-vertex" aria-describedby="a-aide" value="0" aria-label="OG distance verre-oeil en millimètres">
           </div>
         </div>
         <div class="sortie" id="a-og-out" role="status" aria-live="polite"></div>
@@ -356,12 +436,19 @@
       </div>
 
       <button type="button" class="action" id="a-calculer">Calculer la conversion</button>
+      <div class="suite" id="a-suite" role="status" aria-live="polite" hidden></div>
     </section>
 
     <!-- ══════════════ MODULE 2 ══════════════ -->
     <section class="bloc" id="bloc-b" role="tabpanel" aria-labelledby="ong-b" tabindex="0" hidden>
       <h2>Surréfraction</h2>
       <p class="sous-titre">Lentille portée et surréfraction mesurée par oeil ; nouvelle correction cible, rotation torique prise en compte.</p>
+      <p class="aide-saisie" id="b-aide">
+        <span class="req">*</span> Sphère de la lentille portée obligatoire : c'est elle
+        qui décide si l'oeil entre dans le calcul. La surréfraction est pré-remplie à 0,
+        à laisser ainsi si rien n'a été mesuré.
+        DVO : distance verre-oeil en millimètres de la surréfraction, 0 la laisse inchangée.
+      </p>
 
       <div class="oeils">
         <div class="oeil-groupe">
@@ -371,12 +458,12 @@
             <div class="sous-groupe-titre">Lentille portée</div>
             <div class="grille-champs">
               <div class="champ">
-                <label for="b-od-l-sph">Sphère (D)</label>
+                <label for="b-od-l-sph">Sphère (D) <span class="req" aria-hidden="true">*</span></label>
                 <input type="text" inputmode="decimal" id="b-od-l-sph" placeholder="ex. -3,00" aria-label="OD sphère lentille portée">
               </div>
               <div class="champ">
                 <label for="b-od-l-cyl">Cylindre (D)</label>
-                <input type="text" inputmode="decimal" id="b-od-l-cyl" placeholder="ex. -0,75 ou 0" aria-label="OD cylindre lentille portée">
+                <input type="text" inputmode="decimal" id="b-od-l-cyl" placeholder="ex. -0,75" aria-label="OD cylindre lentille portée">
               </div>
               <div class="champ">
                 <label for="b-od-l-axe">Axe (°)</label>
@@ -402,13 +489,14 @@
               </div>
               <div class="champ">
                 <label for="b-od-dist">DVO (mm)</label>
-                <input type="text" inputmode="decimal" id="b-od-dist" value="0" aria-label="OD distance verre-oeil de la surréfraction en millimètres">
+                <input type="text" inputmode="decimal" id="b-od-dist" aria-describedby="b-aide" value="0" aria-label="OD distance verre-oeil de la surréfraction en millimètres">
               </div>
             </div>
           </div>
 
           <div class="sous-groupe">
             <div class="sous-groupe-titre">Rotation torique observée</div>
+            <p class="sous-groupe-note">Sens et stabilité s'activent dès que la rotation n'est pas nulle.</p>
             <div class="grille-champs">
               <div class="champ">
                 <label for="b-od-rot-valeur">Rotation (°)</label>
@@ -438,12 +526,12 @@
             <div class="sous-groupe-titre">Lentille portée</div>
             <div class="grille-champs">
               <div class="champ">
-                <label for="b-og-l-sph">Sphère (D)</label>
+                <label for="b-og-l-sph">Sphère (D) <span class="req" aria-hidden="true">*</span></label>
                 <input type="text" inputmode="decimal" id="b-og-l-sph" placeholder="ex. -3,00" aria-label="OG sphère lentille portée">
               </div>
               <div class="champ">
                 <label for="b-og-l-cyl">Cylindre (D)</label>
-                <input type="text" inputmode="decimal" id="b-og-l-cyl" placeholder="ex. -0,75 ou 0" aria-label="OG cylindre lentille portée">
+                <input type="text" inputmode="decimal" id="b-og-l-cyl" placeholder="ex. -0,75" aria-label="OG cylindre lentille portée">
               </div>
               <div class="champ">
                 <label for="b-og-l-axe">Axe (°)</label>
@@ -469,13 +557,14 @@
               </div>
               <div class="champ">
                 <label for="b-og-dist">DVO (mm)</label>
-                <input type="text" inputmode="decimal" id="b-og-dist" value="0" aria-label="OG distance verre-oeil de la surréfraction en millimètres">
+                <input type="text" inputmode="decimal" id="b-og-dist" aria-describedby="b-aide" value="0" aria-label="OG distance verre-oeil de la surréfraction en millimètres">
               </div>
             </div>
           </div>
 
           <div class="sous-groupe">
             <div class="sous-groupe-titre">Rotation torique observée</div>
+            <p class="sous-groupe-note">Sens et stabilité s'activent dès que la rotation n'est pas nulle.</p>
             <div class="grille-champs">
               <div class="champ">
                 <label for="b-og-rot-valeur">Rotation (°)</label>
@@ -500,12 +589,18 @@
       </div>
 
       <button type="button" class="action" id="b-calculer">Calculer la surréfraction</button>
+      <div class="suite" id="b-suite" role="status" aria-live="polite" hidden></div>
     </section>
 
     <!-- ══════════════ MODULE 3 ══════════════ -->
     <section class="bloc" id="bloc-c" role="tabpanel" aria-labelledby="ong-c" tabindex="0" hidden>
       <h2>Recherche catalogue</h2>
       <p class="sous-titre">Correction cible par oeil ; combinaisons exactes, paramètres compatibles, meilleures alternatives et provenance de la règle.</p>
+      <p class="aide-saisie" id="c-aide">
+        <span class="req">*</span> Sphère cible obligatoire ; cylindre et axe vides pour
+        une correction sphérique pure. Ces champs se pré-remplissent avec la correction
+        cible calculée par les deux autres modules ; ils restent modifiables à la main.
+      </p>
 
       <p class="bandeau-demo">
         Catalogue de démonstration : fabricants, produits et règles fictifs. À ne jamais
@@ -514,17 +609,22 @@
 
       <div class="catalogue-erreurs" id="c-catalogue-erreurs" role="status" aria-live="polite" hidden></div>
 
+      <div class="provenance" id="c-provenance" hidden>
+        <span class="provenance-texte" id="c-provenance-texte"></span>
+        <button type="button" class="btn-second" id="c-vider">Vider les cibles</button>
+      </div>
+
       <div class="oeils">
       <div class="oeil-groupe">
         <h3>OD, oeil droit</h3>
         <div class="grille-champs">
           <div class="champ">
-            <label for="c-od-sph">Sphère cible (D)</label>
+            <label for="c-od-sph">Sphère cible (D) <span class="req" aria-hidden="true">*</span></label>
             <input type="text" inputmode="decimal" id="c-od-sph" placeholder="ex. -3,00" aria-label="OD sphère cible fabrication">
           </div>
           <div class="champ">
             <label for="c-od-cyl">Cylindre cible (D)</label>
-            <input type="text" inputmode="decimal" id="c-od-cyl" placeholder="ex. -0,75 ou 0" aria-label="OD cylindre cible fabrication">
+            <input type="text" inputmode="decimal" id="c-od-cyl" placeholder="ex. -0,75" aria-label="OD cylindre cible fabrication">
           </div>
           <div class="champ">
             <label for="c-od-axe">Axe cible (°)</label>
@@ -538,12 +638,12 @@
         <h3>OG, oeil gauche</h3>
         <div class="grille-champs">
           <div class="champ">
-            <label for="c-og-sph">Sphère cible (D)</label>
+            <label for="c-og-sph">Sphère cible (D) <span class="req" aria-hidden="true">*</span></label>
             <input type="text" inputmode="decimal" id="c-og-sph" placeholder="ex. -3,00" aria-label="OG sphère cible fabrication">
           </div>
           <div class="champ">
             <label for="c-og-cyl">Cylindre cible (D)</label>
-            <input type="text" inputmode="decimal" id="c-og-cyl" placeholder="ex. -0,75 ou 0" aria-label="OG cylindre cible fabrication">
+            <input type="text" inputmode="decimal" id="c-og-cyl" placeholder="ex. -0,75" aria-label="OG cylindre cible fabrication">
           </div>
           <div class="champ">
             <label for="c-og-axe">Axe cible (°)</label>
@@ -555,6 +655,7 @@
       </div>
 
       <button type="button" class="action" id="c-chercher">Chercher les paramètres fabricant disponibles</button>
+      <div class="suite" id="c-suite" role="status" aria-live="polite" hidden></div>
     </section>
   </div>
 </div>
@@ -814,6 +915,13 @@
     return { code: code, gravite: 'erreur', message: message };
   }
 
+  /* Le champ nommé ici sert à marquer la saisie fautive à l'écran : le message
+     reste dans la sortie de l'oeil, mais l'opticien voit lequel des trois
+     champs est en cause sans avoir à lire le code d'erreur. */
+  function refusRx(champ, code, message) {
+    return { etat: 'erreur', champ: champ, probleme: creerProbleme(code, message) };
+  }
+
   /* Lit un triplet sphère/cylindre/axe pour un oeil.
      - Un oeil entièrement vide (aucun des trois champs rempli) n'est pas une
        erreur : c'est un oeil que l'opticien n'a pas encore renseigné, et le
@@ -834,21 +942,21 @@
     }
 
     if (sphVide) {
-      return { etat: 'erreur', probleme: creerProbleme('SPHERE_MANQUANTE', "la sphère est obligatoire dès qu'un autre champ de cet oeil est renseigné.") };
+      return refusRx('sph', 'SPHERE_MANQUANTE', "la sphère est obligatoire dès qu'un autre champ de cet oeil est renseigné.");
     }
     var sph = parseNombre(sphRaw);
     if (Number.isNaN(sph)) {
-      return { etat: 'erreur', probleme: creerProbleme('SPHERE_INVALIDE', 'la sphère doit être un nombre, par exemple -3,00.') };
+      return refusRx('sph', 'SPHERE_INVALIDE', 'la sphère doit être un nombre, par exemple -3,00.');
     }
 
     var cyl = cylVide ? 0 : parseNombre(cylRaw);
     if (Number.isNaN(cyl)) {
-      return { etat: 'erreur', probleme: creerProbleme('CYLINDRE_INVALIDE', "le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.") };
+      return refusRx('cyl', 'CYLINDRE_INVALIDE', "le cylindre doit être un nombre, par exemple -1,00, ou rester vide pour une correction sphérique pure.");
     }
 
     var axe = axeVide ? null : parseNombre(axeRaw);
     if (!axeVide && Number.isNaN(axe)) {
-      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).") };
+      return refusRx('axe', 'AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).");
     }
     /* Domaine de saisie de l'axe : 1..180, 0 lu comme 180 (convention clinique
        de l'axe torique). normalizeAxis (noyau) replie tout angle par modulo
@@ -856,31 +964,155 @@
        une faute de frappe comme 200 ne doit jamais atterrir dans le noyau
        et en ressortir plausible (20°) sans réserve affichée. */
     if (!axeVide && (axe < 0 || axe > 180)) {
-      return { etat: 'erreur', probleme: creerProbleme('AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).") };
+      return refusRx('axe', 'AXE_INVALIDE', "l'axe doit être un nombre entre 0 et 180 degrés (0 étant lu comme 180).");
     }
     if (!axeVide && axe === 0) {
       axe = 180;
     }
 
     if (cyl === 0 && !axeVide) {
-      return { etat: 'erreur', probleme: creerProbleme('AXE_INCOHERENT_CYLINDRE_NUL', "un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n'a été effectué pour cet oeil.") };
+      return refusRx('axe', 'AXE_INCOHERENT_CYLINDRE_NUL', "un axe a été renseigné alors que le cylindre est nul : incohérent, aucun calcul n'a été effectué pour cet oeil.");
     }
     if (cyl !== 0 && axeVide) {
-      return { etat: 'erreur', probleme: creerProbleme('AXE_MANQUANT', "l'axe est obligatoire dès que le cylindre n'est pas nul.") };
+      return refusRx('axe', 'AXE_MANQUANT', "l'axe est obligatoire dès que le cylindre n'est pas nul.");
     }
 
     return { etat: 'ok', entree: { sph: sph, cyl: cyl, axe: axe } };
   }
 
+  /* ══════════════ AFFORDANCE : MARQUAGE, COMPTE RENDU, ENCHAINEMENT ══════
+
+     Trois manques se traitaient ensemble et sont traites ici plutot que dans
+     chaque bloc :
+
+     1. le champ fautif n'etait pas designe (seul un code en tete de message le
+        laissait deviner) ;
+     2. le bouton de calcul est sous les deux colonnes alors que les sorties
+        sont au-dessus : sur telephone, un calcul lance sur des champs vides ne
+        repondait rien du tout a l'endroit ou l'on venait d'appuyer ;
+     3. l'enchainement vers la recherche catalogue existait (les cibles y sont
+        recopiees) mais depuis un onglet masque, donc invisible.             */
+
+  var NOM_OEIL = { od: "l'oeil droit", og: "l'oeil gauche" };
+
+  function listerYeux(liste) {
+    return liste.map(function (o) { return NOM_OEIL[o]; }).join(' et ');
+  }
+
+  function nettoyerErreurs(blocId) {
+    var bloc = document.getElementById(blocId);
+    if (!bloc) { return; }
+    [].slice.call(bloc.querySelectorAll('[aria-invalid="true"]')).forEach(function (e) {
+      e.removeAttribute('aria-invalid');
+      if (e.parentNode && e.parentNode.classList) { e.parentNode.classList.remove('est-invalide'); }
+    });
+  }
+
+  function marquerErreur(id) {
+    var e = document.getElementById(id);
+    if (!e) { return; }
+    e.setAttribute('aria-invalid', 'true');
+    if (e.parentNode && e.parentNode.classList) { e.parentNode.classList.add('est-invalide'); }
+  }
+
+  /* Les problemes de distance produits par le noyau portent le parametre en
+     cause ; c'est le seul cas ou le champ fautif n'est pas connu de la page. */
+  function marquerProblemesDistance(problemes, champsParParametre) {
+    (problemes || []).forEach(function (p) {
+      if (p.code && p.code.indexOf('DISTANCE_') === 0 && champsParParametre[p.parametre]) {
+        marquerErreur(champsParParametre[p.parametre]);
+      }
+    });
+  }
+
+  function focusPremierInvalide(blocId) {
+    var bloc = document.getElementById(blocId);
+    var cible = bloc ? bloc.querySelector('[aria-invalid="true"]') : null;
+    if (!cible) { return; }
+    if (cible.scrollIntoView) { cible.scrollIntoView({ block: 'center' }); }
+    cible.focus();
+  }
+
+  function rendreSuite(suiteId, texte, actions) {
+    var suite = document.getElementById(suiteId);
+    vider(suite);
+    if (!texte) { suite.hidden = true; return; }
+    suite.hidden = false;
+    suite.appendChild(el('span', { class: 'suite-texte', text: texte }));
+    (actions || []).forEach(function (a) {
+      var b = el('button', { class: 'btn-second', text: a.texte });
+      b.type = 'button';
+      b.addEventListener('click', a.action);
+      suite.appendChild(b);
+    });
+  }
+
+  /* bilan.calcules : yeux ayant produit une cible ; bilan.aCorriger : yeux
+     dont la saisie a ete refusee ; bilan.reserve : au moins un avertissement
+     accompagne un resultat. Un oeil laisse vide n'est dans aucune des deux
+     listes, et ne compte pas comme un echec. */
+  function rendreBilan(suiteId, blocId, bilan, textes, actionSucces) {
+    var parties = [];
+    if (bilan.calcules.length) {
+      parties.push(textes.succes(listerYeux(bilan.calcules)));
+      if (bilan.reserve) { parties.push('Une réserve accompagne le résultat, elle est affichée avec lui.'); }
+    }
+    if (bilan.aCorriger.length) {
+      parties.push('Saisie à corriger pour ' + listerYeux(bilan.aCorriger) + '.');
+    }
+    if (!parties.length) { parties.push(textes.vide); }
+
+    var actions = [];
+    if (bilan.aCorriger.length) {
+      actions.push({ texte: 'Corriger la saisie', action: function () { focusPremierInvalide(blocId); } });
+    }
+    if (bilan.calcules.length && actionSucces) { actions.push(actionSucces); }
+    rendreSuite(suiteId, parties.join(' '), actions);
+  }
+
+  /* Assignee par le bloc des onglets, en fin de script : les enchainements
+     ci-dessous ne s'executent qu'au clic, bien apres. */
+  var activerOngletParId = function () {};
+
   /* ══════════════ BLOC A ══════════════ */
 
   var dernieresCibles = { od: null, og: null };
 
-  function prefillC(oeil, cible) {
+  /* Origine des cibles recopiees dans le bloc C, par oeil. Un champ rempli
+     par un autre module doit dire d'ou il vient, sinon l'opticien retrouve
+     dans C des valeurs qu'il n'a pas saisies. Remise a null des que la valeur
+     est modifiee a la main. */
+  var provenanceCibles = { od: null, og: null };
+
+  function majProvenanceC() {
+    var boite = document.getElementById('c-provenance');
+    var texte = document.getElementById('c-provenance-texte');
+    var yeux = ['od', 'og'].filter(function (o) { return provenanceCibles[o]; });
+    if (!yeux.length) {
+      vider(texte);
+      boite.hidden = true;
+      return;
+    }
+    var sources = [];
+    yeux.forEach(function (o) {
+      if (sources.indexOf(provenanceCibles[o]) === -1) { sources.push(provenanceCibles[o]); }
+    });
+    texte.textContent = 'Cible pré-remplie pour ' + listerYeux(yeux) + ' depuis ' +
+      sources.join(' et ') + '. Modifiable à la main.';
+    boite.hidden = false;
+  }
+
+  function nombreSaisie(v) {
+    return v.toFixed(2).replace('.', ',');
+  }
+
+  function prefillC(oeil, cible, source) {
     if (!cible) { return; }
-    document.getElementById('c-' + oeil + '-sph').value = cible.sph.toFixed(2);
-    document.getElementById('c-' + oeil + '-cyl').value = cible.cyl.toFixed(2);
+    document.getElementById('c-' + oeil + '-sph').value = nombreSaisie(cible.sph);
+    document.getElementById('c-' + oeil + '-cyl').value = nombreSaisie(cible.cyl);
     document.getElementById('c-' + oeil + '-axe').value = (cible.axe === null || cible.axe === undefined) ? '' : String(cible.axe);
+    provenanceCibles[oeil] = source;
+    majProvenanceC();
   }
 
   function renderDetailsA(resultat) {
@@ -919,18 +1151,22 @@
     if (resultat.cible) {
       out.appendChild(ligneTier('val-tier-3', 'Correction cible (pas 0,25 D) ', formatRx(resultat.cible)));
       dernieresCibles[oeil] = resultat.cible;
-      prefillC(oeil, resultat.cible);
+      prefillC(oeil, resultat.cible, 'Lunettes vers lentille');
     }
 
     out.appendChild(renderDetailsA(resultat));
   }
 
   function calculerA() {
+    nettoyerErreurs('bloc-a');
+    var bilan = { calcules: [], aCorriger: [], reserve: false };
+
     ['od', 'og'].forEach(function (oeil) {
-      var sphRaw = val('a-' + oeil + '-sph');
-      var cylRaw = val('a-' + oeil + '-cyl');
-      var axeRaw = val('a-' + oeil + '-axe');
-      var out = document.getElementById('a-' + oeil + '-out');
+      var prefixe = 'a-' + oeil + '-';
+      var sphRaw = val(prefixe + 'sph');
+      var cylRaw = val(prefixe + 'cyl');
+      var axeRaw = val(prefixe + 'axe');
+      var out = document.getElementById(prefixe + 'out');
 
       var v = lireRx(sphRaw, cylRaw, axeRaw);
       if (v.etat === 'vide') {
@@ -938,10 +1174,12 @@
         return;
       }
 
-      var vertex = parseNombre(val('a-' + oeil + '-vertex'));
+      var vertex = parseNombre(val(prefixe + 'vertex'));
       var entreeAffichage = { sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw), vertexMm: vertex };
 
       if (v.etat === 'erreur') {
+        marquerErreur(prefixe + v.champ);
+        bilan.aCorriger.push(oeil);
         renderResultatA(oeil, entreeAffichage, { theorique: null, cible: null, problemes: [v.probleme] });
         return;
       }
@@ -949,7 +1187,22 @@
       var resultat = window.LentillesMoteurs.calculerMoteurA({
         sph: v.entree.sph, cyl: v.entree.cyl, axe: v.entree.axe, vertexMm: vertex,
       });
+      marquerProblemesDistance(resultat.problemes, { vertex: prefixe + 'vertex' });
+      if (resultat.cible) {
+        bilan.calcules.push(oeil);
+        if ((resultat.problemes || []).length) { bilan.reserve = true; }
+      } else {
+        bilan.aCorriger.push(oeil);
+      }
       renderResultatA(oeil, entreeAffichage, resultat);
+    });
+
+    rendreBilan('a-suite', 'bloc-a', bilan, {
+      succes: function (yeux) { return 'Correction cible calculée pour ' + yeux + ', affichée au-dessus.'; },
+      vide: "Aucun oeil renseigné : saisissez au moins une sphère, puis relancez le calcul.",
+    }, {
+      texte: 'Chercher ces cibles au catalogue',
+      action: function () { activerOngletParId('ong-c'); chercherC(); },
     });
   }
 
@@ -995,13 +1248,16 @@
     if (resultat.cible) {
       out.appendChild(ligneTier('val-tier-3', 'Nouvelle correction cible (pas 0,25 D) ', formatRx(resultat.cible)));
       dernieresCibles[oeil] = resultat.cible;
-      prefillC(oeil, resultat.cible);
+      prefillC(oeil, resultat.cible, 'Surréfraction');
     }
 
     out.appendChild(renderDetailsB(resultat));
   }
 
   function calculerB() {
+    nettoyerErreurs('bloc-b');
+    var bilan = { calcules: [], aCorriger: [], reserve: false };
+
     ['od', 'og'].forEach(function (oeil) {
       var out = document.getElementById('b-' + oeil + '-out');
       var lSphRaw = val('b-' + oeil + '-l-sph');
@@ -1040,9 +1296,16 @@
         (rotStable ? '' : ', déclarée instable');
 
       var problemesEntree = [];
-      if (vL.etat === 'erreur') { problemesEntree.push(vL.probleme); }
-      if (vS.etat === 'erreur') { problemesEntree.push(vS.probleme); }
+      if (vL.etat === 'erreur') {
+        marquerErreur('b-' + oeil + '-l-' + vL.champ);
+        problemesEntree.push(vL.probleme);
+      }
+      if (vS.etat === 'erreur') {
+        marquerErreur('b-' + oeil + '-s-' + vS.champ);
+        problemesEntree.push(vS.probleme);
+      }
       if (problemesEntree.length) {
+        bilan.aCorriger.push(oeil);
         renderResultatB(oeil, saisieTexte, { theorique: null, cible: null, problemes: problemesEntree });
         return;
       }
@@ -1053,7 +1316,22 @@
         distanceSurrefractionMm: dist,
         rotation: { valeur: rotValeur, sens: rotSens, stable: rotStable },
       });
+      marquerProblemesDistance(resultat.problemes, { distanceSurrefraction: 'b-' + oeil + '-dist' });
+      if (resultat.cible) {
+        bilan.calcules.push(oeil);
+        if ((resultat.problemes || []).length) { bilan.reserve = true; }
+      } else {
+        bilan.aCorriger.push(oeil);
+      }
       renderResultatB(oeil, saisieTexte, resultat);
+    });
+
+    rendreBilan('b-suite', 'bloc-b', bilan, {
+      succes: function (yeux) { return 'Nouvelle correction cible calculée pour ' + yeux + ', affichée au-dessus.'; },
+      vide: "Aucune lentille portée renseignée : saisissez au moins sa sphère, puis relancez le calcul.",
+    }, {
+      texte: 'Chercher ces cibles au catalogue',
+      action: function () { activerOngletParId('ong-c'); chercherC(); },
     });
   }
 
@@ -1137,17 +1415,23 @@
     var catalogueDemo = window.LentillesCatalogueDemo.catalogueDemo;
     var erreursCatalogue = window.LentillesCatalogue.validerCatalogue(catalogueDemo);
     renderErreursCatalogue(erreursCatalogue);
-    if (erreursCatalogue.length) { return; }
+    if (erreursCatalogue.length) {
+      rendreSuite('c-suite', 'Recherche interrompue : le catalogue livré est invalide, la raison est indiquée en haut du module.', []);
+      return;
+    }
 
+    nettoyerErreurs('bloc-c');
+    var bilan = { calcules: [], aCorriger: [], reserve: false };
     var index = window.LentillesSelection.compilerIndex(catalogueDemo);
 
     ['od', 'og'].forEach(function (oeil) {
-      var out = document.getElementById('c-' + oeil + '-out');
+      var prefixe = 'c-' + oeil + '-';
+      var out = document.getElementById(prefixe + 'out');
       vider(out);
 
-      var sphRaw = val('c-' + oeil + '-sph');
-      var cylRaw = val('c-' + oeil + '-cyl');
-      var axeRaw = val('c-' + oeil + '-axe');
+      var sphRaw = val(prefixe + 'sph');
+      var cylRaw = val(prefixe + 'cyl');
+      var axeRaw = val(prefixe + 'axe');
       var v = lireRx(sphRaw, cylRaw, axeRaw);
 
       /* Une cible fabrication non renseignée pour cet oeil reste silencieuse :
@@ -1158,6 +1442,8 @@
       }
 
       if (v.etat === 'erreur') {
+        marquerErreur(prefixe + v.champ);
+        bilan.aCorriger.push(oeil);
         out.appendChild(ligneTier('val-tier-1', 'Cible ', formatRx({ sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw) })));
         out.appendChild(renderProblemes([v.probleme]));
         return;
@@ -1165,15 +1451,75 @@
 
       try {
         var resultats = window.LentillesSelection.chercherAlternatives(index, v.entree, { limit: 5 });
+        if (resultats.length) { bilan.calcules.push(oeil); } else { bilan.aCorriger.push(oeil); }
         renderResultatsC(oeil, v.entree, resultats, catalogueDemo);
       } catch (erreur) {
+        bilan.aCorriger.push(oeil);
         out.appendChild(ligneTier('val-tier-1', 'Cible ', formatRx(v.entree)));
         out.appendChild(renderProblemes([{ code: erreur.code || 'PRESCRIPTION_INVALIDE', gravite: 'erreur', message: erreur.message }]));
       }
     });
+
+    /* Une cible sans resultat n'est pas une saisie fautive : le catalogue de
+       demonstration n'a simplement rien a proposer. Le message le dit, mais
+       aucun champ n'est marque dans ce cas. */
+    rendreBilan('c-suite', 'bloc-c', bilan, {
+      succes: function (yeux) { return 'Paramètres fabricant proposés pour ' + yeux + ', affichés au-dessus.'; },
+      vide: "Aucune cible renseignée : saisissez au moins une sphère cible, ou calculez-la dans l'un des deux autres modules.",
+    }, null);
   }
 
   document.getElementById('c-chercher').addEventListener('click', chercherC);
+
+  /* Vider les cibles : le seul chemin explicite pour repartir d'une saisie
+     propre quand les champs viennent d'un autre module. */
+  document.getElementById('c-vider').addEventListener('click', function () {
+    ['od', 'og'].forEach(function (oeil) {
+      ['sph', 'cyl', 'axe'].forEach(function (champ) {
+        document.getElementById('c-' + oeil + '-' + champ).value = '';
+      });
+      vider(document.getElementById('c-' + oeil + '-out'));
+      provenanceCibles[oeil] = null;
+    });
+    nettoyerErreurs('bloc-c');
+    majProvenanceC();
+    rendreSuite('c-suite', null, []);
+    document.getElementById('c-od-sph').focus();
+  });
+
+  /* Un champ signale redevient neutre des qu'on le corrige, et une cible
+     retapee a la main cesse d'etre presentee comme venant d'un autre module. */
+  ['bloc-a', 'bloc-b', 'bloc-c'].forEach(function (blocId) {
+    document.getElementById(blocId).addEventListener('input', function (evenement) {
+      var cible = evenement.target;
+      if (!cible || !cible.getAttribute) { return; }
+      if (cible.getAttribute('aria-invalid') === 'true') {
+        cible.removeAttribute('aria-invalid');
+        if (cible.parentNode && cible.parentNode.classList) { cible.parentNode.classList.remove('est-invalide'); }
+      }
+      if (blocId === 'bloc-c' && /^c-(od|og)-/.test(cible.id || '')) {
+        var oeil = cible.id.slice(2, 4);
+        if (provenanceCibles[oeil]) { provenanceCibles[oeil] = null; majProvenanceC(); }
+      }
+    });
+  });
+
+  /* Le sens et la stabilite de rotation n'ont aucun effet tant que la rotation
+     est nulle : les laisser actifs promet une influence qu'ils n'ont pas. La
+     note du sous-groupe dit a quelle condition ils reprennent, pour qu'un
+     controle desactive ne reste pas opaque. */
+  function majRotation(oeil) {
+    var v = parseNombre(val('b-' + oeil + '-rot-valeur'));
+    var sansObjet = (v === null || Number.isNaN(v) || v === 0);
+    document.getElementById('b-' + oeil + '-rot-sens').disabled = sansObjet;
+    document.getElementById('b-' + oeil + '-rot-stable').disabled = sansObjet;
+  }
+  ['od', 'og'].forEach(function (oeil) {
+    document.getElementById('b-' + oeil + '-rot-valeur').addEventListener('input', function () {
+      majRotation(oeil);
+    });
+    majRotation(oeil);
+  });
 
   /* ── Validation du catalogue au chargement : si le catalogue livré était
      invalide, l'interruption de la recherche (et non une valeur devinée)
@@ -1215,6 +1561,20 @@
         activer(onglets[(i + pas + onglets.length) % onglets.length], true);
       });
     });
+
+    /* Enchainement depuis un autre module. Le focus suit le panneau affiche :
+       sans cela, le clavier serait reste sur un bouton d'un module devenu
+       invisible, et la suite du parcours ne serait pas la ou elle est a
+       l'ecran. */
+    activerOngletParId = function (id) {
+      var onglet = document.getElementById(id);
+      if (!onglet) { return; }
+      activer(onglet, false);
+      var panneau = document.getElementById(onglet.getAttribute('aria-controls'));
+      if (!panneau) { return; }
+      try { panneau.focus({ preventScroll: true }); } catch (e) { panneau.focus(); }
+      if (panneau.scrollIntoView) { panneau.scrollIntoView({ block: 'start' }); }
+    };
   }());
 }());
 </script>
