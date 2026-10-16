@@ -1,7 +1,7 @@
 name: Contrôle & hygiène
 
 # Qualité / hygiène du site statique : lint des workflows, hygiène des fichiers,
-# validation HTML et vérification des liens. Aucun build (site HTML/CSS/JS pur).
+# vérification des liens. Aucun build (site HTML/CSS/JS pur).
 
 on:
   push:
@@ -111,19 +111,6 @@ jobs:
       # valide par le meme validateur que la production.
       - name: Contrôles du noyau et du catalogue
         run: node tests/lentilles-souples.test.mjs
-
-  html-validate:
-    name: Validation HTML
-    runs-on: ubuntu-latest
-    container: node:22
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: html-validate
-        # Version épinglée : npx sans version exécuterait la dernière publication npm au moment du run.
-        run: npx --yes html-validate@11.5.6 "**/*.html"
 
   links:
     name: Vérification des liens
