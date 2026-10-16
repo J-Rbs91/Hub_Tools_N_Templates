@@ -1,0 +1,15 @@
+# Retain every default detection rule. Only these two deliberately public,
+# browser-side DRAFT_KEY declarations are exempt from generic-api-key findings.
+# Any other secret in these files or elsewhere remains detectable.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+  [[rules.allowlists]]
+  description = "Intentionally public, browser-side draft keys in two static tools"
+  condition = "AND"
+  regexTarget = "line"
+  paths = ['''^outils/(?:demande-ordonnance|cloture-caisse)/index\.html$''']
+  regexes = ['''\b(?:var|let|const)\s+DRAFT_KEY\s*=''']
