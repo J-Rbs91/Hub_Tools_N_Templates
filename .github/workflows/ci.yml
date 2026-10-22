@@ -80,6 +80,10 @@ jobs:
 
           exit "$fail"
 
+      # Reprend le job existant : aucun runner supplémentaire n'est lancé.
+      - name: Convexité des gabarits de verres
+        run: node --test tests/epaisseur-verres-formes.test.mjs
+
   navigation:
     name: Contrat de navigation arrière
     runs-on: ubuntu-latest
