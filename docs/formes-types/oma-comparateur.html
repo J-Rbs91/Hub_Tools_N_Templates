@@ -76,7 +76,7 @@
     <p class="notice">L'indice est une distance de comparaison de silhouettes normalisées. Il ne prouve ni l'identité d'une monture ni l'exactitude d'un gabarit de remplacement.</p>
     <h3>Les trois références les plus proches dans cette petite bibliothèque</h3>
     <div class="ranking" id="ranking"></div>
-    <p class="notice">Proximité calculée, pas équivalence fabricant. Les sept exemples sont insuffisants pour représenter toutes les familles de formes.</p>
+    <p class="notice">La recherche teste les deux orientations horizontales et sélectionne la plus proche. Le miroir est un choix de présentation à confirmer, pas une preuve d'orientation correcte. Proximité calculée, pas équivalence fabricant. Les sept exemples sont insuffisants pour représenter toutes les familles de formes.</p>
   </section>
   <section class="card">
     <h2>Importer un fichier OMA de votre atelier</h2>
@@ -146,7 +146,7 @@
     const resize=id("boxing").checked,flip=id("mirror").checked;
     const h=coords(hub,side),o=omaCoords(oma,hub,side,resize,flip);
     const b=trace.bounds(oma.points);
-    const maxDimension=Math.max(hub.A,b.width*(resize?hub.A/b.width:1),hub.B,b.height*(resize?hub.B/b.height:1));
+
     const scale=Math.min(308/Math.max(hub.A,resize?hub.A:b.width),228/Math.max(hub.B,resize?hub.B:b.height));
     renderSvg(id("hub-svg"),[{points:h,stroke:"#b36e39",fill:"rgba(193,118,63,.10)"}],scale);
     renderSvg(id("oma-svg"),[{points:o,stroke:"#1579ab",fill:"rgba(21,121,171,.10)"}],scale);
@@ -159,19 +159,34 @@
     const err=errorFor(hub,oma,side,flip);
     id("error").textContent=fmt(err)+" %";
     id("status").textContent=reference.name+": données de contour présentes. Orientation OMA à confirmer par le gabarit fabricant.";
-    ranking(hub,side,flip);
+    ranking(hub,side);
   }
-  function ranking(hub,side,flip){
-    const candidates=state.datasets.map(d=>{
+  function closest(hub,side){
+    return state.datasets.map(d=>{
       const oma=d.data.traces.find(t=>t.side===side);
       if(!oma)return null;
-      try{return {name:d.name,label:d.label,error:errorFor(hub,oma,side,flip)}}catch(e){return null}
-    }).filter(Boolean).sort((a,b)=>a.error-b.error).slice(0,3);
+      try{
+        const direct=errorFor(hub,oma,side,false);
+        const inverted=errorFor(hub,oma,side,true);
+        return {name:d.name,label:d.label,error:Math.min(direct,inverted),flip:inverted<direct};
+      }catch(e){return null}
+    }).filter(Boolean).sort((a,b)=>a.error-b.error);
+  }
+  function recommendClosest(){
+    const hub=state.shapes.find(s=>s.key===id("hub").value);
+    if(!hub)return;
+    const top=closest(hub,id("side").value)[0];
+    if(!top)return;
+    id("oma").value=top.name;
+    id("mirror").checked=top.flip;
+  }
+  function ranking(hub,side){
+    const candidates=closest(hub,side).slice(0,3);
     id("ranking").replaceChildren();
     for(const c of candidates){
       const bt=document.createElement("button");
-      bt.type="button";bt.textContent=c.label+" · "+fmt(c.error)+" %";
-      bt.addEventListener("click",()=>{id("oma").value=c.name;redraw()});
+      bt.type="button";bt.textContent=c.label+" · "+fmt(c.error)+" %"+(c.flip?" · miroir":"");
+      bt.addEventListener("click",()=>{id("oma").value=c.name;id("mirror").checked=c.flip;redraw()});
       id("ranking").appendChild(bt);
     }
   }
@@ -192,12 +207,14 @@
     state.datasets.forEach(s=>id("oma").appendChild(option(s.name,s.label)));
     if(!state.datasets.length)throw new Error("Aucune référence accessible. Ouvrez cette page depuis GitHub Pages ou un serveur HTTP local.");
     id("hub").value="rectangle";
-    id("oma").value="R360_1.oma";
+    recommendClosest();
     redraw();
     const failures=all.filter(x=>x.error);
     if(failures.length)id("status").textContent+=" "+failures.length+" référence(s) indisponible(s).";
   }
-  ["hub","oma","side","boxing","mirror"].forEach(key=>id(key).addEventListener("change",redraw));
+  id("hub").addEventListener("change",()=>{recommendClosest();redraw()});
+  id("side").addEventListener("change",()=>{recommendClosest();redraw()});
+  ["oma","boxing","mirror"].forEach(key=>id(key).addEventListener("change",redraw));
   id("file").addEventListener("change",async e=>{
     const file=e.target.files&&e.target.files[0];if(!file)return;
     if(file.size>1500000){id("import-status").textContent="Fichier refusé : taille supérieure à 1,5 Mo.";return}
