@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { runInNewContext } from 'node:vm';
+import { runInNewContext, Script } from 'node:vm';
 
 const root = new URL('../', import.meta.url);
 function source(path) { return readFileSync(new URL(path, root), 'utf8'); }
@@ -67,4 +67,13 @@ test('le laboratoire est disponible sans modification des formes du calculateur'
   assert.match(html, /références/);
   assert.match(html, /id="overlay"/);
   assert.doesNotMatch(html, /https?:\/\/[^"']+\.(?:js|css)/);
+});
+
+test('le script interactif du comparateur est du JavaScript valide', () => {
+  const page=source('docs/formes-types/oma-comparateur.html');
+  const scripts=[...page.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)];
+  assert.equal(scripts.length,1,'un script interactif inline attendu');
+  assert.doesNotThrow(()=>new Script(scripts[0][1]));
+  assert.match(page,/function closest\\(hub,side\\)/);
+  assert.match(page,/function recommendClosest\\(\\)/);
 });
