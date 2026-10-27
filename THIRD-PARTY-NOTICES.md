@@ -42,3 +42,19 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ```
+
+---
+
+## Données de tracés OMA (références de test)
+
+    Source :          https://github.com/eeng/lens_protocol/tree/master/examples/oma
+    Licence source :  MIT, copyright (c) 2019 Emmanuel Nicolau
+    Vérifiée le :     2026-10-27 (LICENSE.txt du dépôt source)
+    Chemin :          docs/formes-types/references-oma/
+    Portée :          sept fichiers de tracés des yeux R/L, prescriptions retirées
+    Réserve :         droits éventuels sur les dessins de montures tiers non établis
+
+Les fichiers ne sont pas utilisés par les calculs d'épaisseur et leur usage reste
+limité au laboratoire de comparaison. Le texte de la licence et les précautions
+relatives aux fichiers fabricants figurent dans
+[references-oma/NOTICE.md](docs/formes-types/references-oma/NOTICE.md).
