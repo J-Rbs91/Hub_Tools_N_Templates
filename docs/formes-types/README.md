@@ -166,3 +166,18 @@ la forme est mémorisée dans le navigateur du poste, elle ne rejoint pas le dé
 
 La présente procédure sert à l'autre besoin : faire entrer une forme dans les **gabarits livrés
 avec l'outil**, pour tout le monde.
+
+---
+
+## 8. Comparer les gabarits aux relevés OMA
+
+Le [laboratoire OMA](oma-comparateur.html) compare les neuf contours natifs aux
+relevés de traceurs présents dans [references-oma](references-oma/NOTICE.md).
+Il permet de charger un fichier OMA ASCII absolu en local, d'afficher le contour
+sans points superposés, de comparer les boxings à taille réelle ou normalisée
+et de rechercher les références proches dans la petite bibliothèque.
+
+**Aucun remplacement automatique** : la similitude d'une forme n'établit ni
+l'identité d'une monture ni le droit de redistribution. Une proposition de
+remplacement requiert un modèle vérifié, la bonne orientation et un relevé
+physique concordant, suivi des tests de convexité et de calcul d'épaisseur.
