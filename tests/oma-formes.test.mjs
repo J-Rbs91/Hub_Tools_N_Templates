@@ -71,9 +71,9 @@ test('le laboratoire est disponible sans modification des formes du calculateur'
 
 test('le script interactif du comparateur est du JavaScript valide', () => {
   const page=source('docs/formes-types/oma-comparateur.html');
-  const scripts=[...page.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)];
+  const scripts=page.split('<script>').slice(1).map(part=>part.split('</script>')[0]);
   assert.equal(scripts.length,1,'un script interactif inline attendu');
-  assert.doesNotThrow(()=>new Script(scripts[0][1]));
-  assert.match(page,/function closest\\(hub,side\\)/);
-  assert.match(page,/function recommendClosest\\(\\)/);
+  assert.doesNotThrow(()=>new Script(scripts[0]));
+  assert.ok(page.includes('function closest(hub,side)'));
+  assert.ok(page.includes('function recommendClosest()'));
 });
