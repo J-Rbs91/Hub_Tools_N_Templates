@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1F6FB2">
+  <title>Laboratoire de formes OMA | Épaisseur des verres</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#213042;background:#f3f6f9}
+    *{box-sizing:border-box}body{margin:0}main{max-width:1140px;margin:auto;padding:18px 16px 48px}
+    header{background:#175a92;color:#fff;padding:16px max(16px,calc((100vw - 1140px)/2))}
+    header a{color:#fff;font-weight:600}h1{font-size:clamp(20px,4vw,28px);margin:12px 0 6px}
+    h2{font-size:17px;margin:0 0 12px}.lede{line-height:1.5;color:#526277}
+    .card{border:1px solid #cfdae4;background:#fff;border-radius:12px;padding:17px;margin:16px 0}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}
+    select,input[type="file"],button{font:inherit}select,input[type="file"]{width:100%;border:1px solid #aabccc;border-radius:7px;padding:9px;background:#fff;color:#213042}
+    button{border:1px solid #1f6fb2;color:#175a92;background:#fff;padding:9px 12px;border-radius:8px;cursor:pointer;text-align:left}
+    button:hover,button:focus-visible{background:#e6f0fa}button:disabled{opacity:.5;cursor:not-allowed}
+    .actions{display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-top:14px}
+    .actions label{display:flex;gap:7px;align-items:center;margin:0;font-weight:500}
+    .views{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+    .view{min-width:0;border:1px solid #d4dee6;border-radius:10px;padding:10px;background:#fcfdfe}
+    .view h3{font-size:14px;margin:0 0 5px}.view small{color:#586a7c}
+    svg{display:block;width:100%;height:auto;max-height:310px}
+    .over{margin-top:12px;border:1px solid #d4dee6;border-radius:10px;padding:10px}
+    .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin:8px 0}
+    .leg{display:inline-flex;align-items:center;gap:6px}.line{width:22px;height:0;border-top:3px solid #c1763f}
+    .line.oma{border-color:#1579ab}.notice{color:#5b6b79;font-size:12px;line-height:1.5}
+    .results{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .metric{background:#f6f9fc;border-radius:9px;padding:11px;min-width:0}
+    .metric strong{display:block;font-size:19px;margin:3px 0}.metric span{font-size:12px;color:#526277}
+    .ranking{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+    .ranking button{font-size:13px;line-height:1.4}.status{font-size:13px;color:#37536b;margin-top:11px;min-height:20px}
+    a{color:#1c6399}footer{margin-top:28px;font-size:12px;color:#536579}
+    @media(max-width:730px){.controls{grid-template-columns:1fr}.views{grid-template-columns:1fr}.ranking{grid-template-columns:1fr}.results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+<header><a href="../../outils/epaisseur-verres/" id="back">← Retour au calculateur</a><h1>Laboratoire des formes OMA</h1><p>Comparer les gabarits du hub à des relevés numériques réels, sans les remplacer automatiquement.</p></header>
+<main>
+  <p class="lede">Les formes orange proviennent du calculateur d'épaisseur. Les formes bleues sont reconstruites à partir des rayons de fichiers OMA. Aucun lissage, aucune interpolation graphique et aucun point de correction ne sont ajoutés. Les fichiers chargés restent dans votre navigateur.</p>
+  <section class="card">
+    <h2>Choisir les deux contours</h2>
+    <div class="controls">
+      <div><label for="hub">Forme du hub</label><select id="hub"></select></div>
+      <div><label for="oma">Fichier OMA de référence</label><select id="oma"></select></div>
+      <div><label for="side">Œil du fichier</label><select id="side"><option value="R">Droit (R)</option><option value="L">Gauche (L)</option></select></div>
+    </div>
+    <div class="actions">
+      <label><input id="boxing" type="checkbox" checked> Même taille pour comparer les silhouettes</label>
+      <label><input id="mirror" type="checkbox"> Inverser horizontalement le tracé OMA</label>
+    </div>
+    <p id="status" class="status" aria-live="polite">Chargement des relevés…</p>
+  </section>
+  <section class="card">
+    <h2>Contours sans points ni artefacts</h2>
+    <div class="views">
+      <div class="view"><h3>Gabarit actuel</h3><small id="hub-meta"></small><svg id="hub-svg" viewBox="0 0 360 280" role="img" aria-label="Contour du hub"></svg></div>
+      <div class="view"><h3>OMA d'origine</h3><small id="oma-meta"></small><svg id="oma-svg" viewBox="0 0 360 280" role="img" aria-label="Contour OMA d'origine"></svg></div>
+    </div>
+    <div class="over"><h3>Superposition à la même échelle</h3><svg id="overlay" viewBox="0 0 360 280" role="img" aria-label="Superposition des deux contours"></svg>
+      <div class="legend"><span class="leg"><i class="line"></i>Hub actuel</span><span class="leg"><i class="line oma"></i>OMA d'origine</span></div>
+      <p class="notice">Le mode « même taille » ramène les deux contours au boxing A/B du hub pour comparer leur forme. Désactivez-le pour afficher leurs dimensions physiques respectives. Ce n'est pas une correction du contour du hub.</p>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Analyse de proximité</h2>
+    <div class="results">
+      <div class="metric"><span>Forme du hub</span><strong id="hbox">-</strong><span>Boxing A × B</span></div>
+      <div class="metric"><span>Forme OMA</span><strong id="obox">-</strong><span>Boxing A × B</span></div>
+      <div class="metric"><span>Rayons OMA</span><strong id="rays">-</strong><span>Par œil</span></div>
+      <div class="metric"><span>Écart géométrique</span><strong id="error">-</strong><span>Indice radial normalisé</span></div>
+    </div>
+    <p class="notice">L'indice est une distance de comparaison de silhouettes normalisées. Il ne prouve ni l'identité d'une monture ni l'exactitude d'un gabarit de remplacement.</p>
+    <h3>Les trois références les plus proches dans cette petite bibliothèque</h3>
+    <div class="ranking" id="ranking"></div>
+    <p class="notice">Proximité calculée, pas équivalence fabricant. Les sept exemples sont insuffisants pour représenter toutes les familles de formes.</p>
+  </section>
+  <section class="card">
+    <h2>Importer un fichier OMA de votre atelier</h2>
+    <label for="file">Importer un fichier .oma ou .txt local</label><input type="file" id="file" accept=".oma,.txt,text/plain">
+    <p class="notice">Import en mémoire seulement. Compatible avec TRCFMT=1, rayons ASCII absolus, échantillonnage régulier E. Les autres variantes sont refusées avec explication. Aucun fichier patient n'est envoyé ou enregistré. L'outil n'importe pas automatiquement les données de prescription, le perçage ou la 3D.</p>
+    <p id="import-status" class="status" aria-live="polite"></p>
+  </section>
+  <footer>Sources exemples : <a href="https://github.com/eeng/lens_protocol" rel="noopener noreferrer">eeng/lens_protocol</a> (MIT), copies limitées aux tracés et dépourvues des données de dossiers. Voir <a href="references-oma/NOTICE.md">attribution et limites</a>. Ce laboratoire ne modifie pas le calculateur.</footer>
+</main>
+<script src="oma-trace.js"></script>
+<script>
+(function(){
+  "use strict";
+  const samples=[
+    ["R1000_1.oma","Silhouette 1559 (1000 rayons)"],
+    ["R1000_2.oma","Silhouette 1575 (1000 rayons)"],
+    ["R1000_3.oma","Silhouette 7580 (1000 rayons)"],
+    ["R360_1.oma","Tracé R360_1 (360 rayons)"],
+    ["R360_2.oma","Tracé R360_2 (360 rayons)"],
+    ["R360_3.oma","Tracé R360_3 (360 rayons)"],
+    ["STHKFMT.oma","Tracé STHKFMT (360 rayons)"]
+  ];
+  const trace=window.OMATrace, state={shapes:[],datasets:[],current:null};
+  const id=n=>document.getElementById(n);
+  const fmt=n=>n.toFixed(2).replace(".",",");
+  const option=(v,t)=>{const el=document.createElement("option");el.value=v;el.textContent=t;return el};
+  const escapeFilename=s=>s.replace(/[^\w. -]/g,"").slice(0,70);
+  function selected(){
+    const hub=state.shapes.find(s=>s.key===id("hub").value);
+    const reference=state.datasets.find(d=>d.name===id("oma").value);
+    const side=id("side").value;
+    const oma=reference&&reference.data.traces.find(t=>t.side===side);
+    return {hub,reference,oma,side};
+  }
+  function renderSvg(svg,drawings,scale){
+    svg.replaceChildren();
+    for(const item of drawings){
+      if(!item.points||!item.points.length)continue;
+      const d=item.points.map((p,i)=>{
+        const x=180+p[0]*scale,y=140-p[1]*scale;
+        return (i?"L":"M")+x.toFixed(3)+" "+y.toFixed(3);
+      }).join(" ")+" Z";
+      const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d",d);path.setAttribute("fill",item.fill||"none");
+      path.setAttribute("stroke",item.stroke);path.setAttribute("stroke-width",item.strokeWidth||2.8);
+      path.setAttribute("stroke-linejoin","round");
+      svg.appendChild(path);
+    }
+  }
+  function coords(s,side){
+    const sign=side==="R"?-1:1;
+    return s.pts.map(p=>[p[0]*s.A/2*sign,p[1]*s.B/2]);
+  }
+  function omaCoords(oma,hub,side,resize,flip){
+    const bb=trace.bounds(oma.points),sign=(side==="R"?-1:1)*(flip?-1:1);
+    return oma.points.map(p=>{
+      const x=p[0]-bb.cx,y=p[1]-bb.cy;
+      return [x*sign*(resize?hub.A/bb.width:1),y*(resize?hub.B/bb.height:1)];
+    });
+  }
+  function errorFor(hub,oma,side,flip){
+    return trace.similarity(coords(hub,side),omaCoords(oma,hub,side,true,flip));
+  }
+  function redraw(){
+    const {hub,oma,reference,side}=selected();
+    if(!hub||!oma){id("status").textContent="Cette référence n'a pas de tracé pour l'œil choisi.";return;}
+    const resize=id("boxing").checked,flip=id("mirror").checked;
+    const h=coords(hub,side),o=omaCoords(oma,hub,side,resize,flip);
+    const b=trace.bounds(oma.points);
+    const maxDimension=Math.max(hub.A,b.width*(resize?hub.A/b.width:1),hub.B,b.height*(resize?hub.B/b.height:1));
+    const scale=Math.min(308/Math.max(hub.A,resize?hub.A:b.width),228/Math.max(hub.B,resize?hub.B:b.height));
+    renderSvg(id("hub-svg"),[{points:h,stroke:"#b36e39",fill:"rgba(193,118,63,.10)"}],scale);
+    renderSvg(id("oma-svg"),[{points:o,stroke:"#1579ab",fill:"rgba(21,121,171,.10)"}],scale);
+    renderSvg(id("overlay"),[{points:h,stroke:"#b36e39"},{points:o,stroke:"#1579ab"}],scale);
+    id("hub-meta").textContent=hub.label+" · "+hub.A+" × "+hub.B+" mm";
+    id("oma-meta").textContent=reference.label+" · "+fmt(b.width)+" × "+fmt(b.height)+" mm";
+    id("hbox").textContent=hub.A+" × "+hub.B;
+    id("obox").textContent=fmt(b.width)+" × "+fmt(b.height);
+    id("rays").textContent=oma.points.length.toLocaleString("fr-FR");
+    const err=errorFor(hub,oma,side,flip);
+    id("error").textContent=fmt(err)+" %";
+    id("status").textContent=reference.name+": données de contour présentes. Orientation OMA à confirmer par le gabarit fabricant.";
+    ranking(hub,side,flip);
+  }
+  function ranking(hub,side,flip){
+    const candidates=state.datasets.map(d=>{
+      const oma=d.data.traces.find(t=>t.side===side);
+      if(!oma)return null;
+      try{return {name:d.name,label:d.label,error:errorFor(hub,oma,side,flip)}}catch(e){return null}
+    }).filter(Boolean).sort((a,b)=>a.error-b.error).slice(0,3);
+    id("ranking").replaceChildren();
+    for(const c of candidates){
+      const bt=document.createElement("button");
+      bt.type="button";bt.textContent=c.label+" · "+fmt(c.error)+" %";
+      bt.addEventListener("click",()=>{id("oma").value=c.name;redraw()});
+      id("ranking").appendChild(bt);
+    }
+  }
+  async function load(){
+    id("status").textContent="Chargement des tracés locaux…";
+    const response=await fetch("hub-shapes.json");
+    if(!response.ok)throw new Error("Gabarits du hub indisponibles.");
+    state.shapes=(await response.json()).shapes;
+    state.shapes.forEach(s=>id("hub").appendChild(option(s.key,s.label)));
+    const all=await Promise.all(samples.map(async ([name,label])=>{
+      try{
+        const response=await fetch("references-oma/"+name);
+        if(!response.ok)throw new Error("HTTP "+response.status);
+        return {name,label,data:trace.parse(await response.text())};
+      }catch(e){return {name,error:e.message}}
+    }));
+    state.datasets=all.filter(x=>x.data);
+    state.datasets.forEach(s=>id("oma").appendChild(option(s.name,s.label)));
+    if(!state.datasets.length)throw new Error("Aucune référence accessible. Ouvrez cette page depuis GitHub Pages ou un serveur HTTP local.");
+    id("hub").value="rectangle";
+    id("oma").value="R360_1.oma";
+    redraw();
+    const failures=all.filter(x=>x.error);
+    if(failures.length)id("status").textContent+=" "+failures.length+" référence(s) indisponible(s).";
+  }
+  ["hub","oma","side","boxing","mirror"].forEach(key=>id(key).addEventListener("change",redraw));
+  id("file").addEventListener("change",async e=>{
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    if(file.size>1500000){id("import-status").textContent="Fichier refusé : taille supérieure à 1,5 Mo.";return}
+    try{
+      const data=trace.parse(await file.text());
+      const name="import-local";
+      state.datasets=state.datasets.filter(d=>d.name!==name);
+      const label="Fichier local : "+escapeFilename(file.name);
+      state.datasets.push({name,label,data});
+      let entry=[...id("oma").options].find(o=>o.value===name);
+      if(!entry)id("oma").appendChild(option(name,label));else entry.textContent=label;
+      id("oma").value=name;
+      const side=data.traces.find(t=>t.side==="R")?"R":data.traces[0].side;
+      id("side").value=side;
+      id("import-status").textContent="Import local réussi : "+data.traces.length+" œil/yeux, aucune donnée enregistrée.";
+      redraw();
+    }catch(err){id("import-status").textContent="Import refusé : "+err.message}
+  });
+  load().catch(err=>{id("status").textContent="Chargement impossible : "+err.message});
+})();
+</script>
+</body>
+</html>
