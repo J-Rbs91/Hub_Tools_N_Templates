@@ -40,7 +40,7 @@
 <body>
 <header><a href="../../outils/epaisseur-verres/" id="back">← Retour au calculateur</a><h1>Laboratoire des formes OMA</h1><p>Comparer les gabarits du hub à des relevés numériques réels, sans les remplacer automatiquement.</p></header>
 <main>
-  <p class="lede">Les formes orange proviennent du calculateur d'épaisseur. Les formes bleues sont reconstruites à partir des rayons de fichiers OMA. Aucun lissage, aucune interpolation graphique et aucun point de correction ne sont ajoutés. Les fichiers chargés restent dans votre navigateur.</p>
+  <p class="lede">Les formes orange proviennent du calculateur d'épaisseur. Les formes bleues sont reconstruites à partir des rayons de fichiers OMA. L'affichage est pivoté de 180° conformément à l'orientation demandée. Aucun lissage, aucune interpolation graphique et aucun point de correction ne sont ajoutés. Les fichiers chargés restent dans votre navigateur.</p>
   <section class="card">
     <h2>Choisir les deux contours</h2>
     <div class="controls">
@@ -116,7 +116,8 @@
     for(const item of drawings){
       if(!item.points||!item.points.length)continue;
       const d=item.points.map((p,i)=>{
-        const x=180+p[0]*scale,y=140-p[1]*scale;
+        // Rotation de 180° de la vue, sans toucher aux coordonnées métier.
+        const x=180-p[0]*scale,y=140+p[1]*scale;
         return (i?"L":"M")+x.toFixed(3)+" "+y.toFixed(3);
       }).join(" ")+" Z";
       const path=document.createElementNS("http://www.w3.org/2000/svg","path");
