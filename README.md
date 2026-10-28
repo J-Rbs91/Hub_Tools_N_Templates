@@ -15,7 +15,7 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 |---|---|---|
 | [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
 | [Clôture de caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
-| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi, Ø mini du palet) selon la correction, l'indice et la forme de monture (côtes A / B / D), décentrement OD / OG et visualisation 3D manipulable | Disponible |
+| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul de l'épaisseur d'un verre ophtalmique avec 7 contours OMA réels (360 à 1 000 rayons par œil), 9 gabarits historiques inchangés, côtes A/B/D, décentrement OD/OG et visualisation 3D | Disponible |
 | [Campagne e-mail](outils/campagne-email/) | CRM simplifié : modèle CSV fourni, import de la liste d'adresses vérifiées, rédaction du message avec variables de personnalisation, suivi des envois contact par contact, liste d'exclusion persistante | **Bientôt** — annoncé mais non ouvert |
 
 > **Campagne e-mail — pourquoi l'outil n'est pas ouvert.** Il est terminé et testé, mais écrire à une
