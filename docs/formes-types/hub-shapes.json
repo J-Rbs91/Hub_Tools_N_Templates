@@ -1,5 +1,5 @@
 {
-  "note": "Instantané vérifiable des neuf gabarits natifs de outils/epaisseur-verres/index.html. Ne pas éditer manuellement.",
+  "note": "Instantané des neuf gabarits AVANT leur rotation de 180° en production. Conserve les noms, les cotes A/B et les points d'origine comme preuve de la transformation, et sert de source au comparateur OMA dont la vue est pivotée.",
   "shapes": [
     {
       "key": "rectangle",
