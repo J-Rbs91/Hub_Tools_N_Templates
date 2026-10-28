@@ -53,7 +53,7 @@ for(const [name,n] of [
 test('la rotation conserve les dimensions et les contours angulaires', () => {
   const original=JSON.parse(source('docs/formes-types/hub-shapes.json')).shapes;
   const code=source('outils/epaisseur-verres/index.html');
-  const block=code.match(/var SHAPES\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});/);
+  const block=code.match(/var SHAPES\s*=\s*(\{[\s\S]*?\n\s*\});/);
   const rotated=runInNewContext('(' + block[1] + ')');
   for(const entry of original){
     const now=rotated[entry.key];
@@ -84,7 +84,7 @@ test('les coordonnées normalisées respectent le boxing',()=>{
   assert.ok(Math.abs(bb.height-2)<1e-9);
   assert.ok(normalized.every(x=>x.every(Number.isFinite)));
 });
-test('le laboratoire est disponible sans modification des formes du calculateur',()=>{
+test('le laboratoire conserve une référence traçable des formes du calculateur',()=>{
   const html=source('docs/formes-types/oma-comparateur.html');
   assert.match(html, /src="oma-trace\.js"/);
   assert.match(html, /hub-shapes\.json/);
