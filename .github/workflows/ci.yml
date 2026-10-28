@@ -84,7 +84,7 @@ jobs:
       - name: Convexité des gabarits de verres
         run: node --test tests/epaisseur-verres-formes.test.mjs
       - name: Références OMA et synchronisation des formes
-        run: node --test tests/oma-formes.test.mjs
+        run: node --test tests/oma-formes.test.mjs tests/oma-calculateur.test.mjs
 
   navigation:
     name: Contrat de navigation arrière
