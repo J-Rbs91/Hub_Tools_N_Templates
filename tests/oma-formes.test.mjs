@@ -23,7 +23,7 @@ test('les neuf gabarits du comparateur sont synchronisés avec le calculateur', 
     assert.equal(item.label, shapes[item.key].label);
     assert.deepEqual(
       JSON.parse(JSON.stringify(shapes[item.key].pts)),
-      item.pts.map(([x,y])=>[-x,-y]),
+      item.pts.map(([x,y])=>[x===0?0:-x,y===0?0:-y]),
       'La rotation de 180° doit être exacte, sans autre modification de contour'
     );
   }
