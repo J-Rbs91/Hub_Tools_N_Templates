@@ -54,7 +54,8 @@ PERFORMANCE OF THIS SOFTWARE.
     Portée :          sept fichiers de tracés des yeux R/L, prescriptions retirées
     Réserve :         droits éventuels sur les dessins de montures tiers non établis
 
-Les fichiers ne sont pas utilisés par les calculs d'épaisseur et leur usage reste
-limité au laboratoire de comparaison. Le texte de la licence et les précautions
+Depuis HF-023, le calculateur d'épaisseur embarque les rayons OMA en données numériques
+pour la simulation des épaisseurs OD/OG. Les fichiers ne sont pas certifiés pour
+le taillage d'un verre client, et les droits industriels sous-jacents restent à vérifier. Le texte de la licence et les précautions
 relatives aux fichiers fabricants figurent dans
 [references-oma/NOTICE.md](docs/formes-types/references-oma/NOTICE.md).
