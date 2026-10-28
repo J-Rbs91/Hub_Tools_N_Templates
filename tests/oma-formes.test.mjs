@@ -23,8 +23,8 @@ test('les neuf gabarits du comparateur sont synchronisés avec le calculateur', 
     assert.equal(item.label, shapes[item.key].label);
     assert.deepEqual(
       JSON.parse(JSON.stringify(shapes[item.key].pts)),
-      item.pts.map(([x,y])=>[x===0?0:-x,y===0?0:-y]),
-      'La rotation de 180° doit être exacte, sans autre modification de contour'
+      item.pts,
+      'Les neuf gabarits doivent conserver leur orientation et leur géométrie d’origine'
     );
   }
 });
@@ -50,23 +50,16 @@ for(const [name,n] of [
   });
 }
 
-test('la rotation conserve les dimensions et les contours angulaires', () => {
-  const original=JSON.parse(source('docs/formes-types/hub-shapes.json')).shapes;
-  const code=source('outils/epaisseur-verres/index.html');
-  const block=code.match(/var SHAPES\s*=\s*(\{[\s\S]*?\n\s*\});/);
-  const rotated=runInNewContext('(' + block[1] + ')');
-  for(const entry of original){
-    const now=rotated[entry.key];
-    const oldPts=entry.pts, newPts=now.pts;
-    assert.equal(newPts.length,72);
-    assert.equal(now.label,entry.label);
-    assert.equal(now.defA,entry.A); assert.equal(now.defB,entry.B);
-    for(let i=0;i<72;i++){
-      const [x,y]=oldPts[i], [rx,ry]=newPts[i];
-      assert.ok(Math.abs(x+rx)<1e-12,entry.key+' x '+i);
-      assert.ok(Math.abs(y+ry)<1e-12,entry.key+' y '+i);
-      assert.ok(Math.abs(x*x+y*y-rx*rx-ry*ry)<1e-12);
-    }
+test('toutes les silhouettes du calculateur sont identiques aux originaux', () => {
+  const snap=JSON.parse(source('docs/formes-types/hub-shapes.json')).shapes;
+  const html=source('outils/epaisseur-verres/index.html');
+  const block=html.match(/var SHAPES\s*=\s*(\{[\s\S]*?\n\s*\});/);
+  const live=runInNewContext('(' + block[1] + ')');
+  for(const orig of snap){
+    assert.equal(live[orig.key].label,orig.label);
+    assert.equal(live[orig.key].defA,orig.A);
+    assert.equal(live[orig.key].defB,orig.B);
+    assert.deepEqual(JSON.parse(JSON.stringify(live[orig.key].pts)),orig.pts);
   }
 });
 
