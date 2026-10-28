@@ -182,17 +182,30 @@ l'identité d'une monture ni le droit de redistribution. Une proposition de
 remplacement requiert un modèle vérifié, la bonne orientation et un relevé
 physique concordant, suivi des tests de convexité et de calcul d'épaisseur.
 
-## 9. Orientation des neuf gabarits natifs (rotation de 180°)
+## 9. Import direct des sept tracés OMA dans le calculateur
 
-La forme choisie par l'utilisateur est maintenant enregistrée dans le calculateur
-avec une rotation réelle de 180° de ses coordonnées (x,y) vers (-x,-y),
-conformément à la validation visuelle. Tous les noms, les clés et les cotes
-A/B sont inchangés. La rotation est appliquée aux points servant au calcul,
-pas seulement à l'aperçu. Elle peut donc modifier les épaisseurs localisées
-avec le décentrement et l'axe de correction, ce qui est attendu.
+Le calculateur utilise désormais les **vrais rayons OMA**, sans les lisser ni les
+réduire à 72 points : trois modèles Silhouette comportent 1 000 rayons/œil,
+quatre autres 360 rayons/œil. Les deux yeux des fichiers sont conservés
+séparément, dans le repère temporal/haut attendu par le moteur de calcul.
 
-Le fichier `hub-shapes.json` conserve les **points d'origine avant rotation**
-à des fins d'audit. Le laboratoire les pivote de 180° à l'affichage : les formes
-vues dans le laboratoire correspondent aux formes actuellement livrées.
-Le test `tests/oma-formes.test.mjs` vérifie que la rotation est exacte et qu'aucun
-nom, cote ou point supplémentaire n'a été modifié.
+Le sélecteur présente d'abord les sept références OMA sous leur nom d'origine,
+puis les **neuf formes historiques sous leur nom inchangé**. L'ancien contour
+des neuf formes est restauré tel qu'il apparaît dans le fichier
+\`hub-shapes.json\` ; aucune rotation de 180° ne leur est appliquée.
+La rotation mentionnée dans les échanges précédents concernait seulement
+un rendu graphique incorrect des contours OMA.
+
+La côte A/B initiale des références OMA découle du boxing des rayons réels ;
+l'utilisateur peut ensuite saisir les cotes de sa monture et le moteur adapte
+la silhouette à ce boxing, comme pour les gabarits historiques.
+
+Le moteur exploite intégralement les 360 ou 1 000 sommets : sa recherche
+d'intersection utilise une recherche dichotomique de l'arête radiale et calcule
+l'intersection géométrique exacte. Il ne resample ni ne lisse les données OMA.
+La sélection OMA affecte les épaisseurs, Ø minimum et rendus du calculateur.
+
+**Réserve** : les fichiers de référence ne prouvent pas la conformité à
+l'atelier d'une monture de client ; le résultat est une estimation et
+les droits de diffusion des gabarits fabricants sont à vérifier
+(voir \`references-oma/NOTICE.md\`).
