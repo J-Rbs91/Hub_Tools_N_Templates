@@ -1,7 +1,7 @@
 # Données OMA d'exemple : provenance et portée
 
-Ces sept fichiers servent de **références de test et de comparaison**, pas de gabarits
-validés à monter sur des verres de client. Ils sont dérivés des exemples publics
+Ces sept fichiers servent de **références numériques de formes utilisées par le calculateur d'épaisseur**,
+mais ne constituent pas des gabarits certifiés permettant le taillage de verres clients sans contrôle physique. Ils sont dérivés des exemples publics
 du dépôt [eeng/lens_protocol](https://github.com/eeng/lens_protocol),
 répertoire `examples/oma/`. Licence consultée le 27 octobre 2026 :
 `LICENSE.txt` du dépôt, libellée MIT, copyright (c) 2019 Emmanuel Nicolau.
@@ -16,9 +16,9 @@ Les fichiers portant `FMFR=SILHOUETTE` correspondent à des références
 étiquetées dans les exemples de `lens_protocol`, non à une certification
 officielle Silhouette. La licence du projet d'exemple n'établit pas, à elle
 seule, la propriété intellectuelle des tracés industriels sous-jacents.
-En conséquence, **ne pas diffuser ces tracés comme bibliothèque de formes
-commercialement certifiées**, ni les utiliser pour remplacer des gabarits de
-production sans vérification des droits et relevé physique concordant.
+En conséquence, **ne pas présenter ces tracés comme une bibliothèque de formes
+commercialement certifiées** ; pour tout taillage réel, vérifier les droits,
+la référence de monture et la concordance au gabarit physique avant usage.
 
 Fichiers :
 - R1000_1.oma : référence `FMFR=SILHOUETTE; FRAM=1559`, 1 000 rayons/œil.
@@ -29,8 +29,9 @@ Fichiers :
 - R360_3.oma : 360 rayons/œil.
 - STHKFMT.oma : 360 rayons/œil.
 
-Le format est analysé par le laboratoire local `../oma-comparateur.html`
-en vue de comparaison, jamais importé par le moteur d'épaisseur.
+Le calculateur `../../../outils/epaisseur-verres/index.html` embarque les rayons bruts de ces sept fichiers
+pour calculer les épaisseurs et les profils OD/OG ; le laboratoire `../oma-comparateur.html`
+permet toujours leur comparaison. Les anciennes neuf familles ne sont pas remplacées.
 
 ## Mention de licence de la source
 
