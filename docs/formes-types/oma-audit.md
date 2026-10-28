@@ -57,3 +57,14 @@ Tests structurels automatisés sur les fichiers et le parser réalisés
 par la CI. Une vérification de l'interface sur appareil réel et une
 comparaison avec les gabarits physiques ne sont **pas** encore prouvées
 par ce rapport.
+
+## Actualisation HF-023 (28 octobre 2026)
+
+Les sept références OMA présentées ici sont maintenant directement sélectionnables
+et utilisées dans le calculateur pour estimer l'épaisseur. Cette intégration
+ne **substitue pas** un relevé OMA à l'une des neuf familles : chaque entrée OMA
+a sa propre référence et conserve ses 360 ou 1 000 rayons par œil.
+Les neuf familles historiques sont restaurées **sans rotation** et sans renommage.
+Les rotations de la galerie précédente n'étaient qu'une correction de présentation.
+Les indices de proximité ci-dessus restent des indicateurs exploratoires,
+pas des recommandations de remplacement automatique ni de taillage.
