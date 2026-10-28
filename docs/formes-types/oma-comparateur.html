@@ -40,7 +40,7 @@
 <body>
 <header><a href="../../outils/epaisseur-verres/" id="back">← Retour au calculateur</a><h1>Laboratoire des formes OMA</h1><p>Comparer les gabarits du hub à des relevés numériques réels, sans les remplacer automatiquement.</p></header>
 <main>
-  <p class="lede">Les formes orange proviennent du calculateur d'épaisseur. Les formes bleues sont reconstruites à partir des rayons de fichiers OMA. L'affichage est pivoté de 180° conformément à l'orientation demandée. Aucun lissage, aucune interpolation graphique et aucun point de correction ne sont ajoutés. Les fichiers chargés restent dans votre navigateur.</p>
+  <p class="lede">Les formes orange proviennent du calculateur d'épaisseur. Les formes bleues sont reconstruites à partir des rayons de fichiers OMA. Les formes historiques sont affichées dans leur repère d'origine ; les tracés OMA suivent l'orientation visuelle validée, sans transformation des gabarits historiques. Aucun lissage, aucune interpolation graphique et aucun point de correction ne sont ajoutés. Les fichiers chargés restent dans votre navigateur.</p>
   <section class="card">
     <h2>Choisir les deux contours</h2>
     <div class="controls">
@@ -116,8 +116,8 @@
     for(const item of drawings){
       if(!item.points||!item.points.length)continue;
       const d=item.points.map((p,i)=>{
-        // Rotation de 180° de la vue, sans toucher aux coordonnées métier.
-        const x=180-p[0]*scale,y=140+p[1]*scale;
+        // Orientation propre à chaque source, sans transformation des gabarits historiques.
+        const x=180+p[0]*scale,y=140-p[1]*scale;
         return (i?"L":"M")+x.toFixed(3)+" "+y.toFixed(3);
       }).join(" ")+" Z";
       const path=document.createElementNS("http://www.w3.org/2000/svg","path");
@@ -132,10 +132,10 @@
     return s.pts.map(p=>[p[0]*s.A/2*sign,p[1]*s.B/2]);
   }
   function omaCoords(oma,hub,side,resize,flip){
-    const bb=trace.bounds(oma.points),sign=(side==="R"?-1:1)*(flip?-1:1);
+    const bb=trace.bounds(oma.points),sign=(side==="R"?1:-1)*(flip?-1:1);
     return oma.points.map(p=>{
       const x=p[0]-bb.cx,y=p[1]-bb.cy;
-      return [x*sign*(resize?hub.A/bb.width:1),y*(resize?hub.B/bb.height:1)];
+      return [x*sign*(resize?hub.A/bb.width:1),-y*(resize?hub.B/bb.height:1)];
     });
   }
   function errorFor(hub,oma,side,flip){
