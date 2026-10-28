@@ -21,7 +21,11 @@ test('les neuf gabarits du comparateur sont synchronisés avec le calculateur', 
     assert.equal(item.A, shapes[item.key].defA);
     assert.equal(item.B, shapes[item.key].defB);
     assert.equal(item.label, shapes[item.key].label);
-    assert.deepEqual(item.pts, JSON.parse(JSON.stringify(shapes[item.key].pts)));
+    assert.deepEqual(
+      JSON.parse(JSON.stringify(shapes[item.key].pts)),
+      item.pts.map(([x,y])=>[-x,-y]),
+      'La rotation de 180° doit être exacte, sans autre modification de contour'
+    );
   }
 });
 
@@ -45,6 +49,26 @@ for(const [name,n] of [
     assert.doesNotMatch(source('docs/formes-types/references-oma/'+name),/^(JOB|SPH|CYL|ADD|PATIENT|ACCN)=/m);
   });
 }
+
+test('la rotation conserve les dimensions et les contours angulaires', () => {
+  const original=JSON.parse(source('docs/formes-types/hub-shapes.json')).shapes;
+  const code=source('outils/epaisseur-verres/index.html');
+  const block=code.match(/var SHAPES\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});/);
+  const rotated=runInNewContext('(' + block[1] + ')');
+  for(const entry of original){
+    const now=rotated[entry.key];
+    const oldPts=entry.pts, newPts=now.pts;
+    assert.equal(newPts.length,72);
+    assert.equal(now.label,entry.label);
+    assert.equal(now.defA,entry.A); assert.equal(now.defB,entry.B);
+    for(let i=0;i<72;i++){
+      const [x,y]=oldPts[i], [rx,ry]=newPts[i];
+      assert.ok(Math.abs(x+rx)<1e-12,entry.key+' x '+i);
+      assert.ok(Math.abs(y+ry)<1e-12,entry.key+' y '+i);
+      assert.ok(Math.abs(x*x+y*y-rx*rx-ry*ry)<1e-12);
+    }
+  }
+});
 
 test('refuser les formats non pris en charge plutôt que dessiner une fausse forme',()=>{
   assert.throws(()=>OMA.parse('TRCFMT=6;360;E;R;F\nR=1234\n'),/non compatible/);
