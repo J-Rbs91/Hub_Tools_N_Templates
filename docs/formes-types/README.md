@@ -166,3 +166,33 @@ la forme est mémorisée dans le navigateur du poste, elle ne rejoint pas le dé
 
 La présente procédure sert à l'autre besoin : faire entrer une forme dans les **gabarits livrés
 avec l'outil**, pour tout le monde.
+
+---
+
+## 8. Comparer les gabarits aux relevés OMA
+
+Le [laboratoire OMA](oma-comparateur.html) compare les neuf contours natifs aux
+relevés de traceurs présents dans [references-oma](references-oma/NOTICE.md).
+Il permet de charger un fichier OMA ASCII absolu en local, d'afficher le contour
+sans points superposés, de comparer les boxings à taille réelle ou normalisée
+et de rechercher les références proches dans la petite bibliothèque.
+
+**Aucun remplacement automatique** : la similitude d'une forme n'établit ni
+l'identité d'une monture ni le droit de redistribution. Une proposition de
+remplacement requiert un modèle vérifié, la bonne orientation et un relevé
+physique concordant, suivi des tests de convexité et de calcul d'épaisseur.
+
+## 9. Orientation des neuf gabarits natifs (rotation de 180°)
+
+La forme choisie par l'utilisateur est maintenant enregistrée dans le calculateur
+avec une rotation réelle de 180° de ses coordonnées (x,y) vers (-x,-y),
+conformément à la validation visuelle. Tous les noms, les clés et les cotes
+A/B sont inchangés. La rotation est appliquée aux points servant au calcul,
+pas seulement à l'aperçu. Elle peut donc modifier les épaisseurs localisées
+avec le décentrement et l'axe de correction, ce qui est attendu.
+
+Le fichier `hub-shapes.json` conserve les **points d'origine avant rotation**
+à des fins d'audit. Le laboratoire les pivote de 180° à l'affichage : les formes
+vues dans le laboratoire correspondent aux formes actuellement livrées.
+Le test `tests/oma-formes.test.mjs` vérifie que la rotation est exacte et qu'aucun
+nom, cote ou point supplémentaire n'a été modifié.
