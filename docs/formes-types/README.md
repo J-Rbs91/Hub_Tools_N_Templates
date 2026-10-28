@@ -182,17 +182,17 @@ l'identité d'une monture ni le droit de redistribution. Une proposition de
 remplacement requiert un modèle vérifié, la bonne orientation et un relevé
 physique concordant, suivi des tests de convexité et de calcul d'épaisseur.
 
-## 9. Orientation des neuf gabarits natifs (rotation de 180°)
+## 9. Orientation des gabarits et tracés OMA
 
-La forme choisie par l'utilisateur est maintenant enregistrée dans le calculateur
-avec une rotation réelle de 180° de ses coordonnées (x,y) vers (-x,-y),
-conformément à la validation visuelle. Tous les noms, les clés et les cotes
-A/B sont inchangés. La rotation est appliquée aux points servant au calcul,
-pas seulement à l'aperçu. Elle peut donc modifier les épaisseurs localisées
-avec le décentrement et l'axe de correction, ce qui est attendu.
+La rotation de 180° précédemment appliquée aux neuf gabarits dans
+`outils/epaisseur-verres/index.html` était une erreur d'interprétation.
+La demande de rotation concernait **uniquement un rendu de galerie**.
 
-Le fichier `hub-shapes.json` conserve les **points d'origine avant rotation**
-à des fins d'audit. Le laboratoire les pivote de 180° à l'affichage : les formes
-vues dans le laboratoire correspondent aux formes actuellement livrées.
-Le test `tests/oma-formes.test.mjs` vérifie que la rotation est exacte et qu'aucun
-nom, cote ou point supplémentaire n'a été modifié.
+La correction a restauré les neuf contours et leurs noms **exactement**
+à l'état d'origine. Le fichier `hub-shapes.json` sert de témoin et les tests
+vérifient cette identité.
+
+Le besoin fonctionnel en attente est distinct : **trouver neuf vrais fichiers
+OMA représentatifs, un par famille, pour remplacer chaque contour historique
+sans modifier son nom**, après contrôle de l'orientation OD/OG, des proportions
+et de l'allure réelle. Voir [issue #91](https://github.com/J-Rbs91/Hub_Tools_N_Templates/issues/91).
