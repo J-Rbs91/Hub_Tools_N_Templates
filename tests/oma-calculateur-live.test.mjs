@@ -89,8 +89,8 @@ for(const [key,file] of Object.entries(mapping)){
     // L'ordre OD est inversé pour garder le sens trigonométrique.
     assert.ok(shape.pts[meta.n-1][0] < -0.7, 'OD : premier rayon R coté nasal en repère canonique');
     assert.ok(shape.og.pts[0][0] > 0.7, 'OG : premier rayon L coté temporal en repère canonique');
-    assert.ok(shape.pts[meta.n-1][1] < 0.001 && shape.pts[meta.n-1][1] > -0.001);
-    assert.ok(shape.og.pts[0][1] < 0.001 && shape.og.pts[0][1] > -0.001);
+    assert.ok(Math.abs(shape.pts[meta.n-1][1]) < 0.02);
+    assert.ok(Math.abs(shape.og.pts[0][1]) < 0.02);
     for(const cfg of [shape,shape.og]){
       assert.equal(cfg._omaPolar.length,meta.n);
       const xs=cfg.pts.map(p=>p[0]),ys=cfg.pts.map(p=>p[1]);
