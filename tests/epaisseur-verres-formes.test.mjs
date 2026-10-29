@@ -52,15 +52,17 @@ for (const [key, shape] of Object.entries(shapes)) {
 }
 
 test('parcours UXER : les sept sections métiers restent navigables', () => {
-  const sections = ['form-shape', 'form-monture', 'form-verre', 'form-prescription', 'results', 'view-3d', 'profiles'];
+  const sections = ['form-shape', 'form-monture', 'form-verre', 'form-measures', 'view-3d', 'profiles'];
   for (const id of sections) {
     assert.equal((html.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, 'section absente ou dupliquée : ' + id);
     assert.ok(html.includes('href="#' + id + '"'), 'lien de navigation absent : ' + id);
   }
-  const resultsAt = html.indexOf('id="results"');
+  const viewsAt = html.indexOf('id="profiles"');
   const visualsAt = html.indexOf('id="view-3d"');
   const outputsAt = html.indexOf('class="layout-col layout-col--results"');
-  assert.ok(outputsAt < resultsAt && resultsAt < visualsAt, 'résultats attendus avant la 3D dans la colonne de droite');
+  const summaryAt = html.indexOf('class="thickness-summary"');
+  assert.ok(outputsAt < visualsAt && visualsAt < viewsAt && viewsAt < summaryAt,
+    'la 3D doit précéder les vues, avec la synthèse dans la section analyse');
 });
 
 test('parcours UXER : champs OD/OG, monture et assistant photo préservés', () => {
@@ -81,5 +83,10 @@ test('parcours UXER : champs OD/OG, monture et assistant photo préservés', () 
   for (const id of ids) assert.ok(allIds.includes(id), 'contrôle métier absent : ' + id);
   assert.match(html, /aria-pressed.*currentShape/);
   assert.match(html, /class="advanced-panel" id="mount-settings"/);
-  assert.match(html, /data-label="½ écart"/);
+  assert.match(html, /class="advanced-panel frame-customization" id="frame-customization"/);
+  assert.match(html, /type="checkbox" id="btn-11"/);
+  assert.match(html, /id="frame-options"/);
+  assert.match(html, /class="thickness-summary"/);
+  assert.match(html, /for="od-pd">½ écart pupillaire/);
+  assert.match(html, /for="og-h">Hauteur/);
 });
