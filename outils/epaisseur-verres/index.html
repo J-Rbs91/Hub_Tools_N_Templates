@@ -1116,15 +1116,14 @@
     function installOmaShapes() {
       var collection = window.OMA_SHAPE_DATA;
       if (!collection) { return false; }
-      var keys = Object.keys(collection);
-      if (keys.length !== 8 || keys.some(function (k) { return SHAPE_KEYS.indexOf(k) < 0 || k === 'hexagone'; })) {
-        throw new Error('Bibliothèque OMA inattendue');
-      }
-      // Validation intégrale en mémoire, puis remplacement atomique.
-      var next = {};
-      keys.forEach(function (key) {
-        var src = collection[key], shape = SHAPES[key];
-        if (!shape || (src.n !== 360 && src.n !== 1000)) { throw new Error('Source OMA inattendue : '+key); }
+      // Éviter tout accès en écriture avec un nom de propriété dynamique :
+      // les huit emplacements OMA sont fixes et contrôlés par le code.
+      if (Object.keys(collection).length !== 8) { throw new Error('Bibliothèque OMA inattendue'); }
+      function make(key, src) {
+        var shape = SHAPES[key];
+        if (!shape || !src || (src.n !== 360 && src.n !== 1000)) {
+          throw new Error('Source OMA inattendue : '+key);
+        }
         var od = omaAsContour(src.od,'od',src.n);
         var og = omaAsContour(src.og,'og',src.n);
         od.label = shape.label;
@@ -1133,9 +1132,25 @@
         od.omaSource = src.source;
         od.og = og;
         og.omaSource = src.source;
-        next[key] = od;
-      });
-      keys.forEach(function (key) { SHAPES[key] = next[key]; });
+        return od;
+      }
+      // Préparer les huit côtés d'abord ; ne remplacer qu'après succès complet.
+      var rectangle = make('rectangle',collection.rectangle);
+      var rectangleDoux = make('rectangledoux',collection.rectangledoux);
+      var carree = make('carree',collection.carree);
+      var pantos = make('pantos',collection.pantos);
+      var papillon = make('papillon',collection.papillon);
+      var ronde = make('ronde',collection.ronde);
+      var pilote = make('pilote',collection.pilote);
+      var ovale = make('ovale',collection.ovale);
+      SHAPES.rectangle = rectangle;
+      SHAPES.rectangledoux = rectangleDoux;
+      SHAPES.carree = carree;
+      SHAPES.pantos = pantos;
+      SHAPES.papillon = papillon;
+      SHAPES.ronde = ronde;
+      SHAPES.pilote = pilote;
+      SHAPES.ovale = ovale;
       return true;
     }
     var omaLoaded = installOmaShapes();
