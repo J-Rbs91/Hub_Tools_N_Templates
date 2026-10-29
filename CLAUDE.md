@@ -139,9 +139,9 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
    "Précédent" pops. Full contract, rationale and the six manual checks: `docs/navigation-retour.md`.
    `tests/navigation-retour.test.mjs` guards the structure in CI.
 9. **Visit counter** — copy the three pieces from an existing tool: the two GoatCounter hosts in
-   the CSP, the `<p class="mesure-note">` line with its style (hidden in `@media print`), and the
-   `<script data-goatcounter…>` before `</body>`. Without them the tool is invisible in the
-   dashboard, which is the whole point of counting per path.
+   the CSP and the `<script data-goatcounter…>` before `</body>`. Do not reintroduce a visible
+   tracking notice on tool screens; usage information lives exclusively in `cgu/index.html`.
+   Without the script the tool is invisible in the visit dashboard.
 
 ## Local checks (mirror CI — there are no app tests)
 
