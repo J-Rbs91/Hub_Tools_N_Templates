@@ -1,0 +1,81 @@
+/* UXER · Direction 03 : Répertoire professionnel.
+   Hub uniquement. Les outils conservent des CSS autonomes. */
+:root {
+  --blue-900:#23382f; --blue-800:#344b3f; --blue-d:#354e42;
+  --blue:#425d4f; --blue-300:#a4b4a7; --blue-100:#e1e7df;
+  --blue-50:#f0f2ed; --sky:#668a74;
+  --ink:#252a27; --ink-2:#37443b; --text-muted:#59685e; --muted-2:#717e75;
+  --border:#c9d0c8; --line:#d7dbd3; --bg:#f5f3ed; --card-bg:#fffefa;
+  --r-sm:4px; --r-md:5px; --r-lg:6px; --e-1:none;
+}
+html{scroll-behavior:auto}
+body{background:var(--bg);color:var(--ink)}
+.optic,.today,.hero__greet,.tool-card__icon,.tool-card__more,.tool-card__note{display:none}
+.topbar{background:var(--bg);color:var(--ink);border-bottom:1px solid var(--line)}
+.topbar__inner{max-width:960px;min-height:68px;padding:13px 26px}
+.brand{gap:10px}
+.brand__mark{background:transparent;border:1px solid var(--blue);border-radius:50%;width:29px;height:29px}
+.brand__mark svg{width:19px;height:19px;stroke:var(--blue-d);stroke-width:1.6}
+.brand__mark svg *{animation:none!important}
+.brand__name{font-size:13px;font-weight:700;letter-spacing:-.01em}
+.brand__meta{color:var(--text-muted);font-size:11px}
+.topbar__link{color:var(--blue-d);font-weight:600;border-radius:0;padding:8px 3px}
+.topbar__link:hover{color:var(--ink);background:transparent;text-decoration:underline;text-underline-offset:4px}
+.store-settings-btn{color:var(--blue-d);background:transparent;border:0;border-bottom:1px solid var(--blue);border-radius:0;padding:6px 0;font-size:12px;font-weight:650}
+.store-settings-btn:hover{background:transparent;color:var(--ink)}
+.topbar a:focus-visible,.topbar button:focus-visible,.skip-link:focus-visible{outline:2px solid var(--blue-d);outline-offset:4px}
+.main{max-width:960px;padding:50px 36px 56px}
+.hero{display:block;margin-bottom:40px}
+.hero__eyebrow{font-size:10px;font-weight:700;color:var(--blue-d);letter-spacing:.12em;text-transform:uppercase}
+.hero__headline{margin:12px 0 8px;color:var(--ink);font-size:clamp(34px,5vw,46px);font-weight:620;letter-spacing:-.055em;line-height:1.15}
+.hero__sub{font-size:13px;color:var(--text-muted);margin:0}
+.sec{margin:30px 0 12px}
+.sec__title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.105em;color:var(--blue-d)}
+.sec__hint{display:none}
+#tools-grid{display:block;counter-reset:tools;list-style:none;border-top:1px solid #afb9af;margin:0}
+.tool-card,.tool-card--soon{
+  counter-increment:tools;display:grid;grid-template-columns:38px minmax(0,1fr) 20px;
+  grid-template-areas:"num head go" "num pitch go";gap:3px 12px;align-items:center;
+  min-height:76px;margin:0;padding:16px 4px 16px 0;background:transparent;border:0;
+  border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;transition:background .12s ease
+}
+.tool-card::before{content:counter(tools,decimal-leading-zero);grid-area:num;align-self:center;font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:11px;color:var(--muted-2);font-variant-numeric:tabular-nums}
+.tool-card:hover,.tool-card:focus-within{background:rgba(66,93,79,.045);border-color:var(--line);box-shadow:none}
+.tool-card__title{display:flex;grid-area:head;align-items:baseline;flex-wrap:wrap;gap:8px;min-width:0;font-size:15px;font-weight:650;letter-spacing:-.022em;line-height:1.35}
+.tool-card__link{font-size:inherit;font-weight:inherit;letter-spacing:inherit;color:var(--ink)}
+.tool-card__pitch{grid-area:pitch;color:var(--text-muted);font-size:11px;line-height:1.45;margin:0}
+.tool-card__go{display:block;grid-area:go;width:18px;height:18px;align-self:center;stroke:var(--blue-d);transition:transform .12s ease}
+.tool-card:hover .tool-card__go{stroke:var(--blue-d);transform:translate(2px,-2px)}
+.tool-card__badge,.badge{display:inline;color:var(--text-muted);background:transparent;border:0;border-radius:0;margin:0;padding:0;font-size:10px;font-weight:600;letter-spacing:0;text-transform:none}
+.tool-card--soon{opacity:.58;border-bottom:1px solid var(--line)}
+.tool-card--soon:hover{background:transparent;border-color:var(--line)}
+.tool-card__link:focus-visible::after{outline:2px solid var(--blue);outline-offset:-2px;border-radius:2px}
+.docs{display:block;list-style:none;border-top:1px solid #afb9af}
+.docs li{border-bottom:1px solid var(--line)}
+.doc{border:0;border-radius:0;padding:14px 0;background:transparent}
+.doc:hover{border-color:transparent;background:rgba(66,93,79,.045)}
+.doc__name{color:var(--ink);font-size:13px;font-weight:650;gap:10px}
+.doc__ico{color:var(--blue-d);stroke:var(--blue-d);width:17px;height:17px}
+.doc__desc{color:var(--text-muted);padding-left:27px;font-size:11px}
+.notice{border-radius:4px;box-shadow:none;background:var(--card-bg);color:var(--ink);border-color:var(--border)}
+.notice__txt{font-size:13px}
+.notice--setup .btn{background:var(--blue)}
+.modal{border:1px solid var(--line);border-radius:6px;box-shadow:0 22px 66px rgba(22,36,27,.22)}
+.modal__title{font-weight:650;letter-spacing:-.03em}
+.modal__hint,.sync-desc{color:var(--text-muted)}
+.field input,.field textarea,.cd-toggle,.cd-panel{border-radius:4px;background:#fffefa}
+.field input:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(66,93,79,.16)}
+.btn{border-radius:4px}.btn--primary{background:var(--blue)}.btn--primary:hover{background:var(--blue-d)}
+.btn--ghost{color:var(--ink-2);background:transparent}
+.site-footer{background:transparent;border-top:1px solid var(--line);color:var(--text-muted);padding:20px 15px 28px;font-size:11px;line-height:1.6}
+.footer-link{color:var(--blue-d);font-size:11px;text-decoration:none;font-weight:650}
+.footer-link:hover{text-decoration:underline}
+@media (max-width:720px){
+  .topbar__inner{padding:12px 16px;min-height:58px}
+  .main{padding:34px 18px 38px}.hero{margin-bottom:29px}.hero__headline{font-size:37px}
+  .tool-card{grid-template-columns:32px minmax(0,1fr) 18px;gap:3px 7px;min-height:73px;padding:13px 2px 13px 0}
+  .tool-card__title{font-size:14px}.tool-card__pitch{font-size:11px}.tool-card__go{display:block}
+  .brand__name{font-size:12px}.store-settings-btn{font-size:11px}.modal{padding:18px}
+}
+@media (max-width:370px){.brand__mark{display:none}.tool-card__badge,.badge{font-size:9px}.hero__headline{font-size:33px}}
+@media (prefers-reduced-motion:reduce){.tool-card,.tool-card__go{transition:none}}

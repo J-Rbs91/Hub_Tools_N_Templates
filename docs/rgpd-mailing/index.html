@@ -79,6 +79,24 @@
     .toc p { font-weight: 800; margin-bottom: 6px; }
     .toc ol { margin: 0 0 0 20px; }
     .toc li { margin-bottom: 3px; }
+
+    /* UXER : identité Répertoire professionnel. Mise en forme uniquement. */
+    :root {
+      --blue:#425d4f;--blue-d:#354e42;--ink:#252a27;--grey:#59685e;
+      --bg:#f5f3ed;--line:#d7dbd3;--border:#d7dbd3;--light:#ecf0e9;
+      --radius:5px;
+    }
+    body { background:#f5f3ed; color:var(--ink); }
+    body::before { display:none !important; animation:none !important; }
+    :where(a,button,input,select,textarea):focus-visible { outline-color:#425d4f; }
+    .ios-back { background:#354e42; box-shadow:0 4px 15px rgba(22,36,27,.18); border-radius:5px; }
+
+    .site-header { background:#f5f3ed; color:#252a27; border-bottom:1px solid #d7dbd3; }
+    .site-header h1 { color:#252a27; font-weight:650; letter-spacing:-.015em; }
+    .site-header .back-link { color:#354e42; border-color:#b5c0b7; border-radius:4px; }
+    .site-header .back-link:hover { background:#e7ece6; }
+    .panel { border-radius:5px; }
+    h2 { letter-spacing:-.018em; }
   </style>
 </head>
 <body>

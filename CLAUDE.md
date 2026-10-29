@@ -32,6 +32,17 @@ counting pages share one GoatCounter site, so each path is its own row in a sing
 if the site code ever changes, update the two hosts and the `data-goatcounter` URL together on
 every counting page.
 
+## Direction visuelle UXER en vigueur (2026-10-29)
+
+- Référence : `.uxer/identity.md`.
+- La direction 03 **Répertoire professionnel** est validée ; priorité au titrage, aux filets et aux lignes numérotées.
+- Le CSS effectif de l'accueil est `assets/css/hub.css` **puis** `assets/css/repertoire.css`. Les descriptions des cartes et variables bleues dans les sections historiques ci-dessous décrivent l'ancienne base, non la direction active.
+- Pour toute nouvelle ligne, donner un titre et une fonction courte ; éviter les détails expansibles et les animations décoratives.
+- N'ajouter aucun texte sur la confidentialité dans chaque carte. La transparence se traite dans le pied de page et les documents pertinents.
+- **Zone intouchable pour cette mission :** `outils/demande-ordonnance/index.html`, contenu et mise en page.
+- **Phase 2 exclusivement :** navigation et saisie de `outils/epaisseur-verres/index.html`. Dans cette première passe, seuls les styles de présentation peuvent évoluer.
+- Les outils existants restent des pages autonomes ; ne pas y importer la feuille de style du hub.
+
 ## Architecture
 
 - `index.html` (root) — the hub landing page. Each tool is one `<li class="tool-card">`

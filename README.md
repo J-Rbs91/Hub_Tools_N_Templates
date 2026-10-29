@@ -1,5 +1,12 @@
 # Hub Outils Internes
 
+## Direction UXER actuelle
+
+La direction retenue est **Répertoire professionnel** (03). Fond papier, liste numérotée, séparateurs fins, vocabulaire court et accent vert grisé. Les règles de continuité vivent dans [l'identité UXER](.uxer/identity.md).
+
+La page d'accueil charge `assets/css/hub.css` puis `assets/css/repertoire.css`. Les outils restent autonomes, avec leurs propres styles inline. La page **Demande / Ordonnance** est exclue de la refonte ; la navigation et la saisie du calculateur d'épaisseur sont réservées à une phase ultérieure.
+
+
 Site statique d'outils internes destiné aux magasins d'optique. Chaque magasin renseigne ses
 coordonnées **une seule fois** via le bouton « ⚙ Mon magasin » du hub : nom, adresse, téléphone
 et e-mail sont alors stockés localement dans le navigateur et réutilisés par tous les outils.
@@ -179,9 +186,9 @@ git grep -lIP '\r$' -- .          # pas de CRLF (LF uniquement)
 
 1. Créer `outils/<nom-de-l-outil>/index.html` : un **fichier unique autonome** (HTML + CSS inline +
    JS inline), sans dépendance ni bibliothèque tierce.
-2. Dans `index.html` (hub, à la racine), ajouter une carte `<li class="tool-card">` dans
-   `<ul id="tools-grid">`, en s'inspirant des cartes existantes : une phrase de bénéfice dans
-   `.tool-card__pitch`, le détail complet replié dans `<details class="tool-card__more">`.
+2. Dans `index.html`, ajouter une ligne `<li class="tool-card">` dans
+   `<ul id="tools-grid">` : titre explicite et fonction très courte dans `.tool-card__pitch`.
+   Le numéro est automatique via CSS. Les détails restent dans l'outil ou sa documentation.
 3. Réutiliser les variables CSS définies dans `assets/css/hub.css` (`--blue`, `--blue-d`, `--ink`,
    `--bg`…) pour la cohérence visuelle.
 4. Ajouter en haut de l'outil un lien « ← Retour » pointant vers `../../` (chemin relatif), plus le

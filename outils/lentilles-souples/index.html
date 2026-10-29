@@ -314,7 +314,27 @@
     position:absolute;width:1px;height:1px;padding:0;margin:-1px;
     overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
   }
-</style>
+
+    /* UXER : identité Répertoire professionnel. Mise en forme uniquement. */
+    :root {
+      --blue:#425d4f;--blue-d:#354e42;--ink:#252a27;--grey:#59685e;
+      --bg:#f5f3ed;--line:#d7dbd3;--border:#d7dbd3;--light:#ecf0e9;
+      --radius:5px;
+    }
+    body { background:#f5f3ed; color:var(--ink); }
+    body::before { display:none !important; animation:none !important; }
+    :where(a,button,input,select,textarea):focus-visible { outline-color:#425d4f; }
+    .ios-back { background:#354e42; box-shadow:0 4px 15px rgba(22,36,27,.18); border-radius:5px; }
+
+    .sheet { border-radius:5px; box-shadow:none; }
+    .sheet header { background:#f5f3ed; color:#252a27; border-bottom:1px solid #d7dbd3; }
+    .sheet header .meta { color:#59685e; }
+    .topbar { background:transparent; }
+    .topbar .back-link { color:#354e42; border-color:#b5c0b7; }
+    .onglets { background:#e9eee7; border-radius:5px; }
+    .onglets button { border-radius:4px; }
+    .bloc { border-radius:5px; }
+  </style>
 </head>
 <body>
 
