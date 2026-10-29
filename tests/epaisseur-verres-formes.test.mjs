@@ -75,7 +75,8 @@ test('parcours UXER : champs OD/OG, monture et assistant photo préservés', () 
     'photo-modal','pm-input','pm-canvas','pm-side-od','pm-side-og','pm-mirror',
     'pm-rot','pm-sens','pm-a','pm-b','pm-name','pm-prev','pm-next'
   ];
-  const allIds = [...html.matchAll(/\\bid="([^"]+)"/g)].map(match => match[1]);
+  const markup = html.slice(0, html.indexOf('<script src="oma-shapes.js">'));
+  const allIds = [...markup.matchAll(/id="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(allIds).size, allIds.length, 'identifiants HTML dupliqués');
   for (const id of ids) assert.ok(allIds.includes(id), 'contrôle métier absent : ' + id);
   assert.match(html, /aria-pressed.*currentShape/);
