@@ -90,3 +90,105 @@ test('parcours UXER : champs OD/OG, monture et assistant photo préservés', () 
   assert.match(html, /for="od-pd">½ écart pupillaire/);
   assert.match(html, /for="og-h">Hauteur/);
 });
+
+/* Interaction tests run the actual compact event handlers extracted from the
+ * browser source. No fabricated implementations and no browser dependency. */
+const logic = html.slice(html.indexOf('  <script>\n  (function'), html.lastIndexOf('</script>'));
+function listenerSource(id, event) {
+  const marker = "el('" + id + "').addEventListener('" + event + "', function () {";
+  const start = logic.indexOf(marker);
+  assert.ok(start >= 0, 'gestionnaire manquant : ' + id + '/' + event);
+  const end = logic.indexOf('\n    });', start);
+  assert.ok(end > start, 'fin de gestionnaire manquante : ' + id);
+  return logic.slice(start, end + '\n    });'.length);
+}
+function functionSource(name) {
+  const marker = 'function ' + name + '() {';
+  const start = logic.indexOf(marker);
+  assert.ok(start >= 0, 'fonction manquante : ' + name);
+  const end = logic.indexOf('\n    }', start);
+  assert.ok(end > start, 'fin de fonction manquante : ' + name);
+  return logic.slice(start, end + '\n    }'.length);
+}
+function control(checked = false, value = '') {
+  const handlers = {};
+  return {
+    checked, value, hidden: false, handlers,
+    addEventListener(name, fn) { handlers[name] = fn; },
+    fire(name) { assert.equal(typeof handlers[name], 'function'); handlers[name].call(this); }
+  };
+}
+
+test('3D : la case Échelle 1:1 active et désactive le mode/règle', () => {
+  const toggle = control(false);
+  let rules = 0, refreshes = 0;
+  const ctx = {
+    scale11: false,
+    renderer3d: { refresh() { refreshes++; } },
+    updateRuler() { rules++; },
+    el(id) { assert.equal(id, 'btn-11'); return toggle; }
+  };
+  runInNewContext(listenerSource('btn-11', 'change'), ctx);
+  toggle.checked = true; toggle.fire('change');
+  assert.equal(ctx.scale11, true);
+  toggle.checked = false; toggle.fire('change');
+  assert.equal(ctx.scale11, false);
+  assert.equal(rules, 2);
+  assert.equal(refreshes, 2);
+});
+
+test('3D : la monture pilote ses options et la légende du débordement', () => {
+  const nodes = {
+    'show-frame': control(true), 'show-overhang': control(false),
+    'frame-options': control(), 'overhang-legend': control()
+  };
+  let refreshes = 0, comparisons = 0;
+  const ctx = {
+    showFrame: true, showOverhang: false,
+    renderer3d: { refresh() { refreshes++; } },
+    refreshComparison3D() { comparisons++; },
+    el(id) { assert.ok(nodes[id], 'contrôle absent : ' + id); return nodes[id]; }
+  };
+  runInNewContext(functionSource('applyFrameOptVisibility'), ctx);
+  runInNewContext(listenerSource('show-frame', 'change'), ctx);
+  runInNewContext(listenerSource('show-overhang', 'change'), ctx);
+  ctx.applyFrameOptVisibility();
+  assert.equal(nodes['frame-options'].hidden, false);
+  assert.equal(nodes['overhang-legend'].hidden, true);
+
+  nodes['show-overhang'].checked = true;
+  nodes['show-overhang'].fire('change');
+  assert.equal(nodes['overhang-legend'].hidden, false);
+
+  nodes['show-frame'].checked = false;
+  nodes['show-frame'].fire('change');
+  assert.equal(ctx.showFrame, false);
+  assert.equal(nodes['frame-options'].hidden, true);
+  assert.equal(nodes['overhang-legend'].hidden, true);
+  // Revoir la monture : les choix précédents restent disponibles.
+  nodes['show-frame'].checked = true;
+  nodes['show-frame'].fire('change');
+  assert.equal(nodes['frame-options'].hidden, false);
+  assert.equal(nodes['show-overhang'].checked, true);
+  assert.equal(nodes['overhang-legend'].hidden, false);
+  assert.equal(refreshes, 3);
+  assert.equal(comparisons, 3);
+});
+
+test('Mesures : Copier OD vers OG transporte correction ET centrage', () => {
+  const names = ['sph','cyl','axe','pd','h'];
+  const nodes = { 'copy-od-og': control() };
+  names.forEach((name, index) => {
+    nodes['od-' + name] = control(false, ['-3.50','-1.25','125','31.5','18'][index]);
+    nodes['og-' + name] = control(false, 'inchange');
+  });
+  let computes = 0;
+  const ctx = {
+    el(id) { assert.ok(nodes[id], 'contrôle absent : ' + id); return nodes[id]; },
+    compute() { computes++; }
+  };
+  runInNewContext(listenerSource('copy-od-og', 'click'), ctx);
+  nodes['copy-od-og'].fire('click');
+  names.forEach(name => assert.equal(nodes['og-' + name].value, nodes['od-' + name].value));
+  assert.equal(computes, 1);
+});
