@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Épaisseur des verres</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#1F6FB2">
+  <meta name="theme-color" content="#f5f3ed">
   <style>
     /* ── Transition d'écran native + fond animé doux (cohérents avec le hub) ── */
     @view-transition { navigation: auto; }
@@ -409,6 +409,318 @@
     .card h2 { letter-spacing:.08em; }
     .btn { border-radius:5px; }
     .cgu-link a{color:var(--blue-d,#354e42);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+    /* UXER · Parcours de calcul. Les moteurs de forme, de calcul et de rendu restent intacts. */
+    @media screen {
+      :root {
+        --ink:#252a27; --grey:#59685e; --bg:#f5f3ed; --white:#fffefa;
+        --blue:#425d4f; --blue-d:#354e42; --line:#d7dbd3; --radius:5px;
+      }
+      body { color:var(--ink); background:var(--bg); }
+      .site-header {
+        display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;
+        padding:24px max(18px,calc((100vw - 1480px)/2));background:var(--bg);
+        border-bottom:1px solid var(--line); color:var(--ink);
+      }
+      .site-header .back-link {
+        order:2;border:0;border-bottom:1px solid var(--blue);border-radius:0;
+        padding:6px 0;color:var(--blue-d);font-size:12px;
+      }
+      .site-header .back-link:hover { background:transparent; }
+      .header-copy { min-width:0; }
+      .header-kicker { margin:0 0 8px;font-size:10px;font-weight:750;letter-spacing:.12em;color:var(--blue-d); }
+      .site-header h1.hdr-title { font-size:clamp(26px,3.2vw,39px);letter-spacing:-.045em;line-height:1.12;font-weight:650;margin:0;color:var(--ink); }
+      .header-description { margin:9px 0 0;color:var(--grey);font-size:12px; }
+      main { max-width:1516px;padding:0 18px 70px; }
+      .workspace-guide { max-width:820px;padding:20px 0 12px;color:var(--grey);font-size:12px;line-height:1.6; }
+      .workspace-guide strong { color:var(--ink);font-weight:650; }
+      .steps-nav {
+        position:sticky;top:0;z-index:26;background:rgba(245,243,237,.98);
+        display:flex;overflow-x:auto;gap:4px;padding:9px 0;margin:0 0 18px;
+        border-top:1px solid #b7c3b7;border-bottom:1px solid var(--line);
+        scrollbar-width:thin;white-space:nowrap;
+      }
+      .steps-nav a {
+        flex-shrink:0;display:inline-flex;align-items:center;gap:8px;
+        padding:9px 12px;text-decoration:none;color:var(--blue-d);border-radius:4px;
+        font-size:12px;font-weight:650;transition:background .12s ease;
+      }
+      .steps-nav a span { font-size:10px;font-weight:750;opacity:.65;font-variant-numeric:tabular-nums; }
+      .steps-nav a:hover { background:#e7ebe5; }
+      .steps-nav a[aria-current="location"] { background:#e3ebe2;color:#273f32; }
+      .steps-nav a:focus-visible { outline:2px solid var(--blue);outline-offset:-2px; }
+      .layout { display:grid;grid-template-columns:minmax(465px,.86fr) minmax(0,1.14fr);align-items:start;gap:18px; }
+      .layout-col { min-width:0; }
+      .card {
+        padding:20px;border:1px solid var(--line);background:var(--white);
+        border-radius:5px;box-shadow:none;min-width:0;
+        scroll-margin-top:88px;
+      }
+      .card + .card { margin-top:14px; }
+      .card h2, .viewer-head h2, .profiles-head h2 {
+        font-size:16px;color:var(--ink);font-weight:650;
+        text-transform:none;letter-spacing:-.02em;margin:0;line-height:1.3;
+      }
+      .card-heading { display:flex;align-items:flex-start;gap:15px;margin:0 0 20px;padding-bottom:16px;border-bottom:1px solid var(--line); }
+      .step-index { color:var(--blue-d);font-size:11px;letter-spacing:.04em;font-weight:750;line-height:22px;font-variant-numeric:tabular-nums;flex-shrink:0; }
+      .card-subtitle { color:var(--grey);font-size:11px;margin:5px 0 0;line-height:1.45; }
+      .field { min-width:0;margin-bottom:16px; }
+      .field > label { color:var(--ink);font-size:12px;font-weight:650;margin-bottom:7px; }
+      input:not([type=checkbox]):not([type=range]):not([type=file]), select {
+        min-height:43px;color:var(--ink);font-size:14px;border:1px solid #bdc8be;
+        border-radius:4px;background:#fff;padding:9px 11px;
+      }
+      input:not([type=checkbox]):not([type=range]):focus,select:focus {
+        border-color:var(--blue);outline:2px solid rgba(66,93,79,.3);outline-offset:1px;
+      }
+      select:disabled { background:#eff1ed;color:#6a756b; }
+      input[type=checkbox],input[type=range] { accent-color:var(--blue); }
+      .shapes { grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0; }
+      .shape-cell { min-width:0; }
+      .shape-btn {
+        position:relative;min-height:94px;gap:9px;justify-content:center;
+        border:1px solid #cdd6cb;border-radius:5px;background:#fdfefa;
+        padding:14px 8px 12px;
+      }
+      .shape-btn svg { width:100%;height:43px; }
+      .shape-btn svg path { fill:#e4ebe4;stroke:#4c6857;stroke-width:2; }
+      .shape-btn span { color:var(--ink);font-size:12px;font-weight:650;line-height:1.25; }
+      .shape-btn:hover { background:#f3f7f1;border-color:var(--blue); }
+      .shape-btn.active, .shape-perso .shape-btn.active {
+        border:2px solid var(--blue);background:#e9f0e7;
+        box-shadow:0 0 0 2px rgba(66,93,79,.08);padding:13px 7px 11px;
+      }
+      .shape-btn.active::after { content:"✓";position:absolute;top:5px;right:9px;color:var(--blue-d);font-size:12px;font-weight:800; }
+      .shape-btn.active svg path, .shape-perso .shape-btn.active svg path { fill:#c9dbc8;stroke:#354e42; }
+      .shape-btn.active span, .shape-perso .shape-btn.active span { color:var(--blue-d); }
+      .shape-del { width:27px;height:27px;top:-7px;right:-7px;border-color:#bfcabd;color:#a1342b;border-radius:50%; }
+      .hint { font-size:11px;color:var(--grey);line-height:1.5; }
+      .hint--selection { margin:13px 0 15px; }
+      .btn,.btn-photo {
+        min-height:40px;display:inline-flex;align-items:center;justify-content:center;
+        border:1px solid #b7c6b8;border-radius:4px;background:transparent;
+        color:var(--blue-d);font-size:12px;font-weight:650;padding:9px 12px;
+      }
+      .btn:hover,.btn-photo:hover { background:#eaf0e7; }
+      .btn:focus-visible { outline:2px solid var(--blue);outline-offset:2px; }
+      .btn-photo { width:100%;margin-top:0;border-style:solid;background:#f5f7f3; }
+      .form-help { border-top:1px solid var(--line);margin-top:16px;padding-top:12px;font-size:12px;color:var(--grey); }
+      .form-help summary { cursor:pointer;font-weight:650;color:var(--blue-d);padding:5px 0; }
+      .form-help p { margin:9px 0;line-height:1.5; }
+      .form-help a { color:var(--blue-d);font-weight:600; }
+      .frame-dimensions { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+      .frame-dimensions .field { min-width:0; }
+      .check { font-weight:600;font-size:12px;color:var(--ink);gap:10px;align-items:flex-start;line-height:1.45; }
+      .check input[type=checkbox] { flex-shrink:0;width:18px;height:18px;min-height:18px;margin-top:0; }
+      .slider-ends { font-size:10px; }
+      .form-instruction { margin:-5px 0 14px;color:var(--grey);font-size:11px;line-height:1.5; }
+      .eyes { width:100%;table-layout:fixed; }
+      .eyes th,.eyes td { padding:6px 3px; }
+      .eyes thead th { text-transform:none;letter-spacing:0;font-size:10px;font-weight:650; }
+      .eyes thead th:first-child { width:53px; }
+      .eyes tbody th { color:var(--blue-d);font-size:13px;font-weight:750; }
+      .eye-code { display:block; }
+      .eye-name { display:none; }
+      .eyes td input { min-width:0;width:100%;min-height:40px!important;padding:8px 3px!important;text-align:center;font-size:12px!important; }
+      .eyes-actions { margin-top:15px; }
+      .eyes-actions .btn { min-height:39px; }
+      .results-card { background:#fdfefa; }
+      .res-eyes { font-variant-numeric:tabular-nums; }
+      .res-eyes th,.res-eyes td { padding:11px 6px;border-bottom:1px solid var(--line); }
+      .res-eyes thead th { text-transform:none;letter-spacing:0;font-weight:650;font-size:10px; }
+      .res-eyes tbody th { color:var(--blue-d);font-weight:700; }
+      .res-eyes .big { font-size:17px;font-weight:750; }
+      #merid { color:var(--grey); }
+      .notes { background:#fdf5e7;border-radius:4px;border-color:#e8c489;font-size:11px; }
+      .viewer-card { padding:0; }
+      .viewer-head { padding:17px 18px;background:#eef1eb;gap:12px; }
+      .viewer-head h2 { display:flex;align-items:center;gap:12px; }
+      .viewer-badge { font-size:11px;color:var(--grey); }
+      #viewport { height:420px; }
+      .vp-hint {
+        bottom:10px;left:10px;right:10px;padding:7px 8px;background:rgba(12,30,31,.38);
+        border-radius:3px;color:#f2f5f4;font-size:10px;line-height:1.45;max-width:700px;
+      }
+      .vp-sides { color:#edf1f5; }
+      .viewer-tools { padding:15px 18px 20px; }
+      .btn-row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0 10px; }
+      .btn-row .btn { width:100%;min-height:43px; }
+      .btn-row .btn--emphasis { border-color:var(--blue);background:var(--blue);color:#fff; }
+      .btn-row .btn--emphasis:hover { background:var(--blue-d); }
+      .advanced-panel {
+        border:1px solid var(--line);background:#fcfdf9;border-radius:4px;margin:0 0 10px;
+        overflow:hidden;
+      }
+      .advanced-panel summary {
+        display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
+        font-size:12px;font-weight:650;color:var(--ink);padding:12px 13px;list-style:none;
+      }
+      .advanced-panel summary::-webkit-details-marker { display:none; }
+      .advanced-panel summary::before { content:"＋";color:var(--blue-d);margin-right:3px;font-size:15px; }
+      .advanced-panel[open] summary::before { content:"−"; }
+      .advanced-panel summary:hover { background:#eef2ec; }
+      .advanced-panel summary:focus-visible { outline:2px solid var(--blue);outline-offset:-2px; }
+      .advanced-tag { margin-left:auto;color:var(--grey);font-size:10px;font-weight:550; }
+      .advanced-inner,.cal { padding:15px 14px;border-top:1px solid var(--line);margin:0; }
+      .advanced-inner>.field { margin-bottom:3px; }
+      .advanced-panel--cal { margin-top:10px; }
+      .cal { background:transparent;font-size:11px; }
+      .cal .hint { margin-top:0; }
+      .viewer-display { margin:16px 0 0; }
+      .viewer-display .subhead { font-size:11px;margin:10px 0; }
+      .vp-legend { margin:13px 0; }
+      .profiles-card { margin-top:14px!important; }
+      .profiles-head { align-items:center;flex-wrap:wrap;padding-bottom:15px;border-bottom:1px solid var(--line);margin-bottom:17px; }
+      .profiles-head h2 { display:flex;align-items:center;gap:11px; }
+      .profiles-status { min-width:unset;max-width:210px;font-size:11px; }
+      .profiles-slide h3 { font-size:12px;letter-spacing:0;font-weight:650; }
+      .compare-card { scroll-margin-top:90px; }
+      .pm__hd { background:var(--blue-d); }
+      .pm__ft { background:#f5f3ed; }
+      .pm-side button.on { background:#e5efe2;border-color:var(--blue);box-shadow:0 0 0 2px rgba(66,93,79,.1); }
+      .cgu-link { margin-top:16px; }
+    }
+    @media screen and (max-width:1120px) {
+      .layout { grid-template-columns:1fr; }
+      .layout-col--form { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start; }
+      .layout-col--form .card { margin:0; }
+      #form-shape,#form-prescription { grid-column:1/-1; }
+      .shapes { grid-template-columns:repeat(5,minmax(0,1fr)); }
+      .layout-col--results { display:grid;grid-template-columns:minmax(0,1fr);gap:14px; }
+      .layout-col--results .card { margin:0!important; }
+      #viewport { height:430px; }
+    }
+    @media screen and (max-width:680px) {
+      .site-header { padding:20px 14px 15px; }
+      .header-copy { flex:1 1 100%; }
+      .site-header h1.hdr-title { font-size:30px; }
+      .site-header .back-link { order:1;font-size:12px; }
+      main { padding:0 11px 44px; }
+      .workspace-guide { padding:17px 2px 10px; }
+      .steps-nav { margin:0 -11px 14px;padding:8px 11px; }
+      .steps-nav a { padding:9px 10px;font-size:11px; }
+      .layout { gap:14px; }
+      .layout-col--form { grid-template-columns:minmax(0,1fr); }
+      #form-shape,#form-prescription { grid-column:auto; }
+      .card { padding:16px 14px; }
+      .card-heading { gap:12px;margin-bottom:16px;padding-bottom:14px; }
+      .shapes { grid-template-columns:repeat(3,minmax(0,1fr));gap:8px; }
+      .shape-btn { min-height:88px;padding:10px 5px; }
+      .shape-btn.active { padding:9px 4px; }
+      .shape-btn svg { height:37px; }
+      .shape-btn span { font-size:11px; }
+      .frame-dimensions { gap:8px; }
+      .frame-dimensions .field > label { font-size:11px; }
+      .frame-dimensions input { padding-left:6px!important;padding-right:6px!important; }
+      .row:not(.frame-dimensions) { gap:10px; }
+      .eyes { display:block; }
+      .eyes thead { display:none; }
+      .eyes tbody { display:grid;gap:12px; }
+      .eyes tbody tr {
+        display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+        border:1px solid var(--line);background:#fbfcf8;border-radius:4px;padding:13px 12px;
+      }
+      .eyes tbody th { grid-column:1/-1;display:flex;gap:9px;align-items:baseline;padding:0 0 8px;border-bottom:1px solid var(--line); }
+      .eye-name { display:inline;font-size:11px;color:var(--grey);font-weight:550; }
+      .eyes tbody td { display:block;min-width:0;padding:0; }
+      .eyes tbody td::before { content:attr(data-label);display:block;font-size:11px;color:var(--grey);font-weight:650;margin-bottom:6px; }
+      .eyes tbody td:last-child { grid-column:1/-1;max-width:calc(50% - 5px); }
+      .eyes td input { font-size:14px!important;text-align:left!important;padding:9px 10px!important; }
+      .eyes-actions { justify-content:stretch; }
+      .eyes-actions .btn { width:100%; }
+      .res-eyes { display:block;overflow-x:auto;max-width:100%; }
+      .res-eyes thead th { white-space:nowrap; }
+      .res-eyes td { white-space:nowrap; }
+      .viewer-head { padding:14px 13px; }
+      .viewer-tools { padding:13px 12px 16px; }
+      #viewport { height:min(72vw,380px);min-height:270px; }
+      .vp-hint { font-size:9px; }
+      .btn-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .profiles-head { align-items:flex-start; }
+      .profiles-nav { width:100%;justify-content:space-between; }
+      .profiles-status { flex:1;max-width:none; }
+      .pm { border-radius:0; }
+    }
+    @media screen and (max-width:350px) {
+      .shape-btn { min-height:80px; }
+      .frame-dimensions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .eyes tbody td:last-child { max-width:none;grid-column:auto; }
+      .btn-row { grid-template-columns:1fr; }
+    }
+    @media screen and (prefers-reduced-motion:reduce) {
+      .steps-nav a { transition:none; }
+    }
+
+    /* UXER : affinage du parcours validé — type de verre, mesures et vues. */
+    @media screen {
+      .layout-col--form .form-card { scroll-margin-top:88px; }
+      .frame-customization { margin-top:2px;padding-top:0; }
+      .frame-customization .advanced-inner .field { margin:13px 0 6px; }
+      .frame-customization .advanced-inner .field:first-of-type { margin-top:16px; }
+      .frame-customization .advanced-inner .hint { margin-top:0; }
+      .subsection-title { font-size:12px;color:var(--blue-d);letter-spacing:0;font-weight:750;
+        margin:18px 0 13px;padding-bottom:9px;border-bottom:1px solid var(--line);text-transform:none; }
+      .subsection-title:first-of-type { margin-top:0; }
+      .eye-parameters-group { display:grid;gap:10px;min-width:0; }
+      .eye-parameters { border:1px solid var(--line);border-radius:5px;margin:0;padding:13px 14px 2px;min-width:0;background:#f8faf6; }
+      .eye-parameters legend { padding:0 7px;margin-left:1px;font-size:12px;color:var(--blue-d);font-weight:700; }
+      .eye-parameters legend span { font-size:11px;color:var(--grey);font-weight:550;margin-left:6px; }
+      .eye-fields { display:grid;gap:10px;min-width:0; }
+      .eye-fields--rx { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .eye-fields--measures { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .eye-fields .field { min-width:0;margin-bottom:12px; }
+      .eye-fields .field label { font-size:11px;font-weight:650;display:block;margin-bottom:6px;line-height:1.35; }
+      .eye-fields input { width:100%;min-width:0;font-variant-numeric:tabular-nums; }
+      .glass-fields { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+      .glass-fields .field { min-width:0; }
+      .glass-fields select { width:100%; }
+      .special-base { margin:2px 0 0;border-top:1px solid var(--line);padding-top:14px; }
+      .special-base .check { margin-bottom:7px; }
+      .special-base select:disabled { opacity:.65; }
+      .special-base .hint { margin-top:8px; }
+      .eyes-actions { margin-top:16px; }
+      .eyes-actions .btn { width:100%; }
+      .viewer-primary { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px; }
+      .viewer-primary .check--primary { min-height:47px;border:1px solid var(--line);background:#f8faf6;
+        padding:12px;display:flex;align-items:center;gap:9px;margin:0;border-radius:4px;font-size:12px; }
+      .viewer-primary .btn--emphasis { min-height:47px;grid-row:1 / span 2;grid-column:2; }
+      .viewer-primary .check--primary input[type=checkbox] { width:19px;height:19px; }
+      #frame-options { border:1px solid #c9d5cb;border-radius:5px;padding:13px 14px 2px;
+        margin:6px 0 12px;background:#f9fbf7; }
+      #frame-options[hidden] { display:none!important; }
+      #frame-options>.check { padding:6px 0; }
+      #frame-options .advanced-panel { margin-top:10px;margin-bottom:12px; }
+      #frame-options .advanced-panel .advanced-inner { padding:13px; }
+      #frame-options .advanced-inner>.field { margin:0; }
+      .viewer-secondary { margin:13px 0;grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .viewer-secondary .btn { background:#fffefa; }
+      .thickness-summary { margin:0 0 22px;padding:0 0 18px;border-bottom:1px solid var(--line); }
+      .thickness-summary>h3 { font-size:13px;font-weight:750;letter-spacing:-.01em;color:var(--blue-d);margin:0 0 6px; }
+      .thickness-summary>.hint { margin:0 0 12px;max-width:76ch; }
+      .thickness-summary .res-eyes { display:block;overflow-x:auto;max-width:100%; }
+      .thickness-summary .res-eyes th,.thickness-summary .res-eyes td { white-space:nowrap; }
+      .thickness-summary #merid { margin-top:12px;font-size:12px;line-height:1.6; }
+      .profiles-carousel { padding-top:4px; }
+      .profiles-slide h3 { padding-bottom:10px;border-bottom:1px solid var(--line); }
+      .profiles-head { flex-wrap:wrap; }
+    }
+    @media screen and (min-width:1121px) {
+      .layout { grid-template-columns:minmax(480px,.9fr) minmax(0,1.1fr); }
+    }
+    @media screen and (max-width:680px) {
+      .eye-parameters { padding:11px 10px 2px; }
+      .eye-fields--rx { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .eye-fields--rx .field:last-child { grid-column:1/-1;max-width:calc(50% - 5px); }
+      .glass-fields { grid-template-columns:minmax(0,1fr);gap:0; }
+      .viewer-primary { grid-template-columns:minmax(0,1fr); }
+      .viewer-primary .btn--emphasis { grid-row:auto;grid-column:auto; }
+      .viewer-primary .check--primary { min-height:44px; }
+      .viewer-secondary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #frame-options { padding:11px 12px 2px; }
+      .thickness-summary { margin-bottom:16px;padding-bottom:15px; }
+      .thickness-summary .res-eyes { font-size:11px; }
+      .profiles-card .profiles-head { margin-bottom:13px; }
+    }
 </style>
 </head>
 <body>
@@ -417,23 +729,46 @@
 
   <header class="site-header">
     <a class="back-link" href="../../">&#8592; Retour</a>
-    <div class="hdr-title">Épaisseur des verres</div>
+    <div class="header-copy">
+      <p class="header-kicker">OUTIL MÉTIER / OPTIQUE</p>
+      <h1 class="hdr-title">Épaisseur des verres</h1>
+      <p class="header-description">Estimation OD / OG · Forme, correction et centrage</p>
+    </div>
   </header>
 
   <main>
+    <div class="workspace-guide">
+      <p><strong>Calcul en direct.</strong> Choisissez la forme, renseignez les cotes, le verre et les mesures. Les épaisseurs et les vues se mettent à jour automatiquement.</p>
+    </div>
+    <nav class="steps-nav" aria-label="Navigation du calcul d’épaisseur">
+      <a href="#form-shape"><span>01</span>Forme</a>
+      <a href="#form-monture"><span>02</span>Cotes</a>
+      <a href="#form-verre"><span>03</span>Verre</a>
+      <a href="#form-measures"><span>04</span>Mesures</a>
+      <a href="#view-3d"><span>05</span>3D</a>
+      <a href="#profiles"><span>06</span>Vues</a>
+    </nav>
     <div class="layout">
 
-      <!-- ── COLONNE GAUCHE : saisie + résultats ── -->
-      <div>
-        <!-- ── MONTURE ── -->
-        <section class="card">
-          <h2>Monture : forme &amp; côtes</h2>
+      <!-- ── COLONNE GAUCHE : parcours de saisie ── -->
+      <div class="layout-col layout-col--form">
+        <!-- ── 01 : forme ── -->
+        <section class="card form-card" id="form-shape">
+          <div class="card-heading"><span class="step-index">01</span><div><h2>Choix de la forme à étudier</h2><p class="card-subtitle">Sélection du contour OD/OG</p></div></div>
           <div class="shapes" id="shapes"></div>
-          <p class="hint">Sept formes calculées avec des contours OMA réels (OD/OG), sans lissage. Pilote a retrouvé son ancien contour ; Hexagone conserve son contour historique, faute d'OMA constructeur vérifié.</p>
-          <button class="btn btn-photo" type="button" id="open-photo">📷 Forme perso d'après une photo du verre</button>
-          <p class="hint" style="margin: 8px 0 12px"><a href="../../docs/formes-types/oma-comparateur.html">Comparer ces formes avec de vrais tracés OMA</a> (laboratoire de référence, sans modification des calculs).</p>
+          <p class="hint hint--selection">La sélection propose les cotes A/B de la forme, sans écraser vos valeurs déjà modifiées.</p>
+          <button class="btn btn-photo" type="button" id="open-photo">Créer une forme depuis une photo</button>
+          <details class="form-help">
+            <summary>Origine des contours</summary>
+            <p>Sept formes reposent sur des contours OMA réels, sans lissage. Les formes Pilote et Hexagone conservent leur tracé historique.</p>
+            <a href="../../docs/formes-types/oma-comparateur.html">Comparer les contours OMA</a>
+          </details>
+        </section>
 
-          <div class="row">
+        <!-- ── 02 : dimensions et montage de la monture ── -->
+        <section class="card form-card" id="form-monture">
+          <div class="card-heading"><span class="step-index">02</span><div><h2>Cotes de la forme à étudier</h2><p class="card-subtitle">Dimensions boxing en millimètres</p></div></div>
+          <div class="row frame-dimensions">
             <div class="field">
               <label for="coteA">Côte A (mm)</label>
               <input type="text" inputmode="decimal" id="coteA" value="52">
@@ -447,32 +782,52 @@
               <input type="text" inputmode="decimal" id="coteD" value="18">
             </div>
           </div>
-
-          <div class="field frame-opt">
+          <details class="advanced-panel frame-customization" id="frame-customization">
+            <summary><span>Personnaliser la monture</span><span class="advanced-tag">Galbe et épaisseur du cercle</span></summary>
+            <div class="advanced-inner">
+              <p class="hint">Paramètres complémentaires pour affiner le calcul et le rendu.</p>
+              <div class="field">
             <label for="cambrure">Base du cercle</label>
             <input type="text" inputmode="decimal" id="cambrure" value="3.5">
           </div>
 
-          <div class="field frame-opt">
+          <div class="field">
             <label for="galbe">Galbe monture <span id="galbe-val" class="hint" style="display:inline;">10°</span></label>
             <input type="range" id="galbe" min="0" max="35" step="1" value="10">
             <div class="slider-ends"><span>plat</span><span>galbé</span></div>
           </div>
 
-          <div class="field frame-opt">
+          <div class="field">
             <label for="m-ep">Épaisseur monture (mm)</label>
             <input type="text" inputmode="decimal" id="m-ep" value="3.0">
           </div>
-
-          <label class="check"><input type="checkbox" id="show-frame" checked> Afficher la monture (cercle)</label>
+            </div>
+          </details>
         </section>
 
         <!-- ── VERRE ── -->
-        <section class="card">
-          <h2>Verre</h2>
-          <div class="field">
-            <label for="indice">Indice</label>
-            <select id="indice">
+        <section class="card form-card" id="form-verre">
+          <div class="card-heading"><span class="step-index">03</span><div><h2>Type de verre</h2><p class="card-subtitle">Correction et caractéristiques optiques</p></div></div>
+          <h3 class="subsection-title">Correction</h3>
+          <div class="eye-parameters-group"><fieldset class="eye-parameters">
+            <legend><strong>OD</strong> <span>Œil droit</span></legend>
+            <div class="eye-fields eye-fields--rx">
+              <div class="field"><label for="od-sph">Sphère (D)</label><input type="text" inputmode="decimal" id="od-sph" value="-4.00" aria-label="OD sphère (D)"></div>
+              <div class="field"><label for="od-cyl">Cylindre (D)</label><input type="text" inputmode="decimal" id="od-cyl" value="0.00" aria-label="OD cylindre (D)"></div>
+              <div class="field"><label for="od-axe">Axe (°)</label><input type="text" inputmode="numeric" id="od-axe" value="0" aria-label="OD axe (°)"></div>
+            </div>
+          </fieldset>
+          <fieldset class="eye-parameters">
+            <legend><strong>OG</strong> <span>Œil gauche</span></legend>
+            <div class="eye-fields eye-fields--rx">
+              <div class="field"><label for="og-sph">Sphère (D)</label><input type="text" inputmode="decimal" id="og-sph" value="-4.00" aria-label="OG sphère (D)"></div>
+              <div class="field"><label for="og-cyl">Cylindre (D)</label><input type="text" inputmode="decimal" id="og-cyl" value="0.00" aria-label="OG cylindre (D)"></div>
+              <div class="field"><label for="og-axe">Axe (°)</label><input type="text" inputmode="numeric" id="og-axe" value="0" aria-label="OG axe (°)"></div>
+            </div>
+          </fieldset></div>
+          <h3 class="subsection-title">Matière et fabrication</h3>
+          <div class="glass-fields">
+            <div class="field"><label for="indice">Indice</label><select id="indice">
               <option value="1.5">CR39, 1,50</option>
               <option value="1.59">Polycarbonate, 1,59</option>
               <option value="1.6">1,60</option>
@@ -480,22 +835,8 @@
               <option value="1.74">1,74</option>
               <option value="1.8">Minéral, 1,80</option>
               <option value="1.9">Minéral, 1,90</option>
-            </select>
-          </div>
-          <div class="row">
-            <div class="field">
-              <label class="check" for="base-speciale">
-                <input type="checkbox" id="base-speciale"> Base spéciale
-              </label>
-              <select id="base" disabled aria-label="Base spéciale de la face avant">
-                <option value="4">B4</option>
-                <option value="6">B6</option>
-                <option value="8">B8</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="cerclage">Épaisseur au bord (mm)</label>
-              <select id="cerclage">
+            </select></div>
+            <div class="field"><label for="cerclage">Épaisseur minimale au bord (mm)</label><select id="cerclage">
                 <option value="0.1">0,1</option>
                 <option value="0.2">0,2</option>
                 <option value="0.3">0,3</option>
@@ -521,75 +862,72 @@
                 <option value="2.3">2,3</option>
                 <option value="2.4">2,4</option>
                 <option value="2.5">2,5</option>
+              </select></div>
+          </div>
+          <div class="field special-base">
+            <label class="check" for="base-speciale"><input type="checkbox" id="base-speciale"> Base spéciale</label>
+            <select id="base" disabled aria-label="Base spéciale de la face avant">
+                <option value="4">B4</option>
+                <option value="6">B6</option>
+                <option value="8">B8</option>
               </select>
-            </div>
+            <p class="hint">Activez la base spéciale pour choisir B4, B6 ou B8. Sinon, la base reste automatique.</p>
           </div>
         </section>
 
         <!-- ── ORDONNANCE ── -->
-        <section class="card">
-          <h2>Ordonnance (OD / OG)</h2>
-          <table class="eyes">
-            <thead>
-              <tr><th></th><th>Sphère</th><th>Cylindre</th><th>Axe</th><th>½ écart</th><th>Hauteur</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>OD</th>
-                <td><input type="text" inputmode="decimal" id="od-sph" value="-4.00" aria-label="OD sphère (D)"></td>
-                <td><input type="text" inputmode="decimal" id="od-cyl" value="0.00" aria-label="OD cylindre (D)"></td>
-                <td><input type="text" inputmode="numeric" id="od-axe" value="0" aria-label="OD axe (°)"></td>
-                <td><input type="text" inputmode="decimal" id="od-pd" value="32" aria-label="OD demi-écart pupillaire (mm)"></td>
-                <td><input type="text" inputmode="decimal" id="od-h" value="22" aria-label="OD hauteur de montage (mm)"></td>
-              </tr>
-              <tr>
-                <th>OG</th>
-                <td><input type="text" inputmode="decimal" id="og-sph" value="-4.00" aria-label="OG sphère (D)"></td>
-                <td><input type="text" inputmode="decimal" id="og-cyl" value="0.00" aria-label="OG cylindre (D)"></td>
-                <td><input type="text" inputmode="numeric" id="og-axe" value="0" aria-label="OG axe (°)"></td>
-                <td><input type="text" inputmode="decimal" id="og-pd" value="32" aria-label="OG demi-écart pupillaire (mm)"></td>
-                <td><input type="text" inputmode="decimal" id="og-h" value="22" aria-label="OG hauteur de montage (mm)"></td>
-              </tr>
-            </tbody>
-          </table>
+        <section class="card form-card" id="form-measures">
+          <div class="card-heading"><span class="step-index">04</span><div><h2>Prise de mesure</h2><p class="card-subtitle">Centrage monoculaire selon la méthode boxing</p></div></div>
+          <div class="eye-parameters-group"><fieldset class="eye-parameters">
+            <legend><strong>OD</strong> <span>Œil droit</span></legend>
+            <div class="eye-fields eye-fields--measures">
+              <div class="field"><label for="od-pd">½ écart pupillaire (mm)</label><input type="text" inputmode="decimal" id="od-pd" value="32" aria-label="OD demi-écart pupillaire (mm)"></div>
+              <div class="field"><label for="od-h">Hauteur (mm)</label><input type="text" inputmode="decimal" id="od-h" value="22" aria-label="OD hauteur de montage (mm)"></div>
+            </div>
+          </fieldset>
+          <fieldset class="eye-parameters">
+            <legend><strong>OG</strong> <span>Œil gauche</span></legend>
+            <div class="eye-fields eye-fields--measures">
+              <div class="field"><label for="og-pd">½ écart pupillaire (mm)</label><input type="text" inputmode="decimal" id="og-pd" value="32" aria-label="OG demi-écart pupillaire (mm)"></div>
+              <div class="field"><label for="og-h">Hauteur (mm)</label><input type="text" inputmode="decimal" id="og-h" value="22" aria-label="OG hauteur de montage (mm)"></div>
+            </div>
+          </fieldset></div>
           <div class="eyes-actions">
-            <button class="btn" type="button" id="copy-od-og">Copier OD → OG</button>
+            <button class="btn" type="button" id="copy-od-og">Copier correction et mesures OD vers OG</button>
           </div>
-          <div class="hint">Prise de mesure Boxing</div>
+          <p class="hint">Cette action copie la correction et les mesures de l'œil droit vers l'œil gauche.</p>
         </section>
 
 
-        <section class="card">
-          <h2>Synthèse</h2>
-          <table class="res-eyes">
-            <thead>
-              <tr><th>Œil</th><th>Indice</th><th>Ép. maxi bord</th><th>Ép. mini bord</th><th>Ép. centre</th><th>Ø utile</th></tr>
-            </thead>
-            <tbody id="res-body"></tbody>
-          </table>
-          <div id="merid"></div>
-          <div class="notes" id="notes"></div>
-        </section>
+
       </div>
 
-      <!-- ── COLONNE DROITE : 3D + profils ── -->
-      <div>
-      <section class="card viewer-card">
-        <div class="viewer-head">
-          <h2>Visualisation 3D</h2>
-          <span class="viewer-badge" id="vp-engine">…</span>
-        </div>
+      <!-- ── COLONNE DROITE : résultats, 3D et profils ── -->
+      <div class="layout-col layout-col--results">
+
+
+      <section class="card viewer-card" id="view-3d">
+        <div class="viewer-head"><h2><span class="step-index">05</span> Affichage 3D</h2><span class="viewer-badge" id="vp-engine">…</span></div>
         <div id="viewport">
           <div class="vp-sides"><span>OD</span><span>OG</span></div>
           <div class="vp-overlay" id="vp-overlay">Chargement de la 3D…</div>
           <div class="ruler" id="ruler" hidden></div>
           <div class="vp-hint">Glisser pour tourner · molette / pincer pour zoomer · clic droit, Maj+glisser ou deux doigts pour déplacer le centre de rotation</div>
         </div>
-        <div style="padding:12px 16px;">
-          <div class="field frame-opt">
-            <label class="check" for="m-bevel-auto">
-              <input type="checkbox" id="m-bevel-auto"> Montage optimisé (cacher l’épaisseur, ≤ 0,10 mm de verre à l’avant)
-            </label>
+        <div class="viewer-tools">
+          <div class="viewer-primary">
+            <label class="check check--primary"><input type="checkbox" id="btn-11"> Échelle 1:1</label>
+            <button class="btn btn--emphasis" type="button" id="compare-save">Enregistrer pour comparer (0/2)</button>
+            <label class="check check--primary"><input type="checkbox" id="show-frame" checked> Afficher la monture</label>
+          </div>
+          <div class="frame-options" id="frame-options">
+            <label class="check"><input type="checkbox" id="show-overhang"> Colorer les dépassements du verre</label>
+            <label class="check"><input type="checkbox" id="m-bevel-auto"> Montage optimisé <span class="hint">(≤ 0,10 mm de verre visible à l’avant)</span></label>
+            <details class="advanced-panel" id="mount-settings">
+              <summary><span>Personnaliser le biseau</span><span class="advanced-tag">Position OD / OG et bornes</span></summary>
+              <div class="advanced-inner">
+                <div class="field frame-opt">
+
             <div class="bevel-eye">
               <label for="m-bevel-od">Positionnement du biseau OD <span id="bevel-val-od" class="hint" style="display:inline;">0,0 mm</span></label>
               <input type="range" id="m-bevel-od" class="bevel-range" min="-5" max="5" step="0.1" value="0">
@@ -613,41 +951,53 @@
             </div>
             <div class="hint" id="bevel-auto-state"></div>
           </div>
-          <div class="btn-row">
-            <button class="btn" type="button" id="compare-save">Enregistrer pour comparer (0/2)</button>
+              </div>
+            </details>
+          </div>
+          <div class="btn-row viewer-secondary">
             <button class="btn" type="button" id="btn-reset-vue">Recentrer la vue</button>
             <button class="btn" type="button" id="btn-coupe">Vue de profil</button>
-            <button class="btn" type="button" id="btn-11">Vue 1:1</button>
           </div>
           <div class="vp-legend"><span><i class="sw-lens"></i>verre</span><span><i class="sw-frame"></i>monture</span></div>
           <div class="vp-legend vp-legend-overhang" id="overhang-legend" hidden>
             <span><i class="sw-front"></i>dépassement avant</span>
             <span><i class="sw-back"></i>dépassement arrière</span>
           </div>
-          <div class="cal">
-            <div class="hint" style="margin-bottom:4px;"><strong>Échelle 1:1</strong> : cliquez <strong>« Vue 1:1 »</strong> : une règle graduée apparaît dans l'image. Avec la <strong>molette</strong>, calibrez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). La 3D passe alors en <strong>perspective réaliste</strong> : le plan du point le plus proche de la monture est à l'échelle exacte (mesurez de face), le reste fuit en profondeur comme à l'œil. <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
+          <details class="advanced-panel advanced-panel--cal">
+            <summary><span>Calibrer l’échelle 1:1</span><span class="advanced-tag">Facultatif</span></summary>
+            <div class="cal">
+            <div class="hint" style="margin-bottom:4px;"><strong>Calibrage :</strong> cochez « Échelle 1:1 » pour afficher une règle graduée dans l'image. Avec la <strong>molette</strong>, calibrez jusqu'à ce qu'un repère tombe juste (ex. le « 5 » à 5 cm réels mesurés sur l'écran). La 3D passe alors en <strong>perspective réaliste</strong> : le plan du point le plus proche de la monture est à l'échelle exacte (mesurez de face), le reste fuit en profondeur comme à l'œil. <button class="btn" type="button" id="cal-reset">Réinitialiser</button></div>
             <div class="cal-state" id="cal-state"></div>
           </div>
-
-          <div class="frame-opt">
-            <div class="subhead">Affichage</div>
-            <label class="check"><input type="checkbox" id="show-overhang"> Colorer les dépassements du verre</label>
-          </div>
+          </details>
         </div>
       </section>
 
-      <section class="card" style="margin-top:16px;" aria-labelledby="profiles-title">
+      <section class="card profiles-card" id="profiles" aria-labelledby="profiles-title">
         <div class="profiles-head">
-          <h2 id="profiles-title">Profils et cartographie des épaisseurs</h2>
+          <h2 id="profiles-title"><span class="step-index">06</span> Vues et analyse des épaisseurs</h2>
           <div class="profiles-nav">
             <button class="btn" type="button" id="profiles-prev" aria-label="Vue précédente">&#8592;</button>
             <span class="profiles-status" id="profiles-status" aria-live="polite"></span>
             <button class="btn" type="button" id="profiles-next" aria-label="Vue suivante">&#8594;</button>
           </div>
         </div>
+        <div class="thickness-summary">
+          <h3>Synthèse OD / OG</h3>
+          <p class="hint">Pour chaque verre : bord le plus épais, bord le plus fin, épaisseur au centre et diamètre utile. Les vues détaillent l’évolution selon les directions.</p>
+          <table class="res-eyes">
+            <thead>
+              <tr><th>Œil</th><th>Indice</th><th>Ép. maxi bord</th><th>Ép. mini bord</th><th>Ép. centre</th><th>Ø utile</th></tr>
+            </thead>
+            <tbody id="res-body"></tbody>
+          </table>
+          <div id="merid"></div>
+          <div class="notes" id="notes"></div>
+        </div>
         <div class="profiles-carousel" id="profiles-carousel" aria-label="Vues 2D des verres">
           <article class="profiles-slide is-active" data-profile-title="Vue de face">
             <h3>Vue de face : cartographie des épaisseurs</h3>
+            <p class="hint">Épaisseur au bord tous les 30°. En cas de cylindre, axe et contre-axe du tore sont également indiqués.</p>
             <div class="profiles-grid" id="profile-face"></div>
           </article>
           <article class="profiles-slide" data-profile-title="Vue côté temporal">
@@ -667,7 +1017,7 @@
 
       <section class="card compare-card" id="compare-card" hidden aria-labelledby="compare-title">
         <div class="compare-head">
-          <h2 id="compare-title">Comparaison client</h2>
+          <h2 id="compare-title">Comparaison de deux configurations</h2>
           <button class="btn" type="button" id="compare-clear">Effacer la comparaison</button>
         </div>
         <div class="compare-slots" id="compare-slots"></div>
@@ -2579,9 +2929,9 @@
       if (!cfg) { return; }
       currentShape = key;
       var wrap = el('shapes'), prev = wrap.querySelector('.shape-btn.active');
-      if (prev) { prev.classList.remove('active'); }
+      if (prev) { prev.classList.remove('active'); prev.setAttribute('aria-pressed', 'false'); }
       var next = wrap.querySelector('[data-shape="' + key + '"]');
-      if (next) { next.classList.add('active'); }
+      if (next) { next.classList.add('active'); next.setAttribute('aria-pressed', 'true'); }
       // Proposer les côtes du gabarit, sans écraser une saisie manuelle.
       if (!abTouched) { el('coteA').value = cfg.defA; el('coteB').value = cfg.defB; }
       compute();
@@ -2600,6 +2950,7 @@
         btn.type = 'button';
         btn.className = 'shape-btn' + (key === currentShape ? ' active' : '');
         btn.setAttribute('data-shape', key);
+        btn.setAttribute('aria-pressed', key === currentShape ? 'true' : 'false');
         if (cfg.omaSource) { btn.title = 'Contour OMA : ' + cfg.omaSource; }
         else if (key === 'hexagone') { btn.title = 'Contour historique — OMA 5586/OX manquant'; }
         else if (key === 'pilote') { btn.title = 'Contour Pilote historique rétabli'; }
@@ -3540,8 +3891,8 @@
     // biseau, coloration des dépassements) selon que le cerclage est affiché ou non.
     function applyFrameOptVisibility() {
       var on = el('show-frame').checked;
-      var nodes = document.querySelectorAll('.frame-opt');
-      for (var i = 0; i < nodes.length; i++) { nodes[i].hidden = !on; }
+      el('frame-options').hidden = !on;
+      el('overhang-legend').hidden = !on || !el('show-overhang').checked;
     }
     el('show-frame').addEventListener('change', function () {
       showFrame = this.checked;
@@ -3552,7 +3903,7 @@
     applyFrameOptVisibility();
     el('show-overhang').addEventListener('change', function () {
       showOverhang = this.checked;
-      el('overhang-legend').hidden = !showOverhang;
+      el('overhang-legend').hidden = !showOverhang || !el('show-frame').checked;
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
       refreshComparison3D();
     });
@@ -3562,9 +3913,8 @@
     });
     el('m-bevel-auto').addEventListener('change', scheduleCompute);
     el('bevel-unlock').addEventListener('change', scheduleCompute);
-    el('btn-11').addEventListener('click', function () {
-      scale11 = !scale11;
-      el('btn-11').textContent = scale11 ? 'Échelle libre' : 'Vue 1:1';
+    el('btn-11').addEventListener('change', function () {
+      scale11 = this.checked;
       updateRuler();
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
     });
@@ -3628,12 +3978,14 @@
        ré-appuie sur Entrée pour conserver la valeur déjà présente et continuer. Boucle sur le
        premier champ. La liste « Base spéciale » n'est dans le parcours que si la case est cochée
        (sinon le champ est désactivé et on l'enjambe). */
-    var ENTER_NAV = ['coteA', 'coteB', 'coteD', 'cambrure',
-      'indice', 'base', 'cerclage',
-      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
-      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h', 'm-ep'];
+    var ENTER_NAV = ['coteA', 'coteB', 'coteD', 'cambrure', 'm-ep',
+      'od-sph', 'od-cyl', 'od-axe', 'og-sph', 'og-cyl', 'og-axe',
+      'indice', 'cerclage', 'base',
+      'od-pd', 'od-h', 'og-pd', 'og-h'];
     function enterNavEligible(id) {
-      return id === 'base' ? el('base-speciale').checked : true;
+      if (id === 'base' && !el('base-speciale').checked) { return false; }
+      var field = el(id);
+      return !field.closest('details:not([open])') && !field.closest('[hidden]');
     }
     function focusNextField(currentId) {
       var i = ENTER_NAV.indexOf(currentId);
@@ -3688,6 +4040,28 @@
     compute();
     load3D();
   })();
+  </script>
+
+  <!-- Navigation par sections sans entrées d'historique supplémentaires sur Android. -->
+  <script>
+    (function () {
+      var links = document.querySelectorAll('.steps-nav a[href^="#"]');
+      Array.prototype.forEach.call(links, function (link) {
+        link.addEventListener('click', function (event) {
+          var target = document.getElementById(link.getAttribute('href').slice(1));
+          if (!target) { return; }
+          event.preventDefault();
+          target.scrollIntoView({
+            block: 'start',
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+          });
+          Array.prototype.forEach.call(links, function (item) {
+            item.removeAttribute('aria-current');
+          });
+          link.setAttribute('aria-current', 'location');
+        });
+      });
+    }());
   </script>
 
   <!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,

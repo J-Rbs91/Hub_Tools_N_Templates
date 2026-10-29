@@ -4,7 +4,7 @@
 
 La direction retenue est **Répertoire professionnel** (03). Fond papier, liste numérotée, séparateurs fins, vocabulaire court et accent vert grisé. Les règles de continuité vivent dans [l'identité UXER](.uxer/identity.md).
 
-La page d'accueil charge `assets/css/hub.css` puis `assets/css/repertoire.css`. Les outils restent autonomes, avec leurs propres styles inline. L'outil **Demande / Ordonnance** dispose ensuite d'une refonte dédiée de son interface de saisie, sans changement des générateurs Gmail et PDF. La navigation et la saisie du calculateur d'épaisseur sont réservées à une phase ultérieure.
+La page d'accueil charge `assets/css/hub.css` puis `assets/css/repertoire.css`. Les outils restent autonomes, avec leurs propres styles inline. L'outil **Demande / Ordonnance** dispose ensuite d'une refonte dédiée de son interface de saisie, sans changement des générateurs Gmail et PDF. La navigation et la saisie du calculateur d'épaisseur ont une refonte UXER dédiée : sections Forme, Cotes, Type de verre, Prise de mesure, Affichage 3D et Vues d'analyse, sans changement du moteur optique.
 
 
 Site statique d'outils internes destiné aux magasins d'optique. Chaque magasin renseigne ses
