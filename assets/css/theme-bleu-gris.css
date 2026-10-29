@@ -134,6 +134,20 @@
   .opt:hover { background:#f1f4f7; }
   .bar { background:rgba(250,251,252,.97); }
 
+  /* Pages techniques annexes : comparateur OMA et scanner de formes. */
+  body > header { background:var(--bg);color:var(--ink);border-bottom:1px solid var(--line); }
+  body > header a { color:var(--blue-d); }
+  body > header a:hover { color:var(--blue-900); }
+  .controls select, .controls input[type="file"], .ranking button, .actions button {
+    border-color:var(--border);color:var(--blue-d);
+  }
+  .ranking button:hover,.ranking button:focus-visible,
+  .actions button:hover,.actions button:focus-visible,
+  .btn.on { background:var(--light);border-color:var(--blue); }
+  .view,.over,.metric { border-color:var(--line); }
+  .metric { background:#f3f6f9; }
+  .status { color:var(--grey); }
+
   /* Documents métier : les fonds bleus servent à l'information uniquement. */
   .panel--info, .rgpd-article .panel--info { background:#edf2f6;border-color:var(--line); }
   .toc { background:#f6f8fa;border-color:var(--line); }
