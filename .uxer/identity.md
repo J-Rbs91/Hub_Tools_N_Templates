@@ -1,0 +1,54 @@
+# Identité UXER : Répertoire professionnel
+Mise à jour : 2026-10-29 · Statut : en révision, validation visuelle requise
+
+## 1. Essence
+Idée centrale : répertoire de travail quotidien pour les équipes de magasins d'optique.
+Personnalité : précis, discret, stable, éditorial.
+Ressenti recherché : retrouver un outil immédiatement, sans parcourir de discours.
+À éviter : page marketing, tableau de bord surchargé, animations décoratives.
+
+## 2. Matière retenue
+- Outils récurrents du magasin : accès direct et navigation courte.
+- Documents, chiffres et paramètres : titrage exact, descriptions limitées aux fonctions.
+- Usage sur poste et mobile : alignements robustes, cibles tactiles suffisantes.
+- États d'accès différents : disponibles, accès par code, ouverture différée.
+
+## 3. Territoire
+Retenu : Répertoire professionnel. Fond papier, écriture sombre, lignes séparatrices, numérotation.
+Écartés : Blanc clinique, plus conventionnel ; Console graphite, contraste et densité inadaptés à certains usages de magasin.
+Le choix a été validé par le demandeur après comparaison des trois pistes.
+
+## 4. Principes
+1. La typographie hiérarchise, les séparateurs structurent. Coût accepté : interface moins illustrée.
+2. Un outil = un intitulé et une fonction très courte sur l'accueil. Coût : détails dans les pages internes.
+3. Une seule couleur d'accent feutrée pour les actions et le focus. Coût : couleurs de catégorie conservées uniquement si elles ont un sens métier.
+4. Pas d'animation décorative persistante. Coût : moins de mouvement.
+5. L'information de confidentialité reste accessible sans être répétée dans chaque carte. Coût : une mention de pied de page nécessaire.
+
+## 5. Signatures
+| Signature | Nature | Surfaces | Absente si |
+|---|---|---|---|
+| Répertoire numéroté | Composition | Accueil | Outils en grandes tuiles colorées |
+| Titrage condensé | Rythme | Accueil, en-têtes | Slogans et paragraphes d'accueil |
+| Fond papier et lignes | Surfaces | Hub, outils autorisés, docs | Dégradés de décoration et ombres nombreuses |
+
+## 6. Application par surface
+| Surface | Porte l'identité | Ajustement admis |
+|---|---|---|
+| Accueil | Rangées numérotées, texte court | Aucun détail expansible |
+| Navigation | Libellés explicites et états d'accès | Navigation propre à chaque outil |
+| Calculateur épaisseur | Habillage colorimétrique seulement | Navigation et saisie inchangées dans cette phase |
+| Demande / Ordonnance | Intouchable dans cette phase | Ni texte ni mise en page modifiés |
+| Clôture de caisse | Neutralité de structure | Couleurs fonctionnelles de comptage préservées |
+| Lentilles souples | Neutralité et lisibilité | Garde et onglets fonctionnels inchangés |
+| Campagne e-mail | Habillage sobre | Garde réglementaire et statut fermé préservés |
+| Documentation | Corps lisible, titres sobres | Contenu légal, technique et procédure conservés |
+| Formulaire et modale | Coins modestes, contraste du focus | Labels et règles de validation inchangés |
+| Mobile | Rangées tactiles lisibles | Empilements propres aux outils |
+
+## 7. Interdits
+- Aucun changement fonctionnel, aucune dépendance externe ni police distante dans cette phase.
+- Aucun texte ou style changé dans outils/demande-ordonnance/index.html.
+- Aucune réorganisation de navigation ou de saisie dans le calculateur.
+- Aucun lien actif ajouté pour Campagne e-mail.
+- Éviter les catalogues de composants ou animations génériques sans rôle métier.
