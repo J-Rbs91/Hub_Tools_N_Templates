@@ -39,7 +39,7 @@ every counting page.
 - Le CSS effectif de l'accueil est `assets/css/hub.css` **puis** `assets/css/repertoire.css`. Les descriptions des cartes et variables bleues dans les sections historiques ci-dessous décrivent l'ancienne base, non la direction active.
 - Pour toute nouvelle ligne, donner un titre et une fonction courte ; éviter les détails expansibles et les animations décoratives.
 - N'ajouter aucun texte sur la confidentialité dans chaque carte. La transparence se traite dans le pied de page et les documents pertinents.
-- **Zone intouchable pour cette mission :** `outils/demande-ordonnance/index.html`, contenu et mise en page.
+- La première mission (PR #96) préservait `outils/demande-ordonnance/index.html`. La mission UXER suivante refond uniquement son **interface de saisie** sur une branche distincte ; conserver strictement ses champs, son JavaScript et ses sorties Gmail, et isoler ses nouveaux styles en `@media screen` pour ne pas perturber l'impression A4.
 - **Phase 2 exclusivement :** navigation et saisie de `outils/epaisseur-verres/index.html`. Dans cette première passe, seuls les styles de présentation peuvent évoluer.
 - Les outils existants restent des pages autonomes ; ne pas y importer la feuille de style du hub.
 

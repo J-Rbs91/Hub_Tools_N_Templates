@@ -38,7 +38,7 @@ Le choix a été validé par le demandeur après comparaison des trois pistes.
 | Accueil | Rangées numérotées, texte court | Aucun détail expansible |
 | Navigation | Libellés explicites et états d'accès | Navigation propre à chaque outil |
 | Calculateur épaisseur | Habillage colorimétrique seulement | Navigation et saisie inchangées dans cette phase |
-| Demande / Ordonnance | Intouchable dans cette phase | Ni texte ni mise en page modifiés |
+| Demande / Ordonnance | Saisie structurée, navigation de section, labels courts | Document A4, textes médicaux générés et exports conservés |
 | Comptage de caisse | Sections 01 à 06, tables sobres, champs lisibles | Écart positif/négatif et avertissements conservent leurs couleurs métier |
 | Lentilles souples | Neutralité et lisibilité | Garde et onglets fonctionnels inchangés |
 | Campagne e-mail | Habillage sobre | Garde réglementaire et statut fermé préservés |
@@ -48,7 +48,7 @@ Le choix a été validé par le demandeur après comparaison des trois pistes.
 
 ## 7. Interdits
 - Aucun changement fonctionnel, aucune dépendance externe ni police distante dans cette phase.
-- Aucun texte ou style changé dans outils/demande-ordonnance/index.html.
+- Les styles de saisie ne doivent pas modifier la mise en page A4, ni les scripts de génération PDF et Gmail.
 - Aucune réorganisation de navigation ou de saisie dans le calculateur.
 - Aucun lien actif ajouté pour Campagne e-mail.
 - Éviter les catalogues de composants ou animations génériques sans rôle métier.
