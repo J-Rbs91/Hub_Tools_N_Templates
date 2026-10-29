@@ -50,3 +50,35 @@ for (const [key, shape] of Object.entries(shapes)) {
     assert.ok(Math.min(...ys) <= -0.99 && Math.max(...ys) >= 0.99);
   });
 }
+
+test('parcours UXER : les sept sections métiers restent navigables', () => {
+  const sections = ['form-shape', 'form-monture', 'form-verre', 'form-prescription', 'results', 'view-3d', 'profiles'];
+  for (const id of sections) {
+    assert.equal((html.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, 'section absente ou dupliquée : ' + id);
+    assert.ok(html.includes('href="#' + id + '"'), 'lien de navigation absent : ' + id);
+  }
+  const resultsAt = html.indexOf('id="results"');
+  const visualsAt = html.indexOf('id="view-3d"');
+  const outputsAt = html.indexOf('class="layout-col layout-col--results"');
+  assert.ok(outputsAt < resultsAt && resultsAt < visualsAt, 'résultats attendus avant la 3D dans la colonne de droite');
+});
+
+test('parcours UXER : champs OD/OG, monture et assistant photo préservés', () => {
+  const ids = [
+    'shapes','coteA','coteB','coteD','cambrure','galbe','m-ep','show-frame',
+    'indice','base-speciale','base','cerclage',
+    ...['od', 'og'].flatMap(eye => ['sph', 'cyl', 'axe', 'pd', 'h'].map(field => eye + '-' + field)),
+    'copy-od-og','res-body','merid','notes','viewport','m-bevel-auto',
+    'm-bevel-od','m-bevel-og','bevel-unlock','show-overhang','btn-reset-vue',
+    'btn-coupe','btn-11','cal-reset','compare-save','compare-clear',
+    'profiles-carousel','profile-face','profile-temporal','profile-top','profile-bottom',
+    'photo-modal','pm-input','pm-canvas','pm-side-od','pm-side-og','pm-mirror',
+    'pm-rot','pm-sens','pm-a','pm-b','pm-name','pm-prev','pm-next'
+  ];
+  const allIds = [...html.matchAll(/\\bid="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(new Set(allIds).size, allIds.length, 'identifiants HTML dupliqués');
+  for (const id of ids) assert.ok(allIds.includes(id), 'contrôle métier absent : ' + id);
+  assert.match(html, /aria-pressed.*currentShape/);
+  assert.match(html, /class="advanced-panel" id="mount-settings"/);
+  assert.match(html, /data-label="½ écart"/);
+});
