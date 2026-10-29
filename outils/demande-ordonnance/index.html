@@ -111,6 +111,7 @@
   /* hauteurs bornées : le cumul des deux zones reste compatible A4 */
   textarea[data-k="intro"]{max-height:130px}
   textarea[data-k="commentaire"]{max-height:200px}
+  .intro-print{display:none}
 
   .pick{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-sm);margin-right:14px}
   .pick input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
@@ -243,7 +244,10 @@
     .closing{font-size:var(--fs-micro);margin:8px 0 0;line-height:1.45}
     .sign{font-size:var(--fs-hint);margin:6px 0 0}
     /* le paragraphe d'intro et tout l'interactif sont masqués au PDF */
-    #introRow,.bar,.help,.toast,.regen,.topbar,.ios-back,.cgu-link{display:none!important}
+    .sect-act,.bar,.help,.toast,.regen,.topbar,.ios-back,.cgu-link{display:none!important}
+    #introRow textarea{display:none!important}
+    #introRow .intro-print{display:block!important;white-space:pre-line;padding:7px 11px;line-height:1.5;font-size:var(--fs-label)}
+    #print-closing{white-space:pre-line}
     tr,.pgrid,.pf,.sheet{break-inside:avoid}
   }
 
@@ -437,16 +441,17 @@
       </td></tr>
       <tr id="introRow"><td colspan="2" style="padding:10px 12px">
         <textarea data-k="intro" placeholder="Le paragraphe se génère automatiquement à partir des champs. Vous pouvez le modifier librement." aria-label="Texte d'introduction"></textarea>
+        <div class="intro-print" id="print-intro"></div>
       </td></tr>
 
       <tr class="sect" id="objet"><td colspan="2">Objet</td></tr>
       <tr><td class="obj">Objet de la demande</td><td>
-        <label class="opt"><input type="checkbox" data-k="o_modif" aria-label="Demande d'autorisation de modification de prescription"><span class="txt">Demande d'autorisation de modification de prescription</span></label>
-        <label class="opt"><input type="checkbox" data-k="o_lentilles" aria-label="Compte rendu d'adaptation lentilles de contact"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></label>
-        <label class="opt"><input type="checkbox" data-k="o_controle" aria-label="Compte rendu de contrôle de vision"><span class="txt">Compte rendu de contrôle de vision</span></label>
-        <label class="opt"><input type="checkbox" data-k="o_adapt" aria-label="Compte rendu d'adaptation de prescription (art. L.4362-10 du Code de la santé publique)"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></label>
-        <label class="opt"><input type="checkbox" data-k="o_renouv" aria-label="Compte rendu de renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon art. D.4362-13 du Code de la santé publique, JO du 12/10/2016</span></span></label>
-        <label class="opt"><input type="checkbox" data-k="o_nouvelle" aria-label="Demande d'établissement d'une nouvelle ordonnance par le médecin"><span class="txt">Demande d'établissement d'une nouvelle ordonnance<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></label>
+        <label class="opt"><input type="radio" name="objet" data-k="o_modif" aria-label="Demande d'accord écrit pour adaptation lors d'une première délivrance"><span class="txt">Demande d'accord écrit<span class="sub">Première délivrance avec adaptation</span></span></label>
+        <label class="opt"><input type="radio" name="objet" data-k="o_lentilles" aria-label="Compte rendu concernant les lentilles de contact"><span class="txt">Compte rendu concernant les lentilles de contact</span></label>
+        <label class="opt"><input type="radio" name="objet" data-k="o_controle" aria-label="Compte rendu de contrôle de vision"><span class="txt">Compte rendu de contrôle de vision</span></label>
+        <label class="opt"><input type="radio" name="objet" data-k="o_adapt" aria-label="Compte rendu d'adaptation lors d'un renouvellement"><span class="txt">Compte rendu d'adaptation de correction<span class="sub">Dans le cadre d'un renouvellement</span></span></label>
+        <label class="opt"><input type="radio" name="objet" data-k="o_renouv" aria-label="Compte rendu de délivrance exceptionnelle sans ordonnance"><span class="txt">Compte rendu de délivrance exceptionnelle<span class="sub">Sans ordonnance, en cas de perte ou de bris</span></span></label>
+        <label class="opt"><input type="radio" name="objet" data-k="o_nouvelle" aria-label="Demande d'établissement d'une nouvelle ordonnance par le médecin"><span class="txt">Demande d'une nouvelle ordonnance</span></label>
       </td></tr>
 
       <tr class="sect" id="patient"><td colspan="2">Patient</td></tr>
@@ -489,7 +494,7 @@
         <span class="grp" data-acuity="Vision de près"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_ac_p" aria-label="Acuité de près initiale (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
       </div></td></tr>
 
-      <tr class="sect" id="modifications"><td colspan="2">Modifications demandées</td></tr>
+      <tr class="sect" id="modifications"><td colspan="2" id="modifications-title">Corrections proposées ou relevées</td></tr>
       <tr><td class="obj">Type d'équipement</td><td>
         <label class="pick"><input type="checkbox" data-k="m_lunettes"> Lunettes</label>
         <label class="pick"><input type="checkbox" data-k="m_lentilles"> Lentilles</label>
@@ -533,10 +538,7 @@
       </td></tr>
     </table>
 
-    <p class="closing">
-      Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir,
-      cher docteur, l'expression de mes respectueuses salutations.
-    </p>
+    <p class="closing" id="print-closing"></p>
     <p class="sign" id="store-sign">Mon magasin</p>
   </div>
 </div>
@@ -705,46 +707,81 @@
     setTimeout(()=>t.classList.remove('show'), 3200);
   }
 
-  /* ---------- paragraphe d'intro auto + éditable ---------- */
-  let introDirty=false; // passe à true dès que l'utilisateur édite manuellement
-
+  /* ---------- textes courts selon la situation ---------- */
+  const OBJETS=[
+    ['o_modif',"Demande d'accord écrit pour adaptation (première délivrance)"],
+    ['o_lentilles',"Compte rendu concernant les lentilles de contact"],
+    ['o_controle',"Compte rendu de contrôle de vision"],
+    ['o_adapt',"Information d'adaptation de correction (renouvellement)"],
+    ['o_renouv',"Compte rendu de délivrance exceptionnelle sans ordonnance"],
+    ['o_nouvelle',"Demande d'une nouvelle ordonnance"]
+  ];
+  let introDirty=false;
+  function objetActif(){return OBJETS.find(([k])=>chk(k))?.[0]||'';}
+  function correctionTitle(){
+    return ({
+      o_modif:'Correction soumise à votre accord',
+      o_nouvelle:'Correction proposée',
+      o_adapt:'Correction adaptée',
+      o_renouv:'Correction délivrée',
+      o_controle:'Mesures relevées',
+      o_lentilles:'Mesures / correction relevées'
+    })[objetActif()]||'Corrections proposées ou relevées';
+  }
+  function closingText(){
+    return objetActif()==='o_modif'||objetActif()==='o_nouvelle'
+      ? "Je vous remercie de votre retour. Si vous préférez revoir votre patient(e), je peux l'inviter à reprendre rendez-vous."
+      : 'Je reste à votre disposition pour toute précision.';
+  }
   function buildIntro(){
-    const dr=val('medecin');
-    const nom=val('p_nom');
-    const ne=val('p_ne');
-    const tete = dr ? ('Docteur '+dr+',') : 'Docteur,';
-
-    // patient : segment optionnel
-    let pat='';
-    if(nom){ pat=' votre patient(e) '+nom; if(ne) pat+=', né(e) le '+ne; pat+='.'; }
-    else { pat=' votre patient(e).'; }
-
-    // corps selon objet coché (priorité au premier coché)
+    const dr=val('medecin'), nom=val('p_nom'), ne=val('p_ne');
+    const tete=dr?'Docteur '+dr+',':'Docteur,';
+    const pat=nom ? nom+(ne?', né(e) le '+ne:'') : 'votre patient(e)';
     let corps;
-    if(chk('o_nouvelle')){
-      const civ=val('p_civ');
-      const patRef=((civ?civ+' ':'')+nom).trim() || 'votre patient(e)';
-      corps="Après essai en magasin et analyse détaillée des habitudes et besoins visuels de "+patRef+", il semblerait qu'appliquer la prescription en l'état ne suffirait pas à servir au mieux ses intérêts. Depuis la décision du Conseil d'État du 2 mai 2025 (art. L.4362-10 du Code de la santé publique), nous ne pouvons plus procéder à cette modification sans votre accord écrit préalable. C'est pourquoi je me permets de solliciter, si aucune contre-indication médicale n'existe et sous réserve de votre appréciation, l'établissement d'une nouvelle ordonnance intégrant l'adaptation détaillée ci-dessous.";
+    switch(objetActif()){
+      case 'o_modif':
+        corps="Je sollicite votre accord écrit avant toute adaptation de la prescription de "+pat+". La correction proposée figure ci-dessous.";
+        break;
+      case 'o_lentilles':
+        corps="Je vous transmets les éléments relevés concernant les lentilles de contact de "+pat+".";
+        break;
+      case 'o_controle':
+        corps="Je vous transmets les résultats du contrôle de vision de "+pat+".";
+        break;
+      case 'o_adapt':
+        corps="Dans le cadre d'un renouvellement, je vous informe de l'adaptation de la correction de "+pat+". Les valeurs figurent ci-dessous.";
+        break;
+      case 'o_renouv':
+        corps="Je vous adresse un compte rendu relatif à la délivrance exceptionnelle sans ordonnance pour "+pat+", à la suite d'une perte ou d'un bris de verres correcteurs.";
+        break;
+      case 'o_nouvelle':
+        corps="La correction envisagée pour "+pat+" diffère de la prescription initiale. Pourriez-vous, si vous le jugez adapté, établir une nouvelle ordonnance à partir de la proposition ci-dessous ?";
+        break;
+      default:
+        corps='Je vous adresse ce document concernant '+pat+'.';
     }
-    else if(chk('o_modif')) corps='Je me permets de vous adresser cette demande concernant'+pat+' Après contrôle, et sous réserve de votre appréciation, je sollicite respectueusement votre autorisation pour la modification de la prescription détaillée ci-dessous.';
-    else if(chk('o_lentilles')) corps="Je vous transmets ce compte rendu d'adaptation de lentilles de contact concernant"+pat;
-    else if(chk('o_controle'))  corps='Je vous transmets ce compte rendu de contrôle de vision concernant'+pat;
-    else if(chk('o_adapt'))     corps="Je vous transmets ce compte rendu d'adaptation de prescription (art. L.4362-10 du Code de la santé publique) concernant"+pat;
-    else if(chk('o_renouv'))    corps='Je vous transmets ce compte rendu de renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique) concernant'+pat;
-    else                        corps='Je me permets de vous adresser ce document concernant'+pat;
-
     return tete+'\n'+corps;
   }
-
-  function refreshIntro(){
-    if(introDirty) return;            // ne pas écraser une saisie manuelle
-    const ta=document.querySelector('[data-k="intro"]');
-    if(ta) ta.value=buildIntro();
+  function syncCourrier(){
+    const titre=document.getElementById('modifications-title');
+    if(titre) titre.textContent=correctionTitle();
+    const printIntro=document.getElementById('print-intro');
+    if(printIntro) printIntro.textContent=val('intro');
+    const printClosing=document.getElementById('print-closing');
+    if(printClosing) printClosing.textContent=closingText()+'\nBien cordialement,';
+    const commentaire=document.querySelector('[data-k="commentaire"]');
+    if(commentaire) commentaire.placeholder=objetActif()==='o_renouv'
+      ? "Perte ou bris, urgence constatée, absence de solution médicale adaptée…"
+      : "Saisie libre…";
   }
-  function regenIntro(){              // bouton ↻ : force la régénération
-    introDirty=false;
+  function refreshIntro(){
     const ta=document.querySelector('[data-k="intro"]');
-    if(ta) ta.value=buildIntro();
+    if(ta&&!introDirty) ta.value=buildIntro();
+    syncCourrier();
+  }
+  function regenIntro(){
+    introDirty=false;
+    refreshIntro();
     toast('Paragraphe régénéré.');
   }
 
@@ -762,19 +799,9 @@
     const on=items.filter(([k])=>chk(k)).map(([,l])=>l);
     return on.length? on.join(' &nbsp;·&nbsp; ') : '';
   }
-  function objetList(){
-    return checkedList([
-      ['o_modif',"Demande d'autorisation de modification de prescription"],
-      ['o_lentilles',"Adaptation lentilles de contact"],
-      ['o_controle',"Contrôle de vision"],
-      ['o_adapt',"Adaptation de prescription (art. L.4362-10 du Code de la santé publique)"],
-      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"],
-      ['o_nouvelle',"Demande d'établissement d'une nouvelle ordonnance"],
-    ]);
-  }
-  // Clôture (toujours présente) : déférence + proposition systématique de revoir le patient + politesse.
-  var CLOSING_1="Cette démarche reste entièrement soumise à votre appréciation ; je me conformerai bien entendu à votre décision. Si vous jugez préférable de revoir votre patient(e) en consultation, je vous remercie de bien vouloir me l'indiquer.";
-  var CLOSING_2="Je vous remercie de votre bienveillante attention et vous prie d'agréer, Docteur, l'expression de mes salutations respectueuses.";
+  function objetList(){return checkedList(OBJETS);}
+  function closingHtml(){return closingText();}
+  function closingSignature(){return 'Bien cordialement,';}
   function suiteList(){
     return checkedList([
       ['s_equip',"Équipement délivré / en cours"],
@@ -849,7 +876,7 @@
     if(patRows.length){ h+=sect('Patient'); h+=patRows.join(''); }
 
     h+=blocPrescription('Prescription initiale','i_');
-    h+=blocPrescription('Modifications demandées','m_');
+    h+=blocPrescription(correctionTitle(),'m_');
 
     const com=val('commentaire');
     if(com){ h+=sect('Commentaire'); h+=row('Commentaire', esc(com).replace(/\n/g,'<br>')); }
@@ -858,8 +885,8 @@
 
     h+='</table>';
 
-    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:16px 2px 0;line-height:1.55;">'+esc(CLOSING_1)+'</p>';
-    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:8px 2px 0;line-height:1.55;">'+esc(CLOSING_2)+'</p>';
+    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:16px 2px 0;line-height:1.55;">'+esc(closingHtml())+'</p>';
+    h+='<p style="font-size:12.5px;color:#5A6B7B;font-style:italic;margin:8px 2px 0;line-height:1.55;">'+esc(closingSignature())+'</p>';
     h+='<p style="font-size:13px;font-weight:700;color:#1A2A3A;margin:10px 2px 0;">'+esc(storeName())+'</p>';
     h+='</div>';
     return h;
@@ -870,16 +897,7 @@
     const on=items.filter(([k])=>chk(k)).map(([,l])=>l);
     return on.length ? on.join(' · ') : '';
   }
-  function objetListTxt(){
-    return checkedListTxt([
-      ['o_modif',"Demande d'autorisation de modification de prescription"],
-      ['o_lentilles',"Adaptation lentilles de contact"],
-      ['o_controle',"Contrôle de vision"],
-      ['o_adapt',"Adaptation de prescription (art. L.4362-10 du Code de la santé publique)"],
-      ['o_renouv',"Renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"],
-      ['o_nouvelle',"Demande d'établissement d'une nouvelle ordonnance"],
-    ]);
-  }
+  function objetListTxt(){return checkedListTxt(OBJETS);}
   function suiteListTxt(){
     return checkedListTxt([
       ['s_equip',"Équipement délivré / en cours"],
@@ -948,7 +966,7 @@
 
     // prescriptions (sections masquées si aucune ligne)
     l.push(...blocPrescriptionTxt('Prescription initiale','i_'));
-    l.push(...blocPrescriptionTxt('Modifications demandées','m_'));
+    l.push(...blocPrescriptionTxt(correctionTitle(),'m_'));
 
     // commentaire
     const com=val('commentaire');
@@ -959,9 +977,9 @@
     if(suite){ l.push('SUITE À DONNER'); l.push('Suite à donner : '+suite); l.push(''); }
 
     // clôture (déférence + proposition de revoir le patient) + politesse + signature
-    l.push(CLOSING_1);
+    l.push(closingText());
     l.push('');
-    l.push(CLOSING_2);
+    l.push(closingSignature());
     l.push('');
     l.push(storeName());
     return l.join('\n');
@@ -980,6 +998,9 @@
       if(cyl && !axe) return document.querySelector('[data-k="'+p+'_axe"]');
       if(axe && !cyl) return document.querySelector('[data-k="'+p+'_cyl"]');
     }
+    if(chk('o_renouv')&&!val('commentaire')) return document.querySelector('[data-k="commentaire"]');
+    if((chk('o_modif')||chk('o_nouvelle')||chk('o_adapt')||chk('o_renouv')) &&
+       !['m_od_sph','m_og_sph'].some(k=>val(k))) return document.querySelector('[data-k="m_od_sph"]');
     return null;
   }
   function hasBlankFields(){ return firstBlankField()!==null; }
@@ -1044,7 +1065,7 @@
   function resetForm(){
     if(!confirm('Effacer toutes les saisies ?')) return;
     document.querySelectorAll('input[type=text]').forEach(i=>i.value='');
-    document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+    document.querySelectorAll('input[type=checkbox],input[type=radio]').forEach(c=>c.checked=false);
     document.querySelectorAll('textarea').forEach(t=>t.value='');
     document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
     document.querySelectorAll('.warn-step').forEach(el=>{el.classList.remove('warn-step');el.removeAttribute('title');});
@@ -1061,13 +1082,13 @@
 
     const ta=document.querySelector('[data-k="intro"]');
     if(ta){
-      ta.addEventListener('input', ()=>{ introDirty=true; });
+      ta.addEventListener('input', ()=>{ introDirty=true; syncCourrier(); });
     }
     // régénère l'intro quand les champs clés changent (si non édité manuellement)
     ['medecin','p_civ','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle']
       .forEach(k=>{
         const e=document.querySelector('[data-k="'+k+'"]');
-        if(e){ const ev = (e.tagName==='SELECT' || e.type==='checkbox') ? 'change' : 'input'; e.addEventListener(ev, refreshIntro); }
+        if(e){ const ev = (e.tagName==='SELECT' || e.type==='radio') ? 'change' : 'input'; e.addEventListener(ev, refreshIntro); }
       });
     refreshIntro();
 
@@ -1103,11 +1124,11 @@
     if(e.key!=='Enter' || e.isComposing) return;
     var el=e.target;
     if(!el) return;
-    var isField = el.tagName==='SELECT' || (el.tagName==='INPUT' && (el.type==='text' || el.type==='checkbox'));
+    var isField = el.tagName==='SELECT' || (el.tagName==='INPUT' && (el.type==='text' || el.type==='checkbox' || el.type==='radio'));
     if(!isField) return;                                    // textarea, boutons… : comportement natif
     e.preventDefault();                                     // évite toute soumission implicite
     var fields=Array.prototype.slice.call(
-      document.querySelectorAll('input[type="text"], input[type="checkbox"], select'))
+      document.querySelectorAll('input[type="text"], input[type="checkbox"], input[type="radio"], select'))
       .filter(function(f){ return !f.disabled && f.offsetParent!==null; });
     var i=fields.indexOf(el);
     if(i>-1 && i+1<fields.length){ fields[i+1].focus(); }
