@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clôture de caisse</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#1F6FB2">
+  <meta name="theme-color" content="#F5F3ED">
   <style>
     /* ── Transition d'écran native + fond animé doux (cohérents avec le hub) ── */
     @view-transition { navigation: auto; }
@@ -580,6 +580,135 @@
     .cnt-table { border-color:var(--line); }
     .block-hdr h2 { letter-spacing:-.01em; }
     .btn { border-radius:5px; }
+
+    /* UXER 03 : répertoire professionnel, outils caisse. */
+    @media screen {
+      :root {
+        --ink:#252a27;--grey:#59685e;--bg:#f5f3ed;--white:#fffefa;--line:#d7dbd3;
+        --fe:#425d4f;--pa:#425d4f;--el:#425d4f;--co:#425d4f;--ec:#425d4f;--ec-d:#354e42;--tb:#425d4f;
+        --fe-alt:#f7f8f4;--pa-alt:#f7f8f4;--el-alt:#f7f8f4;--tb-alt:#f7f8f4;
+        --co-bg:#eef2eb;
+      }
+      html{scroll-behavior:smooth}
+      body{background:var(--bg);color:var(--ink)}
+      body::before{display:none;animation:none}
+      .site-header{
+        padding:24px max(18px,calc((100vw - 1250px)/2));
+        background:var(--bg);color:var(--ink);border-bottom:1px solid var(--line);
+        gap:20px;
+      }
+      .site-header .back-link{order:3;padding:7px 0;border:0;border-bottom:1px solid var(--co);color:var(--ec-d);border-radius:0;font-size:12px}
+      .site-header .back-link:hover{background:transparent;color:var(--ink)}
+      .hdr-info{min-width:210px}
+      .page-kicker{font-size:10px;letter-spacing:.11em;color:var(--ec-d);font-weight:750;margin-bottom:8px}
+      .hdr-title{font-size:clamp(24px,3vw,36px);font-weight:650;line-height:1.15;letter-spacing:-.045em}
+      .hdr-sub{margin-top:8px;color:var(--grey);font-size:12px;opacity:1}
+      .hdr-date{color:var(--grey);opacity:1;font-size:12px;font-weight:550;margin-left:auto}
+      main{padding:0 18px 52px;max-width:1286px}
+      .cash-nav{
+        display:flex;gap:1px;overflow-x:auto;scrollbar-width:thin;white-space:nowrap;
+        background:var(--bg);border-bottom:1px solid var(--line);
+        position:sticky;top:0;z-index:25;padding:10px 0;margin:0 0 22px;
+      }
+      .cash-nav a{padding:9px 13px;text-decoration:none;color:var(--ec-d);font-size:12px;font-weight:650;border-radius:3px}
+      .cash-nav a:hover{background:#e9eee6}
+      .cash-nav a:focus-visible{outline:2px solid var(--co);outline-offset:-2px}
+      .grid-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
+      .grid-bottom{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+      section.block{background:var(--white);border:1px solid var(--line);border-radius:5px;box-shadow:none;overflow:hidden;min-width:0;scroll-margin-top:88px}
+      .block-hdr,.block--ferraille .block-hdr,.block--papier .block-hdr,.block--elec .block-hdr,
+      .block--comptage .block-hdr,.block--ecart .block-hdr,.block--history .block-hdr{
+        background:#edf0e9;border-bottom:1px solid var(--line);color:var(--ink);padding:15px 16px;
+      }
+      .block-hdr h2{font-size:15px;font-weight:650;letter-spacing:-.02em;color:var(--ink)}
+      .block-hdr h2::before{font-size:10px;letter-spacing:.08em;font-weight:700;color:var(--ec-d);margin-right:13px}
+      .block--ferraille .block-hdr h2::before{content:"01"}
+      .block--papier .block-hdr h2::before{content:"02"}
+      .block--elec .block-hdr h2::before{content:"03"}
+      .block--comptage .block-hdr h2::before{content:"04"}
+      .block--ecart .block-hdr h2::before{content:"05"}
+      .block--history .block-hdr h2::before{content:"06"}
+      .block-badge{display:none}
+      .block--history .block-badge{display:inline-flex;background:transparent;border:1px solid #b7c4b8;color:var(--ec-d);font-size:10px;font-weight:650;padding:5px 9px;border-radius:3px}
+      .cnt-table thead th{padding:10px 12px;text-transform:none;font-size:11px;font-weight:650;letter-spacing:0;border-bottom:1px solid var(--line)}
+      .cnt-table tbody td{padding:7px 12px;font-size:13px;border-bottom:1px solid #edece5;background:transparent!important}
+      .cnt-table tbody tr:nth-child(even){background:#f7f8f4}
+      .cnt-table tbody td.td-lbl{font-weight:650}
+      .cnt-table tbody td.td-r{font-weight:650;font-variant-numeric:tabular-nums}
+      .cnt-table tfoot td{padding:13px 12px;font-size:13px;background:#eef1ec;border-top:1px solid #bdc8bc;font-variant-numeric:tabular-nums}
+      .qty-input,.amt-input,.fond-input,.ref-input{
+        min-height:42px;border:1px solid #bdc7bd;border-radius:4px;
+        background:#fff;color:var(--ink);font-size:14px;font-weight:600;
+      }
+      .qty-input{width:72px}
+      .amt-input{width:125px;max-width:100%}
+      .qty-input:focus,.amt-input:focus,.fond-input:focus,.ref-input:focus{
+        outline:2px solid rgba(66,93,79,.32);outline-offset:1px;border-color:var(--co);
+      }
+      .fond-row{background:#f7f8f4;border-top:1px solid var(--line);padding:14px 12px;gap:8px}
+      .fond-row label,.fond-eur{color:var(--grey);font-size:12px;font-weight:650}
+      .fond-row .fond-input{background:#fff;color:var(--ink);border-color:#bdc7bd;width:94px}
+      .comptage-body{padding:29px 19px 24px}
+      .comptage-lbl{font-size:11px;font-weight:650;letter-spacing:.02em;text-transform:none}
+      .comptage-total{color:var(--ec-d);font-size:clamp(34px,4vw,48px);font-weight:680;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+      .comptage-sub{font-size:11px;color:var(--grey)}
+      .comptage-breakdown{margin-top:24px;gap:12px 17px}
+      .cb-item .cb-val{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums}
+      .cb-item .cb-lbl{font-size:10px;text-transform:none;letter-spacing:0;font-weight:600}
+      .cb-sep{font-size:16px}
+      .ecart-body{padding:20px}
+      .ecart-field label{font-size:12px;color:var(--grey);font-weight:650}
+      .ecart-field{gap:9px}
+      .ref-input{width:123px;font-size:14px}
+      .ecart-result{background:#f3f5f0;border:1px solid var(--line);border-radius:4px;padding:14px 15px}
+      .er-lbl{font-size:12px}
+      .er-val{font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+      .er-val.pos{color:#276749}
+      .er-val.neg{color:#a6322d}
+      .remise-alert{border-radius:4px}
+      .prefill-banner{background:#edf0e9;border:1px solid #bac7b8;border-left:3px solid var(--ec);border-radius:4px;color:var(--ec-d);font-size:12px;font-weight:600;margin-bottom:18px}
+      .btn-save{background:var(--ec);border-radius:4px;padding:13px 14px;font-size:13px;font-weight:650;min-height:44px}
+      .btn-save:hover{background:var(--ec-d)}
+      .history-table{min-width:950px}
+      .history-table thead th{font-size:11px;text-transform:none;letter-spacing:0;border-color:var(--line)}
+      .history-table tbody td{font-size:12px;border-color:#e7eae4;font-variant-numeric:tabular-nums}
+      .history-table tbody tr:nth-child(even) td{background:#f6f8f4}
+      .history-table .ht-pos{color:#276749}
+      .history-table .ht-neg{color:#a6322d}
+      .history-body{overflow-x:auto;contain:paint}
+      .btn-del{border-color:#d3a3a1;color:#a6322d;font-weight:650}
+      .btn-reset{border:1px solid #bfc9bf;color:var(--ec-d);border-radius:4px;font-size:12px;font-weight:650;min-height:42px}
+      .btn-reset:hover{background:#f8e8e7;border-color:#d3a3a1;color:#a6322d}
+      .actions-bar{margin-top:18px}
+      .site-footer{border-top:1px solid var(--line);padding:17px;font-size:11px}
+      .toast{border-radius:4px;box-shadow:0 3px 16px rgba(0,0,0,.14)}
+      .ios-back{background:var(--ec-d);border-radius:4px;box-shadow:0 3px 13px rgba(0,0,0,.15)}
+    }
+    @media screen and (max-width:990px){
+      .grid-top{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .block--elec{grid-column:1 / -1}
+      .grid-bottom{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .hdr-date{margin-left:0}
+    }
+    @media screen and (max-width:640px){
+      .site-header{padding:23px 14px 16px;gap:8px 12px}
+      .hdr-info{order:0;flex:1 1 100%}
+      .site-header .back-link{order:2}
+      .hdr-date{order:1;flex:1 1 100%}
+      .hdr-title{font-size:30px}
+      main{padding:0 11px 40px}
+      .cash-nav{margin:0 -11px 14px;padding:8px 11px}
+      .grid-top,.grid-bottom{grid-template-columns:minmax(0,1fr);gap:14px}
+      .block--elec{grid-column:auto}
+      .cnt-table tbody td{padding:7px 10px}
+      .cnt-table thead th{padding:10px}
+      .qty-input{width:75px}
+      .block-hdr{padding:13px 14px}
+      .comptage-total{font-size:38px}
+      .ecart-body{padding:16px}
+      .ecart-field{flex-wrap:wrap}
+    }
+    @media screen and (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
 </head>
 <body>
@@ -589,13 +718,23 @@
   <header class="site-header">
     <a class="back-link" href="../../">&#8592; Retour</a>
     <div class="hdr-info">
-      <div class="hdr-title">Cl&#244;ture de caisse</div>
+      <p class="page-kicker">OUTIL MÉTIER / CAISSE</p>
+      <h1 class="hdr-title">Comptage de caisse</h1>
       <div class="hdr-sub" id="hdr-sub">Mon magasin</div>
     </div>
     <div class="hdr-date" id="js-date"></div>
   </header>
 
   <main>
+
+    <nav class="cash-nav" aria-label="Accès aux sections">
+      <a href="#pieces">Pièces</a>
+      <a href="#billets">Billets</a>
+      <a href="#paiements">Paiements</a>
+      <a href="#especes">Espèces</a>
+      <a href="#ecart">Écart</a>
+      <a href="#historique">Historique</a>
+    </nav>
 
     <!-- ── BANDEAU REPORT DE LA VEILLE ── -->
     <div class="prefill-banner" id="prefill-banner" role="status" aria-live="polite" style="display:none"></div>
@@ -604,9 +743,9 @@
     <div class="grid-top">
 
       <!-- LA FERRAILLE (pièces) -->
-      <section class="block block--ferraille">
+      <section class="block block--ferraille" id="pieces">
         <div class="block-hdr">
-          <h2>La Ferraille</h2>
+          <h2>Pièces</h2>
           <span class="block-badge">Pi&#232;ces</span>
         </div>
         <table class="cnt-table">
@@ -628,9 +767,9 @@
       </section>
 
       <!-- LE PAPIER (billets) -->
-      <section class="block block--papier">
+      <section class="block block--papier" id="billets">
         <div class="block-hdr">
-          <h2>Le Papier</h2>
+          <h2>Billets</h2>
           <span class="block-badge">Billets</span>
         </div>
         <table class="cnt-table">
@@ -657,9 +796,9 @@
       </section>
 
       <!-- L'ÉLECTRONIQUE -->
-      <section class="block block--elec">
+      <section class="block block--elec" id="paiements">
         <div class="block-hdr">
-          <h2>L'&#201;lectronique</h2>
+          <h2>Paiements</h2>
           <span class="block-badge">Paiements</span>
         </div>
         <table class="cnt-table">
@@ -685,13 +824,13 @@
     <div class="grid-bottom">
 
       <!-- COMPTAGE ESPÈCES -->
-      <section class="block block--comptage">
+      <section class="block block--comptage" id="especes">
         <div class="block-hdr">
-          <h2>Comptage Esp&#232;ces</h2>
+          <h2>Espèces comptées</h2>
           <span class="block-badge">Total caisse</span>
         </div>
         <div class="comptage-body">
-          <div class="comptage-lbl">Total esp&#232;ces en caisse</div>
+          <div class="comptage-lbl">Total espèces</div>
           <div class="comptage-total" id="total-especes">0,00&#160;&#8364;</div>
           <div class="comptage-sub">Pi&#232;ces + Billets + R&#233;serve de monnaie</div>
           <div class="comptage-breakdown">
@@ -714,9 +853,9 @@
       </section>
 
       <!-- CALCUL DE L'ÉCART -->
-      <section class="block block--ecart">
+      <section class="block block--ecart" id="ecart">
         <div class="block-hdr">
-          <h2>Calcul de l'&#233;cart de caisse</h2>
+          <h2>Écart de caisse</h2>
           <span class="block-badge">Cl&#244;ture</span>
         </div>
         <div class="ecart-body">
@@ -740,7 +879,7 @@
 
           <div class="remise-alert" id="remise-alert" role="status" aria-live="polite" style="display:none"></div>
 
-          <button class="btn-save" id="btn-save" type="button">Enregistrer le comptage</button>
+          <button class="btn-save" id="btn-save" type="button">Enregistrer</button>
 
         </div>
       </section>
@@ -748,9 +887,9 @@
     </div>
 
     <!-- ── TABLEAU HISTORIQUE ── -->
-    <section class="block block--history">
+    <section class="block block--history" id="historique">
       <div class="block-hdr">
-        <h2>Tableau &#224; compl&#233;ter</h2>
+        <h2>Historique</h2>
         <span class="block-badge" id="history-count">0 entr&#233;e</span>
       </div>
       <div class="history-body">
@@ -777,18 +916,12 @@
     </section>
 
     <div class="actions-bar">
-      <button class="btn-reset" id="btn-reset" type="button">R&#233;initialiser le formulaire</button>
+      <button class="btn-reset" id="btn-reset" type="button">Effacer les saisies</button>
     </div>
 
   </main>
 
-  <footer class="site-footer">
-    Usage interne &#160;&#183;&#160; Donn&#233;es stock&#233;es localement dans le navigateur
-    <p class="mesure-note">
-      Fr&#233;quentation de cette page mesur&#233;e de fa&#231;on anonyme, sans cookie.
-      Vos saisies ne quittent jamais cet appareil.
-    </p>
-  </footer>
+  <footer class="site-footer">Usage interne · Historique local · Fréquentation sans cookie</footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1363,6 +1496,21 @@
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
       document.body.classList.add('is-ios');
     }
+  </script>
+
+  <!-- Les liens de sections déplacent la lecture sans créer d'étapes dans l'historique. -->
+  <script>
+    document.querySelector('.cash-nav').addEventListener('click', function(event) {
+      var link = event.target.closest('a[href^="#"]');
+      if (!link) { return; }
+      var section = document.getElementById(link.getAttribute('href').slice(1));
+      if (!section) { return; }
+      event.preventDefault();
+      section.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+      });
+    });
   </script>
 
   <!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
