@@ -36,7 +36,7 @@ every counting page.
 
 - Référence : `.uxer/identity.md`.
 - La direction 03 **Répertoire professionnel** est validée ; priorité au titrage, aux filets et aux lignes numérotées.
-- Le CSS effectif de l'accueil est `assets/css/hub.css` **puis** `assets/css/repertoire.css`. Les descriptions des cartes et variables bleues dans les sections historiques ci-dessous décrivent l'ancienne base, non la direction active.
+- Le CSS effectif de l'accueil est `assets/css/hub.css`, puis `assets/css/repertoire.css`, puis `assets/css/theme-bleu-gris.css` (palette bleu gris atténué validée). Les outils et documents chargent cette feuille après leur CSS inline. Préserver les couleurs des états métier (succès, erreur, avertissement), les scripts et les sorties imprimées.
 - Pour toute nouvelle ligne, donner un titre et une fonction courte ; éviter les détails expansibles et les animations décoratives.
 - N'ajouter aucun texte sur la confidentialité dans chaque carte. La transparence se traite dans le pied de page et les documents pertinents.
 - La première mission (PR #96) préservait `outils/demande-ordonnance/index.html`. La mission UXER suivante refond uniquement son **interface de saisie** sur une branche distincte ; conserver strictement ses champs, son JavaScript et ses sorties Gmail, et isoler ses nouveaux styles en `@media screen` pour ne pas perturber l'impression A4.
