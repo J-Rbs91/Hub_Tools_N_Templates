@@ -1088,7 +1088,7 @@
     ['medecin','p_civ','p_nom','p_ne','o_modif','o_lentilles','o_controle','o_adapt','o_renouv','o_nouvelle']
       .forEach(k=>{
         const e=document.querySelector('[data-k="'+k+'"]');
-        if(e){ const ev = (e.tagName==='SELECT' || e.type==='radio') ? 'change' : 'input'; e.addEventListener(ev, refreshIntro); }
+        if(e){ const ev = (e.tagName==='SELECT' || e.type==='radio') ? 'change' : 'input'; e.addEventListener(ev, ()=>{ if(k.startsWith('o_')) introDirty=false; refreshIntro(); }); }
       });
     refreshIntro();
 
