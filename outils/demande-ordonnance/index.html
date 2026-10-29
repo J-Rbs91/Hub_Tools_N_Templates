@@ -732,8 +732,8 @@
   }
   function closingText(){
     return objetActif()==='o_modif'||objetActif()==='o_nouvelle'
-      ? "Je vous remercie de votre retour. Si vous préférez revoir votre patient(e), je peux l'inviter à reprendre rendez-vous."
-      : 'Je reste à votre disposition pour toute précision.';
+      ? "Je suivrai bien entendu vos recommandations. Si vous préférez revoir votre patient(e) en consultation, je l'inviterai à reprendre rendez-vous auprès de vous."
+      : 'Je reste à votre disposition pour toute précision utile au suivi de votre patient(e).';
   }
   function buildIntro(){
     const dr=val('medecin'), nom=val('p_nom'), ne=val('p_ne');
@@ -742,22 +742,22 @@
     let corps;
     switch(objetActif()){
       case 'o_modif':
-        corps="Je sollicite votre accord écrit avant toute adaptation de la prescription de "+pat+". La correction proposée figure ci-dessous.";
+        corps="Afin de mieux répondre aux besoins visuels de "+pat+", une adaptation de la correction pourrait lui apporter davantage de confort. Je me permets de vous soumettre les valeurs proposées ci-dessous et de solliciter votre accord écrit préalable, sous réserve de votre appréciation et de toute contre-indication médicale.";
         break;
       case 'o_lentilles':
-        corps="Je vous transmets les éléments relevés concernant les lentilles de contact de "+pat+".";
+        corps="Afin de contribuer au suivi visuel de "+pat+" et de veiller à ce que son équipement réponde au mieux à ses besoins, je vous transmets les éléments relevés concernant ses lentilles de contact.";
         break;
       case 'o_controle':
-        corps="Je vous transmets les résultats du contrôle de vision de "+pat+".";
+        corps="Je vous transmets les résultats du contrôle de vision de "+pat+", afin que vous disposiez de ces éléments pour son suivi. Je vous laisse bien entendu apprécier la suite à leur donner.";
         break;
       case 'o_adapt':
-        corps="Dans le cadre d'un renouvellement, je vous informe de l'adaptation de la correction de "+pat+". Les valeurs figurent ci-dessous.";
+        corps="Dans le cadre du renouvellement de l'équipement de "+pat+", j'ai adapté sa correction afin de répondre au mieux à ses besoins visuels. Je vous transmets les valeurs retenues pour votre information et son suivi.";
         break;
       case 'o_renouv':
-        corps="Je vous adresse un compte rendu relatif à la délivrance exceptionnelle sans ordonnance pour "+pat+", à la suite d'une perte ou d'un bris de verres correcteurs.";
+        corps="À la suite d'une perte ou d'un bris de ses verres, "+pat+" se trouvait dans une situation d'urgence sans solution médicale adaptée. Afin de lui permettre de retrouver rapidement une correction, j'ai procédé à une délivrance exceptionnelle sans ordonnance après examen réfractif. Je vous en transmets le compte rendu.";
         break;
       case 'o_nouvelle':
-        corps="La correction envisagée pour "+pat+" diffère de la prescription initiale. Pourriez-vous, si vous le jugez adapté, établir une nouvelle ordonnance à partir de la proposition ci-dessous ?";
+        corps="Au regard des besoins visuels de "+pat+", la correction proposée ci-dessous pourrait mieux lui convenir que celle de la prescription initiale. Afin de lui permettre de bénéficier d'un équipement adapté et, si nécessaire, d'en faciliter la prise en charge, je me permets de solliciter une nouvelle ordonnance, sous réserve de votre appréciation et de l'absence de contre-indication médicale.";
         break;
       default:
         corps='Je vous adresse ce document concernant '+pat+'.';
@@ -780,7 +780,7 @@
     const commentaire=document.querySelector('[data-k="commentaire"]');
     if(commentaire) commentaire.placeholder=objetActif()==='o_renouv'
       ? "Perte ou bris, urgence constatée, absence de solution médicale adaptée…"
-      : "Saisie libre…";
+      : "Besoins visuels, résultats de l'essai, motif de la demande ou de la prise en charge…";
   }
   function refreshIntro(){
     const ta=document.querySelector('[data-k="intro"]');
