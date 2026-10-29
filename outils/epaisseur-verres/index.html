@@ -3819,8 +3819,7 @@
     // biseau, coloration des dépassements) selon que le cerclage est affiché ou non.
     function applyFrameOptVisibility() {
       var on = el('show-frame').checked;
-      var nodes = document.querySelectorAll('.frame-opt');
-      for (var i = 0; i < nodes.length; i++) { nodes[i].hidden = !on; }
+      el('frame-options').hidden = !on;
     }
     el('show-frame').addEventListener('change', function () {
       showFrame = this.checked;
@@ -3841,9 +3840,8 @@
     });
     el('m-bevel-auto').addEventListener('change', scheduleCompute);
     el('bevel-unlock').addEventListener('change', scheduleCompute);
-    el('btn-11').addEventListener('click', function () {
-      scale11 = !scale11;
-      el('btn-11').textContent = scale11 ? 'Échelle libre' : 'Vue 1:1';
+    el('btn-11').addEventListener('change', function () {
+      scale11 = this.checked;
       updateRuler();
       if (renderer3d && renderer3d.refresh) { renderer3d.refresh(); }
     });
@@ -3907,12 +3905,14 @@
        ré-appuie sur Entrée pour conserver la valeur déjà présente et continuer. Boucle sur le
        premier champ. La liste « Base spéciale » n'est dans le parcours que si la case est cochée
        (sinon le champ est désactivé et on l'enjambe). */
-    var ENTER_NAV = ['coteA', 'coteB', 'coteD', 'cambrure',
-      'indice', 'base', 'cerclage',
-      'od-sph', 'od-cyl', 'od-axe', 'od-pd', 'od-h',
-      'og-sph', 'og-cyl', 'og-axe', 'og-pd', 'og-h', 'm-ep'];
+    var ENTER_NAV = ['coteA', 'coteB', 'coteD', 'cambrure', 'm-ep',
+      'od-sph', 'od-cyl', 'od-axe', 'og-sph', 'og-cyl', 'og-axe',
+      'indice', 'cerclage', 'base',
+      'od-pd', 'od-h', 'og-pd', 'og-h'];
     function enterNavEligible(id) {
-      return id === 'base' ? el('base-speciale').checked : true;
+      if (id === 'base' && !el('base-speciale').checked) { return false; }
+      var field = el(id);
+      return !field.closest('details:not([open])') && !field.closest('[hidden]');
     }
     function focusNextField(currentId) {
       var i = ENTER_NAV.indexOf(currentId);
