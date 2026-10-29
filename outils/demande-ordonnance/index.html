@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Demande / Ordonnance</title>
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#1F6FB2">
+<meta name="theme-color" content="#F5F3ED">
 <style>
   /* ── Transition d'écran native + fond animé doux (cohérents avec le hub) ── */
   @view-transition { navigation: auto; }
@@ -257,16 +257,157 @@
     line-height:1.5;
     color:var(--grey,#5A6B7B)
   }
+
+/* UXER · Répertoire professionnel : écran de saisie, sans impact sur l'A4. */
+@media screen {
+  :root {
+    --blue:#425d4f; --blue-d:#354e42; --ink:#252a27;
+    --grey:#59685e; --line:#d7dbd3; --light:#edf0e9;
+    --bg:#f5f3ed; --white:#fffefa;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);padding:22px 18px 105px;isolation:auto}
+  body::before{display:none;animation:none}
+  .topbar,.workspace-intro,.form-jump,.help,.sheet{max-width:920px;margin-left:auto;margin-right:auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 0 16px;margin-bottom:0;border-bottom:1px solid var(--line)}
+  .topbar__name{order:-1;font-size:12px;font-weight:700;letter-spacing:.065em;color:var(--blue-d)}
+  .back-link{background:transparent;border:0;border-bottom:1px solid var(--blue);border-radius:0;color:var(--blue-d);padding:6px 0;font-size:12px}
+  .back-link:hover{background:transparent;color:var(--ink)}
+  .workspace-intro{padding:37px 0 27px}
+  .workspace-kicker{color:var(--blue-d);font-weight:700;letter-spacing:.12em;font-size:10px}
+  .workspace-intro h1{color:var(--ink);font-size:clamp(28px,5vw,39px);font-weight:650;letter-spacing:-.05em;line-height:1.15;margin:11px 0 7px}
+  .workspace-intro>p:last-child{color:var(--grey);font-size:12px}
+  .form-jump{display:flex;gap:3px;overflow-x:auto;scrollbar-width:thin;white-space:nowrap;border-top:1px solid #b4c0b5;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:18;padding:8px 0;margin-bottom:18px}
+  .form-jump a{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:9px 12px;color:var(--blue-d);font-size:11px;font-weight:650;text-decoration:none;border-radius:3px}
+  .form-jump a:hover{background:#e8ede6}
+  .form-jump a:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+  .help{margin-bottom:18px}
+  .help summary{color:var(--blue-d);font-size:12px;font-weight:650;padding:5px 0}
+  .help[open]{background:var(--white);border:1px solid var(--line);padding:10px 16px;border-radius:4px}
+  .help li{margin-bottom:4px}
+  .sheet{border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible}
+  .sheet>header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 18px;padding:16px 20px;background:#ecefe8;color:var(--ink);border:1px solid var(--line);border-radius:5px}
+  .sheet>header h1{color:var(--ink);font-weight:650;font-size:15px;letter-spacing:-.02em}
+  .sheet>header .meta{color:var(--grey);font-size:11px;opacity:1}
+  .body{padding:0}
+  .body>table{display:block;width:100%;border-collapse:separate}
+  .body>table>tbody{display:block}
+  .body>table tr{display:grid;grid-template-columns:minmax(165px,28%) minmax(0,1fr);align-items:stretch;width:100%;background:var(--white);border:1px solid var(--line);border-top:0}
+  .body>table tr>td{display:block;min-width:0;padding:15px 18px;border:0;font-size:13px}
+  .body>table tr>td[colspan="2"]{grid-column:1/-1}
+  .body>table tr>td.obj{width:auto;padding-top:19px;background:#fafaf6;color:var(--grey);font-size:12px;font-weight:650;border-right:1px solid var(--line)}
+  .body>table tr>td.obj.sub{color:var(--ink)}
+  .body>table tr.sect{display:block;margin-top:30px;background:transparent;border:0;border-bottom:1px solid #aebbaf;scroll-margin-top:75px}
+  .body>table tr.sect td{display:block;background:transparent;border:0;padding:0 0 11px;color:var(--ink);font-size:15px;font-weight:650;letter-spacing:-.02em;text-transform:none}
+  .body>table tr.sect#objet{margin-top:24px}
+  #destinataire{scroll-margin-top:75px}
+  .body>table tr.sect-act{display:block;margin-top:24px;background:transparent;border:0;border-bottom:1px solid #aebbaf}
+  .body>table tr.sect-act td{padding:0 0 11px;background:transparent;border:0}
+  .sect-act .lbl{color:var(--ink);font-size:15px;font-weight:650;letter-spacing:-.02em;text-transform:none}
+  .regen{color:var(--blue-d);border-color:#b9c7ba;border-radius:4px;background:transparent;padding:7px 10px;font-size:11px}
+  .regen:hover{background:var(--blue-d);color:#fff}
+  .body>table tr#introRow{border-top:1px solid var(--line)}
+  .body>table tr#introRow>td{padding:12px 16px!important}
+  input[type=text],select.p-civ{min-height:38px;border:1px solid #bdc8be;border-radius:4px;background:#fff;padding:7px 10px;font-size:14px;color:var(--ink)}
+  input[type=text]:focus,select.p-civ:focus,textarea:focus{outline:2px solid rgba(66,93,79,.3);outline-offset:1px;border-color:var(--blue);background:#fff}
+  textarea{background:#fff;border-color:#bdc8be;border-radius:4px;font-size:13px;padding:11px 12px}
+  textarea[data-k="intro"]{min-height:110px;max-height:240px}
+  textarea[data-k="commentaire"]{min-height:125px;max-height:300px}
+  .opt{display:flex;gap:11px;align-items:flex-start;padding:10px 8px;margin:0;border-bottom:1px solid #ecede7;cursor:pointer}
+  .opt:last-child{border-bottom:0}
+  .opt:hover{background:#f3f5ef}
+  .opt input{width:18px;height:18px;margin-top:1px;accent-color:var(--blue)}
+  .opt .txt{font-size:13px;line-height:1.5}
+  .opt .sub{font-style:normal;font-size:11px;line-height:1.5;margin-top:3px}
+  .pick{margin:4px 14px 4px 0;gap:7px;font-size:13px;cursor:pointer}
+  .pick input{height:18px;width:18px}
+  .pgrid{gap:0}
+  .pf{min-height:65px;padding:12px 15px;gap:9px}
+  .plab{font-size:11px;color:var(--grey);font-weight:650}
+  .eye{gap:10px 15px}
+  .eye .grp[data-field]{position:relative;padding-top:17px}
+  .eye .grp[data-field]::before{content:attr(data-field);position:absolute;top:0;left:0;color:var(--grey);font-size:10px;font-weight:600}
+  .eye .grp[data-field] .sep{color:var(--grey)}
+  .eye .grp[data-acuity]{position:relative;padding-top:18px}
+  .eye .grp[data-acuity]::before{content:attr(data-acuity);position:absolute;top:0;left:0;font-size:10px;font-weight:650;color:var(--grey)}
+  .eye .grp[data-acuity] .sep{color:var(--grey)}
+  input[type=text].inp-sm{width:77px}
+  input[type=text].inp-xs{width:54px}
+  input[type=text].inp-md{width:137px}
+  .closing{margin:24px 0 0;padding:0 4px;color:var(--grey);font-size:12px}
+  .sign{padding:0 4px;font-size:13px}
+  .bar{border-top:1px solid var(--line);background:rgba(255,254,250,.97);box-shadow:0 -2px 18px rgba(29,45,34,.065);padding:12px 14px;gap:8px}
+  button.action{padding:11px 18px;border-radius:4px;border-width:1px;font-size:12px;font-weight:650}
+  .btn-blue{background:transparent;color:var(--blue-d);border-color:var(--blue)}
+  .btn-blue:hover{color:#fff;background:var(--blue-d)}
+  .btn-primary{background:var(--blue);border-color:var(--blue)}
+  .btn-primary:hover{background:var(--blue-d);border-color:var(--blue-d)}
+  .btn-ghost{color:var(--blue-d);background:transparent;border-color:#bdc8be}
+  .btn-ghost:hover{background:#edf0e9}
+  .ov-box{background:var(--white);border:1px solid var(--line);border-radius:5px}
+  .ov-title{font-weight:650;letter-spacing:-.02em}
+  .toast{background:var(--ink);border-radius:5px}
+  .mesure-note{font-size:11px;color:var(--grey);margin-top:25px}
+  .ios-back{border-radius:5px;background:var(--blue-d);box-shadow:0 4px 15px rgba(22,36,27,.18)}
+}
+@media screen and (max-width:700px){
+  body{padding:12px 12px 116px}
+  .workspace-intro{padding:27px 0 20px}
+  .workspace-intro h1{font-size:30px}
+  .form-jump{margin-bottom:13px}
+  .sheet>header{padding:13px 15px}
+  .body>table tr{grid-template-columns:1fr}
+  .body>table tr>td.obj{border-right:0;padding:10px 14px 0;background:var(--white)}
+  .body>table tr>td:not(.obj){padding:10px 14px 14px}
+  .body>table tr#introRow>td{padding:10px 12px!important}
+  .body>table tr.sect{margin-top:25px}
+  .pgrid{grid-template-columns:1fr}
+  .pf{border-right:0!important;border-bottom:1px solid var(--line);min-height:58px;flex-wrap:wrap}
+  .pf:last-child{border-bottom:0}
+  .eye .grp[data-field]{padding-top:16px}
+  .bar{flex-wrap:nowrap;gap:6px;padding:10px 8px max(10px,env(safe-area-inset-bottom))}
+  button.action{padding:10px 8px;min-height:44px;flex:1;font-size:11px}
+}
+@media screen and (max-width:360px){
+  .eye{gap:8px}
+  .bar{flex-wrap:wrap}
+  .bar .btn-ghost{flex:0 0 100%}
+}
+@media print{
+  :root{--blue:#1F6FB2;--blue-d:#175A92;--ink:#1A2A3A;--grey:#5A6B7B;--line:#C9D6E2;--light:#EEF4F9;--bg:#F4F7FA;--white:#fff;--green:#1E8E5A;--green-d:#176E46}
+  .workspace-intro,.form-jump,.topbar__name{display:none!important}
+  .eye .grp[data-field]::before{display:none!important}
+  .eye .grp[data-acuity]::before{display:none!important}
+}
 </style>
 </head>
 <body>
 
 <a class="ios-back" href="../../" aria-label="Retour &#224; l'accueil">&#8592; Retour</a>
 
-<div class="topbar"><a class="back-link" href="../../">&#8592; Retour aux outils</a></div>
+<div class="topbar">
+  <a class="back-link" href="../../" aria-label="Retour au répertoire des outils">&#8592; Outils</a>
+  <span class="topbar__name">OPT / OUTILS</span>
+</div>
+
+<div class="workspace-intro">
+  <p class="workspace-kicker">OUTIL MÉTIER / COURRIER MÉDICAL</p>
+  <h1>Demande / Ordonnance</h1>
+  <p>Rédaction · PDF · Gmail</p>
+</div>
+
+<nav class="form-jump" aria-label="Accès aux sections du formulaire">
+  <a href="#destinataire">Destinataire</a>
+  <a href="#objet">Objet</a>
+  <a href="#patient">Patient</a>
+  <a href="#prescription">Prescription</a>
+  <a href="#modifications">Modifications</a>
+  <a href="#commentaire">Commentaire</a>
+  <a href="#suite">Suite</a>
+</nav>
 
 <details class="help">
-  <summary>Comment envoyer par mail sans pièce jointe ?</summary>
+  <summary>Envoi Gmail : mode d’emploi</summary>
   <ol>
     <li>Remplissez le formulaire ci-dessous.</li>
     <li>Cliquez sur <strong>« Copier pour Gmail »</strong>.</li>
@@ -283,30 +424,30 @@
 
   <div class="body">
     <table>
-      <tr><td class="obj">À l'attention du Dr</td><td><input type="text" data-k="medecin" placeholder="Nom du médecin" aria-label="Nom du médecin"></td></tr>
+      <tr id="destinataire"><td class="obj">À l'attention du Dr</td><td><input type="text" data-k="medecin" placeholder="Nom du médecin" aria-label="Nom du médecin"></td></tr>
 
       <!-- Paragraphe d'intro éditable (auto-généré, masqué au PDF) -->
       <tr class="sect-act"><td colspan="2">
         <div class="row">
           <span class="lbl">Paragraphe d'introduction</span>
-          <button type="button" class="regen" onclick="regenIntro()">↻ Régénérer</button>
+          <button type="button" class="regen" onclick="regenIntro()">Régénérer</button>
         </div>
       </td></tr>
       <tr id="introRow"><td colspan="2" style="padding:10px 12px">
         <textarea data-k="intro" placeholder="Le paragraphe se génère automatiquement à partir des champs. Vous pouvez le modifier librement." aria-label="Texte d'introduction"></textarea>
       </td></tr>
 
-      <tr class="sect"><td colspan="2">Objet</td></tr>
+      <tr class="sect" id="objet"><td colspan="2">Objet</td></tr>
       <tr><td class="obj">Objet de la demande</td><td>
-        <div class="opt"><input type="checkbox" data-k="o_modif" aria-label="Demande d'autorisation de modification de prescription"><span class="txt">Demande d'autorisation de modification de prescription</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_lentilles" aria-label="Compte rendu d'adaptation lentilles de contact"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_controle" aria-label="Compte rendu de contrôle de vision"><span class="txt">Compte rendu de contrôle de vision</span></div>
-        <div class="opt"><input type="checkbox" data-k="o_adapt" aria-label="Compte rendu d'adaptation de prescription (art. L.4362-10 du Code de la santé publique)"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></div>
-        <div class="opt"><input type="checkbox" data-k="o_renouv" aria-label="Compte rendu de renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon art. D.4362-13 du Code de la santé publique, JO du 12/10/2016</span></span></div>
-        <div class="opt"><input type="checkbox" data-k="o_nouvelle" aria-label="Demande d'établissement d'une nouvelle ordonnance par le médecin"><span class="txt">Demande d'établissement d'une nouvelle ordonnance<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></div>
+        <label class="opt"><input type="checkbox" data-k="o_modif" aria-label="Demande d'autorisation de modification de prescription"><span class="txt">Demande d'autorisation de modification de prescription</span></label>
+        <label class="opt"><input type="checkbox" data-k="o_lentilles" aria-label="Compte rendu d'adaptation lentilles de contact"><span class="txt">Compte rendu d'adaptation lentilles de contact</span></label>
+        <label class="opt"><input type="checkbox" data-k="o_controle" aria-label="Compte rendu de contrôle de vision"><span class="txt">Compte rendu de contrôle de vision</span></label>
+        <label class="opt"><input type="checkbox" data-k="o_adapt" aria-label="Compte rendu d'adaptation de prescription (art. L.4362-10 du Code de la santé publique)"><span class="txt">Compte rendu d'adaptation de prescription<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></label>
+        <label class="opt"><input type="checkbox" data-k="o_renouv" aria-label="Compte rendu de renouvellement exceptionnel (art. D.4362-13 du Code de la santé publique)"><span class="txt">Compte rendu de renouvellement exceptionnel<span class="sub">selon art. D.4362-13 du Code de la santé publique, JO du 12/10/2016</span></span></label>
+        <label class="opt"><input type="checkbox" data-k="o_nouvelle" aria-label="Demande d'établissement d'une nouvelle ordonnance par le médecin"><span class="txt">Demande d'établissement d'une nouvelle ordonnance<span class="sub">selon art. L.4362-10 du Code de la santé publique</span></span></label>
       </td></tr>
 
-      <tr class="sect"><td colspan="2">Patient</td></tr>
+      <tr class="sect" id="patient"><td colspan="2">Patient</td></tr>
       <tr><td colspan="2" style="padding:0">
         <div class="pgrid">
           <div class="pf"><span class="plab">Nom / Prénom</span><select data-k="p_civ" class="p-civ" aria-label="Civilité du patient"><option value="">-</option><option value="M.">M.</option><option value="Mme">Mme</option></select><input type="text" data-k="p_nom" aria-label="Nom et prénom du patient"></div>
@@ -314,7 +455,7 @@
         </div>
       </td></tr>
 
-      <tr class="sect"><td colspan="2">Prescription initiale</td></tr>
+      <tr class="sect" id="prescription"><td colspan="2">Prescription initiale</td></tr>
       <tr><td class="obj">En date du</td><td><input type="text" inputmode="numeric" class="inp-md" data-k="i_date" placeholder="jj/mm/aaaa" aria-label="Date de la prescription initiale (jj/mm/aaaa)"></td></tr>
       <tr><td class="obj">Type d'équipement</td><td>
         <label class="pick"><input type="checkbox" data-k="i_lunettes"> Lunettes</label>
@@ -328,25 +469,25 @@
         <label class="pick"><input type="checkbox" data-k="i_vpc"> Vp prof. de champ</label>
       </td></tr>
       <tr><td class="obj sub">OD</td><td><div class="eye">
-        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_sph" aria-label="OD sphère prescription initiale"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_cyl" aria-label="OD cylindre prescription initiale"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="i_od_axe" aria-label="OD axe prescription initiale"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_add" aria-label="OD addition prescription initiale"></span>
+        <span class="grp" data-field="Sphère"><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_sph" aria-label="OD sphère prescription initiale"></span>
+        <span class="grp" data-field="Cylindre"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_cyl" aria-label="OD cylindre prescription initiale"><span class="sep">)</span></span>
+        <span class="grp" data-field="Axe"><input type="text" inputmode="numeric" class="inp-xs" data-k="i_od_axe" aria-label="OD axe prescription initiale"><span class="sep">&#176;</span></span>
+        <span class="grp" data-field="Addition"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_od_add" aria-label="OD addition prescription initiale"></span>
       </div></td></tr>
       <tr><td class="obj sub">OG</td><td><div class="eye">
-        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_sph" aria-label="OG sphère prescription initiale"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_cyl" aria-label="OG cylindre prescription initiale"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="i_og_axe" aria-label="OG axe prescription initiale"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_add" aria-label="OG addition prescription initiale"></span>
+        <span class="grp" data-field="Sphère"><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_sph" aria-label="OG sphère prescription initiale"></span>
+        <span class="grp" data-field="Cylindre"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_cyl" aria-label="OG cylindre prescription initiale"><span class="sep">)</span></span>
+        <span class="grp" data-field="Axe"><input type="text" inputmode="numeric" class="inp-xs" data-k="i_og_axe" aria-label="OG axe prescription initiale"><span class="sep">&#176;</span></span>
+        <span class="grp" data-field="Addition"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_og_add" aria-label="OG addition prescription initiale"></span>
       </div></td></tr>
       <tr><td class="obj">Acuités</td><td><div class="eye">
-        <span class="grp"><span class="sep">OD</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_od" aria-label="OD acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">OG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_og" aria-label="OG acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">ODG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_odg" aria-label="ODG acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_ac_p" aria-label="Acuité de près initiale (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
+        <span class="grp" data-acuity="Vision de loin"><span class="sep">OD</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_od" aria-label="OD acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp" data-acuity="Vision de loin"><span class="sep">OG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_og" aria-label="OG acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp" data-acuity="Vision de loin"><span class="sep">ODG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="i_ac_odg" aria-label="ODG acuité de loin initiale (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp" data-acuity="Vision de près"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="i_ac_p" aria-label="Acuité de près initiale (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
       </div></td></tr>
 
-      <tr class="sect"><td colspan="2">Modifications demandées</td></tr>
+      <tr class="sect" id="modifications"><td colspan="2">Modifications demandées</td></tr>
       <tr><td class="obj">Type d'équipement</td><td>
         <label class="pick"><input type="checkbox" data-k="m_lunettes"> Lunettes</label>
         <label class="pick"><input type="checkbox" data-k="m_lentilles"> Lentilles</label>
@@ -359,34 +500,34 @@
         <label class="pick"><input type="checkbox" data-k="m_vpc"> Vp prof. de champ</label>
       </td></tr>
       <tr><td class="obj sub">OD</td><td><div class="eye">
-        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_sph" aria-label="OD sphère modification demandée"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_cyl" aria-label="OD cylindre modification demandée"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="m_od_axe" aria-label="OD axe modification demandée"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_add" aria-label="OD addition modification demandée"></span>
+        <span class="grp" data-field="Sphère"><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_sph" aria-label="OD sphère modification demandée"></span>
+        <span class="grp" data-field="Cylindre"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_cyl" aria-label="OD cylindre modification demandée"><span class="sep">)</span></span>
+        <span class="grp" data-field="Axe"><input type="text" inputmode="numeric" class="inp-xs" data-k="m_od_axe" aria-label="OD axe modification demandée"><span class="sep">&#176;</span></span>
+        <span class="grp" data-field="Addition"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_od_add" aria-label="OD addition modification demandée"></span>
       </div></td></tr>
       <tr><td class="obj sub">OG</td><td><div class="eye">
-        <span class="grp"><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_sph" aria-label="OG sphère modification demandée"></span>
-        <span class="grp"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_cyl" aria-label="OG cylindre modification demandée"><span class="sep">)</span></span>
-        <span class="grp"><input type="text" inputmode="numeric" class="inp-xs" data-k="m_og_axe" aria-label="OG axe modification demandée"><span class="sep">&#176;</span></span>
-        <span class="grp"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_add" aria-label="OG addition modification demandée"></span>
+        <span class="grp" data-field="Sphère"><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_sph" aria-label="OG sphère modification demandée"></span>
+        <span class="grp" data-field="Cylindre"><span class="sep">(</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_cyl" aria-label="OG cylindre modification demandée"><span class="sep">)</span></span>
+        <span class="grp" data-field="Axe"><input type="text" inputmode="numeric" class="inp-xs" data-k="m_og_axe" aria-label="OG axe modification demandée"><span class="sep">&#176;</span></span>
+        <span class="grp" data-field="Addition"><span class="sep">Add</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_og_add" aria-label="OG addition modification demandée"></span>
       </div></td></tr>
       <tr><td class="obj">Acuités</td><td><div class="eye">
-        <span class="grp"><span class="sep">OD</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_od" aria-label="OD acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">OG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_og" aria-label="OG acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">ODG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_odg" aria-label="ODG acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
-        <span class="grp"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_ac_p" aria-label="Acuité de près modification demandée (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
+        <span class="grp" data-acuity="Vision de loin"><span class="sep">OD</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_od" aria-label="OD acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp" data-acuity="Vision de loin"><span class="sep">OG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_og" aria-label="OG acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp" data-acuity="Vision de loin"><span class="sep">ODG</span><input type="text" inputmode="decimal" class="inp-xs" data-k="m_ac_odg" aria-label="ODG acuité de loin modification demandée (sur 10)"><span class="sep">/10</span></span>
+        <span class="grp" data-acuity="Vision de près"><span class="sep">vp&nbsp;&nbsp;P =</span><input type="text" inputmode="decimal" class="inp-sm" data-k="m_ac_p" aria-label="Acuité de près modification demandée (Parinaud lu à 40 cm)"><span class="sep">lu à 40 cm</span></span>
       </div></td></tr>
 
-      <tr class="sect"><td colspan="2">Commentaire</td></tr>
+      <tr class="sect" id="commentaire"><td colspan="2">Commentaire</td></tr>
       <tr><td class="obj">Commentaire</td><td>
         <textarea data-k="commentaire" placeholder="Saisie libre…" style="min-height:96px" aria-label="Commentaire libre"></textarea>
       </td></tr>
 
-      <tr class="sect"><td colspan="2">Suite à donner</td></tr>
+      <tr class="sect" id="suite"><td colspan="2">Suite à donner</td></tr>
       <tr><td class="obj">Suite à donner</td><td>
-        <div class="opt"><input type="checkbox" data-k="s_equip" aria-label="Équipement délivré / en cours"><span class="txt">Équipement délivré / en cours</span></div>
-        <div class="opt"><input type="checkbox" data-k="s_attente" aria-label="Attente d'approbation du Dr"><span class="txt">Attente d'approbation du Dr</span></div>
-        <div class="opt"><input type="checkbox" data-k="s_rdv" aria-label="Demande de RDV"><span class="txt">Demande de RDV</span></div>
+        <label class="opt"><input type="checkbox" data-k="s_equip" aria-label="Équipement délivré / en cours"><span class="txt">Équipement délivré / en cours</span></label>
+        <label class="opt"><input type="checkbox" data-k="s_attente" aria-label="Attente d'approbation du Dr"><span class="txt">Attente d'approbation du Dr</span></label>
+        <label class="opt"><input type="checkbox" data-k="s_rdv" aria-label="Demande de RDV"><span class="txt">Demande de RDV</span></label>
       </td></tr>
     </table>
 
@@ -399,9 +540,9 @@
 </div>
 
 <div class="bar">
-  <button class="action btn-ghost" onclick="resetForm()">Réinitialiser</button>
-  <button class="action btn-blue" onclick="window.print()">PDF / Imprimer</button>
-  <button class="action btn-primary" onclick="copyForGmail()">📋 Copier pour Gmail</button>
+  <button class="action btn-ghost" onclick="resetForm()">Effacer</button>
+  <button class="action btn-blue" onclick="window.print()">Imprimer / PDF</button>
+  <button class="action btn-primary" onclick="copyForGmail()">Copier pour Gmail</button>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -419,8 +560,7 @@
 </div>
 
 <p class="mesure-note">
-  Fréquentation de cette page mesurée de façon anonyme, sans cookie.
-  Vos saisies ne quittent jamais cet appareil.
+  Fréquentation sans cookie (GoatCounter).
 </p>
 
 <script>
@@ -979,6 +1119,19 @@
      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
     document.body.classList.add('is-ios');
   }
+</script>
+
+<script>
+  /* Navigation de section sans ajout d'historique.
+     Sur Android, le geste Retour continue de quitter l'outil directement. */
+  document.querySelector('.form-jump').addEventListener('click', function(e){
+    const lien=e.target.closest('a[href^="#"]');
+    if(!lien) return;
+    const cible=document.getElementById(lien.getAttribute('href').slice(1));
+    if(!cible) return;
+    e.preventDefault();
+    cible.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  });
 </script>
 
 <!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
