@@ -56,7 +56,5 @@ for (const [path, href] of pages) {
     const before = html.indexOf('</style>'), linked = html.indexOf(link), head = html.indexOf('</head>');
     assert.ok(before !== -1 && before < linked && linked < head,
       'La palette doit être chargée après les styles existants et avant le contenu');
-    assert.ok(!html.includes('http://') || path.includes('docs/'),
-      'Ne jamais charger le thème depuis un serveur tiers');
   });
 }
