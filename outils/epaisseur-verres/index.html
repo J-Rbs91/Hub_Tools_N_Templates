@@ -407,7 +407,7 @@
         <section class="card">
           <h2>Monture : forme &amp; côtes</h2>
           <div class="shapes" id="shapes"></div>
-          <p class="hint">Gabarits vus de face, côté <strong>œil droit</strong> (nez à droite de l'aperçu).</p>
+          <p class="hint">Contours OMA réels (OD/OG) pour huit formes, sans lissage. L'Hexagone conserve temporairement son contour historique, faute de fichier OMA fabricant vérifié.</p>
           <button class="btn btn-photo" type="button" id="open-photo">📷 Forme perso d'après une photo du verre</button>
           <p class="hint" style="margin: 8px 0 12px"><a href="../../docs/formes-types/oma-comparateur.html">Comparer ces formes avec de vrais tracés OMA</a> (laboratoire de référence, sans modification des calculs).</p>
 
@@ -780,6 +780,7 @@
     Vos saisies et vos photos ne quittent jamais cet appareil.
   </p>
 
+  <script src="oma-shapes.js"></script>
   <script>
   (function () {
     'use strict';
@@ -1067,6 +1068,93 @@
     };
 
     var SHAPE_KEYS = ['rectangle', 'rectangledoux', 'carree', 'pantos', 'papillon', 'hexagone', 'ronde', 'pilote', 'ovale'];
+
+    /* HF-022 : remplacer les géométries par les fichiers OMA existants.
+       Les neuf clés et libellés sont stables. L'hexagone demeure historique
+       tant que le fabricant n'a pas fourni le tracé exact 5586/OX.
+       Les coordonnées sont issues des rayons natifs, sans lissage et sans
+       rotation imposée à cause d'une galerie mal affichée. */
+    /* OMA_INSTALL_START */
+    function omaAsContour(radii, side, n) {
+      var raw = radii.split(';').map(Number), pts = [], i, angle, x, y;
+      if (raw.length !== n || raw.some(function (r) { return !Number.isFinite(r) || r < 500 || r > 10000; })) {
+        throw new Error('Profil OMA invalide');
+      }
+      for (i = 0; i < n; i++) {
+        angle = 2 * Math.PI * i / n;
+        // L'OD et l'OG portent le même repère canonique : temporal +X, haut +Y.
+        // Le miroir de l'œil gauche provient de la géométrie OMA et n'est pas
+        // une rotation de 180° appliquée aux gabarits du hub.
+        x = (side === 'og' ? -1 : 1) * raw[i] * Math.cos(angle);
+        y = raw[i] * Math.sin(angle);
+        pts.push([x, y]);
+      }
+      if (side === 'og') { pts.reverse(); }
+      var xs = pts.map(function (p) { return p[0]; });
+      var ys = pts.map(function (p) { return p[1]; });
+      var xmin = Math.min.apply(null,xs), xmax = Math.max.apply(null,xs);
+      var ymin = Math.min.apply(null,ys), ymax = Math.max.apply(null,ys);
+      var width = xmax - xmin, height = ymax - ymin;
+      if (!(width > 2000 && height > 1000)) { throw new Error('Boxing OMA invalide'); }
+      var cx = (xmax + xmin) / 2, cy = (ymax + ymin) / 2;
+      pts = pts.map(function (p) {
+        return [2 * (p[0] - cx) / width, 2 * (p[1] - cy) / height];
+      });
+      var polar = pts.map(function (p, index) {
+        var angle = Math.atan2(p[1], p[0]);
+        return { angle: angle < 0 ? angle + 2 * Math.PI : angle, index: index };
+      }).sort(function (a,b) { return a.angle-b.angle; });
+      // La recherche rapide n'est licite que pour un contour étoilé depuis le
+      // centre de boxing, dont les arêtes sont consécutives dans l'ordre radial.
+      for (i = 0; i < n; i++) {
+        if ((polar[i].index + 1) % n !== polar[(i+1)%n].index) {
+          throw new Error('OMA non étoilé : recherche d’arête interdite');
+        }
+      }
+      return { defA: width / 100, defB: height / 100, pts: pts, _omaPolar: polar };
+    }
+    function installOmaShapes() {
+      var collection = window.OMA_SHAPE_DATA;
+      if (!collection) { return false; }
+      // Éviter tout accès en écriture avec un nom de propriété dynamique :
+      // les huit emplacements OMA sont fixes et contrôlés par le code.
+      if (Object.keys(collection).length !== 8) { throw new Error('Bibliothèque OMA inattendue'); }
+      function make(key, src) {
+        var shape = SHAPES[key];
+        if (!shape || !src || (src.n !== 360 && src.n !== 1000)) {
+          throw new Error('Source OMA inattendue : '+key);
+        }
+        var od = omaAsContour(src.od,'od',src.n);
+        var og = omaAsContour(src.og,'og',src.n);
+        od.label = shape.label;
+        od.defA = Math.round(od.defA * 100)/100;
+        od.defB = Math.round(od.defB * 100)/100;
+        od.omaSource = src.source;
+        od.og = og;
+        og.omaSource = src.source;
+        return od;
+      }
+      // Préparer les huit côtés d'abord ; ne remplacer qu'après succès complet.
+      var rectangle = make('rectangle',collection.rectangle);
+      var rectangleDoux = make('rectangledoux',collection.rectangledoux);
+      var carree = make('carree',collection.carree);
+      var pantos = make('pantos',collection.pantos);
+      var papillon = make('papillon',collection.papillon);
+      var ronde = make('ronde',collection.ronde);
+      var pilote = make('pilote',collection.pilote);
+      var ovale = make('ovale',collection.ovale);
+      SHAPES.rectangle = rectangle;
+      SHAPES.rectangledoux = rectangleDoux;
+      SHAPES.carree = carree;
+      SHAPES.pantos = pantos;
+      SHAPES.papillon = papillon;
+      SHAPES.ronde = ronde;
+      SHAPES.pilote = pilote;
+      SHAPES.ovale = ovale;
+      return true;
+    }
+    var omaLoaded = installOmaShapes();
+    /* OMA_INSTALL_END */
     var currentShape = 'rectangle';
 
     /* ═══════════ FORMES PERSO (relevées sur photo) ═══════════
@@ -1112,7 +1200,29 @@
 
     // Distance du centre-boîte au contour, à l'angle phi (canonique), boîte ax×by (demi-côtes).
     // Lancer de rayon contre la silhouette mise à l'échelle (contour étoilé depuis le centre).
+    /* Trouver l'arête exacte parmi 360 ou 1 000 rayons OMA sans parcourir
+       tout le polygone à chaque intersection (binaire O(log n)). */
+    function omaFrameRadius(cfg, phi, ax, by) {
+      var dx = Math.cos(phi), dy = Math.sin(phi), q = Math.atan2(dy/by, dx/ax);
+      if (q < 0) { q += 2*Math.PI; }
+      var polar = cfg._omaPolar, n = polar.length, low = 0, high = n;
+      while (low < high) {
+        var mid = (low+high) >>> 1;
+        if (polar[mid].angle < q) { low=mid+1; } else { high=mid; }
+      }
+      var k = low % n, j = (k+n-1)%n;
+      var a = cfg.pts[polar[j].index], b = cfg.pts[polar[k].index];
+      var px = a[0]*ax, py = a[1]*by, ex = (b[0]-a[0])*ax, ey = (b[1]-a[1])*by;
+      var det = ex*dy - dx*ey;
+      if (Math.abs(det) < 1e-12) { return 0; }
+      var t=(ex*py-px*ey)/det, u=(dx*py-dy*px)/det;
+      return t > 0 && u >= -1e-6 && u <= 1+1e-6 ? t : 0;
+    }
     function frameRadius(cfg, phi, ax, by) {
+      if (cfg._omaPolar) {
+        var exact=omaFrameRadius(cfg,phi,ax,by);
+        if (exact > 0) { return exact; }
+      }
       var pts = cfg.pts, n = pts.length, dx = Math.cos(phi), dy = Math.sin(phi), best = 0, i;
       for (i = 0; i < n; i++) {
         var a = pts[i], b = pts[(i + 1) % n];
@@ -1169,6 +1279,7 @@
       var sph = eye.sph, cyl = eye.cyl, n = common.n;
       var ax = common.A / 2, by = common.B / 2;
       var cfg = SHAPES[currentShape];
+      if (cfg.omaSource && side === 'og') { cfg = cfg.og; }
       var F1 = baseFront(sph, cyl, common.baseMode);    // base face avant (D, convexe)
 
       // Axe TABO mesuré depuis l'horizontal. En repère canonique (temporal = +x), l'OD est miroir.
@@ -2468,6 +2579,8 @@
         btn.type = 'button';
         btn.className = 'shape-btn' + (key === currentShape ? ' active' : '');
         btn.setAttribute('data-shape', key);
+        if (cfg.omaSource) { btn.title = 'Contour OMA : ' + cfg.omaSource; }
+        else if (key === 'hexagone') { btn.title = 'Contour historique — OMA 5586/OX manquant'; }
         btn.setAttribute('aria-label', cfg.label + (cfg.perso ? ' (forme perso)' : ''));
         btn.innerHTML = '<svg viewBox="0 0 70 50" aria-hidden="true"><path d="' + shapePath(cfg, 70, 50) +
           '"/></svg><span>' + esc(cfg.label) + '</span>';
@@ -3388,6 +3501,13 @@
     /* ═══════════ INIT ═══════════ */
     loadPerso();
     buildShapeButtons();
+    if (!omaLoaded) {
+      var warn = document.createElement('p');
+      warn.className = 'hint';
+      warn.setAttribute('role','alert');
+      warn.textContent = 'Références OMA non chargées : utilisation des contours historiques. Vérifiez oma-shapes.js.';
+      el('shapes').parentNode.insertBefore(warn, el('shapes').nextSibling);
+    }
     updateScaleState();
     initProfilesCarousel();
 
