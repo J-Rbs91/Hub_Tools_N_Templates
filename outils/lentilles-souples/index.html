@@ -9,334 +9,9 @@
 <title>Lentilles souples</title>
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FAFBFC">
-<style>
-  :root{
-    --blue:#1F6FB2; --blue-d:#175A92; --ink:#1A2A3A; --grey:#5A6B7B;
-    --line:#C9D6E2; --light:#EEF4F9; --bg:#F4F7FA; --white:#fff;
-    --green:#1E8E5A; --green-d:#176E46;
-    --err:#C0271A; --err-bg:#FBEAEA; --err-line:#E3B3AC; --err-ink:#7A1D14;
-    --avert:#8A6100; --avert-bg:#FBF3E1; --avert-line:#E8C776;
-    --font: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family: var(--font);
-    background:var(--bg);color:var(--ink);line-height:1.4;
-    padding:24px 16px 92px;
-  }
-  .sheet{
-    max-width:760px;margin:0 auto;background:var(--white);
-    border:1px solid var(--line);border-radius:10px;overflow:hidden;
-    box-shadow:0 6px 30px rgba(26,42,58,.08);
-  }
-  header{background:var(--blue);color:#fff;padding:14px 28px}
-  header h1{font-size:18px;font-weight:700;letter-spacing:.2px}
-  header .meta{font-size:12px;opacity:.95;margin-top:3px}
-  .body{padding:20px 24px 26px}
-
-  .role-note{
-    background:var(--light);border-left:4px solid var(--blue);
-    border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:var(--ink);
-    margin:0 0 18px;
-  }
-  .role-note strong{color:var(--blue-d)}
-
-  /* ── onglets : les trois modules sont independants, on n'en montre qu'un ── */
-  .onglets{
-    display:flex;gap:4px;margin:0 0 16px;padding:4px;
-    background:var(--light);border-radius:10px;
-  }
-  /* Sans fond ni bord, les deux onglets non selectionnes passaient pour du
-     texte gris : l'action n'etait decouvrable qu'au survol, qui n'existe pas
-     au tactile. Ils portent donc un bord permanent. L'onglet actif se
-     distingue par quatre signaux (fond blanc, bord bleu, trait bas epais,
-     libelle bleu) plutot que par la seule nuance blanc sur gris tres clair. */
-  .onglets button{
-    flex:1;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
-    color:var(--grey);background:transparent;
-    border:1px solid var(--line);border-bottom:3px solid var(--line);
-    border-radius:7px;min-height:42px;
-    padding:8px 10px;line-height:1.25;transition:.12s;
-  }
-  .onglets button:hover{color:var(--ink);background:var(--white)}
-  .onglets button[aria-selected="true"]{
-    background:var(--white);color:var(--blue-d);
-    border-color:var(--blue);border-bottom-color:var(--blue-d);
-    box-shadow:0 1px 3px rgba(26,42,58,.12);
-  }
-  .onglets button:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-
-  /* ── blocs ── */
-  .bloc{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0;background:#fff}
-  .bloc h2{font-size:15px;color:var(--ink);margin-bottom:3px}
-  .bloc .sous-titre{font-size:12px;color:var(--grey);margin-bottom:12px}
-  .bloc[hidden]{display:none}
-  /* Le panneau recoit le focus quand on y arrive depuis un autre module :
-     le contour doit etre celui de l'outil, pas celui du navigateur. */
-  .bloc:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-
-  .bandeau-demo{
-    background:#FFF6E5;border:1px solid var(--avert-line);color:var(--avert);
-    border-radius:6px;padding:10px 12px;font-size:13px;font-weight:600;margin:0 0 14px;
-  }
-
-  /* ── groupes par oeil : cote a cote des qu'il y a la place, l'oeil droit et
-        l'oeil gauche se lisent ensemble et la page tient sur un ecran ── */
-  .oeils{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 14px}
-  @media (max-width:860px){ .oeils{grid-template-columns:1fr} }
-  .oeil-groupe{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0}
-  .oeil-groupe h3{
-    font-size:12px;color:var(--blue-d);text-transform:uppercase;letter-spacing:.5px;
-    margin-bottom:8px;font-weight:700;
-  }
-  .sous-groupe{margin:0 0 12px}
-  .sous-groupe:last-child{margin-bottom:0}
-  .sous-groupe-titre{font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
-
-  /* ── grille de champs, se réagence, ne rétrécit jamais ── */
-  .grille-champs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px 14px;margin:0}
-  .champ{display:flex;flex-direction:column;gap:3px}
-  .champ label{font-size:11px;color:var(--grey);font-weight:600}
-  .champ input, .champ select{
-    font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);
-    border-radius:6px;padding:8px 8px;background:#FBFDFE;width:100%;
-  }
-  .champ input:focus, .champ select:focus{outline:none;border-color:var(--blue);background:#fff}
-  /* Au clavier, un changement de bord seul ne dit pas ou l'on se trouve. */
-  .champ input:focus-visible, .champ select:focus-visible{outline:2px solid var(--blue-d);outline-offset:1px}
-  /* Le message reste dans la sortie de l'oeil ; le champ en cause se voit
-     sans avoir a le lire, et redevient neutre des qu'on le corrige. */
-  .champ input[aria-invalid="true"], .champ select[aria-invalid="true"]{
-    border-color:var(--err);background:var(--err-bg);
-  }
-  .champ.est-invalide label{color:var(--err-ink)}
-  .req{color:var(--err);font-weight:700}
-  .champ .req{margin-left:1px}
-  .oeils .grille-champs{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
-  /* Une case a cocher native mesure environ 13 px de cote, sous le minimum de
-     24 x 24 px du critere WCAG 2.5.8. On l'agrandit, et on donne au libelle la
-     meme hauteur puisqu'il est lui aussi une cible (attribut for). */
-  .champ-case{flex-direction:row;align-items:center;gap:10px;grid-column:1/-1;min-height:32px}
-  .oeils .champ-large{grid-column:span 2}
-  .champ-case input{width:24px;height:24px;flex:0 0 auto;accent-color:var(--blue);cursor:pointer}
-  .champ-case label{
-    font-size:12px;color:var(--ink);font-weight:500;cursor:pointer;
-    display:flex;align-items:center;min-height:24px;
-  }
-  /* Un controle sans effet ne doit pas promettre qu'il en a un : le sens et la
-     stabilite ne s'appliquent qu'a partir d'une rotation non nulle. La note du
-     sous-groupe dit a quelle condition ils reprennent. */
-  .champ-case input:disabled{cursor:not-allowed;opacity:.5}
-  .champ-case input:disabled + label{cursor:not-allowed;color:var(--grey)}
-  .champ select:disabled{background:var(--light);color:var(--grey);cursor:not-allowed}
-  .sous-groupe-note{font-size:11px;color:var(--grey);line-height:1.35;margin:-2px 0 6px}
-
-  @media (max-width:640px){
-    body{padding:14px 10px 20px}
-    header{padding:12px 16px}
-    .body{padding:16px 16px 20px}
-    .bloc{padding:14px 14px}
-    .grille-champs{grid-template-columns:repeat(2,1fr)}
-    .onglets{gap:2px;padding:3px}
-    .onglets button{font-size:12px;padding:8px 4px}
-  }
-
-  /* ── boutons ── */
-  button.action{
-    background:var(--blue);color:#fff;border:none;border-radius:8px;
-    padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;
-  }
-  button.action:hover{background:var(--blue-d)}
-  button.action:active{transform:translateY(1px)}
-  button.action:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-
-  /* Ce que le bouton vient de faire, affiche la ou on a appuye. Les sorties
-     par oeil sont au-dessus du bouton, donc hors de vue sur telephone : sans
-     cette ligne, un calcul lance sur deux yeux vides ne repondait rien. */
-  .suite{
-    display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-    margin-top:12px;padding:10px 12px;border-radius:8px;
-    border:1px solid var(--line);background:var(--light);
-    font-size:13px;color:var(--ink);
-  }
-  .suite[hidden], .provenance[hidden]{display:none}
-  .suite-texte, .provenance-texte{flex:1 1 200px;min-width:0}
-
-  /* Un champ rempli par un autre module doit dire d'ou il vient. */
-  .provenance{
-    display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-    margin:0 0 14px;padding:10px 12px;border-radius:8px;
-    border:1px solid var(--line);background:var(--light);
-    font-size:13px;color:var(--ink);
-  }
-
-  .btn-second{
-    font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
-    color:var(--blue-d);background:var(--white);
-    border:1px solid var(--blue);border-radius:8px;padding:9px 14px;min-height:38px;
-  }
-  .btn-second:hover{background:var(--light);border-color:var(--blue-d)}
-  .btn-second:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-
-  /* Ce qui est obligatoire et ce que vaut une valeur pre-remplie : sans cette
-     ligne, les deux ne se decouvraient qu'apres un message d'erreur. */
-  .aide-saisie{font-size:12px;color:var(--grey);margin:0 0 12px;line-height:1.45}
-
-  /* ── hiérarchie à quatre niveaux ── */
-  .sortie{margin-top:12px}
-  .val-tier{margin:5px 0;font-size:13px}
-  .val-tier-lab{font-weight:700;color:var(--grey);margin-right:6px}
-  .val-tier-1{color:var(--grey)}
-  .val-tier-2{color:var(--ink);font-size:14px;font-weight:600}
-  .val-tier-2 .val-tier-lab{color:var(--ink)}
-  .val-tier-3{color:var(--blue-d);font-size:16px;font-weight:700;margin-top:8px}
-  .val-tier-3 .val-tier-lab{color:var(--blue-d)}
-  .val-tier-4{color:var(--green-d);font-size:17px;font-weight:700;margin-top:10px}
-  .val-tier-4 .val-tier-lab{color:var(--green-d)}
-
-  /* ── problèmes (erreurs et avertissements) ── */
-  .problemes{margin:8px 0}
-  .probleme{margin:4px 0;font-size:13px;padding:8px 10px;border-radius:6px;border-left:4px solid transparent}
-  .probleme-erreur{background:var(--err-bg);border-left-color:var(--err);color:var(--err-ink)}
-  .probleme-avert{background:var(--avert-bg);border-left-color:var(--avert);color:var(--avert)}
-  .probleme-label{font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.04em;margin-right:8px}
-  .probleme-code{font-weight:700;margin-right:6px}
-
-  .catalogue-erreurs{background:var(--err-bg);border:1px solid var(--err-line);border-radius:8px;padding:10px 12px;margin:0 0 14px}
-  .catalogue-erreurs .probleme-titre{font-weight:700;color:var(--err-ink);margin-bottom:4px;font-size:13px}
-
-  /* ── détails du calcul ── */
-  details.detail-calcul{margin-top:10px;font-size:12px;color:var(--grey)}
-  details.detail-calcul summary{cursor:pointer;font-weight:700;color:var(--blue-d)}
-  details.detail-calcul dl{margin-top:8px;display:grid;grid-template-columns:auto 1fr;gap:5px 12px}
-  details.detail-calcul dt{font-weight:600;color:var(--grey)}
-  details.detail-calcul dd{color:var(--ink)}
-  @media (max-width:640px){
-    details.detail-calcul dl{grid-template-columns:1fr}
-    details.detail-calcul dt{margin-top:6px}
-  }
-
-  /* ── résultats fabrication ── */
-  .resultat-c{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;background:#F8FBFD}
-  .resultat-c p{margin:2px 0;font-size:13px}
-  .resultat-c-statut{font-weight:700;color:var(--green-d)}
-  .resultat-c-produit{font-weight:700;color:var(--ink)}
-  .resultat-c-source{color:var(--grey);font-size:12px}
-
-  /* retour aux outils (en haut) */
-  .topbar{max-width:760px;margin:0 auto 12px}
-  .back-link{
-    display:inline-flex;align-items:center;gap:6px;text-decoration:none;
-    font-size:13px;font-weight:700;color:var(--blue);
-    border:1px solid var(--line);background:var(--white);
-    padding:7px 14px;border-radius:8px;transition:.15s;
-  }
-  .back-link:hover{background:var(--light)}
-  .back-link:focus-visible, .ios-back:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-
-  /* bouton retour flottant (iOS : pas de bouton retour navigateur) */
-  .ios-back{
-    display:none;position:fixed;z-index:1000;align-items:center;gap:6px;
-    right:calc(env(safe-area-inset-right,0px) + 14px);
-    top:calc(env(safe-area-inset-top,0px) + 14px);
-    background:var(--blue);color:#fff;text-decoration:none;
-    font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;
-    box-shadow:0 4px 16px rgba(26,42,58,.32);
-  }
-  body.is-ios .ios-back{display:inline-flex}
-  body.is-ios .topbar{display:none}
-
-  /* Mesure de fréquentation : mention discrète, jamais imprimée. */
-  .cgu-link{
-    max-width:52ch;
-    margin:32px auto 20px;
-    padding:0 16px;
-    text-align:center;
-    font-size:12px;
-    line-height:1.5;
-    color:var(--grey,#5A6B7B)
-  }
-  @media print{ .cgu-link{display:none!important} }
-
-  /* Verrou d'acces. Commodite de developpement, pas une mesure de securite :
-     le code est dans la source de la page et n'importe qui sachant l'ouvrir le
-     lira. Il sert a ce que l'outil ne soit pas emprunte par erreur pendant
-     qu'il est encore en cours de mise au point. */
-  #verrou{
-    max-width:420px;margin:48px auto;padding:0 16px;
-  }
-  .verrou-carte{
-    background:var(--white);border:1px solid var(--line);border-radius:14px;
-    padding:26px 24px;box-shadow:0 2px 10px rgba(26,42,58,.06);text-align:center;
-  }
-  .verrou-carte h1{font-size:19px;margin:0 0 6px;color:var(--ink)}
-  .verrou-carte p{font-size:14px;line-height:1.55;color:var(--grey);margin:0 0 18px}
-  .verrou-champ{
-    width:100%;box-sizing:border-box;text-align:center;
-    font-size:22px;font-weight:700;letter-spacing:.28em;
-    padding:12px 10px;border:1px solid var(--line);border-radius:10px;
-    color:var(--ink);background:var(--white);
-  }
-  .verrou-champ:focus{outline:2px solid var(--blue);outline-offset:1px}
-  .verrou-valider{
-    margin-top:14px;width:100%;cursor:pointer;
-    background:var(--blue);color:#fff;border:0;border-radius:10px;
-    font-size:15px;font-weight:700;padding:12px 16px;
-  }
-  .verrou-valider:hover{background:var(--blue-d)}
-  .verrou-valider:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-  .verrou-erreur{
-    margin:14px 0 0;font-size:13px;font-weight:700;color:var(--err-ink);
-    background:var(--err-bg);border:1px solid var(--err-line);
-    border-radius:8px;padding:9px 12px;
-  }
-  .verrou-erreur[hidden]{display:none}
-  /* Souligne et sans bord, ce bouton se lisait comme un lien : il ne mene
-     nulle part, il referme l'outil. */
-  .reverrouiller{
-    display:inline-block;margin-left:auto;font-size:12px;font-weight:700;
-    color:var(--grey);background:var(--white);border:1px solid var(--line);
-    cursor:pointer;padding:7px 12px;border-radius:8px;
-  }
-  .reverrouiller:hover{color:var(--ink);background:var(--light)}
-  .reverrouiller:focus-visible{outline:2px solid var(--blue-d);outline-offset:2px}
-  .topbar{display:flex;align-items:center;gap:10px}
-
-  /* Etat par defaut : verrouille. La classe est posee tres tot par un script
-     en tete de body, pour qu'un poste deja deverrouille ne voie pas l'ecran de
-     code clignoter. */
-  #outil{display:none}
-  html.deverrouille #outil{display:block}
-  html.deverrouille #verrou{display:none}
-  html.deverrouille .reverrouiller{display:inline-block}
-  html:not(.deverrouille) .reverrouiller{display:none}
-  .sr-only{
-    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
-    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
-  }
-
-    /* UXER : identité Répertoire professionnel. Mise en forme uniquement. */
-    :root {
-      --blue:#425d4f;--blue-d:#354e42;--ink:#252a27;--grey:#59685e;
-      --bg:#f5f3ed;--line:#d7dbd3;--border:#d7dbd3;--light:#ecf0e9;
-      --radius:5px;
-    }
-    body { background:#f5f3ed; color:var(--ink); }
-    body::before { display:none !important; animation:none !important; }
-    :where(a,button,input,select,textarea):focus-visible { outline-color:#425d4f; }
-    .ios-back { background:#354e42; box-shadow:0 4px 15px rgba(22,36,27,.18); border-radius:5px; }
-
-    .sheet { border-radius:5px; box-shadow:none; }
-    .sheet header { background:#f5f3ed; color:#252a27; border-bottom:1px solid #d7dbd3; }
-    .sheet header .meta { color:#59685e; }
-    .topbar { background:transparent; }
-    .topbar .back-link { color:#354e42; border-color:#b5c0b7; }
-    .onglets { background:#e9eee7; border-radius:5px; }
-    .onglets button { border-radius:4px; }
-    .bloc { border-radius:5px; }
-    .cgu-link a{color:var(--blue-d,#354e42);font-weight:600;text-decoration:underline;text-underline-offset:3px}
-</style>
+<style>/* Styles métier dédiés dans interface.css. */</style>
   <link rel="stylesheet" href="../../assets/css/theme-bleu-gris.css">
+  <link rel="stylesheet" href="./interface.css">
 </head>
 <body>
 
@@ -379,16 +54,11 @@
 <div class="sheet">
   <header>
     <h1>Lentilles souples</h1>
-    <div class="meta" id="hdr-sub">Aide au calcul et à la sélection de paramètres</div>
+    <div class="meta" id="hdr-sub">Paramètres sphériques et toriques</div>
   </header>
 
   <div class="body">
-    <p class="role-note">
-      <strong>Outil d'aide au calcul.</strong> Il ne prescrit pas : la décision finale,
-      y compris le choix de la lentille, revient à l'opticien.
-      <br>Trois modules indépendants, un seul affiché à la fois : passer de l'un à
-      l'autre ne perd aucune saisie.
-    </p>
+    <p class="role-note"><strong>Aide au calcul.</strong> Résultats indicatifs pour usage professionnel, sans valeur de prescription.</p>
 
     <!-- Les trois modules sont independants : chacun se suffit a lui-meme et
          aucun n'attend la sortie d'un autre. On n'en montre qu'un a la fois. -->
@@ -401,13 +71,7 @@
     <!-- ══════════════ MODULE 1 ══════════════ -->
     <section class="bloc" id="bloc-a" role="tabpanel" aria-labelledby="ong-a" tabindex="0">
       <h2>Lunettes vers lentille</h2>
-      <p class="sous-titre">Sphère, cylindre, axe et DVO par oeil ; correction théorique au plan cornéen puis correction cible arrondie au pas clinique.</p>
-      <p class="aide-saisie" id="a-aide">
-        <span class="req">*</span> Sphère obligatoire dès qu'un champ de l'oeil est
-        renseigné ; cylindre et axe à laisser vides si la correction est sphérique pure.
-        Un oeil entièrement vide est ignoré, sans erreur.
-        DVO : distance verre-oeil en millimètres, 0 laisse la correction inchangée.
-      </p>
+      <p class="aide-saisie" id="a-aide"><span class="req" aria-hidden="true">*</span> Sphère requise par œil renseigné. Cylindre et axe vides pour une sphère pure. DVO en mm.</p>
 
       <div class="oeils">
       <div class="oeil-groupe">
@@ -464,13 +128,7 @@
     <!-- ══════════════ MODULE 2 ══════════════ -->
     <section class="bloc" id="bloc-b" role="tabpanel" aria-labelledby="ong-b" tabindex="0" hidden>
       <h2>Surréfraction</h2>
-      <p class="sous-titre">Lentille portée et surréfraction mesurée par oeil ; nouvelle correction cible, rotation torique prise en compte.</p>
-      <p class="aide-saisie" id="b-aide">
-        <span class="req">*</span> Sphère de la lentille portée obligatoire : c'est elle
-        qui décide si l'oeil entre dans le calcul. La surréfraction est pré-remplie à 0,
-        à laisser ainsi si rien n'a été mesuré.
-        DVO : distance verre-oeil en millimètres de la surréfraction, 0 la laisse inchangée.
-      </p>
+      <p class="aide-saisie" id="b-aide"><span class="req" aria-hidden="true">*</span> Sphère de la lentille portée requise. Surréfraction à 0 si absente. DVO en mm.</p>
 
       <div class="oeils">
         <div class="oeil-groupe">
@@ -518,7 +176,6 @@
 
           <div class="sous-groupe">
             <div class="sous-groupe-titre">Rotation torique observée</div>
-            <p class="sous-groupe-note">Sens et stabilité s'activent dès que la rotation n'est pas nulle.</p>
             <div class="grille-champs">
               <div class="champ">
                 <label for="b-od-rot-valeur">Rotation (°)</label>
@@ -586,7 +243,6 @@
 
           <div class="sous-groupe">
             <div class="sous-groupe-titre">Rotation torique observée</div>
-            <p class="sous-groupe-note">Sens et stabilité s'activent dès que la rotation n'est pas nulle.</p>
             <div class="grille-champs">
               <div class="champ">
                 <label for="b-og-rot-valeur">Rotation (°)</label>
@@ -617,17 +273,9 @@
     <!-- ══════════════ MODULE 3 ══════════════ -->
     <section class="bloc" id="bloc-c" role="tabpanel" aria-labelledby="ong-c" tabindex="0" hidden>
       <h2>Recherche catalogue</h2>
-      <p class="sous-titre">Correction cible par oeil ; combinaisons exactes, paramètres compatibles, meilleures alternatives et provenance de la règle.</p>
-      <p class="aide-saisie" id="c-aide">
-        <span class="req">*</span> Sphère cible obligatoire ; cylindre et axe vides pour
-        une correction sphérique pure. Ces champs se pré-remplissent avec la correction
-        cible calculée par les deux autres modules ; ils restent modifiables à la main.
-      </p>
+      <p class="aide-saisie" id="c-aide"><span class="req" aria-hidden="true">*</span> Sphère cible requise. Valeurs calculées reprises automatiquement, puis modifiables.</p>
 
-      <p class="bandeau-demo">
-        Catalogue de démonstration : fabricants, produits et règles fictifs. À ne jamais
-        confondre avec un catalogue réel.
-      </p>
+      <p class="bandeau-demo">Catalogue de démonstration, données fictives. Ne pas utiliser comme catalogue fabricant réel.</p>
 
       <div class="catalogue-erreurs" id="c-catalogue-erreurs" role="status" aria-live="polite" hidden></div>
 
