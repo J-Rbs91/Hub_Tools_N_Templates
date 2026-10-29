@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#1F6FB2">
+  <meta name="theme-color" content="#F5F3ED">
   <link rel="stylesheet" href="assets/css/hub.css">
+  <link rel="stylesheet" href="assets/css/repertoire.css">
   <style>
     /* QA-04 — Message non bloquant sous un champ de formulaire. */
     .field__msg {
@@ -98,8 +99,10 @@
         </span>
       </span>
       <div class="hero__txt">
-        <h1 class="hero__greet" id="welcome-greet">Bonjour</h1>
-        <p class="hero__sub">Vos outils métier, ouverts en un clic. Vos saisies ne quittent jamais cet appareil.</p>
+        <p class="hero__eyebrow">RÉPERTOIRE PROFESSIONNEL</p>
+        <h1 class="hero__headline">Vos outils.</h1>
+        <span class="hero__greet" id="welcome-greet" hidden>Bonjour</span>
+        <p class="hero__sub">Optique · Activité magasin</p>
       </div>
     </section>
 
@@ -109,10 +112,9 @@
         <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
       </svg>
       <span class="notice__txt">
-        Votre magasin n'est pas encore configuré. Renseignez vos coordonnées une seule fois :
-        elles seront réutilisées par tous les outils.
+        Profil magasin non configuré.
       </span>
-      <button class="btn btn--primary" id="setup-notice-btn" type="button">Configurer mon magasin</button>
+      <button class="btn btn--primary" id="setup-notice-btn" type="button">Configurer</button>
     </div>
 
     <!-- Rappel de tâche : n'apparaît que si la clôture du jour manque réellement
@@ -126,8 +128,8 @@
     </div>
 
     <div class="sec">
-      <h2 class="sec__title" id="outils">Vos outils</h2>
-      <span class="sec__hint">Cliquez une carte pour l'ouvrir</span>
+      <h2 class="sec__title" id="outils">Outils disponibles</h2>
+      
     </div>
 
     <ul id="tools-grid" role="list">
@@ -149,20 +151,12 @@
           <a class="tool-card__link" href="outils/demande-ordonnance/">Demande / Ordonnance</a>
         </h3>
         <p class="tool-card__pitch">
-          Le courrier au médecin, rédigé et prêt à partir en deux minutes.
+          Courriers médicaux · PDF
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 18 6-6-6-6"/>
         </svg>
-        <details class="tool-card__more">
-          <summary>Ce que fait l'outil</summary>
-          <p>
-            Formulaire de demande au médecin : modification de prescription, compte rendu
-            d'adaptation lentilles ou de contrôle de vision, renouvellement exceptionnel.
-            Export PDF et copie directe dans Gmail. Vos coordonnées de magasin sont
-            reprises automatiquement.
-          </p>
-        </details>
+        
       </li>
 
       <!-- CLÔTURE — bénéfice : plus de recomptage ni de calcul à la main.
@@ -182,20 +176,12 @@
           <a class="tool-card__link" href="outils/cloture-caisse/">Clôture de caisse</a>
         </h3>
         <p class="tool-card__pitch">
-          Comptez les espèces&nbsp;: le total, l'écart et la remise se calculent seuls.
+          Comptage · Écarts · Remise
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 18 6-6-6-6"/>
         </svg>
-        <details class="tool-card__more">
-          <summary>Ce que fait l'outil</summary>
-          <p>
-            Comptage de fin de journée : pièces, billets, paiements électroniques.
-            Calcul automatique du total espèces, de l'écart par rapport au logiciel métier
-            et alerte remise. Le comptage de la veille est repris automatiquement, et
-            l'historique des quinze derniers jours reste dans le navigateur.
-          </p>
-        </details>
+        
       </li>
 
       <!-- ÉPAISSEUR — bénéfice : annoncer la bonne épaisseur avant la commande.
@@ -235,22 +221,12 @@
           <a class="tool-card__link" href="outils/epaisseur-verres/">Épaisseur des verres</a>
         </h3>
         <p class="tool-card__pitch">
-          Annoncez la bonne épaisseur avant de commander, indice par indice.
+          Calcul · Simulation 3D
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 18 6-6-6-6"/>
         </svg>
-        <details class="tool-card__more">
-          <summary>Ce que fait l'outil</summary>
-          <p>
-            Calcul de l'épaisseur d'un verre ophtalmique (centre, bord mini / maxi,
-            Ø mini du palet) selon la correction, l'indice et la forme de monture
-            (côtes A / B / D). Huit gabarits relevés sur catalogue, ou la forme exacte
-            du client relevée sur une simple photo du verre. Décentrement OD / OG par
-            le demi-écart et la hauteur, avec visualisation 3D manipulable des deux
-            verres et comparaison client.
-          </p>
-        </details>
+        
       </li>
 
       <!-- LENTILLES SOUPLES — bénéfice : le calcul de conversion et le
@@ -271,23 +247,12 @@
           <span class="tool-card__badge">Accès par code</span>
         </h3>
         <p class="tool-card__pitch">
-          Convertissez une prescription lunettes en lentille et repérez les paramètres
-          disponibles chez le fabricant, sans faire le calcul à la main.
-          <em class="tool-card__note">Outil en cours de mise au point, pas encore ouvert au magasin.</em>
+          Conversion · Paramètres fabricants
         </p>
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 18 6-6-6-6"/>
         </svg>
-        <details class="tool-card__more">
-          <summary>Ce que fait l'outil</summary>
-          <p>
-            Aide au calcul et à la sélection de paramètres lentilles souples : conversion
-            d'une prescription lunettes (sphère, cylindre, axe, DVO) au plan
-            cornéen, combinaison de prescriptions, et confrontation à un catalogue fabricant
-            pour repérer les paramètres disponibles. Ne prescrit pas et ne remplace pas le
-            jugement clinique de l'opticien : le choix final de la lentille lui revient toujours.
-          </p>
-        </details>
+        
       </li>
 
       <!-- CAMPAGNE E-MAIL — outil terminé mais volontairement non ouvert : la
@@ -305,19 +270,9 @@
           Campagne e-mail <span class="badge">Bientôt</span>
         </h3>
         <p class="tool-card__pitch">
-          Écrire une fois à toute votre liste, avec un suivi contact par contact.
+          Communication clients
         </p>
-        <details class="tool-card__more">
-          <summary>Pourquoi l'outil n'est pas encore ouvert</summary>
-          <p>
-            CRM simplifié : modèle CSV fourni, import de votre liste d'adresses vérifiées,
-            message rédigé une fois avec variables de personnalisation, suivi des envois
-            contact par contact. Écrire à une liste de clients engage le magasin&nbsp;: les
-            règles à respecter sont détaillées dans le
-            <a href="docs/rgpd-mailing/">rappel RGPD</a>, et l'outil sera ouvert une fois
-            la procédure d'installation validée.
-          </p>
-        </details>
+        
       </li>
 
     </ul>
@@ -327,7 +282,7 @@
          le pied de page ou l'intérieur de la modale « Mon magasin ». Elles ont
          maintenant un chemin visible depuis l'accueil. -->
     <div class="sec">
-      <h2 class="sec__title" id="aide">Aide &amp; documents</h2>
+      <h2 class="sec__title" id="aide">Documentation</h2>
     </div>
 
     <ul class="docs" role="list">
@@ -340,7 +295,7 @@
             </svg>
             Écrire à ses clients : rappel RGPD
           </span>
-          <span class="doc__desc">Ce qu'on a le droit d'envoyer, à qui, et avec quel consentement.</span>
+          <span class="doc__desc">Consentement · Prospection</span>
         </a>
       </li>
       <li>
@@ -354,7 +309,7 @@
             </svg>
             Synchroniser plusieurs postes
           </span>
-          <span class="doc__desc">Partager le paramétrage du magasin via votre propre Google Drive.</span>
+          <span class="doc__desc">Paramètres partagés</span>
         </a>
       </li>
       <li>
@@ -367,7 +322,7 @@
             </svg>
             Sauvegarder par fichier
           </span>
-          <span class="doc__desc">Enregistrer et restaurer le paramétrage sans compte Google.</span>
+          <span class="doc__desc">Export · Restauration</span>
         </a>
       </li>
     </ul>
@@ -375,14 +330,10 @@
   </main>
 
   <footer class="site-footer">
-    <p>Usage interne &nbsp;·&nbsp; Aucune donnée métier transmise au serveur</p>
     <p>
-      Une remarque, une idée, un souci&nbsp;?
-      <button type="button" class="footer-link" id="open-contact">Faites-le moi savoir</button>
-    </p>
-    <p class="site-footer__fine">
-      L'accueil et les outils comptent leurs visites, de façon anonyme et sans cookie
-      (GoatCounter). Ce qui est saisi dans un outil, lui, ne sort pas de cet appareil.
+      <button type="button" class="footer-link" id="open-contact">Contact</button>
+      <span aria-hidden="true"> · </span>
+      Mesure de fréquentation sans cookie (GoatCounter), sans données de saisie.
     </p>
   </footer>
 
@@ -391,8 +342,7 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <h2 class="modal__title" id="modal-title">Mon magasin</h2>
       <p class="modal__hint">
-        Ces informations restent sur cet appareil (aucun envoi au serveur) et pré-remplissent
-        les outils. À renseigner une fois par poste.
+        Coordonnées reprises automatiquement dans les outils. Enregistrées sur ce poste.
       </p>
 
       <form id="settings-form" novalidate>
@@ -424,17 +374,15 @@
         </label>
 
         <div class="sync-section">
-          <p class="sync-title">Retrouver votre paramétrage sur plusieurs postes <span class="field__opt">facultatif</span></p>
+          <p class="sync-title">Synchronisation et sauvegarde <span class="field__opt">facultatif</span></p>
           <p class="sync-desc">
-            Deux façons possibles, au choix : aucune n'est obligatoire ni « meilleure » que l'autre,
-            c'est vous qui décidez selon votre situation.
+            Deux options facultatives.
           </p>
 
-          <p class="sync-title">Façon 1 : avec Google Drive (partagé entre les postes)</p>
+          <p class="sync-title">Google Drive</p>
           <p class="sync-desc">
-            Relie tous les ordinateurs connectés au compte Google du magasin : vous paramétrez
-            <strong>une seule fois</strong> et le profil se retrouve automatiquement sur chaque poste.
-            <a href="docs/sync-drive/" target="_blank" rel="noopener noreferrer">Procédure et transparence</a>.
+            Paramètres partagés entre les postes du magasin.
+            <a href="docs/sync-drive/" target="_blank" rel="noopener noreferrer">Documentation</a>.
           </p>
           <label class="field">
             <span class="field__lbl">URL de synchronisation</span>
@@ -447,12 +395,10 @@
         </div>
 
         <div class="sync-section">
-          <p class="sync-title">Façon 2 : par fichier (clé USB ou ordinateur)</p>
+          <p class="sync-title">Fichier</p>
           <p class="sync-desc">
-            Sans compte Google. Le paramétrage est <strong>propre à chaque poste</strong> : vous
-            l'enregistrez dans un fichier que vous conservez (clé USB ou sur l'ordinateur) et que
-            vous restaurez où vous voulez.
-            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener noreferrer">Procédure et transparence</a>.
+            Sauvegarde et restauration manuelles.
+            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener noreferrer">Documentation</a>.
           </p>
           <div class="sync-actions">
             <button type="button" class="btn btn--ghost" id="backup-save">Sauvegarder dans un fichier</button>
