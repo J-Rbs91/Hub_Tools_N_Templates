@@ -37,7 +37,7 @@ Le choix a été validé par le demandeur après comparaison des trois pistes.
 |---|---|---|
 | Accueil | Rangées numérotées, texte court | Aucun détail expansible |
 | Navigation | Libellés explicites et états d'accès | Navigation propre à chaque outil |
-| Calculateur épaisseur | Parcours sept sections, résultats à droite, OD/OG mobile | Contours OMA, moteur optique et rendu 3D inchangés |
+| Calculateur épaisseur | Six étapes : Forme, Cotes, Type de verre, Mesures, 3D, Vues | Contours OMA, moteur optique et rendu 3D inchangés |
 | Demande / Ordonnance | Saisie structurée, navigation de section, labels courts | Document A4, textes médicaux générés et exports conservés |
 | Comptage de caisse | Sections 01 à 06, tables sobres, champs lisibles | Écart positif/négatif et avertissements conservent leurs couleurs métier |
 | Lentilles souples | Neutralité et lisibilité | Garde et onglets fonctionnels inchangés |
