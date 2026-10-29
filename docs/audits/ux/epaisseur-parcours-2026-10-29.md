@@ -1,93 +1,64 @@
-# UXER : refonte du calculateur d'épaisseur des verres
+# UXER — Refonte du calculateur d'épaisseur
 
-Date : 29 octobre 2026
-Branche : `uxer/epaisseur-parcours-20261029`
-Base : `main` après PR #97 et #99
-Direction : Répertoire professionnel (03)
+**Date :** 29 octobre 2026  
+**Branche :** `uxer/epaisseur-parcours-20261029`  
+**PR :** #100 — brouillon, non fusionnée  
+**Référence :** direction visuelle 03 « Répertoire professionnel »
 
-## Intention
-Remplacer une longue liste de panneaux techniques par un parcours métier explicite, sans transformer le moteur de calcul.
-Le calcul reste immédiat après saisie ou sélection ; aucune étape « Valider / Calculer » n'est introduite.
+## Objectif
 
-## Diagnostic initial
-- 380 px fixes pour la saisie, cinq colonnes d'entrée OD/OG très serrées.
-- Forme et cotes A/B/D dans la même section, avec beaucoup de documentation visible en permanence.
-- Synthèse placée en bas de colonne à gauche, alors que la visualisation occupe le haut de la droite.
-- Options de montage, biseaux, vue 1:1 et notices détaillées monopolisent le panneau de visualisation.
-- Sélection des formes par bouton visuellement active, mais sans `aria-pressed`.
-- En mobile, la table OD/OG devient une grille trop dense.
+Améliorer le parcours métier, les affordances, la navigation et la lisibilité mobile, sans modification des modèles optiques ni des neuf géométries. Les valeurs sont recalculées automatiquement pendant la saisie ; il n'y a pas de bouton « Calculer ».
 
-## Nouvelle composition
-Navigation interne : 01 Forme, 02 Monture, 03 Verre, 04 Correction, 05 Résultats, 06 3D, 07 Profils.
-Les résultats sont la première carte de la colonne de droite, immédiatement visibles en desktop.
-Sur tablette, saisie en grille 2 colonnes avec Forme et Correction en pleine largeur.
-Sur mobile, les cinq données de chaque œil sont regroupées en deux cartes OD/OG avec des libellés visibles ; résultats et vues suivent les saisies.
+## Organisation actuelle — six sections
 
-### Affordances et microcopy
-- La forme choisie est signalée par une bordure plus marquée, une coche et `aria-pressed`.
-- Bouton de photo : « Créer une forme depuis une photo ».
-- Cotes A, B, D réunies dans la section Monture.
-- Indice et épaisseur au bord dans la section Verre.
-- Copie des paramètres : « Copier OD vers OG ».
-- Les actions de vue 3D restent visibles, mais les réglages de montage et l'aide de calibration 1:1 passent dans des `details` accessibles au clavier.
-- Aide technique sur les contours rangée sous « Origine des contours ».
-- Navigation par ancres sans ajout d'entrées d'historique sur Android.
+1. **Choix de la forme à étudier** : neuf formes natives et import d'une forme personnelle par photo. Sélection visuelle explicite et `aria-pressed`.
+2. **Cotes de la forme** : A, B, D ; panneau « Personnaliser la monture » pour base du cercle, galbe et épaisseur du cercle. Le panneau est facultatif et reste utilisable indépendamment de l'affichage 3D du cercle.
+3. **Type de verre** : correction OD/OG (sphère, cylindre, axe), indice, épaisseur minimale au bord et base spéciale conditionnelle.
+4. **Prise de mesure** : demi-écarts pupillaires OD/OG et hauteurs OD/OG. « Copier correction et mesures OD vers OG » recopie les cinq paramètres de l'œil droit.
+5. **Affichage 3D** : case « Échelle 1:1 » (même variable de calcul `scale11`), enregistrement de deux configurations pour comparaison, case « Afficher la monture » (cochée par défaut) qui révèle coloration, montage optimisé et paramètres avancés du biseau. Recentrage, vue de profil, règle de calibrage et légendes sont conservés.
+6. **Vues et analyse des épaisseurs** : tableau des épaisseurs maximales/minimales au bord et au centre, diamètre utile, méridiens du tore, carte de face avec mesures à 30°, vues temporale, de dessus et de dessous, ainsi que les deux emplacements de comparaison. L'épaisseur centrale est une valeur unique par verre ; minima et maxima concernent les bords et les coupes.
 
-## Invariants
-- Neuf noms, géométries et orientation OD/OG conservés ; sept jeux OMA externes + Pilote et Hexagone historiques.
-- Script `oma-shapes.js` inchangé.
-- Fonctions de calcul, génération des profils, rendu 3D, sauvegarde de comparaison et extraction de forme sur photo conservées.
-- Valeurs par défaut, bornes des sliders, types et identifiants de champs conservés.
-- Contrôles de saisie et navigation « Entrée » conservés.
-- Aucun changement des clés de stockage.
-- Affichage de monture conditionnel et règles de biseau conservés.
-- Modal photo complète, y compris cinq étapes et outils de contour, conservée.
-- Pas de nouveau chargement distant, ni modification de GoatCounter/CGU.
+Sur ordinateur, saisie à gauche et visualisation à droite ; sur tablette et mobile, lecture en sections successives. La navigation est collante et n'ajoute pas d'étapes à l'historique Android.
 
-## Vérifications statiques effectuées
-- Comparaison de tous les IDs de saisie, `select`, canvas et boutons avec `main` : identiques.
-- Aucune suppression ni duplication d'ID.
-- Source OMA indépendante : même blob SHA sur base et branche.
-- DOM des sections équilibré et sept ancres résolues.
-- Sections et panneaux `details` structurellement présents.
-- Contrôles CI et recettes navigateur à effectuer avant fusion.
+## Invariants vérifiés par comparaison de fichiers
 
-## Recette requise
-1. Desktop 1440px et 1280px : navigation, densité de la saisie, résultats immédiatement visibles.
-2. Tablette 768px et mobile 375/320px, zoom 200 %, lecture au clavier et lecteur d'écran.
-3. Changement des neuf formes ; vérification contour OD/OG, position nasal/temporal, valeurs A/B suggérées et respect d'une saisie manuelle.
-4. Valeurs sphère/cylindre/axe/PD/hauteur OD et OG, puis bouton « Copier OD vers OG ».
-5. Vérification calculs d'épaisseur, diamètre utile, meridiens et avertissements.
-6. Activation du cercle, bases spéciales, cambrure/galbe, biseau automatique / manuel, déverrouillage des bornes.
-7. Vue 3D : gestes rotation, déplacement, zoom, coupes et règle 1:1 ; panels avancés.
-8. Captures des quatre profils, comparaison client 0/2 à 2/2, suppression et recalcul.
-9. Assistant photo : toutes les étapes, choix côté, rotation, cadrage, contours, forme enregistrée.
-10. Retour système Android/iOS, modale, page rechargée, réinitialisation éventuelle.
+- Les neuf formes natives (7 OMA + Pilote et Hexagone historiques), l'ordre, les contours et l'orientation OD/OG sont conservés ; `oma-shapes.js` n'est pas modifié.
+- Les 30 éléments `input` d'origine (hors transformation volontaire de « Vue 1:1 » en checkbox) conservent leur HTML, types, valeurs par défaut et identifiants ; tous les `select` restent identiques.
+- Aucun ancien identifiant HTML n'a disparu ; pas de doublon.
+- Les fonctions `compute()`, `renderResult()`, `renderProfiles()`, `profileEyeHTML()`, `faceEyeHTML()`, `load3D()` restent identiques.
+- Le moteur de photo, ses cinq étapes, la 3D, les profils, le calcul optique et les clés de stockage ne sont pas modifiés.
+- Les sections et `details` possèdent un balisage équilibré ; les six ancres ciblent une section existante.
+- Le traitement des profils comprend déjà la mesure de bord tous les 30° et l'axe/contre-axe du tore ; pas de nouvel algorithme de méridiens introduit.
 
-Statut : revue UX et validation fonctionnelle navigateur réelles nécessaires avant fusion.
+## Interactions adaptées
 
-## Révision de l'organisation à la demande du métier (29 octobre 2026)
-Cette révision prend la place de l'organisation à sept sections décrite dans les premières parties du rapport. Architecture actuelle à **six sections**, dans cet ordre :
-1. Choix de la forme à étudier (les neuf silhouettes et la forme personnelle).
-2. Cotes de la forme (A, B, D) ; panneau « Personnaliser la monture » pour la base du cercle, le galbe et l'épaisseur de la monture.
-3. Type de verre : correction OD/OG (sphère, cylindre, axe), indice, épaisseur minimale au bord et base spéciale.
-4. Prise de mesure : demi-écart pupillaire OD/OG et hauteur de montage OD/OG. Le bouton de copie OD vers OG reste unique et recopie les cinq paramètres de correction + centrage.
-5. Affichage 3D : case « Échelle 1:1 » qui reprend le mécanisme du bouton d'origine ; bouton de comparaison ; case « Afficher la monture ». Cette dernière révèle la coloration des dépassements, le montage optimisé et la personnalisation avancée du biseau. Les actions de recentrage et de vue de profil restent disponibles.
-6. Vues et analyse des épaisseurs : synthèse OD/OG des bords maxi/mini, épaisseur centrale, diamètre utile, méridiens du tore et les quatre profils (face, temporal, dessus, dessous). La synthèse provient des sorties existantes `res-body`, `merid`, `notes` ; les quatre vues viennent du moteur de profils actuel.
+- `btn-11` devient une checkbox, avec un gestionnaire `change` qui contrôle le même mode `scale11`, rafraîchit la règle et la 3D.
+- `show-frame` pilote la visibilité de `frame-options` et de la légende de dépassement, sans effacer les choix précédents ; la visibilité des tracés en 3D reste contrôlée par le code existant.
+- La copie OD → OG conserve son gestionnaire, ses cinq paramètres et un recalcul.
+- Le parcours Entrée est aligné sur l'ordre du formulaire et ignore les champs dans les panneaux fermés.
+- Les options de biseau et le calibrage 1:1 restent disponibles dans des panneaux natifs `details`, utilisables au clavier.
 
-### Choix conservateurs
-- Les champs `cambrure`, `galbe`, `m-ep`, `m-bevel-od/og`, `bevel-unlock` ne disparaissent pas lorsqu'ils ne sont pas affichés initialement ; ils se déplient.
-- Changement de la commande d'échelle 1:1 de bouton en checkbox, conservant son ID `btn-11`, sa variable `scale11` et la génération de la règle 1:1.
-- Les `input` métier (30 existants), valeurs initiales et attributs sont identiques à ceux de `main`, à l'exception du remplacement du bouton `btn-11` par une case à cocher portant le même ID.
-- Le calcul `compute()`, les fonctions `renderResult()`, `renderProfiles()`, `faceEyeHTML()`, `profileEyeHTML()` et `load3D()` sont conservés à l'identique.
-- Le parcours Entrée clavier saute les éléments des panneaux avancés fermés et les selects désactivés, sans changer les saisies.
+## Tests automatisés
 
-### Recette supplémentaire obligatoire
-- Après décochage « Afficher la monture », vérifier que les options subordonnées disparaissent visuellement sans perdre leurs valeurs et que les vues 3D ne montrent plus le cercle.
-- Après réactivation, vérifier que la coloration et le montage optimisé redeviennent accessibles.
-- Vérifier l'activation/désactivation de la case 1:1, l'apparition de la règle et l'étalonnage.
-- Vérifier que le bouton Copier OD vers OG recopie correction **et** mesures, même si le bouton se trouve dans la section Prise de mesure.
-- Vérifier les épaisseurs mini/maxi au bord, centrale, méridiens toriques et profils pour les corrections sphériques, cylindriques et mixtes.
-- Tester les panneaux refermables à clavier et lecteur d'écran, le parcours Entrée et le zoom mobile.
+Les tests préexistants sur les neuf contours, les références OMA et l'inversion OD/OG sont conservés.
 
-La PR reste en brouillon en attendant validation visuelle et tests navigateur réels.
+De nouveaux tests dans `tests/epaisseur-verres-formes.test.mjs` exécutent, depuis le script réel de la page, les gestionnaires :
+- du mode 1:1 (activation puis désactivation, rafraîchissement),
+- de l'affichage de la monture (panneau d'options et légende),
+- de la copie OD vers OG (sphère, cylindre, axe, demi-écart, hauteur).
+
+La CI « Contrôle & hygiène » exécute ces tests, les contrôles de liens et le contrat de navigation. Le contrôle « Sécurité » est exécuté séparément.
+
+## Recette manuelle restant nécessaire avant fusion
+
+- Rendu Chromium / Firefox sur desktop (1280/1440), tablette (768), mobile (320/375), zoom 200 % et navigation clavier.
+- Vérification visuelle de **chacune des neuf formes** et du sens OD/OG (nasal/temporal).
+- Changement de forme après retouche manuelle A/B : conserver les valeurs saisies.
+- Correction OD/OG sphérique, cylindrique, mixte ; bord mini/maxi, centre, diamètre utile et axes du tore.
+- Visibilité monture, coloration, montage optimisé, positionnement manuel/déverrouillage du biseau.
+- Rotation, zoom, déplacement, coupe 3D, échelle 1:1, règle calibrée.
+- Comparaison 0/2 → 2/2 → retrait et re-sauvegarde.
+- Assistant photo complet : import, OD/OG, miroir, rotation, boxing, retouche, nom, enregistrement.
+- Fonctionnement du bouton retour Android/iOS, fermeture des panneaux/modale sans perte des saisies.
+
+**Statut :** modifications codées et vérifications statiques/CI automatisées ; validation en navigateur réel restant à effectuer. Ne pas fusionner sur la seule base des captures de composition, qui ne représentent pas le moteur 3D exécuté.
