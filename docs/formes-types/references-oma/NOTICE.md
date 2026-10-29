@@ -31,7 +31,7 @@ Fichiers :
 
 Ces sept fichiers servent désormais aussi de **contours numériques d'estimation dans le calculateur d'épaisseur**. Le laboratoire `../oma-comparateur.html` reste disponible ; la matrice de correspondance aux noms du hub et les limites sont documentées dans `../oma-integration-hf022.md`.
 
-Un huitième fichier `GlassOn_Teardrop_53x35_72.oma` a été ajouté depuis https://glasson.io/assets/rimless/glasson-rimless-shape-teardrop.oma (échantillon GlassOn public). Il contient les deux tracés de 1 000 rayons ; le fichier n'a pas de licence de redistribution explicitement établie. La provenance et les droits doivent être réexaminés avant une diffusion commerciale.
+Le fichier d'exemple `GlassOn_Teardrop_53x35_72.oma`, obtenu depuis https://glasson.io/assets/rimless/glasson-rimless-shape-teardrop.oma, est **conservé comme référence documentaire mais n'est plus utilisé dans les calculs** : le Pilote historique a été restauré (HF-024). Il contient deux tracés de 1 000 rayons ; la licence de redistribution des données fabricant n'est pas explicitement établie.
 
 ## Mention de licence de la source
 
