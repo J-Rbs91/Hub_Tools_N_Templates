@@ -2,9 +2,9 @@
 
 ## Direction UXER actuelle
 
-La direction retenue est **Répertoire professionnel** (03). Fond papier, liste numérotée, séparateurs fins, vocabulaire court et accent vert grisé. Les règles de continuité vivent dans [l'identité UXER](.uxer/identity.md).
+La direction retenue est **Répertoire professionnel** (03). Fond clair quasi neutre, liste numérotée, séparateurs fins, vocabulaire court et accent **bleu gris atténué** (#475569). Les règles de continuité vivent dans [l'identité UXER](.uxer/identity.md).
 
-La page d'accueil charge `assets/css/hub.css` puis `assets/css/repertoire.css`. Les outils restent autonomes, avec leurs propres styles inline. L'outil **Demande / Ordonnance** dispose ensuite d'une refonte dédiée de son interface de saisie, sans changement des générateurs Gmail et PDF. La navigation et la saisie du calculateur d'épaisseur ont une refonte UXER dédiée : sections Forme, Cotes, Type de verre, Prise de mesure, Affichage 3D et Vues d'analyse, sans changement du moteur optique.
+La page d'accueil charge `assets/css/hub.css` puis `assets/css/repertoire.css`, suivis de **`assets/css/theme-bleu-gris.css`**. Les outils restent fonctionnellement autonomes, mais chargent cette même feuille *après* leur CSS inline pour uniformiser les couleurs. Les couleurs de statuts (erreur, avertissement, succès) ne sont pas remplacées. L'outil **Demande / Ordonnance** dispose ensuite d'une refonte dédiée de son interface de saisie, sans changement des générateurs Gmail et PDF. La navigation et la saisie du calculateur d'épaisseur ont une refonte UXER dédiée : sections Forme, Cotes, Type de verre, Prise de mesure, Affichage 3D et Vues d'analyse, sans changement du moteur optique.
 
 
 Site statique d'outils internes destiné aux magasins d'optique. Chaque magasin renseigne ses
