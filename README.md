@@ -72,8 +72,9 @@ documentées avec la même transparence (ce qui se passe, ce qui est enregistré
   `localStorage`, sans donnée saisie ni photo : seulement ce que la requête porte déjà (page
   consultée, provenance, navigateur, pays). Tout part dans un seul site GoatCounter, donc un seul
   tableau de bord où chaque page tient sa propre ligne. Les pages `docs/` n'embarquent pas le
-  compteur et leur CSP continue d'interdire toute requête tierce. Chaque page qui compte le dit
-  en toutes lettres : pied de page sur l'accueil, ligne `.mesure-note` dans les outils.
+  compteur et leur CSP continue d'interdire toute requête tierce. L'information destinée aux
+  utilisateurs est centralisée dans [`cgu/`](cgu/) ; aucune notice de fréquentation n'est
+  affichée sur l'accueil ni sur les écrans des outils.
 - Toutes les saisies (données patient, prescriptions) restent strictement locales dans le navigateur.
 - Les exports (PDF, copie Gmail) sont générés entièrement côté client.
 - La synchronisation Drive (facultative) ne transmet que le profil du magasin, vers le Drive du
