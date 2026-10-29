@@ -24,8 +24,8 @@ load GoatCounter (`https://gc.zgo.at/count.js`, counting into
 `https://j-rbs-hub.goatcounter.com/count`). It sends the page's own path and nothing else:
 cookieless, no `localStorage`, no user input, no photo. Everything typed into a tool stays local
 exactly as before. Each counting page therefore allows `gc.zgo.at` in `script-src` and the
-counting host in `img-src`/`connect-src`, ships the `<script data-goatcounter…>` right before
-`</body>`, and states it in French (`.mesure-note` in a tool, the footer line on the hub).
+counting host in `img-src`/`connect-src`, and ships the `<script data-goatcounter…>` right before
+`</body>`. Public-facing disclosure is centralized in `cgu/index.html`: do not add visible counter notices to the hub or tool screens.
 **The `docs/*/index.html` pages and the maintainer-only pages (`tests/`,
 `docs/formes-types/scanner.html`) do not carry the counter** and their CSPs stay closed. All
 counting pages share one GoatCounter site, so each path is its own row in a single dashboard;
