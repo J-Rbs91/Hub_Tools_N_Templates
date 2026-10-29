@@ -1,0 +1,144 @@
+/* UXER — Bleu gris atténué, palette validée le 29/10/2026.
+   Couleurs d'interface uniquement. Ne pas modifier les codes d'état métier,
+   les géométries des verres, les légendes de la 3D ni le document A4 imprimé.
+   Chargé APRÈS les feuilles existantes pour centraliser les jetons visuels. */
+@media screen {
+  :root {
+    color-scheme: light;
+    --blue-900:#273343;
+    --blue-800:#39495d;
+    --blue-d:#3d4a5b;
+    --blue:#475569;
+    --blue-300:#9cabbc;
+    --blue-100:#dfe6ed;
+    --blue-50:#f1f4f7;
+    --sky:#7b8d9e;
+    --ink:#283444;
+    --ink-2:#414d5c;
+    --grey:#626e7c;
+    --text-muted:#626e7c;
+    --muted-2:#6b7280;
+    --sub:#626e7c;
+    --border:#c8d1dc;
+    --line:#dde3e9;
+    --light:#eff3f6;
+    --bg:#fafbfc;
+    --white:#ffffff;
+    --paper:#ffffff;
+    --card-bg:#ffffff;
+    --accent:#475569;
+    --co:#475569; --co-bg:#eff3f6;
+    --fe:#475569; --pa:#475569; --el:#475569; --ec:#475569; --tb:#475569;
+    --ec-d:#3d4a5b;
+    --fe-alt:#f5f7f9; --pa-alt:#f5f7f9; --el-alt:#f5f7f9; --tb-alt:#f5f7f9;
+  }
+
+  /* Identité commune : fond neutre, contrôle bleu grisé et séparateurs fins. */
+  body { background:var(--bg); color:var(--ink); }
+  .topbar, .site-header, .app-hdr { background:var(--bg); color:var(--ink); border-color:var(--line); }
+  .topbar .back-link, .site-header .back-link, .app-hdr .sub { color:var(--blue-d); }
+  .site-header .back-link:hover, .topbar .back-link:hover { background:var(--light); }
+  .topbar__link, .store-settings-btn, .brand__name, .brand__mark svg,
+  .footer-link, .site-footer a { color:var(--blue-d); }
+  .brand__mark { border-color:var(--blue); }
+  .brand__mark svg { stroke:var(--blue); }
+
+  .tool-card:hover, .tool-card:focus-within { background:#f0f3f6; }
+  #tools-grid, .docs { border-top-color:var(--border); }
+  .tool-card__go { stroke:var(--blue-d); }
+  .tool-card__badge,.badge { color:var(--grey); }
+  .settings-group-heading, .settings-group-heading--divider { color:var(--blue-d); border-color:var(--line); }
+  .field input, .field textarea, .cd-toggle, .cd-panel { background:#fff; }
+  :where(a, button, input, textarea, select, summary):focus-visible {
+    outline-color:var(--blue);
+  }
+  input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:var(--blue); }
+
+  /* Écrans métier : remplacer les verts décoratifs, pas les statuts. */
+  .site-header h1, .app-hdr h1, .hdr-title, .workspace-intro h1,
+  .card h2, .viewer-head h2, .profiles-head h2 { color:var(--ink); }
+  .card, .sheet, .block, .step, .modal, .panel:not(.panel--safe):not(.panel--warn):not(.panel--stop):not(.panel--danger),
+  .verrou-carte { border-color:var(--line); }
+  .card, .sheet, .block, .step, .modal, .verrou-carte { background:#fff; }
+  .card-heading, .profiles-head, .profiles-slide h3 { border-color:var(--line); }
+  .step-index, .page-kicker, .header-kicker, .eyebrow { color:var(--blue-d); }
+  .steps-nav, .cash-nav, .form-jump { background:var(--bg); border-color:var(--line); }
+  .steps-nav a, .cash-nav a, .form-jump a { color:var(--blue-d); }
+  .steps-nav a:hover, .cash-nav a:hover, .form-jump a:hover { background:#e8edf2; }
+  .steps-nav a[aria-current="location"] { background:#e1e7ed; color:var(--blue-900); }
+  .workspace-intro, .header-copy, .header-description { color:var(--ink); }
+
+  .btn--primary, .btn--go, .btn-save, .btn-primary,
+  .btn-row .btn--emphasis, .viewer-primary .btn--emphasis,
+  .verrou-valider, .notice--setup .btn {
+    background:var(--blue); color:#fff; border-color:var(--blue);
+  }
+  .btn--primary:hover, .btn--go:hover, .btn-save:hover, .btn-primary:hover,
+  .btn-row .btn--emphasis:hover, .viewer-primary .btn--emphasis:hover,
+  .verrou-valider:hover { background:var(--blue-d); border-color:var(--blue-d); }
+  .btn--ghost, .btn-ghost, .btn-photo, .btn-blue, .btn-reset,
+  .back-link, .ios-back { border-color:var(--border); }
+  .btn--ghost, .btn-ghost, .btn-photo, .btn-blue, .btn-reset, .back-link { color:var(--blue-d); }
+  .btn--ghost:hover, .btn-ghost:hover, .btn-photo:hover, .back-link:hover { background:var(--light); }
+  .ios-back { background:var(--blue-d); color:#fff; }
+
+  /* Accents de sélection (notamment contours de verre et radio d'envoi). */
+  .shape-btn, .mode, .eye-parameters, .advanced-panel { border-color:var(--border); }
+  .shape-btn svg path { fill:#e7ecf1; stroke:#5e7085; }
+  .shape-btn:hover { background:#f0f3f6; border-color:var(--blue); }
+  .shape-btn.active, .shape-perso .shape-btn.active {
+    background:#e4eaf0; border-color:var(--blue); box-shadow:0 0 0 2px rgba(71,85,105,.09);
+  }
+  .shape-btn.active svg path,.shape-perso .shape-btn.active svg path { fill:#cbd5df;stroke:var(--blue); }
+  .shape-btn.active::after,.shape-btn.active span { color:var(--blue-d); }
+  .shape-btn.active, .mode.is-on, .onglets button[aria-selected="true"] { border-color:var(--blue); }
+  .mode.is-on { background:#edf2f6; box-shadow:0 0 0 2px rgba(71,85,105,.11); }
+  .mode:hover { border-color:var(--blue-300); }
+  .onglets { background:var(--light); }
+  .sheet header, .sheet>header, .viewer-head,
+  .block--ferraille .block-hdr, .block--papier .block-hdr, .block--elec .block-hdr,
+  .block--comptage .block-hdr, .block--ecart .block-hdr, .block--history .block-hdr {
+    background:#eff3f6; color:var(--ink); border-color:var(--line);
+  }
+  .viewer-head h2,.block-hdr h2 { color:var(--ink); }
+  .shape-btn span,.eye-parameters legend,.eye-code { color:var(--blue-d); }
+
+  /* Saisie : contraste constant sans accents verts résiduels. */
+  .qty-input,.amt-input,.fond-input,.ref-input,
+  .eye-fields input, .field input:not([type="checkbox"]):not([type="range"]),
+  .field select, .pf input, .pf select,
+  input[type="text"], input[type="number"], select, textarea {
+    border-color:var(--border);
+  }
+  .qty-input:focus,.amt-input:focus,.fond-input:focus,.ref-input:focus,
+  .field input:focus,.field select:focus,input[type="text"]:focus,select:focus,textarea:focus {
+    border-color:var(--blue); outline-color:rgba(71,85,105,.42);
+  }
+  .prefill-banner, .fond-row, .cnt-table tfoot td, .ecart-result,
+  .viewer-primary .check--primary, #frame-options,
+  .advanced-panel, .eye-parameters, .mode.is-on,
+  .preview-obj, .cur, .resultat-c, .rgpd-article .toc {
+    background:#f3f6f9; border-color:var(--line);
+  }
+  .cnt-table tbody tr:nth-child(even),
+  .history-table tbody tr:nth-child(even) td { background:#f8fafb; }
+  .cnt-table tbody td { border-bottom-color:var(--line); }
+  .comptage-total, .block-hdr h2::before { color:var(--blue-d); }
+  .rgpd-article .g th { background:var(--light); }
+
+  /* Formulaire Ordonnance : supprimons les fonds verts décoratifs. */
+  .body>table tr>td.obj { background:#f7f9fb; }
+  .body>table tr.sect, .body>table tr.sect-act { border-bottom-color:var(--border); }
+  .regen, .btn-blue { color:var(--blue-d);border-color:var(--blue); }
+  .regen:hover, .btn-blue:hover { background:var(--blue-d);color:#fff; }
+  .opt:hover { background:#f1f4f7; }
+  .bar { background:rgba(250,251,252,.97); }
+
+  /* Documents métier : les fonds bleus servent à l'information uniquement. */
+  .panel--info, .rgpd-article .panel--info { background:#edf2f6;border-color:var(--line); }
+  .toc { background:#f6f8fa;border-color:var(--line); }
+  .app-hdr, .site-header { box-shadow:none; }
+  /* Couleurs de sécurité conservées : .panel--warn, .panel--stop, .panel--safe,
+     .er-val.pos/.neg, .ht-pos/.ht-neg, .probleme-*, .verdict-* et les vues 3D. */
+}
+/* L'impression des courriers et documents reste gouvernée par leur CSS original. */
