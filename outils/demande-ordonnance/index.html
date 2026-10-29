@@ -540,7 +540,7 @@
       </td></tr>
     </table>
 
-<p class="closing">
+    <p class="closing">
       Dans l'éventualité de recevoir votre autorisation et/ou vos recommandations, je vous prie de recevoir,
       cher docteur, l'expression de mes respectueuses salutations.
     </p>
@@ -768,10 +768,6 @@
       nouvelleSuite.hidden=dejaDemandee;
       if(dejaDemandee) nouvelleSuite.querySelector('input').checked=false;
     }
-    const commentaire=document.querySelector('[data-k="commentaire"]');
-    if(commentaire) commentaire.placeholder=objetActif()==='o_renouv'
-      ? "Perte ou bris, urgence constatée, absence de solution médicale adaptée…"
-      : "Saisie libre…";
   }
   function refreshIntro(){
     const ta=document.querySelector('[data-k="intro"]');
@@ -996,9 +992,6 @@
       if(cyl && !axe) return document.querySelector('[data-k="'+p+'_axe"]');
       if(axe && !cyl) return document.querySelector('[data-k="'+p+'_cyl"]');
     }
-    if(chk('o_renouv')&&!val('commentaire')) return document.querySelector('[data-k="commentaire"]');
-    if((chk('o_modif')||chk('o_nouvelle')||chk('o_adapt')||chk('o_renouv')) &&
-       !['m_od_sph','m_og_sph'].some(k=>val(k))) return document.querySelector('[data-k="m_od_sph"]');
     return null;
   }
   function hasBlankFields(){ return firstBlankField()!==null; }
