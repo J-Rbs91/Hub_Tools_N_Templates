@@ -40,7 +40,7 @@ every counting page.
 - Pour toute nouvelle ligne, donner un titre et une fonction courte ; éviter les détails expansibles et les animations décoratives.
 - N'ajouter aucun texte sur la confidentialité dans chaque carte. La transparence se traite dans le pied de page et les documents pertinents.
 - La première mission (PR #96) préservait `outils/demande-ordonnance/index.html`. La mission UXER suivante refond uniquement son **interface de saisie** sur une branche distincte ; conserver strictement ses champs, son JavaScript et ses sorties Gmail, et isoler ses nouveaux styles en `@media screen` pour ne pas perturber l'impression A4.
-- **Phase 2 exclusivement :** navigation et saisie de `outils/epaisseur-verres/index.html`. Dans cette première passe, seuls les styles de présentation peuvent évoluer.
+- **Phase 2 UXER (calculateur épaisseur) :** la navigation et les groupes de saisie sont réorganisés. Préserver les neuf formes, leur orientation OD/OG, les contrôles de mesure, le moteur de calcul et les rendus 3D/2D ; vérifier les contrats statiques et la recette mobile avant fusion.
 - Les outils existants restent des pages autonomes ; ne pas y importer la feuille de style du hub.
 
 ## Architecture
