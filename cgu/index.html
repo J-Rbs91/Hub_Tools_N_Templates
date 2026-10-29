@@ -34,6 +34,7 @@
     ul{margin:7px 0 12px;padding-left:19px}
     li{margin:5px 0}
     .foot{border-top:1px solid var(--line);padding:22px;text-align:center;font-size:11px;color:var(--sub)}
+    .foot__analytics{display:block;margin-top:4px}
     @media(max-width:540px){main{padding:34px 18px 60px}.top__inner{padding:16px 18px}section{grid-template-columns:24px minmax(0,1fr);gap:10px}}
     @media print{body{background:#fff}main{padding:10mm 0}.top,.foot{display:none}section{break-inside:avoid}}
   </style>
@@ -89,16 +90,6 @@
     <section>
       <span class="number">05</span>
       <div>
-        <h2>Mesure de fréquentation avec GoatCounter</h2>
-        <p>La page d'accueil et les écrans des outils intègrent le service de statistiques <a href="https://www.goatcounter.com/" rel="noopener noreferrer">GoatCounter</a>. Cette mesure sert à connaître la fréquentation des pages et à orienter la maintenance des outils.</p>
-        <p>Le compteur est configuré sans cookie de suivi et sans identifiant publicitaire ajouté par le hub. Il concerne les informations de navigation liées aux visites, notamment la page consultée, la provenance éventuelle, des caractéristiques du navigateur et une localisation approximative. Le code du compteur n'est pas alimenté avec les noms de patients, les prescriptions, les montants de caisse, les fichiers ou les autres champs remplis dans les outils.</p>
-        <p>La consultation d'une page peut entraîner une requête vers les serveurs de GoatCounter. Le compteur n'est pas requis pour utiliser les outils : en cas de blocage ou d'absence de réseau, les fonctionnalités locales restent accessibles.</p>
-      </div>
-    </section>
-
-    <section>
-      <span class="number">06</span>
-      <div>
         <h2>Disponibilité et limites</h2>
         <p>Le hub est fourni pour un usage pratique, sans garantie de disponibilité continue ni d'absence totale d'erreurs. Les données locales peuvent être perdues lors d'un changement de navigateur, d'appareil ou de la suppression du stockage local.</p>
         <p>Il est recommandé de conserver les documents nécessaires selon les procédures professionnelles en vigueur, indépendamment du navigateur.</p>
@@ -106,7 +97,7 @@
     </section>
 
     <section>
-      <span class="number">07</span>
+      <span class="number">06</span>
       <div>
         <h2>Questions et modifications</h2>
         <p>Les présentes conditions peuvent être mises à jour lors de l'évolution du hub ou de ses services. La date de dernière mise à jour figure en haut de cette page.</p>
@@ -114,6 +105,8 @@
       </div>
     </section>
   </main>
-  <footer class="foot">Hub Outils Internes · Conditions générales d'utilisation</footer>
+  <footer class="foot">Hub Outils Internes · Conditions générales d'utilisation
+    <span class="foot__analytics">Fréquentation sans cookies : <a href="https://www.goatcounter.com/" rel="noopener noreferrer">GoatCounter</a>.</span>
+  </footer>
 </body>
 </html>
