@@ -1,5 +1,5 @@
 # Identité UXER : Répertoire professionnel
-Mise à jour : 2026-10-29 · Statut : en révision, validation visuelle requise
+Mise à jour : 2026-10-29 · Palette « Bleu gris atténué » validée par le demandeur ; recette visuelle sur les pages réelles requise
 
 ## 1. Essence
 Idée centrale : répertoire de travail quotidien pour les équipes de magasins d'optique.
@@ -14,14 +14,14 @@ Ressenti recherché : retrouver un outil immédiatement, sans parcourir de disco
 - États d'accès différents : disponibles, accès par code, ouverture différée.
 
 ## 3. Territoire
-Retenu : Répertoire professionnel. Fond papier, écriture sombre, lignes séparatrices, numérotation.
+Retenu : Répertoire professionnel. Fond très clair neutre, écriture sombre, lignes séparatrices, numérotation. Accent bleu gris atténué (au lieu du vert grisé initial).
 Écartés : Blanc clinique, plus conventionnel ; Console graphite, contraste et densité inadaptés à certains usages de magasin.
 Le choix a été validé par le demandeur après comparaison des trois pistes.
 
 ## 4. Principes
 1. La typographie hiérarchise, les séparateurs structurent. Coût accepté : interface moins illustrée.
 2. Un outil = un intitulé et une fonction très courte sur l'accueil. Coût : détails dans les pages internes.
-3. Une seule couleur d'accent feutrée pour les actions et le focus. Coût : couleurs de catégorie conservées uniquement si elles ont un sens métier.
+3. Une seule couleur d'accent bleu gris atténué pour les actions et le focus. Les couleurs de statut métier (succès, erreur, avertissement) restent distinctes.
 4. Pas d'animation décorative persistante. Coût : moins de mouvement.
 5. Les informations relatives à la mesure de fréquentation figurent dans les CGU, accessibles depuis le hub et les outils. Aucun avis de suivi n'est affiché dans les écrans métier.
 
