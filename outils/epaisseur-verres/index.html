@@ -650,6 +650,77 @@
     @media screen and (prefers-reduced-motion:reduce) {
       .steps-nav a { transition:none; }
     }
+
+    /* UXER : affinage du parcours validé — type de verre, mesures et vues. */
+    @media screen {
+      .layout-col--form .form-card { scroll-margin-top:88px; }
+      .frame-customization { margin-top:2px;padding-top:0; }
+      .frame-customization .advanced-inner .field { margin:13px 0 6px; }
+      .frame-customization .advanced-inner .field:first-of-type { margin-top:16px; }
+      .frame-customization .advanced-inner .hint { margin-top:0; }
+      .subsection-title { font-size:12px;color:var(--blue-d);letter-spacing:0;font-weight:750;
+        margin:18px 0 13px;padding-bottom:9px;border-bottom:1px solid var(--line);text-transform:none; }
+      .subsection-title:first-of-type { margin-top:0; }
+      .eye-parameters-group { display:grid;gap:10px;min-width:0; }
+      .eye-parameters { border:1px solid var(--line);border-radius:5px;margin:0;padding:13px 14px 2px;min-width:0;background:#f8faf6; }
+      .eye-parameters legend { padding:0 7px;margin-left:1px;font-size:12px;color:var(--blue-d);font-weight:700; }
+      .eye-parameters legend span { font-size:11px;color:var(--grey);font-weight:550;margin-left:6px; }
+      .eye-fields { display:grid;gap:10px;min-width:0; }
+      .eye-fields--rx { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .eye-fields--measures { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .eye-fields .field { min-width:0;margin-bottom:12px; }
+      .eye-fields .field label { font-size:11px;font-weight:650;display:block;margin-bottom:6px;line-height:1.35; }
+      .eye-fields input { width:100%;min-width:0;font-variant-numeric:tabular-nums; }
+      .glass-fields { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+      .glass-fields .field { min-width:0; }
+      .glass-fields select { width:100%; }
+      .special-base { margin:2px 0 0;border-top:1px solid var(--line);padding-top:14px; }
+      .special-base .check { margin-bottom:7px; }
+      .special-base select:disabled { opacity:.65; }
+      .special-base .hint { margin-top:8px; }
+      .eyes-actions { margin-top:16px; }
+      .eyes-actions .btn { width:100%; }
+      .viewer-primary { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px; }
+      .viewer-primary .check--primary { min-height:47px;border:1px solid var(--line);background:#f8faf6;
+        padding:12px;display:flex;align-items:center;gap:9px;margin:0;border-radius:4px;font-size:12px; }
+      .viewer-primary .btn--emphasis { min-height:47px;grid-row:1 / span 2;grid-column:2; }
+      .viewer-primary .check--primary input[type=checkbox] { width:19px;height:19px; }
+      #frame-options { border:1px solid #c9d5cb;border-radius:5px;padding:13px 14px 2px;
+        margin:6px 0 12px;background:#f9fbf7; }
+      #frame-options[hidden] { display:none!important; }
+      #frame-options>.check { padding:6px 0; }
+      #frame-options .advanced-panel { margin-top:10px;margin-bottom:12px; }
+      #frame-options .advanced-panel .advanced-inner { padding:13px; }
+      #frame-options .advanced-inner>.field { margin:0; }
+      .viewer-secondary { margin:13px 0;grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .viewer-secondary .btn { background:#fffefa; }
+      .thickness-summary { margin:0 0 22px;padding:0 0 18px;border-bottom:1px solid var(--line); }
+      .thickness-summary>h3 { font-size:13px;font-weight:750;letter-spacing:-.01em;color:var(--blue-d);margin:0 0 6px; }
+      .thickness-summary>.hint { margin:0 0 12px;max-width:76ch; }
+      .thickness-summary .res-eyes { display:block;overflow-x:auto;max-width:100%; }
+      .thickness-summary .res-eyes th,.thickness-summary .res-eyes td { white-space:nowrap; }
+      .thickness-summary #merid { margin-top:12px;font-size:12px;line-height:1.6; }
+      .profiles-carousel { padding-top:4px; }
+      .profiles-slide h3 { padding-bottom:10px;border-bottom:1px solid var(--line); }
+      .profiles-head { flex-wrap:wrap; }
+    }
+    @media screen and (min-width:1121px) {
+      .layout { grid-template-columns:minmax(480px,.9fr) minmax(0,1.1fr); }
+    }
+    @media screen and (max-width:680px) {
+      .eye-parameters { padding:11px 10px 2px; }
+      .eye-fields--rx { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .eye-fields--rx .field:last-child { grid-column:1/-1;max-width:calc(50% - 5px); }
+      .glass-fields { grid-template-columns:minmax(0,1fr);gap:0; }
+      .viewer-primary { grid-template-columns:minmax(0,1fr); }
+      .viewer-primary .btn--emphasis { grid-row:auto;grid-column:auto;order:3; }
+      .viewer-primary .check--primary { min-height:44px; }
+      .viewer-secondary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #frame-options { padding:11px 12px 2px; }
+      .thickness-summary { margin-bottom:16px;padding-bottom:15px; }
+      .thickness-summary .res-eyes { font-size:11px; }
+      .profiles-card .profiles-head { margin-bottom:13px; }
+    }
 </style>
 </head>
 <body>
