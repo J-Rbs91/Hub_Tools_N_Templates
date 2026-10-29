@@ -15,7 +15,7 @@ Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-d
 |---|---|---|
 | [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
 | [Clôture de caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
-| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul OD/OG à partir de huit contours OMA réels (360 à 1 000 rayons/œil), dont Pilote GlassOn ; Hexagone historique en attendant l'OMA Silhouette 5586/OX. Noms des neuf formes inchangés, cotes A/B/D et 3D | Disponible |
+| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul OD/OG à partir de sept contours OMA réels (360 à 1 000 rayons/œil), repères nasal/temporal corrigés (ISO 16284) ; Pilote et Hexagone sur leurs contours historiques, noms des neuf formes inchangés, cotes A/B/D et 3D | Disponible |
 | [Campagne e-mail](outils/campagne-email/) | CRM simplifié : modèle CSV fourni, import de la liste d'adresses vérifiées, rédaction du message avec variables de personnalisation, suivi des envois contact par contact, liste d'exclusion persistante | **Bientôt** — annoncé mais non ouvert |
 
 > **Campagne e-mail — pourquoi l'outil n'est pas ouvert.** Il est terminé et testé, mais écrire à une
