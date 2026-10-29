@@ -65,3 +65,29 @@ Sur mobile, les cinq données de chaque œil sont regroupées en deux cartes OD/
 10. Retour système Android/iOS, modale, page rechargée, réinitialisation éventuelle.
 
 Statut : revue UX et validation fonctionnelle navigateur réelles nécessaires avant fusion.
+
+## Révision de l'organisation à la demande du métier (29 octobre 2026)
+Cette révision prend la place de l'organisation à sept sections décrite dans les premières parties du rapport. Architecture actuelle à **six sections**, dans cet ordre :
+1. Choix de la forme à étudier (les neuf silhouettes et la forme personnelle).
+2. Cotes de la forme (A, B, D) ; panneau « Personnaliser la monture » pour la base du cercle, le galbe et l'épaisseur de la monture.
+3. Type de verre : correction OD/OG (sphère, cylindre, axe), indice, épaisseur minimale au bord et base spéciale.
+4. Prise de mesure : demi-écart pupillaire OD/OG et hauteur de montage OD/OG. Le bouton de copie OD vers OG reste unique et recopie les cinq paramètres de correction + centrage.
+5. Affichage 3D : case « Échelle 1:1 » qui reprend le mécanisme du bouton d'origine ; bouton de comparaison ; case « Afficher la monture ». Cette dernière révèle la coloration des dépassements, le montage optimisé et la personnalisation avancée du biseau. Les actions de recentrage et de vue de profil restent disponibles.
+6. Vues et analyse des épaisseurs : synthèse OD/OG des bords maxi/mini, épaisseur centrale, diamètre utile, méridiens du tore et les quatre profils (face, temporal, dessus, dessous). La synthèse provient des sorties existantes `res-body`, `merid`, `notes` ; les quatre vues viennent du moteur de profils actuel.
+
+### Choix conservateurs
+- Les champs `cambrure`, `galbe`, `m-ep`, `m-bevel-od/og`, `bevel-unlock` ne disparaissent pas lorsqu'ils ne sont pas affichés initialement ; ils se déplient.
+- Changement de la commande d'échelle 1:1 de bouton en checkbox, conservant son ID `btn-11`, sa variable `scale11` et la génération de la règle 1:1.
+- Les `input` métier (30 existants), valeurs initiales et attributs sont identiques à ceux de `main`, à l'exception du remplacement du bouton `btn-11` par une case à cocher portant le même ID.
+- Le calcul `compute()`, les fonctions `renderResult()`, `renderProfiles()`, `faceEyeHTML()`, `profileEyeHTML()` et `load3D()` sont conservés à l'identique.
+- Le parcours Entrée clavier saute les éléments des panneaux avancés fermés et les selects désactivés, sans changer les saisies.
+
+### Recette supplémentaire obligatoire
+- Après décochage « Afficher la monture », vérifier que les options subordonnées disparaissent visuellement sans perdre leurs valeurs et que les vues 3D ne montrent plus le cercle.
+- Après réactivation, vérifier que la coloration et le montage optimisé redeviennent accessibles.
+- Vérifier l'activation/désactivation de la case 1:1, l'apparition de la règle et l'étalonnage.
+- Vérifier que le bouton Copier OD vers OG recopie correction **et** mesures, même si le bouton se trouve dans la section Prise de mesure.
+- Vérifier les épaisseurs mini/maxi au bord, centrale, méridiens toriques et profils pour les corrections sphériques, cylindriques et mixtes.
+- Tester les panneaux refermables à clavier et lecteur d'écran, le parcours Entrée et le zoom mobile.
+
+La PR reste en brouillon en attendant validation visuelle et tests navigateur réels.
