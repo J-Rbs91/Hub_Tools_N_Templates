@@ -19,6 +19,23 @@
       color: var(--blue-800, #14527F);
     }
     .field__msg.is-shown { display: block; }
+
+    /* Rubriques de la configuration magasin : les guides ne figurent plus sur l'accueil. */
+    .settings-group-heading {
+      margin: 16px 0 14px;
+      font-size: 13px;
+      color: #354e42;
+      font-weight: 700;
+      letter-spacing: -.015em;
+    }
+    .settings-group-heading--divider {
+      border-top: 1px solid #d7dbd3;
+      padding-top: 19px;
+      margin: 21px 0 3px;
+    }
+    .settings-group-desc { font-size: 12px; color: #59685e; line-height: 1.5; }
+    .sync-section:first-of-type { margin-top: 12px; }
+    .sync-desc a { text-underline-offset: 3px; }
   </style>
 </head>
 <body>
@@ -53,8 +70,7 @@
 
   <!-- ── BARRE SUPÉRIEURE ──
        Identité du magasin à gauche, actions transverses à droite. Collante :
-       « Mon magasin » et le rappel RGPD restent atteignables où qu'on soit
-       dans la page, ce qui n'était pas le cas quand ils vivaient en pied. -->
+       « Mon magasin » reste atteignable depuis toutes les sections du hub. -->
   <header class="topbar">
     <div class="topbar__inner">
       <div class="brand">
@@ -77,7 +93,6 @@
         </span>
       </div>
       <nav class="topbar__actions" aria-label="Actions du magasin">
-        <a class="topbar__link" href="#aide">Aide &amp; documents</a>
         <button class="store-settings-btn" id="open-settings" type="button">&#9881; Mon magasin</button>
       </nav>
     </div>
@@ -277,55 +292,6 @@
 
     </ul>
 
-    <!-- ── AIDE & DOCUMENTS ──
-         Ces trois notices existaient déjà mais n'étaient joignables que depuis
-         le pied de page ou l'intérieur de la modale « Mon magasin ». Elles ont
-         maintenant un chemin visible depuis l'accueil. -->
-    <div class="sec">
-      <h2 class="sec__title" id="aide">Documentation</h2>
-    </div>
-
-    <ul class="docs" role="list">
-      <li>
-        <a class="doc" href="docs/rgpd-mailing/">
-          <span class="doc__name">
-            <svg class="doc__ico" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-              <path d="m9 12 2 2 4-4"/>
-            </svg>
-            Écrire à ses clients : rappel RGPD
-          </span>
-          <span class="doc__desc">Consentement · Prospection</span>
-        </a>
-      </li>
-      <li>
-        <a class="doc" href="docs/sync-drive/">
-          <span class="doc__name">
-            <svg class="doc__ico" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-              <path d="M21 3v5h-5"/>
-              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-              <path d="M8 16H3v5"/>
-            </svg>
-            Synchroniser plusieurs postes
-          </span>
-          <span class="doc__desc">Paramètres partagés</span>
-        </a>
-      </li>
-      <li>
-        <a class="doc" href="docs/sauvegarde-fichier/">
-          <span class="doc__name">
-            <svg class="doc__ico" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
-              <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/>
-              <path d="M7 3v4a1 1 0 0 0 1 1h7"/>
-            </svg>
-            Sauvegarder par fichier
-          </span>
-          <span class="doc__desc">Export · Restauration</span>
-        </a>
-      </li>
-    </ul>
 
   </main>
 
@@ -346,6 +312,7 @@
       </p>
 
       <form id="settings-form" novalidate>
+        <h3 class="settings-group-heading">Coordonnées du magasin</h3>
         <label class="field">
           <span class="field__lbl">Nom du magasin <span class="field__req">obligatoire</span></span>
           <input type="text" id="f-nom" placeholder="Ex. : Optique du Centre" autocomplete="off" required>
@@ -373,16 +340,13 @@
           <span class="field__msg is-shown" id="f-fond-hint">Réserve laissée en caisse en fin de journée. Sert de valeur par défaut dans la Clôture de caisse.</span>
         </label>
 
+        <div class="settings-group-heading settings-group-heading--divider" role="heading" aria-level="3">Paramètres</div>
+        <p class="settings-group-desc">Synchronisation et sauvegarde du magasin, au choix.</p>
         <div class="sync-section">
-          <p class="sync-title">Synchronisation et sauvegarde <span class="field__opt">facultatif</span></p>
+          <p class="sync-title">Synchroniser plusieurs postes</p>
           <p class="sync-desc">
-            Deux options facultatives.
-          </p>
-
-          <p class="sync-title">Google Drive</p>
-          <p class="sync-desc">
-            Paramètres partagés entre les postes du magasin.
-            <a href="docs/sync-drive/" target="_blank" rel="noopener noreferrer">Documentation</a>.
+            Paramètres partagés avec Google Drive.
+            <a href="docs/sync-drive/" target="_blank" rel="noopener noreferrer">Lire la procédure de synchronisation</a>.
           </p>
           <label class="field">
             <span class="field__lbl">URL de synchronisation</span>
@@ -395,10 +359,10 @@
         </div>
 
         <div class="sync-section">
-          <p class="sync-title">Fichier</p>
+          <p class="sync-title">Sauvegarder par fichier</p>
           <p class="sync-desc">
-            Sauvegarde et restauration manuelles.
-            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener noreferrer">Documentation</a>.
+            Export et restauration manuels.
+            <a href="docs/sauvegarde-fichier/" target="_blank" rel="noopener noreferrer">Lire la procédure de sauvegarde</a>.
           </p>
           <div class="sync-actions">
             <button type="button" class="btn btn--ghost" id="backup-save">Sauvegarder dans un fichier</button>
