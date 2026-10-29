@@ -192,7 +192,4 @@ La correction a restauré les neuf contours et leurs noms **exactement**
 à l'état d'origine. Le fichier `hub-shapes.json` sert de témoin et les tests
 vérifient cette identité.
 
-Le besoin fonctionnel en attente est distinct : **trouver neuf vrais fichiers
-OMA représentatifs, un par famille, pour remplacer chaque contour historique
-sans modifier son nom**, après contrôle de l'orientation OD/OG, des proportions
-et de l'allure réelle. Voir [issue #91](https://github.com/J-Rbs91/Hub_Tools_N_Templates/issues/91).
+L'intégration HF-022 utilise désormais **huit tracés OMA réels**, dont le Pilote GlassOn, dans le moteur OD/OG, sans changer les noms du sélecteur. **Hexagone** conserve le contour historique : son OMA constructeur 5586/OX n'a pas pu être obtenu. Les associations exactes sont récapitulées dans [oma-integration-hf022.md](oma-integration-hf022.md). Voir [issue #91](https://github.com/J-Rbs91/Hub_Tools_N_Templates/issues/91).
