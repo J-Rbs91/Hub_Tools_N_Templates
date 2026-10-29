@@ -104,7 +104,7 @@ test('Pilote : boxing d’origine GlassOn, aucune rotation du bloc historique',(
   assert.match(html,/<script src="oma-shapes\.js"><\/script>/);
 });
 test('scripts inline du calculateur : syntaxe JS valide',()=>{
-  for(const part of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)){
+  for(const part of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)){
     assert.doesNotThrow(()=>new Script(part[1]));
   }
 });
