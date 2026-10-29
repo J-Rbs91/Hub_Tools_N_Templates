@@ -736,9 +736,10 @@
       : 'Je reste à votre disposition pour toute précision utile au suivi de votre patient(e).';
   }
   function buildIntro(){
-    const dr=val('medecin'), nom=val('p_nom'), ne=val('p_ne');
+    const dr=val('medecin'), nom=val('p_nom'), civ=val('p_civ');
     const tete=dr?'Docteur '+dr+',':'Docteur,';
-    const pat=nom ? nom+(ne?', né(e) le '+ne:'') : 'votre patient(e)';
+    // La date de naissance figure déjà dans la section Patient.
+    const pat=nom ? ((civ?civ+' ':'')+nom) : 'votre patient(e)';
     let corps;
     switch(objetActif()){
       case 'o_modif':
