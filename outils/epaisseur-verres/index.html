@@ -407,7 +407,7 @@
         <section class="card">
           <h2>Monture : forme &amp; côtes</h2>
           <div class="shapes" id="shapes"></div>
-          <p class="hint">Contours OMA réels (OD/OG) pour huit formes, sans lissage. L'Hexagone conserve temporairement son contour historique, faute de fichier OMA fabricant vérifié.</p>
+          <p class="hint">Sept formes calculées avec des contours OMA réels (OD/OG), sans lissage. Pilote a retrouvé son ancien contour ; Hexagone conserve son contour historique, faute d'OMA constructeur vérifié.</p>
           <button class="btn btn-photo" type="button" id="open-photo">📷 Forme perso d'après une photo du verre</button>
           <p class="hint" style="margin: 8px 0 12px"><a href="../../docs/formes-types/oma-comparateur.html">Comparer ces formes avec de vrais tracés OMA</a> (laboratoire de référence, sans modification des calculs).</p>
 
@@ -1069,11 +1069,11 @@
 
     var SHAPE_KEYS = ['rectangle', 'rectangledoux', 'carree', 'pantos', 'papillon', 'hexagone', 'ronde', 'pilote', 'ovale'];
 
-    /* HF-022 : remplacer les géométries par les fichiers OMA existants.
-       Les neuf clés et libellés sont stables. L'hexagone demeure historique
-       tant que le fabricant n'a pas fourni le tracé exact 5586/OX.
-       Les coordonnées sont issues des rayons natifs, sans lissage et sans
-       rotation imposée à cause d'une galerie mal affichée. */
+    /* HF-022 : sept contours OMA actifs, noms et clés stables.
+       Pilote = silhouette historique (54 x 48 mm), restaurée sur demande.
+       Hexagone = silhouette historique faute d'OMA Silhouette 5586/OX.
+       Les rayons R/L sont mis dans le repère canonique temporal +X,
+       haut +Y selon ISO 16284 ; aucune rotation due à la galerie. */
     /* OMA_INSTALL_START */
     function omaAsContour(radii, side, n) {
       var raw = radii.split(';').map(Number), pts = [], i, angle, x, y;
@@ -1082,14 +1082,16 @@
       }
       for (i = 0; i < n; i++) {
         angle = 2 * Math.PI * i / n;
-        // L'OD et l'OG portent le même repère canonique : temporal +X, haut +Y.
-        // Le miroir de l'œil gauche provient de la géométrie OMA et n'est pas
-        // une rotation de 180° appliquée aux gabarits du hub.
-        x = (side === 'og' ? -1 : 1) * raw[i] * Math.cos(angle);
+        // ISO 16284 § 5.4.9-5.4.11 : les rayons R et L commencent
+        // à 3 h et progressent dans le sens anti-horaire (vue de face).
+        // 3 h = NASAL pour R (œil droit), TEMPORAL pour L (œil gauche).
+        // Dans le repère moteur x positif = temporal pour chaque œil :
+        // seul R doit donc être réfléchi sur l'axe vertical.
+        x = (side === 'od' ? -1 : 1) * raw[i] * Math.cos(angle);
         y = raw[i] * Math.sin(angle);
         pts.push([x, y]);
       }
-      if (side === 'og') { pts.reverse(); }
+      if (side === 'od') { pts.reverse(); }
       var xs = pts.map(function (p) { return p[0]; });
       var ys = pts.map(function (p) { return p[1]; });
       var xmin = Math.min.apply(null,xs), xmax = Math.max.apply(null,xs);
@@ -1118,7 +1120,9 @@
       if (!collection) { return false; }
       // Éviter tout accès en écriture avec un nom de propriété dynamique :
       // les huit emplacements OMA sont fixes et contrôlés par le code.
-      if (Object.keys(collection).length !== 8) { throw new Error('Bibliothèque OMA inattendue'); }
+      if (Object.keys(collection).length !== 7 || Object.hasOwn(collection, 'pilote')) {
+        throw new Error('Bibliothèque OMA inattendue');
+      }
       function make(key, src) {
         var shape = SHAPES[key];
         if (!shape || !src || (src.n !== 360 && src.n !== 1000)) {
@@ -1134,14 +1138,13 @@
         og.omaSource = src.source;
         return od;
       }
-      // Préparer les huit côtés d'abord ; ne remplacer qu'après succès complet.
+      // Préparer les sept profils d'abord ; ne remplacer qu'après succès complet.
       var rectangle = make('rectangle',collection.rectangle);
       var rectangleDoux = make('rectangledoux',collection.rectangledoux);
       var carree = make('carree',collection.carree);
       var pantos = make('pantos',collection.pantos);
       var papillon = make('papillon',collection.papillon);
       var ronde = make('ronde',collection.ronde);
-      var pilote = make('pilote',collection.pilote);
       var ovale = make('ovale',collection.ovale);
       SHAPES.rectangle = rectangle;
       SHAPES.rectangledoux = rectangleDoux;
@@ -1149,7 +1152,6 @@
       SHAPES.pantos = pantos;
       SHAPES.papillon = papillon;
       SHAPES.ronde = ronde;
-      SHAPES.pilote = pilote;
       SHAPES.ovale = ovale;
       return true;
     }
@@ -2581,6 +2583,7 @@
         btn.setAttribute('data-shape', key);
         if (cfg.omaSource) { btn.title = 'Contour OMA : ' + cfg.omaSource; }
         else if (key === 'hexagone') { btn.title = 'Contour historique — OMA 5586/OX manquant'; }
+        else if (key === 'pilote') { btn.title = 'Contour Pilote historique rétabli'; }
         btn.setAttribute('aria-label', cfg.label + (cfg.perso ? ' (forme perso)' : ''));
         btn.innerHTML = '<svg viewBox="0 0 70 50" aria-hidden="true"><path d="' + shapePath(cfg, 70, 50) +
           '"/></svg><span>' + esc(cfg.label) + '</span>';

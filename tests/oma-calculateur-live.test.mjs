@@ -28,7 +28,7 @@ const mapping = {
   rectangle:'R360_1.oma', rectangledoux:'R360_2.oma',
   carree:'R1000_1.oma', pantos:'R1000_2.oma',
   papillon:'STHKFMT.oma', ronde:'R1000_3.oma',
-  ovale:'R360_3.oma', pilote:'GlassOn_Teardrop_53x35_72.oma'
+  ovale:'R360_3.oma'
 };
 const toNative = x => JSON.parse(JSON.stringify(x));
 function sourceRadii(file) {
@@ -57,17 +57,20 @@ function rayScan(cfg,phi,ax,by) {
   }
   return best;
 }
-test('9 noms et identifiants conservés, 8 OMA installés, hexagone historique',()=>{
+test('9 noms conservés, 7 OMA actifs et Pilote / Hexagone historiques',()=>{
   assert.deepEqual(toNative(SHAPE_KEYS), [
     'rectangle','rectangledoux','carree','pantos','papillon',
     'hexagone','ronde','pilote','ovale'
   ]);
   assert.equal(Object.keys(SHAPES).length,9);
   assert.equal(ctx.omaLoaded,true);
-  assert.equal(Object.values(SHAPES).filter(s=>s.omaSource).length,8);
+  assert.equal(Object.values(SHAPES).filter(s=>s.omaSource).length,7);
+  assert.equal(Object.keys(ctx.window.OMA_SHAPE_DATA).length,7);
+  assert.equal(ctx.window.OMA_SHAPE_DATA.pilote,undefined);
   assert.equal(SHAPES.hexagone.omaSource,undefined);
   for(const key of SHAPE_KEYS)assert.equal(SHAPES[key].label,names[key]);
   assert.deepEqual(toNative(SHAPES.hexagone.pts),toNative(original.hexagone.pts));
+  assert.deepEqual(toNative(SHAPES.pilote),toNative(original.pilote));
 });
 for(const [key,file] of Object.entries(mapping)){
   test(key+' : correspondance à '+file+' et données natives des deux yeux',()=>{
@@ -75,10 +78,19 @@ for(const [key,file] of Object.entries(mapping)){
     assert.ok(meta && shape);
     assert.equal(shape.omaSource,file);
     assert.equal(shape.og.omaSource,file);
+    // L’OMA R est bien l’œil droit, L l’œil gauche : seuls leurs
+    // repères internes sont convertis (pas de permutation des fichiers).
     assert.equal(meta.od,raw.R.join(';'));
     assert.equal(meta.og,raw.L.join(';'));
     assert.equal(shape.pts.length,meta.n);
     assert.equal(shape.og.pts.length,meta.n);
+    // Selon ISO 16284, 0° OMA de R = nasal, 0° de L = temporal.
+    // Le moteur emploie temporal +X pour les DEUX yeux.
+    // L'ordre OD est inversé pour garder le sens trigonométrique.
+    assert.ok(shape.pts[meta.n-1][0] < -0.7, 'OD : premier rayon R coté nasal en repère canonique');
+    assert.ok(shape.og.pts[0][0] > 0.7, 'OG : premier rayon L coté temporal en repère canonique');
+    assert.ok(Math.abs(shape.pts[meta.n-1][1]) < 0.02);
+    assert.ok(Math.abs(shape.og.pts[0][1]) < 0.02);
     for(const cfg of [shape,shape.og]){
       assert.equal(cfg._omaPolar.length,meta.n);
       const xs=cfg.pts.map(p=>p[0]),ys=cfg.pts.map(p=>p[1]);
@@ -96,12 +108,21 @@ for(const [key,file] of Object.entries(mapping)){
     }
   });
 }
-test('Pilote : boxing d’origine GlassOn, aucune rotation du bloc historique',()=>{
-  assert.ok(Math.abs(SHAPES.pilote.defA - 53)<0.02);
-  assert.ok(Math.abs(SHAPES.pilote.defB - 35.72)<0.02);
-  assert.ok(SHAPES.pilote.pts[0][0]>0,'orientation canonique OMA conservée');
+test('Pilote : retour intégral à la forme d’avant GlassOn (54 x 48 mm, 72 points)',()=>{
+  assert.equal(SHAPES.pilote.label,'Pilote');
+  assert.equal(SHAPES.pilote.defA,54);
+  assert.equal(SHAPES.pilote.defB,48);
+  assert.equal(SHAPES.pilote.pts.length,72);
+  assert.equal(SHAPES.pilote.omaSource,undefined);
+  assert.deepEqual(toNative(SHAPES.pilote.pts),toNative(original.pilote.pts));
   assert.match(html,/if \(cfg\.omaSource && side === 'og'\) \{ cfg = cfg\.og; \}/);
   assert.match(html,/<script src="oma-shapes\.js"><\/script>/);
+});
+test('Le repère OMA est conforme ISO 16284 et aucun label OD/OG n’est permuté',()=>{
+  assert.match(html,/x = \(side === 'od' \? -1 : 1\) \* raw\[i\] \* Math\.cos\(angle\)/);
+  assert.match(html,/if \(side === 'od'\) \{ pts\.reverse\(\); \}/);
+  assert.match(html,/var od = omaAsContour\(src\.od,'od',src\.n\)/);
+  assert.match(html,/var og = omaAsContour\(src\.og,'og',src\.n\)/);
 });
 test('script métier inline du calculateur : syntaxe JavaScript valide',()=>{
   const openTag = '  <script>\n  (function () {';
