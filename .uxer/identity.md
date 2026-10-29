@@ -39,7 +39,7 @@ Le choix a été validé par le demandeur après comparaison des trois pistes.
 | Navigation | Libellés explicites et états d'accès | Navigation propre à chaque outil |
 | Calculateur épaisseur | Habillage colorimétrique seulement | Navigation et saisie inchangées dans cette phase |
 | Demande / Ordonnance | Intouchable dans cette phase | Ni texte ni mise en page modifiés |
-| Clôture de caisse | Neutralité de structure | Couleurs fonctionnelles de comptage préservées |
+| Comptage de caisse | Sections 01 à 06, tables sobres, champs lisibles | Écart positif/négatif et avertissements conservent leurs couleurs métier |
 | Lentilles souples | Neutralité et lisibilité | Garde et onglets fonctionnels inchangés |
 | Campagne e-mail | Habillage sobre | Garde réglementaire et statut fermé préservés |
 | Documentation | Corps lisible, titres sobres | Contenu légal, technique et procédure conservés |
