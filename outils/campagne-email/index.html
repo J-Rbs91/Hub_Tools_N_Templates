@@ -319,7 +319,7 @@
     }
 
     /* Mesure de fréquentation : mention discrète, jamais imprimée. */
-    .mesure-note {
+    .cgu-link {
       max-width: 52ch;
       margin: 32px auto 20px;
       padding: 0 16px;
@@ -328,7 +328,7 @@
       line-height: 1.5;
       color: var(--grey, #5A7080);
     }
-    @media print { .mesure-note { display: none; } }
+    @media print { .cgu-link { display: none; } }
 
     /* UXER : identité Répertoire professionnel. Mise en forme uniquement. */
     :root {
@@ -347,7 +347,8 @@
     .topbar .back-link { color:#354e42; border-color:#b5c0b7; }
     .step { box-shadow:none; }
     .btn { border-radius:5px; }
-  </style>
+    .cgu-link a{color:var(--blue-d,#354e42);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+</style>
 </head>
 <body>
 
@@ -725,10 +726,7 @@
 
 </div>
 
-<p class="mesure-note">
-  Fréquentation de cette page mesurée de façon anonyme, sans cookie.
-  Vos saisies ne quittent jamais cet appareil.
-</p>
+<p class="cgu-link"><a href="../../cgu/">CGU</a></p>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

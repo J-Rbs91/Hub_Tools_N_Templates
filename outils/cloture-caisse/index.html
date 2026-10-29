@@ -550,15 +550,6 @@
       .comptage-total { font-size: 34px; }
     }
 
-    /* Mesure de fréquentation : mention discrète, jamais imprimée. */
-    .mesure-note {
-      max-width: 52ch;
-      margin: 6px auto 0;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    @media print { .mesure-note { display: none; } }
-
     /* UXER : identité Répertoire professionnel. Mise en forme uniquement. */
     :root {
       --blue:#425d4f;--blue-d:#354e42;--ink:#252a27;--grey:#59685e;
@@ -709,6 +700,7 @@
       .ecart-field{flex-wrap:wrap}
     }
     @media screen and (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    .site-footer a{color:var(--ec-d,#354e42);font-weight:600;text-underline-offset:3px}
   </style>
 </head>
 <body>
@@ -921,7 +913,7 @@
 
   </main>
 
-  <footer class="site-footer">Usage interne · Historique local · Fréquentation sans cookie</footer>
+  <footer class="site-footer">Usage interne · Historique local · <a href="../../cgu/">CGU</a></footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

@@ -247,7 +247,7 @@
   body.is-ios .topbar{display:none}
 
   /* Mesure de fréquentation : mention discrète, jamais imprimée. */
-  .mesure-note{
+  .cgu-link{
     max-width:52ch;
     margin:32px auto 20px;
     padding:0 16px;
@@ -256,7 +256,7 @@
     line-height:1.5;
     color:var(--grey,#5A6B7B)
   }
-  @media print{ .mesure-note{display:none!important} }
+  @media print{ .cgu-link{display:none!important} }
 
   /* Verrou d'acces. Commodite de developpement, pas une mesure de securite :
      le code est dans la source de la page et n'importe qui sachant l'ouvrir le
@@ -334,7 +334,8 @@
     .onglets { background:#e9eee7; border-radius:5px; }
     .onglets button { border-radius:4px; }
     .bloc { border-radius:5px; }
-  </style>
+    .cgu-link a{color:var(--blue-d,#354e42);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+</style>
 </head>
 <body>
 
@@ -680,10 +681,7 @@
   </div>
 </div>
 
-<p class="mesure-note">
-  Fréquentation de cette page mesurée de façon anonyme, sans cookie.
-  Vos saisies ne quittent jamais cet appareil.
-</p>
+<p class="cgu-link"><a href="../../cgu/">CGU</a></p>
 
 </div><!-- #outil -->
 

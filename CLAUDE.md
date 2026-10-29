@@ -24,8 +24,8 @@ load GoatCounter (`https://gc.zgo.at/count.js`, counting into
 `https://j-rbs-hub.goatcounter.com/count`). It sends the page's own path and nothing else:
 cookieless, no `localStorage`, no user input, no photo. Everything typed into a tool stays local
 exactly as before. Each counting page therefore allows `gc.zgo.at` in `script-src` and the
-counting host in `img-src`/`connect-src`, ships the `<script data-goatcounter…>` right before
-`</body>`, and states it in French (`.mesure-note` in a tool, the footer line on the hub).
+counting host in `img-src`/`connect-src`, and ships the `<script data-goatcounter…>` right before
+`</body>`. Public-facing disclosure is centralized in `cgu/index.html`: do not add visible counter notices to the hub or tool screens.
 **The `docs/*/index.html` pages and the maintainer-only pages (`tests/`,
 `docs/formes-types/scanner.html`) do not carry the counter** and their CSPs stay closed. All
 counting pages share one GoatCounter site, so each path is its own row in a single dashboard;
@@ -139,9 +139,9 @@ subpath (e.g. `/<repo-name>/`). Every tool includes a `← Retour` link pointing
    "Précédent" pops. Full contract, rationale and the six manual checks: `docs/navigation-retour.md`.
    `tests/navigation-retour.test.mjs` guards the structure in CI.
 9. **Visit counter** — copy the three pieces from an existing tool: the two GoatCounter hosts in
-   the CSP, the `<p class="mesure-note">` line with its style (hidden in `@media print`), and the
-   `<script data-goatcounter…>` before `</body>`. Without them the tool is invisible in the
-   dashboard, which is the whole point of counting per path.
+   the CSP and the `<script data-goatcounter…>` before `</body>`. Do not reintroduce a visible
+   tracking notice on tool screens; usage information lives exclusively in `cgu/index.html`.
+   Without the script the tool is invisible in the visit dashboard.
 
 ## Local checks (mirror CI — there are no app tests)
 

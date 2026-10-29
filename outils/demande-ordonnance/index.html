@@ -243,12 +243,12 @@
     .closing{font-size:var(--fs-micro);margin:8px 0 0;line-height:1.45}
     .sign{font-size:var(--fs-hint);margin:6px 0 0}
     /* le paragraphe d'intro et tout l'interactif sont masqués au PDF */
-    #introRow,.bar,.help,.toast,.regen,.topbar,.ios-back,.mesure-note{display:none!important}
+    #introRow,.bar,.help,.toast,.regen,.topbar,.ios-back,.cgu-link{display:none!important}
     tr,.pgrid,.pf,.sheet{break-inside:avoid}
   }
 
   /* Mesure de fréquentation : mention discrète, jamais imprimée. */
-  .mesure-note{
+  .cgu-link{
     max-width:52ch;
     margin:32px auto 20px;
     padding:0 16px;
@@ -347,7 +347,7 @@
   .ov-box{background:var(--white);border:1px solid var(--line);border-radius:5px}
   .ov-title{font-weight:650;letter-spacing:-.02em}
   .toast{background:var(--ink);border-radius:5px}
-  .mesure-note{font-size:11px;color:var(--grey);margin-top:25px}
+  .cgu-link{font-size:11px;color:var(--grey);margin-top:25px}
   .ios-back{border-radius:5px;background:var(--blue-d);box-shadow:0 4px 15px rgba(22,36,27,.18)}
 }
 @media screen and (max-width:700px){
@@ -379,6 +379,7 @@
   .eye .grp[data-field]::before{display:none!important}
   .eye .grp[data-acuity]::before{display:none!important}
 }
+  .cgu-link a{color:var(--blue-d,#354e42);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -559,9 +560,7 @@
   </div>
 </div>
 
-<p class="mesure-note">
-  Fréquentation sans cookie (GoatCounter).
-</p>
+<p class="cgu-link"><a href="../../cgu/">CGU</a></p>
 
 <script>
   /* ── Retour arrière : une couche ouverte se ferme sur le geste retour ────────

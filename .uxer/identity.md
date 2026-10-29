@@ -23,7 +23,7 @@ Le choix a été validé par le demandeur après comparaison des trois pistes.
 2. Un outil = un intitulé et une fonction très courte sur l'accueil. Coût : détails dans les pages internes.
 3. Une seule couleur d'accent feutrée pour les actions et le focus. Coût : couleurs de catégorie conservées uniquement si elles ont un sens métier.
 4. Pas d'animation décorative persistante. Coût : moins de mouvement.
-5. L'information de confidentialité reste accessible sans être répétée dans chaque carte. Coût : une mention de pied de page nécessaire.
+5. Les informations relatives à la mesure de fréquentation figurent dans les CGU, accessibles depuis le hub et les outils. Aucun avis de suivi n'est affiché dans les écrans métier.
 
 ## 5. Signatures
 | Signature | Nature | Surfaces | Absente si |
