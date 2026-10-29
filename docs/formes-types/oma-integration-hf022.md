@@ -1,63 +1,55 @@
-# HF-022 — correspondances OMA du calculateur d'épaisseur
+# HF-022 / HF-024 — correspondance des contours du calculateur
 
-Les neuf **noms et identifiants** de formes du hub restent inchangés. Les sept
-références OMA déjà présentées, plus la référence Pilote GlassOn, remplacent les
-géométries correspondantes dans le **moteur du calculateur** : épaisseurs,
-diamètre de palet, vues 2D et 3D. Les formes OD et OG proviennent des relevés
-distincts des fichiers et gardent leurs rayons d'origine.
+Le sélecteur conserve exactement ses **neuf noms, clés et ordre**. Après HF-024
+(seconde correction demandée), **sept** formes utilisent de vrais contours OMA.
+Les deux formes **Pilote** et **Hexagone** utilisent les contours historiques
+du calculateur.
 
-| Clé interne (inchangée) | Nom affiché (inchangé) | Fichier OMA utilisé | Résolution |
-| --- | --- | --- | --- |
-| rectangle | Rectangle | R360_1.oma | 360 rayons / œil |
-| rectangledoux | Rectangle doux | R360_2.oma | 360 rayons / œil |
-| carree | Carrée | R1000_1.oma | 1 000 rayons / œil |
-| pantos | Pantos | R1000_2.oma | 1 000 rayons / œil |
-| papillon | Papillon | STHKFMT.oma | 360 rayons / œil |
-| hexagone | Hexagone | **En attente : Silhouette 5586/OX** | 72 points historiques conservés |
-| ronde | Ronde | R1000_3.oma | 1 000 rayons / œil |
-| pilote | Pilote | GlassOn_Teardrop_53x35_72.oma | 1 000 rayons / œil |
-| ovale | Ovale | R360_3.oma | 360 rayons / œil |
+| Clé interne | Nom affiché | Géométrie active |
+| --- | --- | --- |
+| rectangle | Rectangle | `R360_1.oma` — 360 rayons / œil |
+| rectangledoux | Rectangle doux | `R360_2.oma` — 360 rayons / œil |
+| carree | Carrée | `R1000_1.oma` — 1 000 rayons / œil |
+| pantos | Pantos | `R1000_2.oma` — 1 000 rayons / œil |
+| papillon | Papillon | `STHKFMT.oma` — 360 rayons / œil |
+| hexagone | Hexagone | **Historique** — OMA Silhouette 5586/OX indisponible |
+| ronde | Ronde | `R1000_3.oma` — 1 000 rayons / œil |
+| pilote | Pilote | **Historique rétabli** — 54 × 48 mm, 72 points |
+| ovale | Ovale | `R360_3.oma` — 360 rayons / œil |
 
-Les associations des sept premiers fichiers sont une affectation algorithmique
-*unique* minimisant l'écart quadratique radial normalisé avec les familles
-historiques. **Elles ne prouvent pas la forme commerciale réelle** :
-certaines silhouettes d'exemple se ressemblent beaucoup ; le « Papillon »
-notamment mérite une comparaison avec une vraie monture cat-eye. Les sept
-fichiers ont été acceptés visuellement par l'utilisateur, mais cette validation
-n'indique pas une correspondance fichier-par-famille. La traçabilité explicite
-permet de corriger l'affectation si nécessaire sans renommer les familles.
+L'affectation des sept OMA aux familles a été faite par rapprochement géométrique ;
+cela ne garantit pas la représentativité d'un modèle commercial ni la compatibilité
+avec la monture d'un client. Le relevé GlassOn Teardrop reste archivé dans
+`references-oma/` comme référence mais **n'est plus importé** dans le calculateur,
+sur demande de l'utilisateur.
 
-Le fichier OMA GlassOn provient de
-https://glasson.io/assets/rimless/glasson-rimless-shape-teardrop.oma ;
-il contient les métadonnées de boxing **53,00 × 35,72 mm** et les tracés
-d'origine sur les deux côtés. Les champs de perçage sont ignorés.
+## Repères OD/OG — correction HF-024
 
-## Orientation et représentation
+Conformément à **ISO 16284, sections 5.4.9 à 5.4.12** :
 
-- Le repère interne est **temporal +X, haut +Y** ; la miniature OD applique
-  son miroir de face. Aucune rotation arbitraire de 180° liée aux anciennes
-  présentations ChatGPT.
-- Les rayons OMA sont assemblés en polygones à leur résolution native, sans
-  interpolation ou lissage. Le détecteur d'arête utilise une recherche binaire
-  sur leurs directions et l'intersection linéaire exacte.
-- Le boxing A/B proposé est calculé depuis le fichier ; les dimensions
-  restent modifiables par l'utilisateur.
-- Le gabarit Hexagone reste **l'original**, tant que le fichier constructeur
-  exact **Silhouette The Visionary 5586/OX** est inaccessible. Le calculateur
-  l'indique dans la note sous les formes et dans le titre de sa vignette.
+- les rayons des deux relevés sont lus à partir de 0°, position **3 heures**,
+  en sens trigonométrique ;
+- pour le relevé `TRCFMT=...;R;...`, ce premier rayon est côté **nasal**,
+  pour `TRCFMT=...;L;...`, il est côté **temporal**, en vue de face ;
+- le calculateur emploie le repère canonique **temporal = +X**, **haut = +Y**
+  pour chaque œil : les coordonnées X du relevé R sont réfléchies, celles
+  du relevé L ne le sont pas ;
+- les points du relevé R sont replacés dans l'ordre trigonométrique après
+  cette réflexion. Le fichier R reste affecté à **OD**, et L à **OG**.
 
-## Limites et contrôle d'atelier
+Cela corrige l'inversion de sens de HF-022 **sans faire pivoter les formes
+de 180°**. Le moteur utilise tous les rayons d'origine, sans lissage, pour
+les épaisseurs, les diamètres minimum et les vues.
 
-Ces contours sont des références numériques pour une **estimation** de
-l'épaisseur. Ils ne certifient pas la forme d'une monture client et ne
-remplacent ni un relevé de calibre ni les réglages de la meuleuse.
+Le test `tests/oma-calculateur-live.test.mjs` vérifie l'identité aux sources
+des relevés R/L, leur orientation nasal/temporal, les intersections radiales
+rapides et exhaustives, les noms inchangés ainsi que l'identité exacte du
+Pilote et de l'Hexagone avec les formes d'avant l'intégration OMA.
 
-L'utilisation et la rediffusion des tracés de fabricants peuvent être soumises
-à des droits propres. Les vérifications de provenance et d'attribution restent
-documentées dans `references-oma/NOTICE.md` et
-`THIRD-PARTY-NOTICES.md`.
+## Limites
 
-Tests de non-régression : `tests/oma-calculateur-live.test.mjs`.
-Le test vérifie les **rayons OMA exacts** des huit sources, leurs deux côtés,
-les neuf noms, l'Hexagone conservé et l'égalité des recherches d'intersection
-rapide/exhaustive sur les 120 méridiens.
+Les formes servent à une **estimation** de l'épaisseur, non à certifier
+le taillage d'une monture de client. Les fichiers sont conservés en
+provenance dans `references-oma/NOTICE.md`, avec réserves sur les droits
+industriels sous-jacents. Le contour Hexagone OMA 5586/OX ne doit pas être
+inventé à partir d'une photographie.
