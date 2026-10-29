@@ -54,6 +54,6 @@ PERFORMANCE OF THIS SOFTWARE.
     Portée :          sept fichiers de tracés des yeux R/L, prescriptions retirées
     Réserve :         droits éventuels sur les dessins de montures tiers non établis
 
-Les sept fichiers servent désormais de géométries numériques dans le calculateur d'épaisseur (HF-022). Un huitième relevé a été importé depuis l'échantillon public GlassOn Teardrop : https://glasson.io/assets/rimless/glasson-rimless-shape-teardrop.oma. **Le statut des droits de rediffusion de cet échantillon fabricant n'est pas documenté.** Les calculs restent des estimations et ne certifient pas la géométrie d'un verre client. Le texte de la licence et les précautions
+Les sept fichiers sont toujours utilisés comme géométries numériques dans le calculateur d'épaisseur (HF-024), avec les repères OD/OG corrigés suivant ISO 16284. Le relevé complémentaire GlassOn Teardrop (https://glasson.io/assets/rimless/glasson-rimless-shape-teardrop.oma) reste dans la bibliothèque de référence **mais n'est plus chargé dans le calculateur** : la silhouette Pilote historique a été restaurée. **Les droits de rediffusion du relevé GlassOn ne sont pas documentés.** Les calculs restent des estimations et ne certifient pas la géométrie d'un verre client. Le texte de la licence et les précautions
 relatives aux fichiers fabricants figurent dans
 [references-oma/NOTICE.md](docs/formes-types/references-oma/NOTICE.md).
