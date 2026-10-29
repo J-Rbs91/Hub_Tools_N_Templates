@@ -2855,9 +2855,9 @@
       if (!cfg) { return; }
       currentShape = key;
       var wrap = el('shapes'), prev = wrap.querySelector('.shape-btn.active');
-      if (prev) { prev.classList.remove('active'); }
+      if (prev) { prev.classList.remove('active'); prev.setAttribute('aria-pressed', 'false'); }
       var next = wrap.querySelector('[data-shape="' + key + '"]');
-      if (next) { next.classList.add('active'); }
+      if (next) { next.classList.add('active'); next.setAttribute('aria-pressed', 'true'); }
       // Proposer les côtes du gabarit, sans écraser une saisie manuelle.
       if (!abTouched) { el('coteA').value = cfg.defA; el('coteB').value = cfg.defB; }
       compute();
@@ -2876,6 +2876,7 @@
         btn.type = 'button';
         btn.className = 'shape-btn' + (key === currentShape ? ' active' : '');
         btn.setAttribute('data-shape', key);
+        btn.setAttribute('aria-pressed', key === currentShape ? 'true' : 'false');
         if (cfg.omaSource) { btn.title = 'Contour OMA : ' + cfg.omaSource; }
         else if (key === 'hexagone') { btn.title = 'Contour historique — OMA 5586/OX manquant'; }
         else if (key === 'pilote') { btn.title = 'Contour Pilote historique rétabli'; }
@@ -3964,6 +3965,28 @@
     compute();
     load3D();
   })();
+  </script>
+
+  <!-- Navigation par sections sans entrées d'historique supplémentaires sur Android. -->
+  <script>
+    (function () {
+      var links = document.querySelectorAll('.steps-nav a[href^="#"]');
+      Array.prototype.forEach.call(links, function (link) {
+        link.addEventListener('click', function (event) {
+          var target = document.getElementById(link.getAttribute('href').slice(1));
+          if (!target) { return; }
+          event.preventDefault();
+          target.scrollIntoView({
+            block: 'start',
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+          });
+          Array.prototype.forEach.call(links, function (item) {
+            item.removeAttribute('aria-current');
+          });
+          link.setAttribute('aria-current', 'location');
+        });
+      });
+    }());
   </script>
 
   <!-- Compteur de visites GoatCounter : chemin de la page uniquement, sans cookie,
