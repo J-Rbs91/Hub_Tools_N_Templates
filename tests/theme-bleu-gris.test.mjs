@@ -33,16 +33,16 @@ function ratio(a, b) {
 }
 
 test('palette UXER approuvée et contrastes lisibles', () => {
-  const colors = ['--blue:#445d6c;', '--blue-d:#3a525e;', '--muted-2:#6b7280;',
-    '--line:#dce6ea;', '--bg:#fafbfc;'];
+  const colors = ['--blue:#405e70;', '--blue-d:#365362;', '--muted-2:#6b7280;',
+    '--line:#dbe7eb;', '--bg:#fafbfc;'];
   for (const color of colors) assert.ok(css.includes(color), 'Jeton manquant: ' + color);
-  assert.ok(ratio('#445d6c', '#fafbfc') >= 4.5, 'Accent trop peu contrasté');
+  assert.ok(ratio('#405e70', '#fafbfc') >= 4.5, 'Accent trop peu contrasté');
   assert.ok(ratio('#626e7c', '#fafbfc') >= 4.5, 'Texte secondaire trop peu contrasté');
-  assert.ok(ratio('#ffffff', '#445d6c') >= 4.5, 'Texte du bouton insuffisamment contrasté');
+  assert.ok(ratio('#ffffff', '#405e70') >= 4.5, 'Texte du bouton insuffisamment contrasté');
 });
 
-// Référence : bleu gris atténué validé le 29/10/2026. Les accents gagnent
-// 20 % de saturation HSL relative (arrondi RVB sur 8 bits).
+// Référence : bleu acier du 31/10/2026. Le bleu gagne 20 % de saturation
+// HSL relative supplémentaire, à teinte et luminosité constantes (RVB 8 bits).
 function hsl(hex) {
   const channels = hex.match(/[a-f\d]{2}/gi).map(v => parseInt(v, 16) / 255);
   const max = Math.max(...channels), min = Math.min(...channels);
@@ -60,16 +60,16 @@ function hsl(hex) {
   return { lightness, saturation, hue };
 }
 
-test('saturation des accents augmentée de 20 % sans variation de luminosité', () => {
+test('bleu acier renforcé de 20 % sans variation de teinte ou luminosité', () => {
   const accents = [
-    ['--blue-900', '#273343', '#243b46'],
-    ['--blue-800', '#39495d', '#355361'],
-    ['--blue-d', '#3d4a5b', '#3a525e'],
-    ['--blue', '#475569', '#445d6c'],
-    ['--blue-300', '#9cabbc', '#99b4bf'],
-    ['--blue-100', '#dfe6ed', '#deeaee'],
-    ['--blue-50', '#f1f4f7', '#f0f6f8'],
-    ['--sky', '#7b8d9e', '#7897a2'],
+    ['--blue-900', '#243b46', '#213c49'],
+    ['--blue-800', '#355361', '#315565'],
+    ['--blue-d', '#3a525e', '#365362'],
+    ['--blue', '#445d6c', '#405e70'],
+    ['--blue-300', '#99b4bf', '#95b6c3'],
+    ['--blue-100', '#deeaee', '#dcebf0'],
+    ['--blue-50', '#f0f6f8', '#eff6f9'],
+    ['--sky', '#7897a2', '#7499a6'],
   ];
   for (const [token, before, after] of accents) {
     assert.ok(css.includes(token + ':' + after + ';'), 'Accent absent : ' + token);
@@ -79,19 +79,21 @@ test('saturation des accents augmentée de 20 % sans variation de luminosité', 
       'Saturation inattendue : ' + token);
     assert.ok(Math.abs(updated.lightness - original.lightness) <= .004,
       'Luminosité modifiée : ' + token);
-    assert.ok(updated.hue >= 190 && updated.hue <= 205,
-      'Teinte bleue-acier trop violacée : ' + token);
+    assert.ok(Math.abs(updated.hue - original.hue) <= 4 && updated.hue >= 188 && updated.hue <= 205,
+      'Teinte bleue-acier modifiée ou trop violacée : ' + token);
   }
-  assert.ok(css.includes('rgba(68,93,108,.42)'), 'Focus non synchronisé avec le bleu');
+  assert.ok(css.includes('rgba(64,94,112,.42)'), 'Focus non synchronisé avec le bleu');
 });
 
-test('la teinte primaire corrige le reflet violacé sans modifier la saturation', () => {
-  const previous = hsl('#44546c');
-  const steelBlue = hsl('#445d6c');
-  assert.ok(steelBlue.hue <= previous.hue - 10, 'La teinte reste trop proche du bleu violacé');
-  assert.ok(Math.abs(steelBlue.saturation - previous.saturation) <= .01);
-  assert.ok(Math.abs(steelBlue.lightness - previous.lightness) <= .004);
-  assert.ok(ratio('#ffffff', '#445d6c') >= 4.5);
+test('le bleu renforcé conserve sa teinte acier et les contrastes', () => {
+  const violetBlue = hsl('#44546c');
+  const previousSteelBlue = hsl('#445d6c');
+  const reinforcedSteelBlue = hsl('#405e70');
+  assert.ok(reinforcedSteelBlue.hue <= violetBlue.hue - 10, 'La teinte redevient violacée');
+  assert.ok(Math.abs(reinforcedSteelBlue.hue - previousSteelBlue.hue) <= 1);
+  assert.ok(Math.abs(reinforcedSteelBlue.saturation - previousSteelBlue.saturation * 1.2) <= .015);
+  assert.ok(Math.abs(reinforcedSteelBlue.lightness - previousSteelBlue.lightness) <= .004);
+  assert.ok(ratio('#ffffff', '#405e70') >= 4.5);
 });
 
 test('thème limité aux écrans, sans réécriture de l’impression métier', () => {
