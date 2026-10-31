@@ -1134,7 +1134,7 @@ body {
 
 .c-error {
   display: none;
-  margin-top: 6px;
+  margin: 0 0 var(--s-2);
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
   color: var(--red);
@@ -1144,57 +1144,31 @@ body {
 
 .c-step .modal__title:focus { outline: none; }
 
-.c-fallback {
-  border-top: 1px solid var(--line);
-  padding-top: var(--s-3);
-}
-
-.c-fallback__title {
-  font-size: var(--fs-base);
-  font-weight: var(--fw-bold);
-  color: var(--ink);
-  margin-bottom: var(--s-2);
-}
-
-.c-fallback__list {
-  margin: 0;
-  padding-left: 20px;
+.c-fail {
+  margin-top: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
   font-size: var(--fs-sm);
   color: var(--ink-2);
   line-height: 1.55;
 }
 
-.c-fallback__list li + li { margin-top: var(--s-3); }
-
-.c-fallback__list li > span:first-child { display: block; margin-bottom: 6px; }
-
-.c-fallback__btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.c-fail p { margin-bottom: var(--s-2); }
 
 .c-btn { padding: 7px 14px; font-size: var(--fs-sm); }
 
 .c-dest {
   color: var(--ink);
   overflow-wrap: anywhere;
-  user-select: all;
 }
 
 .c-copied {
-  min-height: 1.4em;
-  margin-top: var(--s-2);
+  margin-left: var(--s-2);
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
   color: var(--green-d);
-}
-
-.c-retry {
-  display: inline-block;
-  font-size: var(--fs-sm);
-  color: var(--blue-d);
-  text-decoration: underline;
 }
 
 /* ── SECTION SYNCHRO ── */

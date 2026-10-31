@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://j-rbs-hub.goatcounter.com; connect-src 'self' https://j-rbs-hub.goatcounter.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://j-rbs-hub.goatcounter.com; connect-src 'self' https://j-rbs-hub.goatcounter.com https://api.emailjs.com; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Outils internes</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -381,32 +381,30 @@
     </div>
   </div>
 
-  <!-- ── MODALE : CONTACT / RETOUR ──
-       Deux étapes dans la même fenêtre : 1) rédiger, 2) envoyer depuis sa propre
-       messagerie, avec des solutions de repli visibles si elle ne s'ouvre pas
-       (poste sans logiciel de messagerie configuré, cas fréquent en magasin). -->
+  <!-- ── MODALE : CONTACT ──
+       Même fonctionnement que le formulaire du CV : le message part en un clic
+       par EmailJS, sans ouvrir de messagerie. Le champ Email sert d'adresse de
+       réponse. -->
   <div class="modal-overlay" id="contact-modal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
 
       <div class="c-step" id="c-step-write">
-        <h2 class="modal__title" id="contact-title">Contacter le concepteur</h2>
-        <p class="modal__hint">
-          Un problème, une idée ou une question sur ces outils&nbsp;? Votre message
-          arrive par e-mail à la personne qui les crée.
-        </p>
+        <h2 class="modal__title" id="contact-title">Me contacter</h2>
+        <p class="modal__hint">Un problème, une idée ou une question sur ces outils&nbsp;? Écrivez ici, je vous réponds par e-mail.</p>
 
         <form id="contact-form" novalidate>
-          <fieldset class="c-set">
-            <legend class="field__lbl">Il s'agit de</legend>
-            <div class="c-chips">
-              <label class="c-chip"><input type="radio" name="c-type" value="Problème" checked><span>Un problème</span></label>
-              <label class="c-chip"><input type="radio" name="c-type" value="Idée"><span>Une idée</span></label>
-              <label class="c-chip"><input type="radio" name="c-type" value="Question"><span>Une question</span></label>
-            </div>
-          </fieldset>
+          <label class="field">
+            <span class="field__lbl">Nom</span>
+            <input type="text" id="c-nom" name="from_name" autocomplete="name" maxlength="100" required>
+          </label>
+
+          <label class="field">
+            <span class="field__lbl">Email</span>
+            <input type="email" id="c-email" name="from_email" autocomplete="email" maxlength="150" required>
+          </label>
 
           <fieldset class="c-set" id="c-tools">
-            <legend class="field__lbl">Sur quel outil&nbsp;? <span class="c-opt">facultatif, plusieurs choix possibles</span></legend>
+            <legend class="field__lbl">Outil concerné <span class="c-opt">facultatif</span></legend>
             <div class="c-chips">
               <label class="c-chip"><input type="checkbox" value="Page d'accueil"><span>Page d'accueil</span></label>
               <label class="c-chip"><input type="checkbox" value="Demande / Ordonnance"><span>Demande / Ordonnance</span></label>
@@ -417,47 +415,29 @@
           </fieldset>
 
           <label class="field">
-            <span class="field__lbl">Votre message</span>
-            <textarea id="c-message" rows="5" placeholder="Ce que vous faisiez, ce qui s'est passé." aria-describedby="c-msg" required></textarea>
-            <span class="field__msg c-error" id="c-msg" role="status"></span>
+            <span class="field__lbl">Message</span>
+            <textarea id="c-message" name="message" rows="5" maxlength="2000" required></textarea>
           </label>
+
+          <p class="c-error" id="c-msg" role="alert"></p>
+          <div class="c-fail" id="c-fail" hidden>
+            <p>Vous pouvez aussi écrire directement à <strong class="c-dest" id="c-dest"></strong>.</p>
+            <button type="button" class="btn btn--ghost c-btn" id="c-copy-msg">Copier le message</button>
+            <span class="c-copied" id="c-copied" role="status"></span>
+          </div>
 
           <div class="modal__actions">
             <button type="button" class="btn btn--ghost" id="cancel-contact">Annuler</button>
-            <button type="submit" class="btn btn--primary">Ouvrir ma messagerie</button>
+            <button type="submit" class="btn btn--primary" id="c-submit">Envoyer</button>
           </div>
         </form>
       </div>
 
-      <div class="c-step" id="c-step-send" hidden>
-        <h2 class="modal__title" id="c-send-title" tabindex="-1">Il reste à cliquer sur «&nbsp;Envoyer&nbsp;»</h2>
-        <p class="modal__hint">
-          Votre messagerie vient de s'ouvrir avec le message déjà écrit.
-          Vérifiez-le, puis envoyez-le comme un e-mail normal.
-        </p>
-
-        <div class="c-fallback">
-          <p class="c-fallback__title">Rien ne s'est ouvert&nbsp;?</p>
-          <ol class="c-fallback__list">
-            <li>
-              <span>Vous utilisez Gmail dans le navigateur&nbsp;:</span>
-              <a class="btn btn--ghost c-btn" id="c-gmail" href="#" target="_blank" rel="noopener noreferrer">Ouvrir dans Gmail</a>
-            </li>
-            <li>
-              <span>Autre messagerie&nbsp;: copiez le message, puis envoyez-le à <strong class="c-dest" id="c-dest"></strong></span>
-              <span class="c-fallback__btns">
-                <button type="button" class="btn btn--ghost c-btn" id="c-copy-msg">Copier le message</button>
-                <button type="button" class="btn btn--ghost c-btn" id="c-copy-dest">Copier l'adresse</button>
-              </span>
-            </li>
-          </ol>
-          <p class="c-copied" id="c-copied" role="status"></p>
-          <a class="c-retry" id="c-mailto" href="#">Réessayer d'ouvrir ma messagerie</a>
-        </div>
-
+      <div class="c-step" id="c-step-done" hidden>
+        <h2 class="modal__title" id="c-done-title" tabindex="-1">Message envoyé</h2>
+        <p class="modal__hint">Merci. La réponse arrivera à <strong class="c-dest" id="c-reply-to"></strong>.</p>
         <div class="modal__actions">
-          <button type="button" class="btn btn--ghost" id="c-edit">Modifier le message</button>
-          <button type="button" class="btn btn--primary" id="c-done">Terminé</button>
+          <button type="button" class="btn btn--primary" id="c-done">Fermer</button>
         </div>
       </div>
 
@@ -1101,45 +1081,47 @@
     if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
   </script>
 
-  <!-- ── MODALE CONTACT : prépare un e-mail, sans rien envoyer en ligne ──
-       100 % local : « Ouvrir ma messagerie » passe l'objet et le texte à la
-       messagerie de l'utilisateur (lien mailto). Le site n'envoie rien lui-même.
-       L'étape 2 propose des replis visibles (Gmail web, copie du message) car un
-       poste de magasin n'a souvent aucun logiciel de messagerie configuré, et le
-       lien mailto échoue alors sans aucun message d'erreur. -->
+  <!-- ── MODALE CONTACT : envoi par EmailJS, comme le formulaire du CV ──
+       Le message (nom, e-mail, outil, texte, nom du magasin, type d'appareil)
+       est transmis à l'API EmailJS, seul service tiers appelé par cette modale,
+       puis remis par e-mail. Appel direct à l'API REST plutôt que la
+       bibliothèque : aucun script externe à charger, seul `connect-src` est
+       ouvert à api.emailjs.com. La clé publique est publique par conception
+       (même usage que dans le navigateur avec la bibliothèque officielle). -->
   <script>
     (function contactModal() {
-      // Adresse assemblée à l'exécution plutôt qu'écrite en clair : le dépôt et la page
-      // publiée sont accessibles à tous, et une adresse littérale y est ramassée par les
-      // robots de collecte. Reconstituée seulement au moment de préparer l'e-mail.
+      var EMAILJS_URL = 'https://api.emailjs.com/api/v1.0/email/send';
+      var EMAILJS_SERVICE  = 'service_tpynp8t';
+      var EMAILJS_TEMPLATE = 'template_k8zwk94';
+      var EMAILJS_PUBLIC_KEY = 'XaKCNJspsS14ZNmOl';
+      var LS_CONTACT = 'contact-v1';   // nom et e-mail mémorisés sur cet appareil
+      // Adresse de repli assemblée à l'exécution : une adresse littérale dans une
+      // page publique est ramassée par les robots de collecte.
       var DEST = ['contact', 'panum.fr'].join(String.fromCharCode(64));
+
       var overlay = document.getElementById('contact-modal');
       var form    = document.getElementById('contact-form');
       if (!overlay || !form) { return; }
       var dialog    = overlay.querySelector('[role="dialog"]');
       var stepWrite = document.getElementById('c-step-write');
-      var stepSend  = document.getElementById('c-step-send');
+      var stepDone  = document.getElementById('c-step-done');
       var openBtn   = document.getElementById('open-contact');
       var cancelBtn = document.getElementById('cancel-contact');
+      var submitBtn = document.getElementById('c-submit');
+      var nomEl     = document.getElementById('c-nom');
+      var emailEl   = document.getElementById('c-email');
       var msgEl     = document.getElementById('c-message');
       var noteEl    = document.getElementById('c-msg');
-      var sendTitle = document.getElementById('c-send-title');
-      var gmailLink = document.getElementById('c-gmail');
-      var mailtoLnk = document.getElementById('c-mailto');
-      var destEl    = document.getElementById('c-dest');
+      var failEl    = document.getElementById('c-fail');
       var copiedEl  = document.getElementById('c-copied');
       var trigger   = null;   // bouton ayant ouvert la modale (focus rendu à la fermeture)
-      var dernier   = null;   // { objet, corps } du dernier message préparé
+      var envoiEnCours = false;
 
-      var PLACEHOLDERS = {
-        'Problème': 'Ce que vous faisiez, ce qui s\'est passé.',
-        'Idée':     'Votre idée, et ce qu\'elle vous ferait gagner.',
-        'Question': 'Votre question.'
-      };
+      document.getElementById('c-dest').textContent = DEST;
 
-      function typeChoisi() {
-        var r = form.querySelector('input[name="c-type"]:checked');
-        return r ? r.value : 'Problème';
+      function lireJSON(cle) {
+        try { return JSON.parse(localStorage.getItem(cle) || '{}') || {}; }
+        catch (err) { return {}; }
       }
 
       function outilsChoisis() {
@@ -1147,8 +1129,7 @@
           .map(function (c) { return c.value; });
       }
 
-      // Appareil et navigateur, en clair : aide à reproduire un problème. Visible
-      // dans l'e-mail avant envoi, l'utilisateur peut le retirer.
+      // Appareil et navigateur, en clair : aide à reproduire un problème.
       function appareil() {
         var ua = navigator.userAgent || '';
         var os = /iPhone|iPod/.test(ua) ? 'iPhone'
@@ -1164,43 +1145,26 @@
         return os + ', ' + nav;
       }
 
-      function preparer() {
-        var type = typeChoisi();
+      // Le modèle EmailJS du CV lit from_name, from_email et message. Le contexte
+      // du hub est donc placé dans `message` pour être lu quel que soit le modèle.
+      function texteComplet() {
         var outils = outilsChoisis();
-        // Contexte utile : nom du magasin s'il est renseigné (jamais de donnée patient).
-        var nomMag = '';
-        try { nomMag = (JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}).nom || ''; }
-        catch (err) { nomMag = ''; }
-        var objet = '[Outils magasin] ' + type + (outils.length ? ' - ' + outils.join(', ') : '');
-        var corps = (msgEl.value || '').trim() + '\n\n-----\n' +
-                    'Type : ' + type + '\n' +
-                    (outils.length ? 'Outil(s) : ' + outils.join(', ') + '\n' : '') +
-                    (nomMag ? 'Magasin : ' + nomMag + '\n' : '') +
-                    'Appareil : ' + appareil() + '\n';
-        return { objet: objet, corps: corps };
-      }
-
-      function lienMailto(m) {
-        return 'mailto:' + DEST + '?subject=' + encodeURIComponent(m.objet) +
-               '&body=' + encodeURIComponent(m.corps);
-      }
-
-      function lienGmail(m) {
-        return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(DEST) +
-               '&su=' + encodeURIComponent(m.objet) + '&body=' + encodeURIComponent(m.corps);
+        var mag = lireJSON(LS_PROFIL);
+        return '[Outils magasin]' + (outils.length ? ' Outil : ' + outils.join(', ') : '') + '\n\n' +
+               msgEl.value.trim() + '\n\n-----\n' +
+               (mag.nom ? 'Magasin : ' + mag.nom + (mag.tel ? ', ' + mag.tel : '') + '\n' : '') +
+               'Appareil : ' + appareil();
       }
 
       function setNote(msg) {
-        if (!noteEl) { return; }
         noteEl.textContent = msg || '';
         noteEl.classList.toggle('is-shown', !!msg);
       }
 
-      function montrerEtape(envoi) {
-        stepWrite.hidden = envoi;
-        stepSend.hidden = !envoi;
-        dialog.setAttribute('aria-labelledby', envoi ? 'c-send-title' : 'contact-title');
-        if (copiedEl) { copiedEl.textContent = ''; }
+      function montrerFin(fini) {
+        stepWrite.hidden = fini;
+        stepDone.hidden = !fini;
+        dialog.setAttribute('aria-labelledby', fini ? 'c-done-title' : 'contact-title');
       }
 
       function focusables() {
@@ -1214,13 +1178,16 @@
       function open(e) {
         trigger = (e && e.currentTarget) || document.activeElement || null;
         form.reset();          // repart d'un formulaire vierge à chaque ouverture
-        msgEl.placeholder = PLACEHOLDERS[typeChoisi()];
+        // Pré-remplissage : dernier nom/e-mail utilisés ici, sinon l'e-mail du magasin.
+        var memo = lireJSON(LS_CONTACT);
+        nomEl.value = memo.nom || '';
+        emailEl.value = memo.email || lireJSON(LS_PROFIL).mail || '';
         setNote('');
-        dernier = null;
-        montrerEtape(false);
+        failEl.hidden = true;
+        montrerFin(false);
         overlay.hidden = false;
         document.body.style.overflow = 'hidden';
-        msgEl.focus();
+        (nomEl.value ? (emailEl.value ? msgEl : emailEl) : nomEl).focus();
         // Même contrat que la modale « Mon magasin » : le geste retour referme.
         Couches.ouvrir('contact', close);
       }
@@ -1240,62 +1207,78 @@
         trigger = null;
       }
 
-      function copier(texte, confirmation) {
-        function ok() { copiedEl.textContent = confirmation; }
-        function ko() { copiedEl.textContent = 'Copie impossible ici : sélectionnez le texte à la main.'; }
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(texte).then(ok, ko);
-          return;
+      function verifier() {
+        if (nomEl.value.trim().length < 2) { return [nomEl, 'Indiquez votre nom.']; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+          return [emailEl, 'Indiquez une adresse e-mail valide, pour recevoir la réponse.'];
         }
-        // Repli pour les navigateurs sans API presse-papiers (ou hors HTTPS).
-        var ta = document.createElement('textarea');
-        ta.value = texte;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        stepSend.appendChild(ta);
-        ta.select();
-        var reussi = false;
-        try { reussi = document.execCommand('copy'); } catch (err) { reussi = false; }
-        stepSend.removeChild(ta);
-        if (reussi) { ok(); } else { ko(); }
+        if (msgEl.value.trim().length < 10) { return [msgEl, 'Écrivez votre message (10 caractères au moins).']; }
+        return null;
       }
 
-      form.addEventListener('change', function (e) {
-        if (e.target && e.target.name === 'c-type') { msgEl.placeholder = PLACEHOLDERS[typeChoisi()]; }
-      });
+      function copier(texte) {
+        function ok() { copiedEl.textContent = 'Message copié.'; }
+        function ko() { copiedEl.textContent = 'Copie impossible : sélectionnez le texte à la main.'; }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(texte).then(ok, ko);
+        } else { ko(); }
+      }
 
-      msgEl.addEventListener('input', function () { if (msgEl.value.trim()) { setNote(''); } });
+      form.addEventListener('input', function () { if (noteEl.textContent && !verifier()) { setNote(''); } });
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (!(msgEl.value || '').trim()) {
-          setNote('Écrivez votre message avant de continuer.');
-          msgEl.focus();
-          return;
-        }
-        dernier = preparer();
-        var href = lienMailto(dernier);
-        mailtoLnk.href = href;
-        gmailLink.href = lienGmail(dernier);
-        destEl.textContent = DEST;
-        montrerEtape(true);
-        sendTitle.focus();
-        window.location.href = href;
+        if (envoiEnCours) { return; }
+        var erreur = verifier();
+        if (erreur) { setNote(erreur[1]); erreur[0].focus(); return; }
+
+        var nom = nomEl.value.trim();
+        var email = emailEl.value.trim();
+        var outils = outilsChoisis();
+        envoiEnCours = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Envoi…';
+        setNote('');
+        failEl.hidden = true;
+
+        fetch(EMAILJS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: EMAILJS_SERVICE,
+            template_id: EMAILJS_TEMPLATE,
+            user_id: EMAILJS_PUBLIC_KEY,
+            template_params: {
+              from_name: nom,
+              from_email: email,
+              reply_to: email,
+              message: texteComplet(),
+              subject: '[Outils magasin] ' + (outils.length ? outils.join(', ') : 'Message'),
+              to_email: DEST
+            }
+          })
+        }).then(function (rep) {
+          if (!rep.ok) { throw new Error('HTTP ' + rep.status); }
+          try { localStorage.setItem(LS_CONTACT, JSON.stringify({ nom: nom, email: email })); }
+          catch (err) { /* stockage indisponible : simple confort perdu */ }
+          document.getElementById('c-reply-to').textContent = email;
+          montrerFin(true);
+          document.getElementById('c-done-title').focus();
+        }).catch(function () {
+          setNote('L\'envoi n\'a pas abouti. Vérifiez la connexion et réessayez.');
+          copiedEl.textContent = '';
+          failEl.hidden = false;
+        }).then(function () {
+          envoiEnCours = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Envoyer';
+        });
       });
 
       document.getElementById('c-copy-msg').addEventListener('click', function () {
-        if (dernier) { copier('Objet : ' + dernier.objet + '\n\n' + dernier.corps, 'Message copié. Collez-le dans un nouvel e-mail.'); }
-      });
-      document.getElementById('c-copy-dest').addEventListener('click', function () {
-        copier(DEST, 'Adresse copiée.');
-      });
-      document.getElementById('c-edit').addEventListener('click', function () {
-        montrerEtape(false);
-        msgEl.focus();
+        copier('De : ' + nomEl.value.trim() + ' <' + emailEl.value.trim() + '>\n\n' + texteComplet());
       });
       document.getElementById('c-done').addEventListener('click', demanderFermeture);
-
       if (openBtn)   { openBtn.addEventListener('click', open); }
       if (cancelBtn) { cancelBtn.addEventListener('click', demanderFermeture); }
       overlay.addEventListener('click', function (e) { if (e.target === overlay) { demanderFermeture(); } });

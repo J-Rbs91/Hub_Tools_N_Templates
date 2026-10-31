@@ -1,5 +1,5 @@
-# Retain every default detection rule. Only these two deliberately public,
-# browser-side DRAFT_KEY declarations are exempt from generic-api-key findings.
+# Retain every default detection rule. Only these deliberately public,
+# browser-side declarations are exempt from generic-api-key findings.
 # Any other secret in these files or elsewhere remains detectable.
 [extend]
 useDefault = true
@@ -13,3 +13,10 @@ id = "generic-api-key"
   regexTarget = "line"
   paths = ['''^outils/(?:demande-ordonnance|cloture-caisse)/index\.html$''']
   regexes = ['''\b(?:var|let|const)\s+DRAFT_KEY\s*=''']
+
+  [[rules.allowlists]]
+  description = "EmailJS public key of the hub Contact form: public by design, sent by every browser"
+  condition = "AND"
+  regexTarget = "line"
+  paths = ['''^index\.html$''']
+  regexes = ['''\b(?:var|let|const)\s+EMAILJS_PUBLIC_KEY\s*=''']
