@@ -33,12 +33,12 @@ function ratio(a, b) {
 }
 
 test('palette UXER approuvée et contrastes lisibles', () => {
-  const colors = ['--blue:#44546c;', '--blue-d:#3a4a5e;', '--muted-2:#6b7280;',
-    '--line:#dce3ea;', '--bg:#fafbfc;'];
+  const colors = ['--blue:#445d6c;', '--blue-d:#3a525e;', '--muted-2:#6b7280;',
+    '--line:#dce6ea;', '--bg:#fafbfc;'];
   for (const color of colors) assert.ok(css.includes(color), 'Jeton manquant: ' + color);
-  assert.ok(ratio('#44546c', '#fafbfc') >= 4.5, 'Accent trop peu contrasté');
+  assert.ok(ratio('#445d6c', '#fafbfc') >= 4.5, 'Accent trop peu contrasté');
   assert.ok(ratio('#626e7c', '#fafbfc') >= 4.5, 'Texte secondaire trop peu contrasté');
-  assert.ok(ratio('#ffffff', '#44546c') >= 4.5, 'Texte du bouton insuffisamment contrasté');
+  assert.ok(ratio('#ffffff', '#445d6c') >= 4.5, 'Texte du bouton insuffisamment contrasté');
 });
 
 // Référence : bleu gris atténué validé le 29/10/2026. Les accents gagnent
@@ -48,19 +48,28 @@ function hsl(hex) {
   const max = Math.max(...channels), min = Math.min(...channels);
   const lightness = (max + min) / 2;
   const saturation = max === min ? 0 : (max - min) / (1 - Math.abs(2 * lightness - 1));
-  return { lightness, saturation };
+  const [r, g, b] = channels;
+  const delta = max - min;
+  let hue = 0;
+  if (delta !== 0) {
+    if (max === r) hue = ((g - b) / delta) % 6;
+    else if (max === g) hue = (b - r) / delta + 2;
+    else hue = (r - g) / delta + 4;
+    hue = (hue * 60 + 360) % 360;
+  }
+  return { lightness, saturation, hue };
 }
 
 test('saturation des accents augmentée de 20 % sans variation de luminosité', () => {
   const accents = [
-    ['--blue-900', '#273343', '#243346'],
-    ['--blue-800', '#39495d', '#354961'],
-    ['--blue-d', '#3d4a5b', '#3a4a5e'],
-    ['--blue', '#475569', '#44546c'],
-    ['--blue-300', '#9cabbc', '#99abbf'],
-    ['--blue-100', '#dfe6ed', '#dee6ee'],
-    ['--blue-50', '#f1f4f7', '#f0f4f8'],
-    ['--sky', '#7b8d9e', '#788da2'],
+    ['--blue-900', '#273343', '#243b46'],
+    ['--blue-800', '#39495d', '#355361'],
+    ['--blue-d', '#3d4a5b', '#3a525e'],
+    ['--blue', '#475569', '#445d6c'],
+    ['--blue-300', '#9cabbc', '#99b4bf'],
+    ['--blue-100', '#dfe6ed', '#deeaee'],
+    ['--blue-50', '#f1f4f7', '#f0f6f8'],
+    ['--sky', '#7b8d9e', '#7897a2'],
   ];
   for (const [token, before, after] of accents) {
     assert.ok(css.includes(token + ':' + after + ';'), 'Accent absent : ' + token);
@@ -70,8 +79,19 @@ test('saturation des accents augmentée de 20 % sans variation de luminosité', 
       'Saturation inattendue : ' + token);
     assert.ok(Math.abs(updated.lightness - original.lightness) <= .004,
       'Luminosité modifiée : ' + token);
+    assert.ok(updated.hue >= 190 && updated.hue <= 205,
+      'Teinte bleue-acier trop violacée : ' + token);
   }
-  assert.ok(css.includes('rgba(68,84,108,.42)'), 'Focus non synchronisé avec le bleu');
+  assert.ok(css.includes('rgba(68,93,108,.42)'), 'Focus non synchronisé avec le bleu');
+});
+
+test('la teinte primaire corrige le reflet violacé sans modifier la saturation', () => {
+  const previous = hsl('#44546c');
+  const steelBlue = hsl('#445d6c');
+  assert.ok(steelBlue.hue <= previous.hue - 10, 'La teinte reste trop proche du bleu violacé');
+  assert.ok(Math.abs(steelBlue.saturation - previous.saturation) <= .01);
+  assert.ok(Math.abs(steelBlue.lightness - previous.lightness) <= .004);
+  assert.ok(ratio('#ffffff', '#445d6c') >= 4.5);
 });
 
 test('thème limité aux écrans, sans réécriture de l’impression métier', () => {
