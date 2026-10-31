@@ -44,7 +44,7 @@ test('palette UXER approuvée et contrastes lisibles', () => {
 // Référence : bleu gris atténué validé le 29/10/2026. Les accents gagnent
 // 20 % de saturation HSL relative (arrondi RVB sur 8 bits).
 function hsl(hex) {
-  const channels = hex.match(/[a-f\\d]{2}/gi).map(v => parseInt(v, 16) / 255);
+  const channels = hex.match(/[a-f\d]{2}/gi).map(v => parseInt(v, 16) / 255);
   const max = Math.max(...channels), min = Math.min(...channels);
   const lightness = (max + min) / 2;
   const saturation = max === min ? 0 : (max - min) / (1 - Math.abs(2 * lightness - 1));
