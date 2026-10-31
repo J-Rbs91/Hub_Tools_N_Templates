@@ -381,52 +381,86 @@
     </div>
   </div>
 
-  <!-- ── MODALE : CONTACT / RETOUR ── -->
+  <!-- ── MODALE : CONTACT / RETOUR ──
+       Deux étapes dans la même fenêtre : 1) rédiger, 2) envoyer depuis sa propre
+       messagerie, avec des solutions de repli visibles si elle ne s'ouvre pas
+       (poste sans logiciel de messagerie configuré, cas fréquent en magasin). -->
   <div class="modal-overlay" id="contact-modal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
-      <h2 class="modal__title" id="contact-title">Un retour à me faire&nbsp;?</h2>
-      <p class="modal__hint">
-        Remarque, suggestion, bug… tout est utile. Au clic sur «&nbsp;Préparer l'e-mail&nbsp;»,
-        votre messagerie s'ouvre avec le message déjà rédigé&nbsp;: rien n'est envoyé sans
-        votre validation et aucune donnée ne transite par ce site.
-      </p>
 
-      <form id="contact-form" novalidate>
-        <label class="field">
-          <span class="field__lbl">Objet <span class="field__opt">facultatif</span></span>
-          <input type="text" id="c-objet" placeholder="Ex. : suggestion pour la clôture de caisse" autocomplete="off">
-        </label>
+      <div class="c-step" id="c-step-write">
+        <h2 class="modal__title" id="contact-title">Contacter le concepteur</h2>
+        <p class="modal__hint">
+          Un problème, une idée ou une question sur ces outils&nbsp;? Votre message
+          arrive par e-mail à la personne qui les crée.
+        </p>
 
-        <div class="c-group">
-          <span class="field__lbl" id="c-tools-lbl">Outil concerné <span class="field__opt">facultatif · choix multiple</span></span>
-          <div class="cd" id="c-tools">
-            <button type="button" class="cd-toggle" id="c-tools-toggle"
-                    aria-haspopup="true" aria-expanded="false"
-                    aria-controls="c-tools-panel" aria-labelledby="c-tools-lbl c-tools-summary">
-              <span class="cd-toggle__txt is-placeholder" id="c-tools-summary">Indiquer le ou les outils…</span>
-              <span class="cd-toggle__chev" aria-hidden="true">&#9662;</span>
-            </button>
-            <div class="cd-panel" id="c-tools-panel" role="group" aria-labelledby="c-tools-lbl" hidden>
-              <label class="cd-opt"><input type="checkbox" value="Hub d'accueil"> Hub d'accueil</label>
-              <label class="cd-opt"><input type="checkbox" value="Demande / Ordonnance"> Demande / Ordonnance</label>
-              <label class="cd-opt"><input type="checkbox" value="Clôture de caisse"> Clôture de caisse</label>
-              <label class="cd-opt"><input type="checkbox" value="Épaisseur des verres"> Épaisseur des verres</label>
-              <label class="cd-opt"><input type="checkbox" value="Campagne e-mail"> Campagne e-mail</label>
+        <form id="contact-form" novalidate>
+          <fieldset class="c-set">
+            <legend class="field__lbl">Il s'agit de</legend>
+            <div class="c-chips">
+              <label class="c-chip"><input type="radio" name="c-type" value="Problème" checked><span>Un problème</span></label>
+              <label class="c-chip"><input type="radio" name="c-type" value="Idée"><span>Une idée</span></label>
+              <label class="c-chip"><input type="radio" name="c-type" value="Question"><span>Une question</span></label>
             </div>
-          </div>
-        </div>
+          </fieldset>
 
-        <label class="field">
-          <span class="field__lbl">Votre message <span class="field__req">obligatoire</span></span>
-          <textarea id="c-message" rows="5" placeholder="Décrivez votre remarque, votre idée ou le problème rencontré…" aria-describedby="c-msg" required></textarea>
-          <span class="field__msg" id="c-msg" role="status"></span>
-        </label>
+          <fieldset class="c-set" id="c-tools">
+            <legend class="field__lbl">Sur quel outil&nbsp;? <span class="c-opt">facultatif, plusieurs choix possibles</span></legend>
+            <div class="c-chips">
+              <label class="c-chip"><input type="checkbox" value="Page d'accueil"><span>Page d'accueil</span></label>
+              <label class="c-chip"><input type="checkbox" value="Demande / Ordonnance"><span>Demande / Ordonnance</span></label>
+              <label class="c-chip"><input type="checkbox" value="Clôture de caisse"><span>Clôture de caisse</span></label>
+              <label class="c-chip"><input type="checkbox" value="Épaisseur des verres"><span>Épaisseur des verres</span></label>
+              <label class="c-chip"><input type="checkbox" value="Lentilles souples"><span>Lentilles souples</span></label>
+            </div>
+          </fieldset>
+
+          <label class="field">
+            <span class="field__lbl">Votre message</span>
+            <textarea id="c-message" rows="5" placeholder="Ce que vous faisiez, ce qui s'est passé." aria-describedby="c-msg" required></textarea>
+            <span class="field__msg c-error" id="c-msg" role="status"></span>
+          </label>
+
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" id="cancel-contact">Annuler</button>
+            <button type="submit" class="btn btn--primary">Ouvrir ma messagerie</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="c-step" id="c-step-send" hidden>
+        <h2 class="modal__title" id="c-send-title" tabindex="-1">Il reste à cliquer sur «&nbsp;Envoyer&nbsp;»</h2>
+        <p class="modal__hint">
+          Votre messagerie vient de s'ouvrir avec le message déjà écrit.
+          Vérifiez-le, puis envoyez-le comme un e-mail normal.
+        </p>
+
+        <div class="c-fallback">
+          <p class="c-fallback__title">Rien ne s'est ouvert&nbsp;?</p>
+          <ol class="c-fallback__list">
+            <li>
+              <span>Vous utilisez Gmail dans le navigateur&nbsp;:</span>
+              <a class="btn btn--ghost c-btn" id="c-gmail" href="#" target="_blank" rel="noopener noreferrer">Ouvrir dans Gmail</a>
+            </li>
+            <li>
+              <span>Autre messagerie&nbsp;: copiez le message, puis envoyez-le à <strong class="c-dest" id="c-dest"></strong></span>
+              <span class="c-fallback__btns">
+                <button type="button" class="btn btn--ghost c-btn" id="c-copy-msg">Copier le message</button>
+                <button type="button" class="btn btn--ghost c-btn" id="c-copy-dest">Copier l'adresse</button>
+              </span>
+            </li>
+          </ol>
+          <p class="c-copied" id="c-copied" role="status"></p>
+          <a class="c-retry" id="c-mailto" href="#">Réessayer d'ouvrir ma messagerie</a>
+        </div>
 
         <div class="modal__actions">
-          <button type="button" class="btn btn--ghost" id="cancel-contact">Annuler</button>
-          <button type="submit" class="btn btn--primary">Préparer l'e-mail</button>
+          <button type="button" class="btn btn--ghost" id="c-edit">Modifier le message</button>
+          <button type="button" class="btn btn--primary" id="c-done">Terminé</button>
         </div>
-      </form>
+      </div>
+
     </div>
   </div>
 
@@ -1067,11 +1101,12 @@
     if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
   </script>
 
-  <!-- ── MODALE CONTACT : prépare un e-mail via mailto, sans rien envoyer en ligne ──
-       100 % local : « Préparer l'e-mail » ouvre la messagerie de l'utilisateur avec
-       l'objet et le corps pré-remplis. Aucune donnée ne transite par le site, ce qui
-       respecte la contrainte de confidentialité du hub (pas d'appel réseau, pas de
-       service tiers, CSP inchangée). -->
+  <!-- ── MODALE CONTACT : prépare un e-mail, sans rien envoyer en ligne ──
+       100 % local : « Ouvrir ma messagerie » passe l'objet et le texte à la
+       messagerie de l'utilisateur (lien mailto). Le site n'envoie rien lui-même.
+       L'étape 2 propose des replis visibles (Gmail web, copie du message) car un
+       poste de magasin n'a souvent aucun logiciel de messagerie configuré, et le
+       lien mailto échoue alors sans aucun message d'erreur. -->
   <script>
     (function contactModal() {
       // Adresse assemblée à l'exécution plutôt qu'écrite en clair : le dépôt et la page
@@ -1081,41 +1116,92 @@
       var overlay = document.getElementById('contact-modal');
       var form    = document.getElementById('contact-form');
       if (!overlay || !form) { return; }
+      var dialog    = overlay.querySelector('[role="dialog"]');
+      var stepWrite = document.getElementById('c-step-write');
+      var stepSend  = document.getElementById('c-step-send');
       var openBtn   = document.getElementById('open-contact');
       var cancelBtn = document.getElementById('cancel-contact');
-      var objetEl   = document.getElementById('c-objet');
       var msgEl     = document.getElementById('c-message');
       var noteEl    = document.getElementById('c-msg');
+      var sendTitle = document.getElementById('c-send-title');
+      var gmailLink = document.getElementById('c-gmail');
+      var mailtoLnk = document.getElementById('c-mailto');
+      var destEl    = document.getElementById('c-dest');
+      var copiedEl  = document.getElementById('c-copied');
       var trigger   = null;   // bouton ayant ouvert la modale (focus rendu à la fermeture)
+      var dernier   = null;   // { objet, corps } du dernier message préparé
 
-      // ── Menu déroulant « Outil concerné » (choix multiple) ──
-      var cdRoot    = document.getElementById('c-tools');
-      var cdToggle  = document.getElementById('c-tools-toggle');
-      var cdPanel   = document.getElementById('c-tools-panel');
-      var cdSummary = document.getElementById('c-tools-summary');
-      var PLACEHOLDER = 'Indiquer le ou les outils…';
+      var PLACEHOLDERS = {
+        'Problème': 'Ce que vous faisiez, ce qui s\'est passé.',
+        'Idée':     'Votre idée, et ce qu\'elle vous ferait gagner.',
+        'Question': 'Votre question.'
+      };
 
-      function cdChecks() {
-        return cdPanel ? Array.prototype.slice.call(cdPanel.querySelectorAll('input[type="checkbox"]')) : [];
+      function typeChoisi() {
+        var r = form.querySelector('input[name="c-type"]:checked');
+        return r ? r.value : 'Problème';
       }
 
-      function cdSelected() {
-        return cdChecks().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+      function outilsChoisis() {
+        return Array.prototype.slice.call(form.querySelectorAll('#c-tools input:checked'))
+          .map(function (c) { return c.value; });
       }
 
-      function cdRefresh() {
-        var sel = cdSelected();
-        cdSummary.textContent = sel.length ? sel.join(', ') : PLACEHOLDER;
-        cdSummary.classList.toggle('is-placeholder', sel.length === 0);
+      // Appareil et navigateur, en clair : aide à reproduire un problème. Visible
+      // dans l'e-mail avant envoi, l'utilisateur peut le retirer.
+      function appareil() {
+        var ua = navigator.userAgent || '';
+        var os = /iPhone|iPod/.test(ua) ? 'iPhone'
+          : (/iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) ? 'iPad'
+          : /Android/.test(ua) ? 'Android'
+          : /Windows/.test(ua) ? 'Windows'
+          : /Mac OS X|Macintosh/.test(ua) ? 'Mac'
+          : /Linux/.test(ua) ? 'Linux' : 'appareil inconnu';
+        var nav = /Edg\//.test(ua) ? 'Edge'
+          : /Firefox\/|FxiOS/.test(ua) ? 'Firefox'
+          : /Chrome\/|CriOS/.test(ua) ? 'Chrome'
+          : /Safari\//.test(ua) ? 'Safari' : 'navigateur inconnu';
+        return os + ', ' + nav;
       }
 
-      function cdOpen(o) {
-        if (!cdPanel) { return; }
-        cdPanel.hidden = !o;
-        cdToggle.setAttribute('aria-expanded', o ? 'true' : 'false');
+      function preparer() {
+        var type = typeChoisi();
+        var outils = outilsChoisis();
+        // Contexte utile : nom du magasin s'il est renseigné (jamais de donnée patient).
+        var nomMag = '';
+        try { nomMag = (JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}).nom || ''; }
+        catch (err) { nomMag = ''; }
+        var objet = '[Outils magasin] ' + type + (outils.length ? ' - ' + outils.join(', ') : '');
+        var corps = (msgEl.value || '').trim() + '\n\n-----\n' +
+                    'Type : ' + type + '\n' +
+                    (outils.length ? 'Outil(s) : ' + outils.join(', ') + '\n' : '') +
+                    (nomMag ? 'Magasin : ' + nomMag + '\n' : '') +
+                    'Appareil : ' + appareil() + '\n';
+        return { objet: objet, corps: corps };
       }
 
-      function cdIsOpen() { return cdPanel && !cdPanel.hidden; }
+      function lienMailto(m) {
+        return 'mailto:' + DEST + '?subject=' + encodeURIComponent(m.objet) +
+               '&body=' + encodeURIComponent(m.corps);
+      }
+
+      function lienGmail(m) {
+        return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(DEST) +
+               '&su=' + encodeURIComponent(m.objet) + '&body=' + encodeURIComponent(m.corps);
+      }
+
+      function setNote(msg) {
+        if (!noteEl) { return; }
+        noteEl.textContent = msg || '';
+        noteEl.classList.toggle('is-shown', !!msg);
+      }
+
+      function montrerEtape(envoi) {
+        stepWrite.hidden = envoi;
+        stepSend.hidden = !envoi;
+        dialog.setAttribute('aria-labelledby', envoi ? 'c-send-title' : 'contact-title');
+        if (copiedEl) { copiedEl.textContent = ''; }
+      }
 
       function focusables() {
         var sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
@@ -1125,30 +1211,22 @@
         });
       }
 
-      function setNote(msg) {
-        if (!noteEl) { return; }
-        noteEl.textContent = msg || '';
-        if (msg) { noteEl.classList.add('is-shown'); }
-        else { noteEl.classList.remove('is-shown'); }
-      }
-
       function open(e) {
         trigger = (e && e.currentTarget) || document.activeElement || null;
         form.reset();          // repart d'un formulaire vierge à chaque ouverture
-        cdOpen(false);
-        cdRefresh();
+        msgEl.placeholder = PLACEHOLDERS[typeChoisi()];
         setNote('');
+        dernier = null;
+        montrerEtape(false);
         overlay.hidden = false;
         document.body.style.overflow = 'hidden';
-        (objetEl || msgEl).focus();
+        msgEl.focus();
         // Même contrat que la modale « Mon magasin » : le geste retour referme.
         Couches.ouvrir('contact', close);
       }
 
-      /* Le menu « Outil concerné » n'est pas enregistré comme couche : c'est un
-         dépliant à l'intérieur de la modale, pas un écran. Échap le referme en
-         premier ; le geste retour, lui, referme la modale entière — ce que fait
-         aussi le bouton « Annuler », donc les deux retours restent d'accord. */
+      // Bouton, Échap et fond passent par la pile : le geste retour et l'interface
+      // aboutissent au même endroit (voir docs/navigation-retour.md).
       function demanderFermeture() {
         if (overlay.hidden) { return; }
         Couches.fermer();
@@ -1156,60 +1234,76 @@
 
       function close() {
         if (overlay.hidden) { return; }
-        cdOpen(false);
         overlay.hidden = true;
         document.body.style.overflow = '';
         if (trigger && typeof trigger.focus === 'function') { trigger.focus(); }
         trigger = null;
       }
 
+      function copier(texte, confirmation) {
+        function ok() { copiedEl.textContent = confirmation; }
+        function ko() { copiedEl.textContent = 'Copie impossible ici : sélectionnez le texte à la main.'; }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(texte).then(ok, ko);
+          return;
+        }
+        // Repli pour les navigateurs sans API presse-papiers (ou hors HTTPS).
+        var ta = document.createElement('textarea');
+        ta.value = texte;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        stepSend.appendChild(ta);
+        ta.select();
+        var reussi = false;
+        try { reussi = document.execCommand('copy'); } catch (err) { reussi = false; }
+        stepSend.removeChild(ta);
+        if (reussi) { ok(); } else { ko(); }
+      }
+
+      form.addEventListener('change', function (e) {
+        if (e.target && e.target.name === 'c-type') { msgEl.placeholder = PLACEHOLDERS[typeChoisi()]; }
+      });
+
+      msgEl.addEventListener('input', function () { if (msgEl.value.trim()) { setNote(''); } });
+
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-        var message = (msgEl.value || '').trim();
-        if (!message) {
-          setNote('Saisissez d’abord un message.');
+        if (!(msgEl.value || '').trim()) {
+          setNote('Écrivez votre message avant de continuer.');
           msgEl.focus();
           return;
         }
-        var objet = (objetEl.value || '').trim() || 'Retour sur les outils internes';
-        var outils = cdSelected();
-        // Contexte utile : nom du magasin s'il est renseigné (jamais de donnée patient).
-        var nomMag = '';
-        try { nomMag = (JSON.parse(localStorage.getItem(LS_PROFIL) || '{}') || {}).nom || ''; }
-        catch (err) { nomMag = ''; }
-        var corps = (outils.length ? 'Outil(s) concerné(s) : ' + outils.join(', ') + '\n\n' : '') +
-                    message + '\n\n-----\nEnvoyé depuis les outils internes' +
-                    (nomMag ? ' (' + nomMag + ')' : '') + '.';
-        var href = 'mailto:' + DEST +
-                   '?subject=' + encodeURIComponent(objet) +
-                   '&body=' + encodeURIComponent(corps);
+        dernier = preparer();
+        var href = lienMailto(dernier);
+        mailtoLnk.href = href;
+        gmailLink.href = lienGmail(dernier);
+        destEl.textContent = DEST;
+        montrerEtape(true);
+        sendTitle.focus();
         window.location.href = href;
-        setNote('Votre messagerie devrait s’ouvrir. Si rien ne se passe, écrivez-moi à ' + DEST + '.');
       });
+
+      document.getElementById('c-copy-msg').addEventListener('click', function () {
+        if (dernier) { copier('Objet : ' + dernier.objet + '\n\n' + dernier.corps, 'Message copié. Collez-le dans un nouvel e-mail.'); }
+      });
+      document.getElementById('c-copy-dest').addEventListener('click', function () {
+        copier(DEST, 'Adresse copiée.');
+      });
+      document.getElementById('c-edit').addEventListener('click', function () {
+        montrerEtape(false);
+        msgEl.focus();
+      });
+      document.getElementById('c-done').addEventListener('click', demanderFermeture);
 
       if (openBtn)   { openBtn.addEventListener('click', open); }
       if (cancelBtn) { cancelBtn.addEventListener('click', demanderFermeture); }
       overlay.addEventListener('click', function (e) { if (e.target === overlay) { demanderFermeture(); } });
 
-      // Déclencheur du menu : ouvre/ferme le panneau de cases à cocher.
-      if (cdToggle) {
-        cdToggle.addEventListener('click', function () { cdOpen(!cdIsOpen()); });
-      }
-      // Mise à jour du résumé à chaque (dé)cochage.
-      cdChecks().forEach(function (c) { c.addEventListener('change', cdRefresh); });
-      // Un clic dans la modale, hors du menu, referme le panneau.
-      overlay.addEventListener('click', function (e) {
-        if (cdIsOpen() && cdRoot && !cdRoot.contains(e.target)) { cdOpen(false); }
-      });
-
-      // Échap : referme d'abord le menu s'il est ouvert, sinon la modale.
-      // Tab / Maj+Tab confinent le focus dans la modale ouverte.
+      // Échap referme la modale. Tab / Maj+Tab confinent le focus dans la modale ouverte.
       document.addEventListener('keydown', function (e) {
         if (overlay.hidden) { return; }
-        if (e.key === 'Escape') {
-          if (cdIsOpen()) { cdOpen(false); cdToggle.focus(); } else { demanderFermeture(); }
-          return;
-        }
+        if (e.key === 'Escape') { demanderFermeture(); return; }
         if (e.key !== 'Tab') { return; }
         var foc = focusables();
         if (!foc.length) { return; }
