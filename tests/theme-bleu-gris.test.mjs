@@ -33,12 +33,45 @@ function ratio(a, b) {
 }
 
 test('palette UXER approuvée et contrastes lisibles', () => {
-  const colors = ['--blue:#475569;', '--blue-d:#3d4a5b;', '--muted-2:#6b7280;',
-    '--line:#dde3e9;', '--bg:#fafbfc;'];
+  const colors = ['--blue:#44546c;', '--blue-d:#3a4a5e;', '--muted-2:#6b7280;',
+    '--line:#dce3ea;', '--bg:#fafbfc;'];
   for (const color of colors) assert.ok(css.includes(color), 'Jeton manquant: ' + color);
-  assert.ok(ratio('#475569', '#fafbfc') >= 4.5, 'Accent trop peu contrasté');
+  assert.ok(ratio('#44546c', '#fafbfc') >= 4.5, 'Accent trop peu contrasté');
   assert.ok(ratio('#626e7c', '#fafbfc') >= 4.5, 'Texte secondaire trop peu contrasté');
-  assert.ok(ratio('#ffffff', '#475569') >= 4.5, 'Texte du bouton insuffisamment contrasté');
+  assert.ok(ratio('#ffffff', '#44546c') >= 4.5, 'Texte du bouton insuffisamment contrasté');
+});
+
+// Référence : bleu gris atténué validé le 29/10/2026. Les accents gagnent
+// 20 % de saturation HSL relative (arrondi RVB sur 8 bits).
+function hsl(hex) {
+  const channels = hex.match(/[a-f\d]{2}/gi).map(v => parseInt(v, 16) / 255);
+  const max = Math.max(...channels), min = Math.min(...channels);
+  const lightness = (max + min) / 2;
+  const saturation = max === min ? 0 : (max - min) / (1 - Math.abs(2 * lightness - 1));
+  return { lightness, saturation };
+}
+
+test('saturation des accents augmentée de 20 % sans variation de luminosité', () => {
+  const accents = [
+    ['--blue-900', '#273343', '#243346'],
+    ['--blue-800', '#39495d', '#354961'],
+    ['--blue-d', '#3d4a5b', '#3a4a5e'],
+    ['--blue', '#475569', '#44546c'],
+    ['--blue-300', '#9cabbc', '#99abbf'],
+    ['--blue-100', '#dfe6ed', '#dee6ee'],
+    ['--blue-50', '#f1f4f7', '#f0f4f8'],
+    ['--sky', '#7b8d9e', '#788da2'],
+  ];
+  for (const [token, before, after] of accents) {
+    assert.ok(css.includes(token + ':' + after + ';'), 'Accent absent : ' + token);
+    const original = hsl(before), updated = hsl(after);
+    // Les tons très clairs comportent peu de niveaux RVB : quantification tolérée.
+    assert.ok(Math.abs(updated.saturation - original.saturation * 1.2) <= .04,
+      'Saturation inattendue : ' + token);
+    assert.ok(Math.abs(updated.lightness - original.lightness) <= .004,
+      'Luminosité modifiée : ' + token);
+  }
+  assert.ok(css.includes('rgba(68,84,108,.42)'), 'Focus non synchronisé avec le bleu');
 });
 
 test('thème limité aux écrans, sans réécriture de l’impression métier', () => {
