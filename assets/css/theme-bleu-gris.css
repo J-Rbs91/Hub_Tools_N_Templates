@@ -50,7 +50,7 @@
   .tool-card__go { stroke:var(--blue-d); }
   .tool-card__badge,.badge { color:var(--grey); }
   .settings-group-heading, .settings-group-heading--divider { color:var(--blue-d); border-color:var(--line); }
-  .field input, .field textarea, .cd-toggle, .cd-panel { background:#fff; }
+  .field input, .field textarea { background:#fff; }
   :where(a, button, input, textarea, select, summary):focus-visible {
     outline-color:var(--blue);
   }

@@ -13,7 +13,8 @@ each shop fills it once via the hub's "⚙ Mon magasin" modal, and it is kept in
 `localStorage` profile (see "Shared store profile" below) that every tool reads.
 
 Hard privacy constraint: **no user data ever leaves the browser**. No cookies, no network calls
-carrying user input, and **no external resource other than the visit counter below** — no remote
+carrying user input (sole, owner-approved exception: the hub's Contact form, below), and **no
+external resource other than the visit counter below** — no remote
 webfont, no CDN, no third-party image. Typography uses the system font stack declared in `--font`;
 never add a `<link>` to a font service or a remote host to a page's CSP.
 Exports (PDF, clipboard) are generated entirely client-side. Preserve this
@@ -31,6 +32,16 @@ counting host in `img-src`/`connect-src`, and ships the `<script data-goatcounte
 counting pages share one GoatCounter site, so each path is its own row in a single dashboard;
 if the site code ever changes, update the two hosts and the `data-goatcounter` URL together on
 every counting page.
+
+**The one exception carrying user input, the Contact form** (decided by the owner on 2026-10-31,
+to match the contact form of the owner's interactive CV): the hub's "Contact" modal in
+`index.html` POSTs name, e-mail, chosen tool, message, shop name/phone and a coarse device label to
+the EmailJS REST API (`https://api.emailjs.com/api/v1.0/email/send`), which delivers it by e-mail.
+It calls the REST endpoint with `fetch` (no EmailJS script, no CDN), so only `connect-src` of
+`index.html` lists `https://api.emailjs.com`. The EmailJS public key is public by design and
+allow-listed in `.gitleaks.toml`. The e-mail field becomes the `Reply-To` of the delivered mail.
+Disclosure lives in `cgu/index.html` (section 04). No tool page sends anything to EmailJS;
+never extend this exception to patient or tool data.
 
 ## Direction visuelle UXER en vigueur (2026-10-29)
 

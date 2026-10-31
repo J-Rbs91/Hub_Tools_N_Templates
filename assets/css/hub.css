@@ -1059,83 +1059,116 @@ body {
 
 .field:focus-within .field__lbl { color: var(--blue); }
 
-/* ── MENU DÉROULANT À CHOIX MULTIPLE (outil concerné, modale contact) ──
-   Maison, sans dépendance : un bouton-déclencheur façon champ + un panneau de
-   cases à cocher qui se déploie en flux (pas d'absolu = jamais rogné par le
-   défilement de la modale, et confortable au doigt sur mobile). */
-.c-group { margin-bottom: var(--s-3); }
-
-.cd { position: relative; }
-
-.cd-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-family: inherit;
-  font-size: var(--fs-lg);
-  color: var(--ink);
-  text-align: left;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 9px 11px;
-  background: #fff;
-  cursor: pointer;
-  transition: border-color .15s ease, box-shadow .15s ease;
-}
-
-.cd-toggle:focus-visible {
-  outline: none;
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(31,111,178,.18);
-}
-
-.cd-toggle__txt {
-  flex: 1;
+/* ── MODALE CONTACT ──
+   Choix visibles d'un coup d'œil (pastilles) plutôt qu'un menu replié : on voit
+   ce qu'on peut indiquer sans rien ouvrir. La vraie case reste présente,
+   invisible mais focalisable, pour le clavier et les lecteurs d'écran ; le clic
+   passe par le libellé. */
+.c-set {
+  border: 0;
+  margin: 0 0 var(--s-3);
+  padding: 0;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.cd-toggle__txt.is-placeholder { color: var(--text-muted); }
+.c-set > legend { padding: 0; }
 
-.cd-toggle__chev {
-  flex-shrink: 0;
+.c-opt {
+  font-weight: var(--fw-medium);
   color: var(--text-muted);
-  transition: transform .15s ease;
 }
 
-.cd-toggle[aria-expanded="true"] .cd-toggle__chev { transform: rotate(180deg); }
+.c-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-.cd-panel {
-  margin-top: 6px;
-  background: #fff;
+.c-chip {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.c-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.c-chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 14px;
   border: 1.5px solid var(--border);
   border-radius: var(--r-sm);
-  padding: 6px;
-}
-
-.cd-opt {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 6px;
+  background: #fff;
   font-size: var(--fs-base);
-  color: var(--ink);
-  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  color: var(--ink-2);
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
 }
 
-.cd-opt:hover { background: var(--bg); }
+.c-chip:hover span { border-color: var(--blue-300); }
 
-.cd-opt input {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
-  accent-color: var(--blue);
-  cursor: pointer;
+.c-chip input:checked + span {
+  background: var(--blue-50);
+  border-color: var(--blue);
+  color: var(--blue-900);
+}
+
+.c-chip input:checked + span::before {
+  content: "\2713";
+  margin-right: 6px;
+  font-weight: var(--fw-black);
+}
+
+.c-chip input:focus-visible + span {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.c-error {
+  display: none;
+  margin: 0 0 var(--s-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--red);
+}
+
+.c-error.is-shown { display: block; }
+
+.c-step .modal__title:focus { outline: none; }
+
+.c-fail {
+  margin-top: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.c-fail p { margin-bottom: var(--s-2); }
+
+.c-btn { padding: 7px 14px; font-size: var(--fs-sm); }
+
+.c-dest {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.c-copied {
+  margin-left: var(--s-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--green-d);
 }
 
 /* ── SECTION SYNCHRO ── */
