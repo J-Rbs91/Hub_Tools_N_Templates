@@ -762,12 +762,6 @@
     if(titre) titre.textContent=correctionTitle();
     const printIntro=document.getElementById('print-intro');
     if(printIntro) printIntro.textContent=val('intro');
-    const nouvelleSuite=document.getElementById('suite-nouvelle');
-    if(nouvelleSuite){
-      const dejaDemandee=chk('o_nouvelle');
-      nouvelleSuite.hidden=dejaDemandee;
-      if(dejaDemandee) nouvelleSuite.querySelector('input').checked=false;
-    }
   }
   function refreshIntro(){
     const ta=document.querySelector('[data-k="intro"]');
@@ -801,11 +795,9 @@
     const items=[
       ['s_equip',"Équipement délivré / en cours"],
       ['s_attente',"Attente d'approbation du Dr"],
-      ['s_rdv',"Demande de RDV"]
+      ['s_rdv',"Demande de RDV"],
+      ['s_nouvelle',"Nouvelle ordonnance"]
     ];
-    if(!chk('o_nouvelle')){
-      items.push(['s_nouvelle',"Nouvelle ordonnance"]);
-    }
     return items;
   }
   function suiteList(){return checkedList(suiteItems());}
