@@ -1,211 +1,116 @@
-# Hub Outils Internes
+<div align="center">
+  <img src=".github/readme-hero.svg" alt="Répertoire professionnel. Vos outils. Optique et activité magasin." width="1000">
+</div>
 
-## Direction UXER actuelle
+<p align="center">
+  <a href="https://j-rbs91.github.io/Hub_Tools_N_Templates/"><strong>Accéder au hub</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#01--outils-disponibles">Les outils</a>
+  &nbsp;·&nbsp;
+  <a href="#03--données-et-confidentialité">Confidentialité</a>
+  &nbsp;·&nbsp;
+  <a href="#05--développement-et-déploiement">Documentation technique</a>
+</p>
 
-La direction retenue est **Répertoire professionnel** (03). Fond clair quasi neutre, liste numérotée, séparateurs fins, vocabulaire court et accent **bleu gris atténué** (#475569). Les règles de continuité vivent dans [l'identité UXER](.uxer/identity.md).
+Un répertoire d'outils pour le travail quotidien en magasin d'optique : courriers, clôture de caisse, calculs optiques et fonctions en cours de mise au point.
 
-La page d'accueil charge `assets/css/hub.css` puis `assets/css/repertoire.css`, suivis de **`assets/css/theme-bleu-gris.css`**. Les outils restent fonctionnellement autonomes, mais chargent cette même feuille *après* leur CSS inline pour uniformiser les couleurs. Les couleurs de statuts (erreur, avertissement, succès) ne sont pas remplacées. L'outil **Demande / Ordonnance** dispose ensuite d'une refonte dédiée de son interface de saisie, sans changement des générateurs Gmail et PDF. La navigation et la saisie du calculateur d'épaisseur ont une refonte UXER dédiée : sections Forme, Cotes, Type de verre, Prise de mesure, Affichage 3D et Vues d'analyse, sans changement du moteur optique.
-
-
-Site statique d'outils internes destiné aux magasins d'optique. Chaque magasin renseigne ses
-coordonnées **une seule fois** via le bouton « ⚙ Mon magasin » du hub : nom, adresse, téléphone
-et e-mail sont alors stockés localement dans le navigateur et réutilisés par tous les outils.
-Aucune configuration côté code n'est nécessaire pour déployer dans un nouveau magasin.
-
-Déployé via GitHub Pages, à l'adresse `https://<utilisateur>.github.io/<nom-du-depot>/`.
-
----
-
-## Outils disponibles
-
-| Outil | Description | Statut |
-|---|---|---|
-| [Demande / Ordonnance](outils/demande-ordonnance/) | Formulaire de demande au médecin (modification de prescription, CR adaptation lentilles, renouvellement…) avec export PDF et copie Gmail | Disponible |
-| [Clôture de caisse](outils/cloture-caisse/) | Comptage de fin de journée (pièces, billets, paiements électroniques), écart vs logiciel métier, reprise du comptage de la veille, historique local | Disponible |
-| [Épaisseur des verres](outils/epaisseur-verres/) | Calcul OD/OG à partir de sept contours OMA réels (360 à 1 000 rayons/œil), repères nasal/temporal corrigés (ISO 16284) ; Pilote et Hexagone sur leurs contours historiques, noms des neuf formes inchangés, cotes A/B/D et 3D | Disponible |
-| [Campagne e-mail](outils/campagne-email/) | CRM simplifié : modèle CSV fourni, import de la liste d'adresses vérifiées, rédaction du message avec variables de personnalisation, suivi des envois contact par contact, liste d'exclusion persistante | **Bientôt** — annoncé mais non ouvert |
-
-> **Campagne e-mail — pourquoi l'outil n'est pas ouvert.** Il est terminé et testé, mais écrire à une
-> liste de clients engage la responsabilité du magasin (consentement, désinscription, durée de
-> conservation, et surtout **aucune donnée de santé dans un message commercial**). La carte du hub
-> l'annonce en état « Bientôt » sans lien d'accès ; la page reste joignable par son URL directe pour
-> évaluation, et affiche un bandeau qui le rappelle. Les règles sont réunies dans
-> [`docs/rgpd-mailing/`](docs/rgpd-mailing/), accessible depuis la section « Aide & documents » du
-> hub. Pour ouvrir l'outil : envelopper le titre de la carte dans un lien `.tool-card__link` vers
-> `outils/campagne-email/`, ajouter le chevron `.tool-card__go`, retirer le badge « Bientôt » et la
-> classe `tool-card--soon`, puis retirer le bandeau de la page de l'outil.
-
-> **Profil magasin** — un profil partagé (clé `localStorage` `profil-magasin-v1`, contenant nom,
-> adresse, téléphone et e-mail) renseigné une fois sur le hub pré-remplit l'en-tête de la
-> Demande/Ordonnance. La réserve de monnaie et le fond de caisse cible sont mémorisés séparément par
-> la Clôture de caisse (clés `cloture-fond-v1` et `cloture-fond-cible-v1`). Comme `localStorage` est propre à chaque navigateur/poste, les données
-> d'un magasin ne se mélangent jamais avec celles d'un autre — mais elles ne se partagent pas non
-> plus entre deux postes d'un même magasin, sauf si la synchronisation Drive ci-dessous est activée.
-
-### Deux façons d'enregistrer le magasin (au choix, facultatives)
-
-Aucune n'est recommandée plus que l'autre&nbsp;: l'utilisateur choisit selon sa situation. Les deux sont
-documentées avec la même transparence (ce qui se passe, ce qui est enregistré, où vivent les données).
-
-- **Façon 1 — Google Drive (partagé entre les postes)** — le hub copie le profil sur le Drive du magasin
-  via un **script Apps Script** déployé par le magasin lui-même (aucun backend du projet) ; le profil se
-  retrouve alors **automatiquement sur tous les postes** connectés au compte Google. Procédure et script
-  dans [`docs/sync-drive/`](docs/sync-drive/). **Seul le profil est synchronisé — jamais de donnée patient.**
-- **Façon 2 — fichier, sur clé USB ou ordinateur (sans Google)** — depuis « Mon magasin », on exporte
-  dans un fichier JSON le profil, les paramètres de caisse et l'historique de clôture (15 derniers jours), puis
-  on le restaure en cas de changement de poste ou de vidage du navigateur. Le paramétrage est alors
-  **propre à chaque poste** : les informations statiques (adresse…) ne demandent aucun entretien, mais
-  ce qui gagnerait à être commun n'est **pas partagé automatiquement** entre les postes. La page
-  [`docs/sauvegarde-fichier/`](docs/sauvegarde-fichier/) détaille **ce que le fichier contient** (et ce
-  qu'il ne contient jamais — aucune donnée patient) et **où vivent les données**.
+**Un site statique, sans compte à créer ni serveur applicatif à administrer.** Chaque magasin peut renseigner ses coordonnées depuis **Mon magasin**. Les outils récupèrent ensuite les informations utiles sur le même navigateur.
 
 ---
 
-## Confidentialité
+## 01 / Outils disponibles
 
-**Aucune donnée saisie ne quitte le navigateur.**
+| N° | Outil | Fonction | Accès |
+| :-- | :-- | :-- | :-- |
+| **01** | **[Demande / Ordonnance](outils/demande-ordonnance/)** | Courriers destinés aux médecins, export PDF et copie pour Gmail. | Ouvert |
+| **02** | **[Clôture de caisse](outils/cloture-caisse/)** | Comptage, comparaison avec le logiciel métier, fond de caisse et historique local. | Ouvert |
+| **03** | **[Épaisseur des verres](outils/epaisseur-verres/)** | Calcul OD/OG, choix de formes et visualisation 3D. | Ouvert |
+| **04** | **[Lentilles souples](outils/lentilles-souples/)** | Conversion lunettes/lentilles, surréfraction et recherche catalogue. | Par code, en mise au point |
+| **05** | **Campagne e-mail** | Préparation et suivi de communications clients. | Bientôt |
 
-- Zéro backend, zéro serveur, zéro base de données.
-- Aucun cookie, aucun traceur publicitaire, aucun profilage.
-- **Une mesure de fréquentation, sur l'accueil et sur les outils** : ces pages chargent
-  [GoatCounter](https://www.goatcounter.com/) pour compter leurs visites. Sans cookie, sans
-  `localStorage`, sans donnée saisie ni photo : seulement ce que la requête porte déjà (page
-  consultée, provenance, navigateur, pays). Tout part dans un seul site GoatCounter, donc un seul
-  tableau de bord où chaque page tient sa propre ligne. Les pages `docs/` n'embarquent pas le
-  compteur et leur CSP continue d'interdire toute requête tierce. L'information destinée aux
-  utilisateurs est centralisée dans [`cgu/`](cgu/) ; aucune notice de fréquentation n'est
-  affichée sur l'accueil ni sur les écrans des outils.
-- Toutes les saisies (données patient, prescriptions) restent strictement locales dans le navigateur.
-- Les exports (PDF, copie Gmail) sont générés entièrement côté client.
-- La synchronisation Drive (facultative) ne transmet que le profil du magasin, vers le Drive du
-  magasin, et jamais de donnée patient.
-- La liste de contacts de **Campagne e-mail** reste dans le navigateur du poste : elle n'est jamais
-  incluse dans la sauvegarde du profil ni dans la synchronisation Drive. Le mode d'envoi *assisté*
-  n'envoie aucune adresse ; le mode *automatique*, facultatif et à activer explicitement,
-  transmet une adresse à la fois vers le **compte Google du magasin lui-même**, via un script
-  déployé et contrôlé par le magasin ([`docs/campagne-email/`](docs/campagne-email/)).
-- **Une seule ressource externe sur tout le site, le compteur ci-dessus** : ni police distante,
-  ni CDN, ni image tierce, pas même pour la typographie (pile de polices système). Une fois la
-  page chargée, un outil fonctionne intégralement hors ligne : le compteur échoue en silence et
-  rien d'autre ne sort.
+Les trois premiers outils sont directement accessibles depuis l'accueil. **Lentilles souples** affiche un écran d'accès par code : l'outil est encore en cours de mise au point. **Campagne e-mail** reste volontairement fermé depuis le hub, le temps d'encadrer son utilisation et les exigences applicables aux communications commerciales.
 
----
+Les calculs optiques sont des **aides à la décision professionnelle**. Ils ne remplacent ni les vérifications de l'opticien ni une prescription.
 
-## Déploiement GitHub Pages
+## 02 / Mon magasin
 
-Le déploiement est automatisé par GitHub Actions (workflow `.github/workflows/deploy.yml`).
+Le bouton **Mon magasin**, en haut de l'accueil, sert à renseigner le nom, l'adresse, le téléphone et l'e-mail du magasin, ainsi que le fond de caisse. Ces réglages sont enregistrés sur le poste et réutilisés par les outils concernés.
 
-1. Sur GitHub (une seule fois) : **Settings → Pages → Build and deployment → Source = « GitHub Actions »**.
-2. Pousser sur `main` : le workflow publie le site automatiquement.
-3. Le site est disponible à `https://<utilisateur>.github.io/<nom-du-depot>/`.
+Deux solutions facultatives permettent de conserver ou retrouver le paramétrage :
 
-> Ce mode remplace le build legacy basé sur la branche (qui s'appuyait sur d'anciennes actions Node.js 20 et émettait un avertissement de dépréciation).
+| Méthode | Fonctionnement | Limite |
+| :-- | :-- | :-- |
+| **[Synchronisation Google Drive](docs/sync-drive/)** | Le magasin déploie son propre Google Apps Script pour partager son profil entre plusieurs postes. | Seul le profil magasin est synchronisé, jamais les données de patients. |
+| **[Sauvegarde par fichier](docs/sauvegarde-fichier/)** | Export et restauration d'un fichier JSON contenant les réglages et l'historique de caisse prévu par l'outil. | Transfert manuel, sans synchronisation automatique. |
 
-Le fichier `.nojekyll` à la racine désactive le traitement Jekyll et assure la compatibilité d'un site HTML/CSS/JS statique pur.
+Sans synchronisation, le profil reste **propre à chaque navigateur**. Deux ordinateurs ne partagent pas leurs réglages simplement parce qu'ils ouvrent la même adresse.
 
-> **Note :** les liens et chemins sont relatifs, ce qui les rend compatibles avec le sous-chemin `/<nom-du-depot>/` imposé par GitHub Pages.
+## 03 / Données et confidentialité
 
----
+Le fonctionnement repose principalement sur le navigateur : pas de backend applicatif du projet, pas de base de données centrale, pas de cookie publicitaire ni de CDN pour les outils. Les saisies métier, notamment les données de patients, ne sont pas envoyées à un serveur du projet.
 
-## Arborescence
+Les échanges externes existants sont explicitement délimités :
 
-```
-/
-├── index.html                   (hub — page d'accueil)
-├── .nojekyll
-├── .editorconfig                (UTF-8, LF, indentation 2 espaces, newline finale)
-├── .htmlvalidate.json           (règles de validation HTML)
-├── README.md
-├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md  LICENSE
-├── CLAUDE.md                    (consignes pour l'assistant Claude Code)
-├── assets/
-│   ├── favicon.svg
-│   └── css/
-│       └── hub.css              (styles du hub uniquement + design tokens)
-├── docs/
-│   ├── sync-drive/
-│   │   └── index.html           (procédure + script Apps Script de synchro Drive)
-│   ├── sauvegarde-fichier/
-│   │   └── index.html           (procédure « fichier » + transparence sur les données)
-│   ├── campagne-email/
-│   │   └── index.html           (procédure + script Apps Script d'envoi des campagnes)
-│   └── rgpd-mailing/
-│       └── index.html           (rappel RGPD : écrire à ses clients par e-mail)
-├── .github/
-│   ├── dependabot.yml           (maj auto des versions d'actions)
-│   ├── ISSUE_TEMPLATE/          (modèles de bug / amélioration)
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── workflows/
-│       ├── deploy.yml           (déploiement GitHub Pages)
-│       ├── ci.yml               (contrôle & hygiène)
-│       └── security.yml         (CodeQL + détection de secrets)
-└── outils/
-    ├── demande-ordonnance/
-    │   └── index.html           (outil autonome : HTML + CSS + JS inline)
-    ├── cloture-caisse/
-    │   └── index.html           (outil autonome : HTML + CSS + JS inline)
-    ├── epaisseur-verres/
-    │   └── index.html           (outil autonome : HTML + CSS + JS inline)
-    └── campagne-email/
-        └── index.html           (outil autonome : HTML + CSS + JS inline)
+- **Fréquentation :** l'accueil et les pages des outils utilisent [GoatCounter](https://www.goatcounter.com/), sans cookie, pour mesurer les visites. Le compteur ne reçoit pas le contenu des formulaires métier.
+- **Contact :** le formulaire « Contact » de l'accueil transmet le nom, l'adresse e-mail, le message et les informations de contexte prévues par le formulaire via **EmailJS**, afin de remettre le message par e-mail.
+- **Synchronisation facultative :** si elle est configurée, **Google Apps Script / Google Drive** transporte uniquement les paramètres du magasin vers l'espace Google contrôlé par le magasin.
+- **Campagnes e-mail :** les fonctions d'envoi assisté ou automatique sont distinctes du stockage local des contacts et restent soumises aux conditions d'utilisation décrites dans la documentation dédiée.
+
+Les exports PDF et les contenus copiés pour Gmail sont préparés dans le navigateur. Le traitement ultérieur d'un document exporté ou d'un message envoyé relève de l'outil choisi par l'utilisateur.
+
+Pour le détail des traitements et les règles applicables : **[CGU et confidentialité](cgu/)** · **[RGPD et campagnes e-mail](docs/rgpd-mailing/)** · **[Documentation des campagnes](docs/campagne-email/)**.
+
+## 04 / Architecture
+
+```text
+index.html                 Accueil et configuration du magasin
+assets/css/                Styles et identité visuelle commune
+outils/                    Outils métier
+  demande-ordonnance/
+  cloture-caisse/
+  epaisseur-verres/
+  lentilles-souples/
+  campagne-email/
+docs/                      Guides et procédures
+cgu/                       Conditions d'utilisation et confidentialité
+tests/                     Contrôles de comportement et de navigation
+.github/workflows/         CI, sécurité et déploiement
 ```
 
-Chaque outil est un **fichier unique autonome** : `<style>` et `<script>` sont en ligne, sans import
-de JS/CSS partagé ni bibliothèque tierce. Les outils redéclarent localement les variables de couleur
-plutôt que d'importer `hub.css`.
+**Socle :** HTML, CSS et JavaScript, sans framework, compilation ni gestionnaire de dépendances pour exécuter le site. Le stockage local utilise `localStorage`, notamment la clé commune `profil-magasin-v1`. Les pages des outils conservent leur autonomie ; certains outils disposent désormais de feuilles de style dédiées.
 
----
+La direction artistique en vigueur est **Répertoire professionnel**, documentée dans [l'identité UXER](.uxer/identity.md). Le rendu repose sur le fond `#FAFBFC`, l'encre `#283444`, l'accent bleu-gris `#405E70`, une hiérarchie typographique nette et des séparateurs fins. Les feuilles de style effectives du hub sont [hub.css](assets/css/hub.css), [repertoire.css](assets/css/repertoire.css), puis [theme-bleu-gris.css](assets/css/theme-bleu-gris.css).
 
-## Intégration continue (CI/CD)
+## 05 / Développement et déploiement
 
-Trois workflows GitHub Actions, sur push `main` et pull request :
+### Exécuter localement
 
-| Workflow | Rôle |
-|---|---|
-| `deploy.yml` | Publie le site sur GitHub Pages (actions de dernière génération). |
-| `ci.yml` | **Contrôle & hygiène** : lint des workflows (actionlint), hygiène des fichiers (espaces de fin, CRLF, newline finale), validation HTML (html-validate), vérification des liens (lychee). |
-| `security.yml` | **Sécurité** : analyse CodeQL du JS embarqué + détection de secrets (gitleaks). |
-
-Réglages partagés : `.editorconfig` (style de fichiers), `.htmlvalidate.json` (règles HTML).
-Dependabot met à jour les versions d'actions chaque semaine pour éviter les avertissements de dépréciation.
-
-### Reproduire la CI en local
+Aucune installation applicative n'est nécessaire. Pour servir les pages avec une origine locale cohérente :
 
 ```sh
-# Validation HTML (règles dans .htmlvalidate.json)
-npx --yes html-validate "**/*.html"
-
-# Hygiène des fichiers — chaque commande doit ne rien afficher :
-git grep -nIP ' +$' -- ':!*.md'   # pas d'espaces de fin (Markdown exempté)
-git grep -lIP '\r$' -- .          # pas de CRLF (LF uniquement)
-# + tout fichier non binaire doit se terminer par une newline finale
+git clone https://github.com/J-Rbs91/Hub_Tools_N_Templates.git
+cd Hub_Tools_N_Templates
+python3 -m http.server 8000
 ```
 
----
+Ouvrir ensuite **http://localhost:8000/** dans le navigateur.
 
-## Ajouter un futur outil
+### Publier
 
-1. Créer `outils/<nom-de-l-outil>/index.html` : un **fichier unique autonome** (HTML + CSS inline +
-   JS inline), sans dépendance ni bibliothèque tierce.
-2. Dans `index.html`, ajouter une ligne `<li class="tool-card">` dans
-   `<ul id="tools-grid">` : titre explicite et fonction très courte dans `.tool-card__pitch`.
-   Le numéro est automatique via CSS. Les détails restent dans l'outil ou sa documentation.
-3. Réutiliser les variables CSS définies dans `assets/css/hub.css` (`--blue`, `--blue-d`, `--ink`,
-   `--bg`…) pour la cohérence visuelle.
-4. Ajouter en haut de l'outil un lien « ← Retour » pointant vers `../../` (chemin relatif), plus le
-   bouton flottant `.ios-back` révélé sur iOS (voir les outils existants).
-5. **Rendre l'outil responsive** (`<meta name="viewport">` + règles `@media (max-width: 640px)`) : le
-   personnel l'utilise sur smartphone.
-6. Garder toutes les données côté client (voir la section Confidentialité).
-7. Committer avec le préfixe `HF-XXX — description`.
+Le site est publié par **GitHub Pages** depuis la branche `main`, via [le workflow de déploiement](.github/workflows/deploy.yml). À la première installation, sélectionner **Settings → Pages → Build and deployment → GitHub Actions**. Les changements de documentation interne ou de README ne nécessitent pas, à eux seuls, un nouveau déploiement du site.
 
----
+### Contrôler les modifications
 
-## Convention de commits
+```sh
+# Validation HTML, selon la version utilisée par le projet
+npx --yes html-validate@11.5.6 "**/*.html"
 
-Préfixe `HF-XXX` + description courte en français. Exemple :
-`HF-003 — outil Demande/Ordonnance : structure et styles`
+# Tests de navigation, lorsqu'ils sont modifiés ou concernés
+node --test tests/*.test.mjs
+```
+
+La CI prévoit également des contrôles de liens et de fichiers, de l'analyse statique et de la détection de secrets. Pour contribuer, consulter [CONTRIBUTING.md](CONTRIBUTING.md), [CLAUDE.md](CLAUDE.md) et [SECURITY.md](SECURITY.md).
 
 ---
 
-*Usage interne — Magasins d'optique*
+<sub>Outils internes · Magasins d'optique · <a href="cgu/">Conditions d'utilisation</a></sub>

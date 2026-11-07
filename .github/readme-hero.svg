@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="322" viewBox="0 0 1000 322" role="img" aria-labelledby="title desc">
+  <title id="title">Répertoire professionnel : Vos outils.</title>
+  <desc id="desc">Bannière reprenant l'identité du site : fond clair, typographie sombre, bleu gris, pictogramme de lunettes et séparateurs fins.</desc>
+  <rect width="1000" height="322" fill="#fafbfc"/>
+  <rect x="0.5" y="0.5" width="999" height="321" fill="none" stroke="#dbe7eb"/>
+  <line x1="0" y1="65" x2="1000" y2="65" stroke="#dbe7eb"/>
+  <circle cx="67" cy="33" r="17" fill="none" stroke="#405e70" stroke-width="1.5"/>
+  <g transform="translate(55 21) scale(1)" fill="none" stroke="#405e70" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/>
+    <path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>
+    <circle cx="6" cy="15" r="4"/>
+    <circle cx="18" cy="15" r="4"/>
+    <path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/>
+  </g>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif">
+    <text x="98" y="38" font-size="15" font-weight="700" fill="#283444">Outils internes</text>
+    <text x="950" y="38" font-size="12" text-anchor="end" fill="#365362">OPTIQUE / MAGASIN</text>
+
+    <text x="58" y="119" font-size="12" font-weight="700" letter-spacing="2" fill="#365362">RÉPERTOIRE PROFESSIONNEL</text>
+    <text x="54" y="210" font-size="70" font-weight="650" letter-spacing="-3" fill="#283444">Vos outils.</text>
+    <text x="58" y="243" font-size="17" fill="#626e7c">Optique · Activité magasin</text>
+
+    <line x1="58" y1="274" x2="942" y2="274" stroke="#c4d8e0"/>
+    <text x="58" y="301" font-size="12" font-weight="700" letter-spacing="1.2" fill="#365362">OUTILS DISPONIBLES</text>
+    <text x="942" y="301" text-anchor="end" font-size="12" fill="#626e7c">05 / RÉPERTOIRE</text>
+  </g>
+</svg>
