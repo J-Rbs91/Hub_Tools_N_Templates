@@ -93,7 +93,7 @@ cd Hub_Tools_N_Templates
 python3 -m http.server 8000
 ```
 
-Ouvrir ensuite **http://localhost:8000/** dans le navigateur.
+Ouvrir ensuite **`http://localhost:8000/`** dans le navigateur.
 
 ### Publier
 

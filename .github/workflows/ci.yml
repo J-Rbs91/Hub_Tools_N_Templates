@@ -83,6 +83,8 @@ jobs:
       # Reprend le job existant : aucun runner supplémentaire n'est lancé.
       - name: Contrat de palette UXER commune
         run: node --test tests/theme-bleu-gris.test.mjs
+      - name: Lisibilité du comptage de caisse
+        run: node --test tests/caisse-lisibilite.test.mjs
       - name: Convexité des gabarits de verres
         run: node --test tests/epaisseur-verres-formes.test.mjs
       - name: Références OMA et synchronisation des formes
