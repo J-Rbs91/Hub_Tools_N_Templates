@@ -581,27 +581,27 @@
         --co-bg:#eef2eb;
       }
       html{scroll-behavior:smooth}
-      body{background:var(--bg);color:var(--ink)}
+      body{background:var(--bg);color:var(--ink);font-size:20px;line-height:1.5}
       body::before{display:none;animation:none}
       .site-header{
         padding:24px max(18px,calc((100vw - 1250px)/2));
         background:var(--bg);color:var(--ink);border-bottom:1px solid var(--line);
         gap:20px;
       }
-      .site-header .back-link{order:3;padding:7px 0;border:0;border-bottom:1px solid var(--co);color:var(--ec-d);border-radius:0;font-size:12px}
+      .site-header .back-link{order:3;padding:7px 0;border:0;border-bottom:1px solid var(--co);color:var(--ec-d);border-radius:0;font-size:16px}
       .site-header .back-link:hover{background:transparent;color:var(--ink)}
       .hdr-info{min-width:210px}
-      .page-kicker{font-size:10px;letter-spacing:.11em;color:var(--ec-d);font-weight:750;margin-bottom:8px}
-      .hdr-title{font-size:clamp(24px,3vw,36px);font-weight:650;line-height:1.15;letter-spacing:-.045em}
-      .hdr-sub{margin-top:8px;color:var(--grey);font-size:12px;opacity:1}
-      .hdr-date{color:var(--grey);opacity:1;font-size:12px;font-weight:550;margin-left:auto}
+      .page-kicker{font-size:14px;letter-spacing:.11em;color:var(--ec-d);font-weight:750;margin-bottom:8px}
+      .hdr-title{font-size:clamp(30px,3vw,38px);font-weight:650;line-height:1.15;letter-spacing:-.045em}
+      .hdr-sub{margin-top:8px;color:var(--grey);font-size:16px;opacity:1}
+      .hdr-date{color:var(--grey);opacity:1;font-size:16px;font-weight:550;margin-left:auto}
       main{padding:0 18px 52px;max-width:1286px}
       .cash-nav{
         display:flex;gap:1px;overflow-x:auto;scrollbar-width:thin;white-space:nowrap;
         background:var(--bg);border-bottom:1px solid var(--line);
         position:sticky;top:0;z-index:25;padding:10px 0;margin:0 0 22px;
       }
-      .cash-nav a{padding:9px 13px;text-decoration:none;color:var(--ec-d);font-size:12px;font-weight:650;border-radius:3px}
+      .cash-nav a{display:inline-flex;align-items:center;min-height:48px;padding:12px 15px;text-decoration:none;color:var(--ec-d);font-size:16px;font-weight:650;border-radius:3px}
       .cash-nav a:hover{background:#e9eee6}
       .cash-nav a:focus-visible{outline:2px solid var(--co);outline-offset:-2px}
       .grid-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
@@ -609,10 +609,10 @@
       section.block{background:var(--white);border:1px solid var(--line);border-radius:5px;box-shadow:none;overflow:hidden;min-width:0;scroll-margin-top:88px}
       .block-hdr,.block--ferraille .block-hdr,.block--papier .block-hdr,.block--elec .block-hdr,
       .block--comptage .block-hdr,.block--ecart .block-hdr,.block--history .block-hdr{
-        background:#edf0e9;border-bottom:1px solid var(--line);color:var(--ink);padding:15px 16px;
+        background:#edf0e9;border-bottom:1px solid var(--line);color:var(--ink);padding:18px 18px;
       }
-      .block-hdr h2{font-size:15px;font-weight:650;letter-spacing:-.02em;color:var(--ink)}
-      .block-hdr h2::before{font-size:10px;letter-spacing:.08em;font-weight:700;color:var(--ec-d);margin-right:13px}
+      .block-hdr h2{font-size:20px;font-weight:650;letter-spacing:-.02em;color:var(--ink)}
+      .block-hdr h2::before{font-size:14px;letter-spacing:.08em;font-weight:700;color:var(--ec-d);margin-right:13px}
       .block--ferraille .block-hdr h2::before{content:"01"}
       .block--papier .block-hdr h2::before{content:"02"}
       .block--elec .block-hdr h2::before{content:"03"}
@@ -620,62 +620,84 @@
       .block--ecart .block-hdr h2::before{content:"05"}
       .block--history .block-hdr h2::before{content:"06"}
       .block-badge{display:none}
-      .block--history .block-badge{display:inline-flex;background:transparent;border:1px solid #b7c4b8;color:var(--ec-d);font-size:10px;font-weight:650;padding:5px 9px;border-radius:3px}
-      .cnt-table thead th{padding:10px 12px;text-transform:none;font-size:11px;font-weight:650;letter-spacing:0;border-bottom:1px solid var(--line)}
-      .cnt-table tbody td{padding:7px 12px;font-size:13px;border-bottom:1px solid #edece5;background:transparent!important}
+      .block--history .block-badge{display:inline-flex;background:transparent;border:1px solid #b7c4b8;color:var(--ec-d);font-size:14px;font-weight:650;padding:5px 9px;border-radius:3px}
+      .cnt-table thead th{padding:12px 12px;text-transform:none;font-size:15px;font-weight:650;letter-spacing:0;border-bottom:1px solid var(--line)}
+      .cnt-table tbody td{padding:10px 12px;font-size:16px;border-bottom:1px solid #edece5;background:transparent!important}
       .cnt-table tbody tr:nth-child(even){background:#f7f8f4}
+      .cnt-table tbody tr:focus-within{background:#edf6f8}
       .cnt-table tbody td.td-lbl{font-weight:650}
       .cnt-table tbody td.td-r{font-weight:650;font-variant-numeric:tabular-nums}
-      .cnt-table tfoot td{padding:13px 12px;font-size:13px;background:#eef1ec;border-top:1px solid #bdc8bc;font-variant-numeric:tabular-nums}
+      .cnt-table tfoot td{padding:14px 12px;font-size:16px;background:#eef1ec;border-top:1px solid #bdc8bc;font-variant-numeric:tabular-nums}
       .qty-input,.amt-input,.fond-input,.ref-input{
-        min-height:42px;border:1px solid #bdc7bd;border-radius:4px;
-        background:#fff;color:var(--ink);font-size:14px;font-weight:600;
+        min-height:48px;border:1px solid #bdc7bd;border-radius:4px;
+        background:#fff;color:var(--ink);font-size:18px;font-weight:600;
       }
-      .qty-input{width:72px}
-      .amt-input{width:125px;max-width:100%}
+      .qty-input{width:82px}
+      .amt-input{width:152px;max-width:100%}
       .qty-input:focus,.amt-input:focus,.fond-input:focus,.ref-input:focus{
         outline:2px solid rgba(66,93,79,.32);outline-offset:1px;border-color:var(--co);
       }
       .fond-row{background:#f7f8f4;border-top:1px solid var(--line);padding:14px 12px;gap:8px}
-      .fond-row label,.fond-eur{color:var(--grey);font-size:12px;font-weight:650}
-      .fond-row .fond-input{background:#fff;color:var(--ink);border-color:#bdc7bd;width:94px}
+      .fond-row label,.fond-eur{color:var(--grey);font-size:16px;font-weight:650}
+      .fond-row .fond-input{background:#fff;color:var(--ink);border-color:#bdc7bd;width:126px}
       .comptage-body{padding:29px 19px 24px}
-      .comptage-lbl{font-size:11px;font-weight:650;letter-spacing:.02em;text-transform:none}
-      .comptage-total{color:var(--ec-d);font-size:clamp(34px,4vw,48px);font-weight:680;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
-      .comptage-sub{font-size:11px;color:var(--grey)}
+      .comptage-lbl{font-size:15px;font-weight:650;letter-spacing:.02em;text-transform:none}
+      .comptage-total{color:var(--ec-d);font-size:clamp(36px,4vw,48px);font-weight:680;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+      .comptage-sub{font-size:15px;color:var(--grey)}
       .comptage-breakdown{margin-top:24px;gap:12px 17px}
-      .cb-item .cb-val{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums}
-      .cb-item .cb-lbl{font-size:10px;text-transform:none;letter-spacing:0;font-weight:600}
-      .cb-sep{font-size:16px}
+      .cb-item .cb-val{font-size:20px;font-weight:650;font-variant-numeric:tabular-nums}
+      .cb-item .cb-lbl{font-size:14px;text-transform:none;letter-spacing:0;font-weight:600}
+      .cb-sep{font-size:20px}
       .ecart-body{padding:20px}
-      .ecart-field label{font-size:12px;color:var(--grey);font-weight:650}
+      .ecart-field label{font-size:16px;color:var(--grey);font-weight:650}
       .ecart-field{gap:9px}
-      .ref-input{width:123px;font-size:14px}
+      .ref-input{width:152px;font-size:18px}
       .ecart-result{background:#f3f5f0;border:1px solid var(--line);border-radius:4px;padding:14px 15px}
-      .er-lbl{font-size:12px}
-      .er-val{font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+      .er-lbl{font-size:16px}
+      .er-val{font-size:28px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
       .er-val.pos{color:#276749}
       .er-val.neg{color:#a6322d}
       .remise-alert{border-radius:4px}
-      .prefill-banner{background:#edf0e9;border:1px solid #bac7b8;border-left:3px solid var(--ec);border-radius:4px;color:var(--ec-d);font-size:12px;font-weight:600;margin-bottom:18px}
-      .btn-save{background:var(--ec);border-radius:4px;padding:13px 14px;font-size:13px;font-weight:650;min-height:44px}
+      .prefill-banner{background:#edf0e9;border:1px solid #bac7b8;border-left:3px solid var(--ec);border-radius:4px;color:var(--ec-d);font-size:16px;font-weight:600;margin-bottom:18px}
+      .btn-save{background:var(--ec);border-radius:4px;padding:15px 16px;font-size:16px;font-weight:650;min-height:44px}
       .btn-save:hover{background:var(--ec-d)}
-      .history-table{min-width:950px}
-      .history-table thead th{font-size:11px;text-transform:none;letter-spacing:0;border-color:var(--line)}
-      .history-table tbody td{font-size:12px;border-color:#e7eae4;font-variant-numeric:tabular-nums}
+      .history-table{min-width:1100px}
+      .history-table thead th{font-size:15px;text-transform:none;letter-spacing:0;border-color:var(--line)}
+      .history-table tbody td{font-size:16px;border-color:#e7eae4;font-variant-numeric:tabular-nums}
       .history-table tbody tr:nth-child(even) td{background:#f6f8f4}
       .history-table .ht-pos{color:#276749}
       .history-table .ht-neg{color:#a6322d}
       .history-body{overflow-x:auto;contain:paint}
       .btn-del{border-color:#d3a3a1;color:#a6322d;font-weight:650}
-      .btn-reset{border:1px solid #bfc9bf;color:var(--ec-d);border-radius:4px;font-size:12px;font-weight:650;min-height:42px}
+      .btn-reset{border:1px solid #bfc9bf;color:var(--ec-d);border-radius:4px;font-size:16px;font-weight:650;min-height:48px}
       .btn-reset:hover{background:#f8e8e7;border-color:#d3a3a1;color:#a6322d}
       .actions-bar{margin-top:18px}
-      .site-footer{border-top:1px solid var(--line);padding:17px;font-size:11px}
+      .site-footer{border-top:1px solid var(--line);padding:17px;font-size:15px}
       .toast{border-radius:4px;box-shadow:0 3px 16px rgba(0,0,0,.14)}
       .ios-back{background:var(--ec-d);border-radius:4px;box-shadow:0 3px 13px rgba(0,0,0,.15)}
+
+      /* Lisibilité à 100 % : l'ancien affichage nécessitait un zoom navigateur à 110 %. */
+      .cash-intro{margin:20px 0 12px;color:var(--grey);font-size:16px;line-height:1.55;max-width:75ch}
+      .grid-top,.grid-bottom{align-items:start}
+      .count-table-scroll{max-width:100%;overflow-x:auto;scrollbar-width:thin}
+      .count-table-scroll .cnt-table{min-width:295px}
+      .count-table-scroll:focus-visible,.history-body:focus-visible{
+        outline:3px solid var(--blue);outline-offset:-3px;
+      }
+      .cnt-table tbody td.td-r,.cnt-table tfoot td.td-r,
+      .history-table .h-r{white-space:nowrap;font-variant-numeric:tabular-nums}
+      .fond-row{flex-wrap:wrap}
+      .fond-row label{flex:1 1 165px}
+      .fond-row .fond-input{flex:0 1 126px}
+      .comptage-total{overflow-wrap:anywhere;line-height:1.12}
+      .ecart-field label{min-width:0}
+      .ecart-field input{flex:0 1 152px;min-width:0}
+      .er-val{overflow-wrap:anywhere;text-align:right}
+      .btn-del{min-height:44px;padding:9px 12px}
+      .btn-reset{padding:12px 18px}
+      .toast{font-size:15px;line-height:1.5}
     }
-    @media screen and (max-width:990px){
+    @media screen and (max-width:1120px){
       .grid-top{grid-template-columns:repeat(2,minmax(0,1fr))}
       .block--elec{grid-column:1 / -1}
       .grid-bottom{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -686,18 +708,21 @@
       .hdr-info{order:0;flex:1 1 100%}
       .site-header .back-link{order:2}
       .hdr-date{order:1;flex:1 1 100%}
-      .hdr-title{font-size:30px}
+      .hdr-title{font-size:32px}
       main{padding:0 11px 40px}
+      .cash-intro{margin:15px 0 10px}
       .cash-nav{margin:0 -11px 14px;padding:8px 11px}
       .grid-top,.grid-bottom{grid-template-columns:minmax(0,1fr);gap:14px}
       .block--elec{grid-column:auto}
-      .cnt-table tbody td{padding:7px 10px}
-      .cnt-table thead th{padding:10px}
-      .qty-input{width:75px}
-      .block-hdr{padding:13px 14px}
-      .comptage-total{font-size:38px}
+      .cnt-table tbody td{padding:10px 7px}
+      .cnt-table thead th{padding:11px 7px}
+      .qty-input{width:72px}
+      .block-hdr{padding:16px 14px}
+      .comptage-total{font-size:clamp(28px,8vw,38px)}
       .ecart-body{padding:16px}
       .ecart-field{flex-wrap:wrap}
+      .ecart-field label{flex:1 1 100%}
+      .ecart-field input{flex:1 1 140px;max-width:calc(100% - 32px)}
     }
     @media screen and (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
     .site-footer a{color:var(--ec-d,#354e42);font-weight:600;text-underline-offset:3px}
@@ -720,6 +745,8 @@
 
   <main>
 
+    <p class="cash-intro">Saisis les quantités et les montants, puis vérifie l’écart avant d’enregistrer le comptage.</p>
+
     <nav class="cash-nav" aria-label="Accès aux sections">
       <a href="#pieces">Pièces</a>
       <a href="#billets">Billets</a>
@@ -741,10 +768,12 @@
           <h2>Pièces</h2>
           <span class="block-badge">Pi&#232;ces</span>
         </div>
-        <table class="cnt-table">
+        <div class="count-table-scroll" role="region" aria-label="Comptage des pièces, défilement horizontal" tabindex="0">
+          <table class="cnt-table">
+            <caption class="sr-only">Comptage des pièces</caption>
           <thead>
             <tr>
-              <th class="th-c">Qt&#233;</th>
+              <th class="th-c">Nombre</th>
               <th>Valeur</th>
               <th class="th-r">Total</th>
             </tr>
@@ -757,6 +786,7 @@
             </tr>
           </tfoot>
         </table>
+        </div>
       </section>
 
       <!-- LE PAPIER (billets) -->
@@ -765,10 +795,12 @@
           <h2>Billets</h2>
           <span class="block-badge">Billets</span>
         </div>
-        <table class="cnt-table">
+        <div class="count-table-scroll" role="region" aria-label="Comptage des billets, défilement horizontal" tabindex="0">
+          <table class="cnt-table">
+            <caption class="sr-only">Comptage des billets</caption>
           <thead>
             <tr>
-              <th class="th-c">Qt&#233;</th>
+              <th class="th-c">Nombre</th>
               <th>Valeur</th>
               <th class="th-r">Total</th>
             </tr>
@@ -781,6 +813,7 @@
             </tr>
           </tfoot>
         </table>
+        </div>
         <div class="fond-row">
           <label for="reserve-monnaie">R&#233;serve de monnaie</label>
           <input class="fond-input" type="number" inputmode="decimal" id="reserve-monnaie" min="0" step="0.01">
@@ -794,10 +827,12 @@
           <h2>Paiements</h2>
           <span class="block-badge">Paiements</span>
         </div>
-        <table class="cnt-table">
+        <div class="count-table-scroll" role="region" aria-label="Comptage des paiements électroniques, défilement horizontal" tabindex="0">
+          <table class="cnt-table">
+            <caption class="sr-only">Comptage des paiements électroniques</caption>
           <thead>
             <tr>
-              <th>Type</th>
+              <th>Moyen de paiement</th>
               <th class="th-r">Montant</th>
             </tr>
           </thead>
@@ -809,6 +844,7 @@
             </tr>
           </tfoot>
         </table>
+        </div>
       </section>
 
     </div>
@@ -872,7 +908,7 @@
 
           <div class="remise-alert" id="remise-alert" role="status" aria-live="polite" style="display:none"></div>
 
-          <button class="btn-save" id="btn-save" type="button">Enregistrer</button>
+          <button class="btn-save" id="btn-save" type="button">Enregistrer le comptage</button>
 
         </div>
       </section>
@@ -885,8 +921,9 @@
         <h2>Historique</h2>
         <span class="block-badge" id="history-count">0 entr&#233;e</span>
       </div>
-      <div class="history-body">
+      <div class="history-body" role="region" aria-label="Historique des clôtures, défilement horizontal" tabindex="0">
         <table class="history-table">
+          <caption class="sr-only">Historique des clôtures de caisse</caption>
           <thead>
             <tr>
               <th>Date</th>
