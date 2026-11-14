@@ -579,9 +579,12 @@
         --fe:#425d4f;--pa:#425d4f;--el:#425d4f;--co:#425d4f;--ec:#425d4f;--ec-d:#354e42;--tb:#425d4f;
         --fe-alt:#f7f8f4;--pa-alt:#f7f8f4;--el-alt:#f7f8f4;--tb-alt:#f7f8f4;
         --co-bg:#eef2eb;
+        --fs-display:32px;--fs-hero:28px;--fs-2xl:24px;--fs-xl:22px;
+        --fs-lg:20px;--fs-h3:18px;--fs-base:16px;--fs-sm:16px;
+        --fs-label:15px;--fs-hint:15px;--fs-micro:14px;--fs-nano:14px;
       }
       html{scroll-behavior:smooth}
-      body{background:var(--bg);color:var(--ink);font-size:20px;line-height:1.5}
+      body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5}
       body::before{display:none;animation:none}
       .site-header{
         padding:24px max(18px,calc((100vw - 1250px)/2));
@@ -771,20 +774,20 @@
         <div class="count-table-scroll" role="region" aria-label="Comptage des pièces, défilement horizontal" tabindex="0">
           <table class="cnt-table">
             <caption class="sr-only">Comptage des pièces</caption>
-          <thead>
-            <tr>
-              <th class="th-c">Nombre</th>
-              <th>Valeur</th>
-              <th class="th-r">Total</th>
-            </tr>
-          </thead>
-          <tbody id="coins-tbody"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2">Total pi&#232;ces</td>
-              <td class="td-r" id="total-coins">0,00&#160;&#8364;</td>
-            </tr>
-          </tfoot>
+            <thead>
+              <tr>
+                <th class="th-c">Nombre</th>
+                <th>Valeur</th>
+                <th class="th-r">Total</th>
+              </tr>
+            </thead>
+            <tbody id="coins-tbody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">Total pi&#232;ces</td>
+                <td class="td-r" id="total-coins">0,00&#160;&#8364;</td>
+              </tr>
+            </tfoot>
         </table>
         </div>
       </section>
@@ -798,20 +801,20 @@
         <div class="count-table-scroll" role="region" aria-label="Comptage des billets, défilement horizontal" tabindex="0">
           <table class="cnt-table">
             <caption class="sr-only">Comptage des billets</caption>
-          <thead>
-            <tr>
-              <th class="th-c">Nombre</th>
-              <th>Valeur</th>
-              <th class="th-r">Total</th>
-            </tr>
-          </thead>
-          <tbody id="bills-tbody"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2">Total billets</td>
-              <td class="td-r" id="total-bills">0,00&#160;&#8364;</td>
-            </tr>
-          </tfoot>
+            <thead>
+              <tr>
+                <th class="th-c">Nombre</th>
+                <th>Valeur</th>
+                <th class="th-r">Total</th>
+              </tr>
+            </thead>
+            <tbody id="bills-tbody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">Total billets</td>
+                <td class="td-r" id="total-bills">0,00&#160;&#8364;</td>
+              </tr>
+            </tfoot>
         </table>
         </div>
         <div class="fond-row">
@@ -830,19 +833,19 @@
         <div class="count-table-scroll" role="region" aria-label="Comptage des paiements électroniques, défilement horizontal" tabindex="0">
           <table class="cnt-table">
             <caption class="sr-only">Comptage des paiements électroniques</caption>
-          <thead>
-            <tr>
-              <th>Moyen de paiement</th>
-              <th class="th-r">Montant</th>
-            </tr>
-          </thead>
-          <tbody id="elec-tbody"></tbody>
-          <tfoot>
-            <tr>
-              <td>Total &#233;lectronique</td>
-              <td class="td-r" id="total-elec">0,00&#160;&#8364;</td>
-            </tr>
-          </tfoot>
+            <thead>
+              <tr>
+                <th>Moyen de paiement</th>
+                <th class="th-r">Montant</th>
+              </tr>
+            </thead>
+            <tbody id="elec-tbody"></tbody>
+            <tfoot>
+              <tr>
+                <td>Total &#233;lectronique</td>
+                <td class="td-r" id="total-elec">0,00&#160;&#8364;</td>
+              </tr>
+            </tfoot>
         </table>
         </div>
       </section>
