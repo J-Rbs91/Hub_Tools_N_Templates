@@ -45,26 +45,38 @@ test('la DVO est préremplie à 15 mm pour chaque œil dans les deux modules', (
   assert.match(html, /id="b-og-s-sph"[^>]*value="0"/);
 });
 
-test('la conversion affiche une seule cible et un seul détail théorique', () => {
+test('un seul dépliage présente les détails des deux yeux', () => {
+  const blocA = html.match(/<section class="bloc" id="bloc-a"[\s\S]*?(?=<!-- ═+ MODULE 2)/);
+  assert.ok(blocA, 'Bloc de conversion absent');
+  assert.match(blocA[0], /<details[^>]*id="a-details"[^>]*hidden>/);
+  assert.match(blocA[0], /<summary>Détails du calcul<\/summary>/);
+  assert.match(blocA[0], /id="a-details-yeux"/);
+  assert.equal((blocA[0].match(/<details\b/g) || []).length, 1);
+
   const renderA = html.match(/function renderResultatA\([\s\S]*?(?=\n  function calculerA\()/);
   const detailsA = html.match(/function renderDetailsA\([\s\S]*?(?=\n  function renderResultatA\()/);
-  assert.ok(renderA && detailsA, 'Rendu A et détails présents');
+  const calculA = html.match(/function calculerA\([\s\S]*?(?=\n  document\.getElementById\('a-calculer'\))/);
+  assert.ok(renderA && detailsA && calculA);
   assert.match(renderA[0], /'Correction normée : '/);
   assert.match(renderA[0], /formatD\(resultat\.cible\.sph\)/);
   assert.match(renderA[0], /formatRx\(resultat\.cible\)/);
-  assert.doesNotMatch(renderA[0], /ligneTier\('val-tier-1'/);
-  assert.doesNotMatch(renderA[0], /ligneTier\('val-tier-2'/);
   assert.match(renderA[0], /renderProblemes\(resultat\.problemes\)/);
   assert.match(renderA[0], /prefillC\(oeil, resultat\.cible/);
-  assert.match(renderA[0], /renderDetailsA\(resultat\)/);
-  assert.match(renderA[0], /if \(details\) \{ out\.appendChild\(details\); \}/);
-  assert.match(detailsA[0], /if \(!resultat\.theorique\) \{ return null; \}/);
-  assert.match(detailsA[0], /Détails du calcul/);
-  assert.match(detailsA[0], /ligneDetail\(dl, 'Correction théorique \(plan cornéen\)', formatRx\(resultat\.theorique\)\)/);
-  assert.equal((detailsA[0].match(/ligneDetail\(/g) || []).length, 1, 'Un seul détail affiché');
-  for (const ancien of ["'Saisie'", "'Lunettes normalisées'", "'Arrondi sphère'", "'Arrondi cylindre'", "'Correction cible'"]) {
-    assert.ok(!detailsA[0].includes(ancien), 'Ancien détail visible : ' + ancien);
-  }
+  assert.doesNotMatch(renderA[0], /renderDetailsA|el\('details'/);
+  assert.match(detailsA[0], /getElementById\('a-details-yeux'\)/);
+  assert.match(detailsA[0], /\['od', 'og'\]\.forEach/);
+  assert.match(detailsA[0], /'OD, œil droit'/);
+  assert.match(detailsA[0], /'OG, œil gauche'/);
+  assert.match(detailsA[0], /ligneDetail\(dl, 'Correction théorique \(plan cornéen\)', formatRx\(theorique\)\)/);
+  assert.match(detailsA[0], /panneau\.hidden = !contenu\.hasChildNodes\(\)/);
+  assert.match(detailsA[0], /if \(panneau\.hidden\) \{ panneau\.open = false; \}/);
+  assert.equal((detailsA[0].match(/ligneDetail\(/g) || []).length, 1);
+  assert.match(calculA[0], /var theoriquesParOeil = \{ od: null, og: null \}/);
+  assert.match(calculA[0], /theoriquesParOeil\[oeil\] = resultat\.theorique \|\| null/);
+  assert.match(calculA[0], /renderDetailsA\(theoriquesParOeil\)/);
+  assert.equal((calculA[0].match(/renderDetailsA\(/g) || []).length, 1);
+  assert.match(css, /\.detail-calcul-yeux\s*\{\s*display:\s*grid/);
+  assert.match(css, /@media \(max-width: 900px\)[\s\S]*?\.detail-calcul-yeux\s*\{\s*grid-template-columns:\s*1fr/);
 });
 
 test('identifiants uniques et relations de saisie accessibles', () => {
