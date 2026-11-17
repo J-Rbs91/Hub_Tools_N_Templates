@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1154 1154" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 208 1154 738" preserveAspectRatio="none" role="img" aria-labelledby="title desc">
   <title id="title">HUB</title>
   <desc id="desc">Monogramme HUB néo-brutaliste bleu-gris sur fond transparent.</desc>
-  <!-- Géométrie fidèle à la version validée. Le dessin occupe toute la largeur utile. -->
+  <!-- Géométrie fidèle à la version validée. Cadrage carré sans marge verticale, pour occuper presque 16 × 16 px. -->
   <g transform="translate(-50 -15)" fill="#405e70">
     <!-- H : masse orthogonale et traverse compacte. -->
     <path d="M51 324 H179 V537 H282 V324 H396 V873 H282 V655 H179 V873 H51 Z"/>
