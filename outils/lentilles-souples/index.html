@@ -782,25 +782,14 @@
     majProvenanceC();
   }
 
-  function renderDetailsA(entree, resultat) {
+  function renderDetailsA(resultat) {
+    // En l'absence de calcul valide, les erreurs sont déjà affichées dans
+    // la sortie de l'œil : ne pas ouvrir un panneau de détails vide.
+    if (!resultat.theorique) { return null; }
     var det = el('details', { class: 'detail-calcul' });
     det.appendChild(el('summary', { text: 'Détails du calcul' }));
     var dl = el('dl');
-    if (resultat.lunettes) {
-      ligneDetail(dl, 'Saisie', formatRx(entree) + ', DVO ' + formatMm(entree.vertexMm));
-      ligneDetail(dl, 'Lunettes normalisées', formatRx(resultat.lunettes));
-    }
-    if (resultat.theorique) { ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(resultat.theorique)); }
-    if (resultat.detailArrondi && resultat.detailArrondi.sph) {
-      ligneDetail(dl, 'Arrondi sphère', detailArrondiTexte(resultat.detailArrondi.sph));
-    }
-    if (resultat.detailArrondi && resultat.detailArrondi.cyl) {
-      ligneDetail(dl, 'Arrondi cylindre', detailArrondiTexte(resultat.detailArrondi.cyl));
-    }
-    if (resultat.cible) { ligneDetail(dl, 'Correction cible', formatRx(resultat.cible)); }
-    if (!dl.hasChildNodes()) {
-      ligneDetail(dl, 'Calcul non effectué', 'aucune valeur intermédiaire disponible pour cet oeil');
-    }
+    ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(resultat.theorique));
     det.appendChild(dl);
     return det;
   }
@@ -824,7 +813,8 @@
       out.appendChild(renderProblemes(resultat.problemes));
     }
 
-    out.appendChild(renderDetailsA(entree, resultat));
+    var details = renderDetailsA(resultat);
+    if (details) { out.appendChild(details); }
   }
 
   function calculerA() {
