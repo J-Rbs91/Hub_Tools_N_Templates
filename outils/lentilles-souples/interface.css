@@ -273,6 +273,12 @@ details.detail-calcul summary { cursor: pointer; color: var(--lentilles-accent-d
 details.detail-calcul dl { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr; gap: 8px 14px; margin-top: 12px; }
 details.detail-calcul dt { font-weight: 650; }
 details.detail-calcul dd { margin: 0; color: var(--lentilles-text); }
+/* Détails communs : deux colonnes alignées avec les yeux. */
+details.detail-calcul-commun { margin: 0 0 20px; }
+.detail-calcul-yeux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 12px; }
+.detail-calcul-oeil { min-width: 0; }
+.detail-calcul-oeil h3 { margin: 0; color: var(--lentilles-accent-dark); font-size: 12px; font-weight: 700; }
+details.detail-calcul-commun .detail-calcul-oeil dl { display: grid; grid-template-columns: 1fr; gap: 3px; margin-top: 8px; }
 .resultat-c { margin: 9px 0; padding: 12px 14px; border: 1px solid var(--lentilles-border); background: #f6f8fa; }
 .resultat-c p { margin: 3px 0; font-size: 12px; }
 .resultat-c-statut { color: var(--lentilles-success); font-weight: 650; }
@@ -283,6 +289,7 @@ details.detail-calcul dd { margin: 0; color: var(--lentilles-text); }
 
 @media (max-width: 900px) {
   .oeils { grid-template-columns: 1fr; gap: 28px; }
+  .detail-calcul-yeux { grid-template-columns: 1fr; gap: 18px; }
   .oeil-groupe + .oeil-groupe { border-left: 0; border-top: 1px solid var(--lentilles-border); padding: 24px 0 0; }
   .oeils .grille-champs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
