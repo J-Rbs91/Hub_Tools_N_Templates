@@ -123,6 +123,8 @@ jobs:
       # valide par le meme validateur que la production.
       - name: Contrôles du noyau et du catalogue
         run: node tests/lentilles-souples.test.mjs
+      - name: Contrôles de l'interface lentilles
+        run: node --test tests/lentilles-interface.test.mjs
 
   links:
     name: Vérification des liens
