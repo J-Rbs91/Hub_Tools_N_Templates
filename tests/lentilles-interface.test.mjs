@@ -34,6 +34,17 @@ test('trois modules et commandes métier toujours présents', () => {
   }
 });
 
+test('la DVO est préremplie à 15 mm pour chaque œil dans les deux modules', () => {
+  for (const id of ['a-od-vertex', 'a-og-vertex', 'b-od-dist', 'b-og-dist']) {
+    const champ = html.match(new RegExp('<input\\b[^>]*\\bid="' + id + '"[^>]*>'));
+    assert.ok(champ, 'Champ DVO absent : ' + id);
+    assert.match(champ[0], /\\bvalue="15"/, 'DVO initiale incorrecte : ' + id);
+  }
+  // Les autres champs initialisés à zéro restent inchangés.
+  assert.match(html, /id="b-od-s-sph"[^>]*value="0"/);
+  assert.match(html, /id="b-og-s-sph"[^>]*value="0"/);
+});
+
 test('identifiants uniques et relations de saisie accessibles', () => {
   const list = ids();
   assert.equal(new Set(list).size, list.length);
