@@ -121,6 +121,12 @@
       </div>
       </div>
 
+      <!-- Une seule zone dépliable pour les résultats théoriques OD et OG. -->
+      <details class="detail-calcul detail-calcul-commun" id="a-details" hidden>
+        <summary>Détails du calcul</summary>
+        <div class="detail-calcul-yeux" id="a-details-yeux"></div>
+      </details>
+
       <button type="button" class="action" id="a-calculer">Calculer la conversion</button>
       <div class="suite" id="a-suite" role="status" aria-live="polite" hidden></div>
     </section>
@@ -782,19 +788,29 @@
     majProvenanceC();
   }
 
-  function renderDetailsA(resultat) {
-    // En l'absence de calcul valide, les erreurs sont déjà affichées dans
-    // la sortie de l'œil : ne pas ouvrir un panneau de détails vide.
-    if (!resultat.theorique) { return null; }
-    var det = el('details', { class: 'detail-calcul' });
-    det.appendChild(el('summary', { text: 'Détails du calcul' }));
-    var dl = el('dl');
-    ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(resultat.theorique));
-    det.appendChild(dl);
-    return det;
+  function renderDetailsA(theoriquesParOeil) {
+    var panneau = document.getElementById('a-details');
+    var contenu = document.getElementById('a-details-yeux');
+    vider(contenu);
+
+    ['od', 'og'].forEach(function (oeil) {
+      var theorique = theoriquesParOeil[oeil];
+      if (!theorique) { return; }
+
+      var section = el('section', { class: 'detail-calcul-oeil' });
+      section.appendChild(el('h3', { text: oeil === 'od' ? 'OD, œil droit' : 'OG, œil gauche' }));
+      var dl = el('dl');
+      ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(theorique));
+      section.appendChild(dl);
+      contenu.appendChild(section);
+    });
+
+    // Ne jamais conserver un calcul antérieur si la saisie devient vide/invalide.
+    panneau.hidden = !contenu.hasChildNodes();
+    if (panneau.hidden) { panneau.open = false; }
   }
 
-  function renderResultatA(oeil, entree, resultat) {
+  function renderResultatA(oeil, resultat) {
     var out = document.getElementById('a-' + oeil + '-out');
     vider(out);
 
@@ -813,13 +829,12 @@
       out.appendChild(renderProblemes(resultat.problemes));
     }
 
-    var details = renderDetailsA(resultat);
-    if (details) { out.appendChild(details); }
   }
 
   function calculerA() {
     nettoyerErreurs('bloc-a');
     var bilan = { calcules: [], aCorriger: [], reserve: false };
+    var theoriquesParOeil = { od: null, og: null };
 
     ['od', 'og'].forEach(function (oeil) {
       var prefixe = 'a-' + oeil + '-';
@@ -835,12 +850,11 @@
       }
 
       var vertex = parseNombre(val(prefixe + 'vertex'));
-      var entreeAffichage = { sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw), vertexMm: vertex };
 
       if (v.etat === 'erreur') {
         marquerErreur(prefixe + v.champ);
         bilan.aCorriger.push(oeil);
-        renderResultatA(oeil, entreeAffichage, { theorique: null, cible: null, problemes: [v.probleme] });
+        renderResultatA(oeil, { theorique: null, cible: null, problemes: [v.probleme] });
         return;
       }
 
@@ -854,8 +868,12 @@
       } else {
         bilan.aCorriger.push(oeil);
       }
-      renderResultatA(oeil, entreeAffichage, resultat);
+      theoriquesParOeil[oeil] = resultat.theorique || null;
+      renderResultatA(oeil, resultat);
     });
+
+    // Un seul panneau permet de consulter simultanément les deux yeux.
+    renderDetailsA(theoriquesParOeil);
 
     rendreBilan('a-suite', 'bloc-a', bilan, {
       succes: function (yeux) { return 'Correction cible calculée pour ' + yeux + ', affichée au-dessus.'; },
