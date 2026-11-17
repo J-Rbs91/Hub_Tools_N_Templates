@@ -782,11 +782,14 @@
     majProvenanceC();
   }
 
-  function renderDetailsA(resultat) {
+  function renderDetailsA(entree, resultat) {
     var det = el('details', { class: 'detail-calcul' });
     det.appendChild(el('summary', { text: 'Détails du calcul' }));
     var dl = el('dl');
-    if (resultat.lunettes) { ligneDetail(dl, 'Lunettes normalisées', formatRx(resultat.lunettes)); }
+    if (resultat.lunettes) {
+      ligneDetail(dl, 'Saisie', formatRx(entree) + ', DVO ' + formatMm(entree.vertexMm));
+      ligneDetail(dl, 'Lunettes normalisées', formatRx(resultat.lunettes));
+    }
     if (resultat.theorique) { ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(resultat.theorique)); }
     if (resultat.detailArrondi && resultat.detailArrondi.sph) {
       ligneDetail(dl, 'Arrondi sphère', detailArrondiTexte(resultat.detailArrondi.sph));
@@ -806,22 +809,22 @@
     var out = document.getElementById('a-' + oeil + '-out');
     vider(out);
 
-    out.appendChild(ligneTier('val-tier-1', 'Saisie ', formatRx(entree) + ', DVO ' + formatMm(entree.vertexMm)));
+    // Une seule correction en lecture principale. Le format sphérique évite
+    // le préfixe « sph » ; le format torique conserve sphère, cylindre et axe.
+    if (resultat.cible) {
+      var correction = resultat.cible.cyl
+        ? formatRx(resultat.cible)
+        : formatD(resultat.cible.sph);
+      out.appendChild(ligneTier('val-tier-3', 'Correction normée : ', correction));
+      dernieresCibles[oeil] = resultat.cible;
+      prefillC(oeil, resultat.cible, 'Lunettes vers lentille');
+    }
 
     if (resultat.problemes && resultat.problemes.length) {
       out.appendChild(renderProblemes(resultat.problemes));
     }
 
-    if (resultat.theorique) {
-      out.appendChild(ligneTier('val-tier-2', 'Correction théorique (plan cornéen) ', formatRx(resultat.theorique)));
-    }
-    if (resultat.cible) {
-      out.appendChild(ligneTier('val-tier-3', 'Correction cible (pas 0,25 D) ', formatRx(resultat.cible)));
-      dernieresCibles[oeil] = resultat.cible;
-      prefillC(oeil, resultat.cible, 'Lunettes vers lentille');
-    }
-
-    out.appendChild(renderDetailsA(resultat));
+    out.appendChild(renderDetailsA(entree, resultat));
   }
 
   function calculerA() {
