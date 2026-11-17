@@ -91,7 +91,7 @@
           </div>
           <div class="champ">
             <label for="a-od-vertex">DVO (mm)</label>
-            <input type="text" inputmode="decimal" id="a-od-vertex" aria-describedby="a-aide" value="0" aria-label="OD distance verre-oeil en millimètres">
+            <input type="text" inputmode="decimal" id="a-od-vertex" aria-describedby="a-aide" value="15" aria-label="OD distance verre-oeil en millimètres">
           </div>
         </div>
         <div class="sortie" id="a-od-out" role="status" aria-live="polite"></div>
@@ -114,12 +114,18 @@
           </div>
           <div class="champ">
             <label for="a-og-vertex">DVO (mm)</label>
-            <input type="text" inputmode="decimal" id="a-og-vertex" aria-describedby="a-aide" value="0" aria-label="OG distance verre-oeil en millimètres">
+            <input type="text" inputmode="decimal" id="a-og-vertex" aria-describedby="a-aide" value="15" aria-label="OG distance verre-oeil en millimètres">
           </div>
         </div>
         <div class="sortie" id="a-og-out" role="status" aria-live="polite"></div>
       </div>
       </div>
+
+      <!-- Une seule zone dépliable pour les résultats théoriques OD et OG. -->
+      <details class="detail-calcul detail-calcul-commun" id="a-details" hidden>
+        <summary>Détails du calcul</summary>
+        <div class="detail-calcul-yeux" id="a-details-yeux"></div>
+      </details>
 
       <button type="button" class="action" id="a-calculer">Calculer la conversion</button>
       <div class="suite" id="a-suite" role="status" aria-live="polite" hidden></div>
@@ -169,7 +175,7 @@
               </div>
               <div class="champ">
                 <label for="b-od-dist">DVO (mm)</label>
-                <input type="text" inputmode="decimal" id="b-od-dist" aria-describedby="b-aide" value="0" aria-label="OD distance verre-oeil de la surréfraction en millimètres">
+                <input type="text" inputmode="decimal" id="b-od-dist" aria-describedby="b-aide" value="15" aria-label="OD distance verre-oeil de la surréfraction en millimètres">
               </div>
             </div>
           </div>
@@ -236,7 +242,7 @@
               </div>
               <div class="champ">
                 <label for="b-og-dist">DVO (mm)</label>
-                <input type="text" inputmode="decimal" id="b-og-dist" aria-describedby="b-aide" value="0" aria-label="OG distance verre-oeil de la surréfraction en millimètres">
+                <input type="text" inputmode="decimal" id="b-og-dist" aria-describedby="b-aide" value="15" aria-label="OG distance verre-oeil de la surréfraction en millimètres">
               </div>
             </div>
           </div>
@@ -782,51 +788,53 @@
     majProvenanceC();
   }
 
-  function renderDetailsA(resultat) {
-    var det = el('details', { class: 'detail-calcul' });
-    det.appendChild(el('summary', { text: 'Détails du calcul' }));
-    var dl = el('dl');
-    if (resultat.lunettes) { ligneDetail(dl, 'Lunettes normalisées', formatRx(resultat.lunettes)); }
-    if (resultat.theorique) { ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(resultat.theorique)); }
-    if (resultat.detailArrondi && resultat.detailArrondi.sph) {
-      ligneDetail(dl, 'Arrondi sphère', detailArrondiTexte(resultat.detailArrondi.sph));
-    }
-    if (resultat.detailArrondi && resultat.detailArrondi.cyl) {
-      ligneDetail(dl, 'Arrondi cylindre', detailArrondiTexte(resultat.detailArrondi.cyl));
-    }
-    if (resultat.cible) { ligneDetail(dl, 'Correction cible', formatRx(resultat.cible)); }
-    if (!dl.hasChildNodes()) {
-      ligneDetail(dl, 'Calcul non effectué', 'aucune valeur intermédiaire disponible pour cet oeil');
-    }
-    det.appendChild(dl);
-    return det;
+  function renderDetailsA(theoriquesParOeil) {
+    var panneau = document.getElementById('a-details');
+    var contenu = document.getElementById('a-details-yeux');
+    vider(contenu);
+
+    ['od', 'og'].forEach(function (oeil) {
+      var theorique = theoriquesParOeil[oeil];
+      if (!theorique) { return; }
+
+      var section = el('section', { class: 'detail-calcul-oeil' });
+      section.appendChild(el('h3', { text: oeil === 'od' ? 'OD, œil droit' : 'OG, œil gauche' }));
+      var dl = el('dl');
+      ligneDetail(dl, 'Correction théorique (plan cornéen)', formatRx(theorique));
+      section.appendChild(dl);
+      contenu.appendChild(section);
+    });
+
+    // Ne jamais conserver un calcul antérieur si la saisie devient vide/invalide.
+    panneau.hidden = !contenu.hasChildNodes();
+    if (panneau.hidden) { panneau.open = false; }
   }
 
-  function renderResultatA(oeil, entree, resultat) {
+  function renderResultatA(oeil, resultat) {
     var out = document.getElementById('a-' + oeil + '-out');
     vider(out);
 
-    out.appendChild(ligneTier('val-tier-1', 'Saisie ', formatRx(entree) + ', DVO ' + formatMm(entree.vertexMm)));
+    // Une seule correction en lecture principale. Le format sphérique évite
+    // le préfixe « sph » ; le format torique conserve sphère, cylindre et axe.
+    if (resultat.cible) {
+      var correction = resultat.cible.cyl
+        ? formatRx(resultat.cible)
+        : formatD(resultat.cible.sph);
+      out.appendChild(ligneTier('val-tier-3', 'Correction normée : ', correction));
+      dernieresCibles[oeil] = resultat.cible;
+      prefillC(oeil, resultat.cible, 'Lunettes vers lentille');
+    }
 
     if (resultat.problemes && resultat.problemes.length) {
       out.appendChild(renderProblemes(resultat.problemes));
     }
 
-    if (resultat.theorique) {
-      out.appendChild(ligneTier('val-tier-2', 'Correction théorique (plan cornéen) ', formatRx(resultat.theorique)));
-    }
-    if (resultat.cible) {
-      out.appendChild(ligneTier('val-tier-3', 'Correction cible (pas 0,25 D) ', formatRx(resultat.cible)));
-      dernieresCibles[oeil] = resultat.cible;
-      prefillC(oeil, resultat.cible, 'Lunettes vers lentille');
-    }
-
-    out.appendChild(renderDetailsA(resultat));
   }
 
   function calculerA() {
     nettoyerErreurs('bloc-a');
     var bilan = { calcules: [], aCorriger: [], reserve: false };
+    var theoriquesParOeil = { od: null, og: null };
 
     ['od', 'og'].forEach(function (oeil) {
       var prefixe = 'a-' + oeil + '-';
@@ -842,12 +850,11 @@
       }
 
       var vertex = parseNombre(val(prefixe + 'vertex'));
-      var entreeAffichage = { sph: parseNombre(sphRaw), cyl: parseNombre(cylRaw), axe: parseNombre(axeRaw), vertexMm: vertex };
 
       if (v.etat === 'erreur') {
         marquerErreur(prefixe + v.champ);
         bilan.aCorriger.push(oeil);
-        renderResultatA(oeil, entreeAffichage, { theorique: null, cible: null, problemes: [v.probleme] });
+        renderResultatA(oeil, { theorique: null, cible: null, problemes: [v.probleme] });
         return;
       }
 
@@ -861,8 +868,12 @@
       } else {
         bilan.aCorriger.push(oeil);
       }
-      renderResultatA(oeil, entreeAffichage, resultat);
+      theoriquesParOeil[oeil] = resultat.theorique || null;
+      renderResultatA(oeil, resultat);
     });
+
+    // Un seul panneau permet de consulter simultanément les deux yeux.
+    renderDetailsA(theoriquesParOeil);
 
     rendreBilan('a-suite', 'bloc-a', bilan, {
       succes: function (yeux) { return 'Correction cible calculée pour ' + yeux + ', affichée au-dessus.'; },
