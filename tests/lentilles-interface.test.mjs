@@ -45,7 +45,7 @@ test('la DVO est préremplie à 15 mm pour chaque œil dans les deux modules', (
   assert.match(html, /id="b-og-s-sph"[^>]*value="0"/);
 });
 
-test('la conversion présente uniquement la correction normée et conserve les détails', () => {
+test('la conversion affiche une seule cible et un seul détail théorique', () => {
   const renderA = html.match(/function renderResultatA\([\s\S]*?(?=\n  function calculerA\()/);
   const detailsA = html.match(/function renderDetailsA\([\s\S]*?(?=\n  function renderResultatA\()/);
   assert.ok(renderA && detailsA, 'Rendu A et détails présents');
@@ -56,11 +56,15 @@ test('la conversion présente uniquement la correction normée et conserve les d
   assert.doesNotMatch(renderA[0], /ligneTier\('val-tier-2'/);
   assert.match(renderA[0], /renderProblemes\(resultat\.problemes\)/);
   assert.match(renderA[0], /prefillC\(oeil, resultat\.cible/);
-  assert.match(renderA[0], /renderDetailsA\(entree, resultat\)/);
-  assert.match(detailsA[0], /'Saisie'/);
-  assert.match(detailsA[0], /'Correction théorique \(plan cornéen\)'/);
-  assert.match(detailsA[0], /'Arrondi sphère'/);
+  assert.match(renderA[0], /renderDetailsA\(resultat\)/);
+  assert.match(renderA[0], /if \(details\) \{ out\.appendChild\(details\); \}/);
+  assert.match(detailsA[0], /if \(!resultat\.theorique\) \{ return null; \}/);
   assert.match(detailsA[0], /Détails du calcul/);
+  assert.match(detailsA[0], /ligneDetail\(dl, 'Correction théorique \(plan cornéen\)', formatRx\(resultat\.theorique\)\)/);
+  assert.equal((detailsA[0].match(/ligneDetail\(/g) || []).length, 1, 'Un seul détail affiché');
+  for (const ancien of ["'Saisie'", "'Lunettes normalisées'", "'Arrondi sphère'", "'Arrondi cylindre'", "'Correction cible'"]) {
+    assert.ok(!detailsA[0].includes(ancien), 'Ancien détail visible : ' + ancien);
+  }
 });
 
 test('identifiants uniques et relations de saisie accessibles', () => {
