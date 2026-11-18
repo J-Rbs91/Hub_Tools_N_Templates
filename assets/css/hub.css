@@ -482,26 +482,6 @@ body {
 .notice--setup .notice__ico { stroke: var(--amber); }
 .notice--setup .btn { margin-left: auto; }
 
-/* Rappel de tâche : information, pas alerte. */
-.notice--todo {
-  background: var(--blue-50);
-  border: 1px solid var(--blue-100);
-  color: var(--blue-800);
-}
-
-.notice--todo .notice__ico { stroke: var(--blue); }
-
-.notice--todo a {
-  margin-left: auto;
-  color: var(--blue-800);
-  font-weight: var(--fw-bold);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  white-space: nowrap;
-}
-
-.notice--todo a:hover { color: var(--blue-900); }
-
 /* ── TITRE DE SECTION ──
    Le regroupement est nommé plutôt qu'encadré : pas de carte autour d'une
    section, pas de bordure qui double un espacement déjà suffisant. */
@@ -1301,8 +1281,7 @@ body {
   .tool-card__icon { width: 46px; height: 46px; }
   .tool-card__icon svg { width: 24px; height: 24px; }
 
-  .notice--setup .btn,
-  .notice--todo a { margin-left: 0; }
+  .notice--setup .btn { margin-left: 0; }
 
   .modal { padding: var(--s-4); }
 }

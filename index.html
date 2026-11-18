@@ -115,10 +115,8 @@
         </span>
       </span>
       <div class="hero__txt">
-        <p class="hero__eyebrow">RÉPERTOIRE PROFESSIONNEL</p>
-        <h1 class="hero__headline">Vos outils.</h1>
+        <h1 class="hero__headline" id="outils">Vos outils</h1>
         <span class="hero__greet" id="welcome-greet" hidden>Bonjour</span>
-        <p class="hero__sub">Optique · Activité magasin</p>
       </div>
     </section>
 
@@ -131,21 +129,6 @@
         Profil magasin non configuré.
       </span>
       <button class="btn btn--primary" id="setup-notice-btn" type="button">Configurer</button>
-    </div>
-
-    <!-- Rappel de tâche : n'apparaît que si la clôture du jour manque réellement
-         (outil déjà utilisé, journée entamée). Jamais de bloc vide. -->
-    <div class="notice notice--todo" id="todo-notice" hidden>
-      <svg class="notice__ico" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-      </svg>
-      <span class="notice__txt" id="todo-txt"></span>
-      <a href="outils/cloture-caisse/">Ouvrir la clôture</a>
-    </div>
-
-    <div class="sec">
-      <h2 class="sec__title" id="outils">Outils disponibles</h2>
-
     </div>
 
     <ul id="tools-grid" role="list">
@@ -268,26 +251,6 @@
         <svg class="tool-card__go" viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 18 6-6-6-6"/>
         </svg>
-
-      </li>
-
-      <!-- CAMPAGNE E-MAIL — outil terminé mais volontairement non ouvert : la
-           carte l'annonce sans y donner accès (aucun lien, donc aucune cible
-           au clavier). L'icône reste immobile et atténuée. -->
-      <li class="tool-card tool-card--soon" data-tool="mail">
-        <span class="tool-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path class="ti-stack" d="M17 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 1-1.732"/>
-            <rect x="7" y="3" width="15" height="12" rx="2"/>
-            <path class="acc ti-flap" pathLength="100" d="m22 5.5-6.419 4.179a2 2 0 0 1-2.162 0L7 5.5"/>
-          </svg>
-        </span>
-        <h3 class="tool-card__title">
-          Campagne e-mail <span class="badge">Bientôt</span>
-        </h3>
-        <p class="tool-card__pitch">
-          Communication clients
-        </p>
 
       </li>
 
@@ -930,7 +893,6 @@
           var merged = capHistory((Array.isArray(local) ? local : []).concat(bundle.caisse));
           localStorage.setItem(LS_CAISSE, JSON.stringify(merged));
         }
-        renderTodo();
         setBackupStatus('Sauvegarde restaurée ✓ : profil et paramètres de caisse remplacés, historique fusionné.', true);
       };
       reader.onerror = function () { setBackupStatus('Impossible de lire le fichier.', false); };
@@ -982,29 +944,9 @@
       setTxt('eph-mo2', MOIS[hier.getMonth()]);
     }
 
-    /* Clé de jour au format de l'historique de caisse (jj/mm/aaaa). */
+    /* Clé de jour (jj/mm/aaaa) pour détecter un changement de date. */
     function jourKey(d) {
       return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
-
-    /* ── Rappel : la clôture du jour n'est pas enregistrée ──
-       Ne se déclenche que si l'outil a déjà servi (historique non vide) et que
-       la journée est assez avancée : un indicateur qui n'appelle aucune action
-       n'a rien à faire sur un écran d'accueil. */
-    function renderTodo() {
-      var el = document.getElementById('todo-notice');
-      if (!el) { return; }
-      var now = new Date();
-      var hist = readJSON(LS_CAISSE, []);
-      if (!Array.isArray(hist) || hist.length === 0 || now.getHours() < 16) {
-        el.hidden = true;
-        return;
-      }
-      var today = jourKey(now);
-      var fait = hist.some(function (e) { return e && e.date === today; });
-      if (fait) { el.hidden = true; return; }
-      setTxt('todo-txt', 'Le comptage de caisse du jour n’est pas encore enregistré.');
-      el.hidden = false;
     }
 
     /* ── Coupe du verre : concave ↔ convexe ──
@@ -1075,7 +1017,6 @@
 
     renderHeader();
     renderWelcome();
-    renderTodo();
     playDayTurn();
     playIntro();
     if (syncUrl()) { syncPull(true); }   // rafraîchit en arrière-plan si la synchro est configurée
